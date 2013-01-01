@@ -5,6 +5,10 @@ var MUX_ADDR = 0x70;
 var IO_EXPANDER_ADDR = 0x41;
 var which = [true, true];
 var cmd = 0x00;
+
+//console.log(i2c3.scanSync());
+console.log(i2c3.i2cFuncsSync());
+
 // enable all channels
 cmd = [ 0xFF ];
 console.log(cmd.length);
@@ -22,7 +26,7 @@ if(deter) {
 		} else {
 			cmd &= ~(0x01 << 0);
 		}
-		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd);
+		i2c3.writeByte(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
 		which[0] = !which[0];
 	}, 0);
 	setInterval(function() {
@@ -31,7 +35,7 @@ if(deter) {
 		} else {
 			cmd &= ~(0x01 << 1);
 		}
-		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd);
+		i2c3.writeByte(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
 		which[1] = !which[1];
 	}, 0);
 	setInterval(function() {
@@ -40,7 +44,7 @@ if(deter) {
 		} else {
 			cmd &= ~(0x01 << 2);
 		}
-		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd);
+		i2c3.writeByte(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
 		which[2] = !which[2];
 	}, 0);
 	setInterval(function() {
@@ -49,20 +53,18 @@ if(deter) {
 		} else {
 			cmd &= ~(0x01 << 3);
 		}
-		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd);
+		i2c3.writeByte(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
 		which[3] = !which[3];
 	}, 0);
 
 } else {
 	while(true) {
-		//setImmediate(function(){ 
-			if(which) {
-				cmd = 0x00;
-			} else {
-				cmd = 0xFF;
-			}
-			i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd);
-			which = !which;
-		//});
+		if(which) {
+			cmd = 0x00;
+		} else {
+			cmd = 0xFF;
+		}
+		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
+		which = !which;
 	}
 }
