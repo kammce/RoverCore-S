@@ -1,6 +1,6 @@
 "use strict";
 //make feedback optional
-//
+
 
 
 var Skeleton = require("../skeleton.js");
@@ -401,3 +401,4 @@ Motor.prototype.setAllDirectionTemp=function(Left, Right){
 	}
 }
 module.exports = exports = Motor;
+
