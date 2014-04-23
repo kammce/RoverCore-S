@@ -24,13 +24,16 @@ apt-get install -y nodejs npm
 # Running firware installation
 cd firmware
 ./firmware-install.sh
-# Leaving firmware directory and going to root
-cd ../..
+
+cd ..
 # Making backup of original
 if [ ! -f /boot/uboot/uEnv.txt.backup ]; then
     cp /boot/uboot/uEnv.txt /boot/uboot/uEnv.txt.backup
 fi
 # Copying uEnv.txt to /boot/uboot/uEnv.txt
 cp startup/uEnv.txt /boot/uboot/uEnv.txt
+
+# Leaving firmware directory and going to root
+cd ..
 # Installing dependencies
 npm install
