@@ -201,9 +201,10 @@ function Spine(feedback) {
 	}*/
 	function loadFirmware(path, firmware) {
 		try {
-			fs.writeFileSync(path, "BB-UART1");
+			fs.writeFileSync(path, firmware);
 		} catch(e) {
 			console.log("DTS "+firmware+" is already loaded");
+			console.log(e);
 		}
 	}
 	console.log("Systems Check...");
@@ -217,6 +218,8 @@ function Spine(feedback) {
 			return;
 		}
 		// Inserting firmware into Device tree structure slots.
+		
+		slots_path = slots_path[0];
 
 		console.log("Setting up UARTs");	
 		loadFirmware(slots_path, "BB-UART1");
@@ -232,12 +235,12 @@ function Spine(feedback) {
 
 		console.log("Setting up PWMs");
 		loadFirmware(slots_path, "am33xx_pwm");
-		loadFirmware(slots_path, "bone_pwm_P8_13_custom");
-		loadFirmware(slots_path, "bone_pwm_P8_19_custom");
-		loadFirmware(slots_path, "bone_pwm_P8_34_custom");
-		loadFirmware(slots_path, "bone_pwm_P8_36_custom");
-		loadFirmware(slots_path, "bone_pwm_P9_28_custom");
-		loadFirmware(slots_path, "bone_pwm_P9_29_custom");
+		loadFirmware(slots_path, "BONE_PWM_A");
+		loadFirmware(slots_path, "BONE_PWM_B");
+		loadFirmware(slots_path, "BONE_PWM_C");
+		loadFirmware(slots_path, "BONE_PWM_D");
+		loadFirmware(slots_path, "BONE_PWM_E");
+		loadFirmware(slots_path, "BONE_PWM_F");
 		console.log("\tPWMs set");
 		
 		console.log("Exporting GPIOs");
