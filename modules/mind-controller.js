@@ -17,7 +17,6 @@ function MindController(feedback, simulation, debug) {
 	var parent = this;
 	var model = require('./model.js');
 	
-	this.spine = new SPINE();
 	this.model = model;
 
 	if(simulation == true) {
@@ -42,7 +41,7 @@ function MindController(feedback, simulation, debug) {
 }
 
 MindController.prototype.handle = function(data) {
-	switch(data) {
+	switch(data['directive']) {
 		case "DISCONNECT":
 			this.halt(data['info']);
 			break;
@@ -111,9 +110,9 @@ MindController.prototype.resume = function(data) {
 			case 'tracker':
 				this.tracker._resume();
 				break;
-			// case 'SENSOR':
-			// 	this.sensor._resume();
-			// 	break;
+			case 'SENSOR':
+			 	this.sensor._resume();
+			 	break;
 			default:
 				console.log(data+" Connected");
 				break;

@@ -8,7 +8,7 @@ Sensor.prototype.constructor = Sensor;
 function Sensor(model_ref, feedback, debug) {
     this.model = model_ref;
     this.feedback = feedback;
-    this.debug = debug;
+    this.debug = false;
 
     //interval
     this.interval_compass = 1000;
@@ -21,6 +21,12 @@ function Sensor(model_ref, feedback, debug) {
     global.XAXIS = 0;
     global.YAXIS = 1;
     global.ZAXIS = 2;
+
+     var SerialPort = SERIALPORT.SerialPort; // make a local instant
+    this.PowerPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
+      baudRate: 9600,
+      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
+  });
     
     this.fs = require('fs')
     this.buffer = new Buffer(100);
@@ -129,12 +135,12 @@ Sensor.prototype.handle = function(data) { // take command from user interface
     //acuator command 
 
     if (data == "MAST-UP"){
-        parent.model.acuator.sent_position = "U";
+        this.model.acuator.sent_position = "U";
         this.acuator();
     }
 
     else if (data == "MAST-DOWN"){
-        parent.model.acuator.sent_position = "D"
+        this.model.acuator.sent_position = "D"
         this.acuator();
     }    
 
@@ -366,12 +372,7 @@ Sensor.prototype.GPS = function() {
 
     
       myPort.on('data', function(data) {
-        console.log(' '); //adds line to separate
-        console.log(data); // full unparsed data
         var piece = data.split(",", 7);
-        console.log(piece[0], piece[2]); //$GPRMC, A/V
-        console.log(piece[3], piece[4]); // LAT, dir
-        console.log(piece[5], piece[6]); // LONG, dir
         //making variables
         var lat = piece[3];
         var lat_dir = piece[4];
@@ -408,20 +409,15 @@ Sensor.prototype.GPS = function() {
 };
 Sensor.prototype.Serialdata = function() {
   var parent = this;
- 
-  var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var PowerPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
-      baudRate: 9600,
-      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
-  });
 
-  PowerPort.open(function(error) {
+
+  this.PowerPort.open(function(error) {
     if (error) {
       console.log('failed to open: ' + error);
     } else {
         console.log('open');
         
-            PowerPort.on('data', function(data) {
+            parent.PowerPort.on('data', function(data) {
                 var voltage_string = [""];      //initiate a string
                 var current_string = [""];
                 var potentiometer_string = [""];                  
@@ -451,39 +447,27 @@ Sensor.prototype.Serialdata = function() {
                           }
                         }
                     }
-                    if (parent.debug == 'true') { 
-                        console.log("voltage: " + parent.model.power.voltage);
-                        console.log("current: " + parent.model.power.current);
-                        console.log("potentiometer: " + parent.model.acuator.potentiometer);
-                    } 
+                   
+                        //console.log("voltage: " + parent.model.power.voltage);
+                        //console.log("current: " + parent.model.power.current);
+                        //console.log("potentiometer: " + parent.model.acuator.potentiometer);
+                     
             });
+
+
         
       }
    });                       
 };
 
 Sensor.prototype.acuator = function() {
-
-  var parent = this;
-  var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var AcuatorPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
-      baudRate: 9600,
-      parser: SERIALPORT.parsers.readline("\r\n") // look for return and new ln
-  });
-
-  AcuatorPort.open(function(error) {
-    if (error) {
-      console.log('failed to open: ' + error);
-        } 
-    else {
-    console.log('open');
-
-    //write command to arduino 
-    AcuatorPort.write(parent.model.acuator.sent_position, function() {
+    var parent = this;
+    //write command to arduino
+    console.log("acuator = "+this.model.acuator.sent_position); 
+    this.PowerPort.write(this.model.acuator.sent_position, function() {
         console.log("command sended");   
-        });
-      }
-   });
+    });
+    
 };
 
 Sensor.prototype.temp = function() {    
@@ -496,7 +480,7 @@ Sensor.prototype.temp = function() {
 	console.log("data: " + data);
         parent.model.temperature.cpu = data/1000;
         console.log("temperature: " + parent.model.temperature.cpu  );
-	console.log("it running");  
+	 
     });
    },1000);
 };
@@ -510,5 +494,6 @@ Sensor.prototype.halt = function() {};
 
 
 module.exports = exports = Sensor;
+
 
 

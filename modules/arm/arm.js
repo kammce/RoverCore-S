@@ -113,11 +113,13 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 			console.log("Getting called into action!!");
 		}
 		this.serial.write(this.actionBuffer, function() {
-			parent.ready = [false,false,false,false,false];
-			parent.busy = false;
-			if(parent.debug){
-				console.log("No longer busy");
-			}
+			parent.serial.write(parent.actionBuffer, function() {
+				parent.ready = [false,false,false,false,false];
+				parent.busy = false;
+				if(parent.debug){
+					console.log("No longer busy");
+				}
+			});
 		});
 	}	
 	// for (var i = 0; i < this.ready.length; i++) {
@@ -140,13 +142,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.ON); //other pump on last
 				/*Since continuous deflation poses no risk of destrution to balloon/arm, no timeout is
 				needed.*/
-				console.log("grippin'");
+				if(this.debug){
+					console.log("Pump: grippin'");
+				}
 			}
 			if(input.pump == "stop"){ //0 = stop all in case of emergency
 				this.spine.digitalWrite(this.pressurizer.pin, this.turn.OFF); //pump off first
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //other pump offpin
-			
-				console.log("stoppin'");
+				if(this.debug){
+					console.log("Pump: stoppin'");
+				}
 			}
 			if(input.pump == "drop"){ //1 = pump air into balloon
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //pump off first
@@ -154,13 +159,88 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				setTimeout(function(){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
 					parent.spine.digitalWrite(parent.pressurizer.pin, parent.turn.OFF); //pump off first
 				}, 4000); //In case of connection loss, balloon inflation will cease after x seconds
-			
-				console.log("drop it!");
+				if(this.debug){
+					console.log("Pump: drop it!");
+				}
 			}
 		}
 		else{
 			if(this.debug){
-				console.log("Invalid pump control value!");
+				console.log("Pump: Invalid Value");
+			}
+		}
+	}
+	/*Speed Control Block*/
+	if(!_.isUndefined(input["speed"])){
+		if(input.speed == "slow"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x28,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Slow");
+			}
+		}
+		else if(input.speed == "normal"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x40,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Normal");
+			}			
+		}
+		else if(input.speed == "fast"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x48,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Normal");
+			}			
+		}
+		else{
+			if(this.debug){
+				console.log("Speed: Invalid Value");
+			}
+		}
+	}
+	/*Torque Control Block*/
+	if(!_.isUndefined(input["torque"])){
+		if(input.torque == "off"){ //interface is telling you to turn off torque
+			this.writePacket({ //Enable Torque
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL, 
+				register:this.edit.TORQUE, 
+				lowbyte:this.turn.OFF
+			});
+			if(this.debug){
+				console.log("Torque: Deactivating");
+			}
+		}
+		else if(input.torque == "on"){ //interface is telling you to turn on torque
+			this.writePacket({ //Enable Torque
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL, 
+				register:this.edit.TORQUE, 
+				lowbyte:this.turn.ON
+			});
+			if(this.debug){
+				console.log("Torque: Activating");
+			}
+		}
+		else{
+			if(this.debug){
+				console.log("Torque: Invalid Value");
 			}
 		}
 	}
@@ -176,11 +256,11 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			register:this.edit.TORQUE, 
 			lowbyte:this.turn.ON
 		});
-		this.writePacket({ //Set movement speed to 15 rpm
+		this.writePacket({
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL,
 			register:this.edit.SPEED, 
-			lowbyte:0x48,
+			lowbyte:0x40,
 			highbyte:0x00
 		});
 		this.defaulted = true;
@@ -190,7 +270,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(!_.isUndefined(input["shoulder"])) { //If shoulder element exists
 		this.invalid_input = false;
 		var pos = input.shoulder;
-		if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
+		if(pos < 45) {pos = 45;} else if (pos > 180){ pos = 180;} //angle limiter
 		var newval = (pos - 300) * (-1);
 		this.moveMotor(this.id.LEFTSHOULDER, newval);
 		this.moveMotor(this.id.RIGHTSHOULDER, pos);
@@ -201,22 +281,24 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	}
 	if(!_.isUndefined(input["wrist"])) { //If wrist element exists
 		this.invalid_input = false;
-		var pos = input.wrist;
-		if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
-		this.moveMotor(this.id.WRIST, input.wrist);
+		var wrst = input.wrist;
+		if(wrst < 100){wrst = 100;} else if (wrst > 240){wrst = 240;} //angle limiter
+		this.moveMotor(this.id.WRIST, wrst);
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
 		this.invalid_input = false;
-		var pos = input.elbow;
-		if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
-		this.moveMotor(this.id.ELBOW, pos);
+		var elb = input.elbow;
+		if(elb < 70){elb = 70;} else if (elb > 205){elb = 205;} //angle limiter
+		this.moveMotor(this.id.ELBOW, elb);
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		this.invalid_input = false;
+		var bs = input.base;
+		if(bs < 240){bs = 240;} else if (bs > 340){bs = 340;} //angle limiter
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
-		this.moveMotorMX(this.id.BASE, input.base);
+		this.moveMotorMX(this.id.BASE, bs);
 	}
 	if(this.invalid_input) {
 		this.busy = false;

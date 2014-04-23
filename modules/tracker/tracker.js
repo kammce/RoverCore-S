@@ -92,7 +92,7 @@ Tracker.prototype.setRotations = function(data) {
 	}
 	if(this.PWMs[2] + rollVal > 0 && this.PWMs[2] + rollVal < 255) {
 		this.curDegrees[2] = this.curDegrees[2] + 10*rollVal;
-		this.PWMS[2] += 10*rollVal;
+		this.PWMs[2] += 10*rollVal;
 	}
 	
 	this.model.tracker.pitch = this.curDegrees[0];
