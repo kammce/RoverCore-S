@@ -117,7 +117,6 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 	}
 };
 
-
 Sensor.prototype.initCOMPASS = function() { // degrees refer to North
 	var parent = this;
 	clearInterval(this.intervals.queues.compass);
@@ -141,53 +140,91 @@ Sensor.prototype.initCOMPASS = function() { // degrees refer to North
 
 	this.intervals.queues.compass = setInterval(function() {
 		parent.I2C.compass.readBytes(0x03, 6, function(err, res) {
-			var x = 0;
-			var y = 0;
+			var X = 0;
+			var Y = 0;
 			var z = 0;
 			if (!err) {
 				// convert binary to signed decimal 
-				x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first numer
+				X = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first numer
 				z = new Int16Array([res[2] << 8 | res[3]])[0];
-				y = new Int16Array([res[4] << 8 | res[5]])[0];
+				Y = new Int16Array([res[4] << 8 | res[5]])[0];
 			} else {
 				console.log("Compass Error ::: " + JSON.stringify(err));
 				parent.feedback(parent.module, "COMPASS ERROR, STOPPING COMPASS!");
 				clearInterval(parent.intervals.queues.compass);
 			}
-			var declinationAngle = 0.226; //use in compass functions, value needed checking with sensor
-			var pi = 3.14;
-			var heading = Math.atan2(y, x);
-			// Once you have your heading, you must then add your 'Declination Angle', which is the 'Error' of the magnetic field in your location.
-			//If you cannot find your Declination, comment out this lines, your compass will be slightly off.
-			heading += declinationAngle;
-			// Correct for when signs are reversed.
-			if (heading < 0) {
-				heading += 2 * pi;
+			//routine to give a fast solution for angle, from X/Y co-ordinates - result in degrees 
+			var AX,AY,ival,oval,aival,quad; 
+			AX=Math.abs(X);
+			AY=Math.abs(Y);
+			//Now the approximation used works for tan from -1 to 1, so we have to keep the 
+			//values inside this range and adjust the input/output. 
+			//Four 'quadrants' are decoded -1 to 1, (315 to 45 degrees), then 45 to 135, 
+			//135 to 225, 225 to 315
+			//Right hand half of the circle
+			try {
+				if (X >= 0) { 
+					if (AY > X) { 
+						if (Y < 0) { 
+							quad = 4; 
+							ival = -X / Y; 
+						} else { 
+							quad = 2; 
+							ival = X / -Y; 
+						} 
+					} else { 
+						if (AY > X) { 
+							quad = 4; 
+							ival = -Y / X; 
+						} else { 
+							quad = 1; 
+							ival = Y / X; 
+						} 
+					}
+				} else { 
+					if (Y > AX) { 
+						quad = 2; 
+						ival = X / -Y; 
+					} else { 
+						if (AY > AX) {          
+							quad = 4; 
+							ival = -X / Y; 
+						} else { 
+							quad = 3; 
+							ival = -Y / -X; 
+						}
+					}
+				}	
+			} catch (e) {
+				parent.feedback("Compass Division Error, NOT stopping event, error is = " +e);
+				parent.model.compass.heading = 0;
 			}
-			// Check for wrap due to addition of declination.
-			else if (heading > 2 * pi) {
-				heading -= 2 * pi;
+			
+			//A lot of lines of code, but small and quick really..... 
+			//Now the solution 
+			//Now approximation for atan from -1 to +1, giving an answer in degrees. 
+			aival = Math.abs(ival); 
+			oval = 45 * ival - ival * (aival - 1) * (14.02 + 3.79 * aival); 
+			//Now solve back to the final result 
+			if (quad != 1) 
+			{ 
+				if (quad == 2) { 
+					oval = oval + 90; 
+				} else { 
+					if (quad == 3) {
+						oval = oval + 180; 
+					} else { 
+						oval = oval + 270; 
+					}
+				} 
 			}
-			// Convert radians to degrees for readability.
-			var mod_heading = ((heading * 180) / pi);
-			if (mod_heading >= 0 && mod_heading <= 137) {
-				mod_heading *= .6569;
-			} else if (mod_heading > 137 && mod_heading <= 215) {
-				mod_heading = ((mod_heading - 137) * 1.16883117 + 90);
-			} else if (mod_heading > 215 && mod_heading <= 281) {
-				mod_heading = ((mod_heading - 215) * 1.3636 + 180);
-			} else if (heading > 281 && heading <= 0) {
-				mod_heading = ((mod_heading - 281) * 1.3924 + 270);
-			}
-			if (mod_heading >= 180) {
-				mod_heading -= 180;
-			} 
-			else if (mod_heading < 180 && mod_heading >= 0) {
-				mod_heading += 180;
-			}
-			parent.model.compass.heading = -(mod_heading-360);
+			// Adding 360
+			if (oval<0) { oval+=360; } 
+			//Flip around
+			oval = Math.abs(oval - 360);
+			parent.model.compass.heading = oval;
 			if(parent.debug) {
-				console.log('Heading: ' + parent.model.compass.heading + ' degrees');
+				console.log('Heading: ' + parent.model.compass.heading + ' degrees');	
 			}
 		});
 	}, this.intervals.periods.compass);
@@ -301,9 +338,6 @@ Sensor.prototype.initACCELEROMETER = function() {
 
                     parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
                     parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
-
-
-                    console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
                 } else {
                     console.log(err);
                 }
@@ -465,4 +499,5 @@ Sensor.prototype.initSignalTracker = function() {
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
 module.exports = exports = Sensor;
+
 
