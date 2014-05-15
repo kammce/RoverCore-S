@@ -177,6 +177,8 @@ Audio.prototype.resume = function() {
 Audio.prototype.halt = function() {
 	//// Do not halt anything
 
+	this.process.spawn('killall', [ 'ffmpeg' ]);
+	this.process.spawn('killall', [ 'ffmpeg' ]);
 	// Kill camera feed processes
 	// if(!_.isUndefined(this.mspawn)) {
 	// 	// Kill camera feed processes

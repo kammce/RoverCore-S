@@ -66,9 +66,9 @@ socket.on('connect', function () {
 	console.log("Oculus connected to server!");
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) {
+		console.log("INCOMING CTRLSIG", data);
 		if(_.isUndefined(data["info"])) { return; }
 		if(data["info"]["stream"] != STREAM) { return; }
-		console.log("INCOMING CTRLSIG", data);
 		switch(data['directive']) {
 			case 'VIDEO':
 				setTimeout(function() { 
@@ -86,6 +86,8 @@ socket.on('connect', function () {
 				setTimeout(function() { 
 					if(data['info']['signal'] == "RESTART") {
 						feedback("OCULUS", "Shutting down OCULUS (should be revived by forever-monitor)");
+						video._halt();
+						audio._halt();
 						process.exit();
 					} else if(data['info']['signal'] == "SETNTSC") {
 						exec('v4l2-ctl -d /dev/video-tracker -s ntsc', setNTSC);

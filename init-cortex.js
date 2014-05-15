@@ -14,13 +14,13 @@ if( process.argv.length < 3 ) {
 var forever = require('forever-monitor');
 
 var child = new (forever.Monitor)('cortex.js', {
-	max: 20,
+	max: 50,
 	silent: false,
-	args: [process.argv[2], process.argv[3]]
+	args: [process.argv[2]]
 });
 
 child.on('exit', function () {
-	console.log('cortex.js has exited after 3 restarts');
+	console.log('cortex.js has exited after 50 restarts');
 });
 
 child.start();

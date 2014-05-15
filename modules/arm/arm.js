@@ -72,7 +72,7 @@ Therefore, use 'this.defaulted'
 	this.id = {ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
 	this.testing = "hello world";
 	//Servo Register Addresses **NOTE:TORQUE enables motor movement
-	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
+	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19, MAXTORQUE: 0X0E};
 
 	/*Setup command standards (saves processing time)*/
 	this.standards = {
@@ -244,6 +244,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 		}
 	}
+	/*Torque Reset Block*/
+	if(!_.isUndefined(input["reset"])){ //should changed max torque back to max when arm overtorques
+		this.writePacket({
+			instruction: this.operation.WRITE,
+			motorID: this.id.ALL,
+			register: this.edit.MAXTORQUE,
+			lowbyte: 0xFF,
+			highbyte: 0x03
+		});
+	}
 	/*Arm Control Block*/
 	if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
 	if(this.defaulted == false) { //If defaults not yet set
@@ -387,7 +397,7 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-//	console.log(std);
+
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
