@@ -40,7 +40,7 @@ function Tracker(model_ref, feedback, debug) {
 	
 	var tempVal = "";
 	this.serialport.on("data", function(data) {
-		console.log("tracker serialport data = ",data);
+		console.log("tracker serialport data = ",data, data.toString());
 		if(this.serOpen) {
 			if(this.debug) {
 				console.log("Length of data: " + data.toString().length);

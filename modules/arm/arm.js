@@ -70,8 +70,7 @@ Therefore, use 'this.defaulted'
 	//Instruction Codes
 	this.operation = {PING: 0x01, READ: 0x02, WRITE: 0x03, REGWRITE: 0x04, ACTION:0x05};
 	//Motor IDs **NOTE:ALL == broadcast to all motors for execution
-	this.id = {ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
-	this.testing = "hello world";
+	this.id = {ALL: 0xFE, BASE: 0x04, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x00, WRIST: 0x03};
 	//Servo Register Addresses **NOTE:TORQUE enables motor movement
 	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19, MAXTORQUE: 0x22 , ALARMSHUTDOWN: 0x12};
 
