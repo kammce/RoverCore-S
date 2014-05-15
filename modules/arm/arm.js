@@ -9,6 +9,7 @@ Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 function Arm (model_ref, feedback, spine, debug) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
+	this.armParent = this;
 	this.debug = debug; //boolean value to toggle console log traffic.
 	this.busy = false;//Handles signal traffic jams
 	this.ready = [false,false,false,false,false]; //readiness flags (when all true, send Action cmd)
@@ -56,7 +57,7 @@ Therefore, use 'this.defaulted'
 		"properties" : {
 			"base" : "Number", //Degree value, from 0 to 360
 			//"shoulderL" : "Number", //Degree value, from 0 to 360
-			"shoulderR" : "Number", //Degree value, from 0 to 360
+			"shoulder" : "Number", //Degree value, from 0 to 360
 			"elbow" : "Number", //Degree value, from 0 to 360
 			"wrist" : "Number", //Degree value, from 0 to 360
 			"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
@@ -101,6 +102,29 @@ Therefore, use 'this.defaulted'
 	});
 
 	this.invalid_input = false;
+	this.posBuffer = {
+		shoulderL: 150,
+		shoulderR: 150,
+		elbow: 150,
+		wrist: 150;
+		base: 285
+	}
+	this.setposition = setInterval(function(){
+		//copy posBuffer positions into separate vars to prevent changes to positions while calculations are being done (this will mess up motors)
+		var sdL = armParent.posBuffer.shoulderL;
+		var sdR = armParent.posBuffer.shoulderR;
+		var wMtr = armParent.posBuffer.wrist;
+		var eMtr = armParent.posBuffer.elbow;
+		var bMtr = armParent.posBuffer.base;
+		if(sdL != (sdR - 300) * (-1)){ //check if left servo is synced with the right servo
+			sdL = (sdR - 300) * (-1);
+		}
+		armParent.moveMotor(armParent.id.LEFTSHOULDER, sdL);
+		armParent.moveMotor(armParent.id.RIGHTSHOULDER, sdR);
+		armParent.moveMotor(armParent.id.WRIST, wMtr);
+		armParent.moveMotor(armParent.id.ELBOW, eMtr);
+		armParent.moveMotorMX(armParent.id.BASE, bMtr);
+	}, 100);
 }
 
 Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends action when all true
@@ -291,10 +315,12 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		var pos = input.shoulder;
 		if(pos < 45) {pos = 45;} else if (pos > 180){ pos = 180;} //angle limiter
 		var newval = (pos - 300) * (-1);
-		this.moveMotor(this.id.LEFTSHOULDER, newval);
-		this.moveMotor(this.id.RIGHTSHOULDER, pos);
+		// this.moveMotor(this.id.LEFTSHOULDER, newval);
+		// this.moveMotor(this.id.RIGHTSHOULDER, pos);
+		this.posBuffer.shoulderL = newval;
+		this.posBuffer.shoulderR = pos;
 		if(this.debug){
-			console.log("sholder if statement has been called");
+			console.log("shoulder if statement has been called");
 		}
 		// this.callAction(this.actionBuffer);
 	}
@@ -302,13 +328,15 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		this.invalid_input = false;
 		var wrst = input.wrist;
 		if(wrst < 100){wrst = 100;} else if (wrst > 240){wrst = 240;} //angle limiter
-		this.moveMotor(this.id.WRIST, wrst);
+		// this.moveMotor(this.id.WRIST, wrst);
+		this.posBuffer.wrist = wrst;
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
 		this.invalid_input = false;
 		var elb = input.elbow;
 		if(elb < 70){elb = 70;} else if (elb > 205){elb = 205;} //angle limiter
-		this.moveMotor(this.id.ELBOW, elb);
+		// this.moveMotor(this.id.ELBOW, elb);
+		this.posBuffer.elbow = elb;
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		this.invalid_input = false;
@@ -317,7 +345,8 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
-		this.moveMotorMX(this.id.BASE, bs);
+		// this.moveMotorMX(this.id.BASE, bs);
+		this.posBuffer.base = bs;
 	}
 	if(this.invalid_input) {
 		this.busy = false;
