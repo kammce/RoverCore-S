@@ -110,7 +110,7 @@ Therefore, use 'this.defaulted'
 		base: 285
 	}
 	this.setposition = function(){
-		console.log("setting position");
+		// console.log("setting position");
 		//copy posBuffer positions into separate vars to prevent changes to positions while calculations are being done (this will mess up motors)
 		var sdL = parent.posBuffer.shoulderL;
 		var sdR = parent.posBuffer.shoulderR;
