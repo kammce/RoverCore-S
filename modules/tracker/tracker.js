@@ -89,6 +89,8 @@ Tracker.prototype.handle = function(data) {
 	} else if(data["req"] == "Get Range") {
 		this.getRange();
 	} else if(data["req"] == "Reset") {
+		this.PWMs = [254, 127, 127];
+		this.curDegrees = [0, 0, 0];
 		this.serialport.write("r\r\n");
 	}
 };
