@@ -31,4 +31,3 @@ echo "out" > "/sys/class/gpio/gpio$gpio/direction"
 
 (echo 0 > "/sys/class/gpio/gpio$gpio/value" && sleep 0.9 && echo 1 > "/sys/class/gpio/gpio$gpio/value") & 
 avrdude -v -carduino -patmega328p -P$1 -b57600 -D -Uflash:w:$2 2>&1
-

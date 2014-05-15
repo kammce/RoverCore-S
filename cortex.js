@@ -16,6 +16,7 @@ console.log("Starting Rover Cortex");
 // GLOBAL Includes
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
+GLOBAL.http = require("http");
 GLOBAL.glob = require('glob');
 GLOBAL.os = require('os');
 GLOBAL.async = require('async');
@@ -26,7 +27,6 @@ if(process.argv[3] == "--simulate") {
 	simulate = true;
 } else if(process.argv[3] == "--debug") {
 	console.log("debug mode activated!");
-	DEBUG = true;
 }
 
 if(os.hostname() == 'beaglebone') {
@@ -129,3 +129,4 @@ socket.on('connect', function () {
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'cortex', password: 'destroymit' });
 });
+

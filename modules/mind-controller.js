@@ -6,7 +6,7 @@ function MindController(feedback, simulation, debug) {
 		arm: 1,
 		sensor: 250,
 		tracker: 1
-	}
+	};
 
 	this.mc_connected = false;
 	this.is_halted = false;
@@ -68,7 +68,6 @@ MindController.prototype.halt = function(data) {
 			this.motor._halt();
 			this.arm._halt();
 			this.tracker._halt();
-			//this.logger._halt();
 			this.is_halted = true;
 		}
 	} else {
@@ -134,3 +133,4 @@ MindController.prototype.initialize = function() {
 }
 
 module.exports = exports = MindController;
+
