@@ -64,7 +64,7 @@ function Video(feedback, stream, debug) {
 			source: undefined
 		}
 	];
-	this.debug = false; // process debug information
+	this.debug = true; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
