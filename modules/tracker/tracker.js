@@ -81,7 +81,7 @@ function Tracker(model_ref, feedback, debug) {
 }
 
 Tracker.prototype.handle = function(data) {
-	console.log(this.module+" Recieved ", data);
+	//console.log(this.module+" Recieved ", data);
 	if(data["req"] == "Set Rotations") {
 		this.setRotations(data);
 	} else if (data["req"] == "Set Zoom") {

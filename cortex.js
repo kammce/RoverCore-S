@@ -55,7 +55,7 @@ socket.on('connect', function () {
 	if(!mcu.is_initialized) { mcu.initialize(); }
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) { 
-		if(DEBUG) { console.log("INCOMING CTRLSIG", data); }
+		console.log("INCOMING CTRLSIG", data);
 		//mcu.logger.log(data);
 		switch(data['directive']) {
 			case 'MOTOR':

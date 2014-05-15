@@ -49,7 +49,7 @@ function Sensor(model_ref, feedback, debug) {
 	this.buffer = new Buffer(100);
 	//initiate
 	this.initGYRO();
-	//this.initACCELEROMETER();
+	this.initACCELEROMETER();
 	this.initCOMPASS();
 	this.initGPS();
 	// [power,voltage,potentiometer]
@@ -339,7 +339,7 @@ Sensor.prototype.initGPS = function() {
 	});
 	this.gpsPort.on('data', function(data) {
 		var piece = data.split(",", 7);
-		//making variables
+		
 		var lat = piece[3];
 		var lat_dir = piece[4];
 		var lng = piece[5];
@@ -349,7 +349,8 @@ Sensor.prototype.initGPS = function() {
 		parent.model.GPS.latitude = lat;
 		parent.model.GPS.longitude_dir = lng_dir;
 		parent.model.GPS.latitude_dir = lat_dir;
-		if (parent.debug){ 
+		
+		if(parent.debug) {
 			console.log("lat: " + parent.model.GPS.latitude + " long: " + parent.model.GPS.longitude);
 		}
 	});
