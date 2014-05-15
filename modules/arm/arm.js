@@ -126,7 +126,7 @@ Therefore, use 'this.defaulted'
 		parent.moveMotor(parent.id.ELBOW, eMtr);
 		parent.moveMotorMX(parent.id.BASE, bMtr);
 	}
-	//this.respondTimer = setInterval(this.setposition, 100);
+	//this.respondTimer = setInterval(this.setposition, 200);
 	this.respondTimer;
 }
 
@@ -148,7 +148,7 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 						console.log("No longer busy");
 					}
 				});
-			}, 5);
+			}, 20);
 		});
 	}	
 	// for (var i = 0; i < this.ready.length; i++) {
@@ -296,13 +296,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			lowbyte: 0xFF,
 			highbyte: 0x03
 		});
-		setTimeout(
+		setTimeout(function() {
+			/*
 			this.writePacket({
 				instruction: this.operation.WRITE,
 				motorID: this.id.ALL,
 				register: this.edit.ALARMSHUTDOWN,
 				lowbyte: 0x24
-			}), 500);
+			})
+			*/
+		}, 500);
 	}
 	/*Arm Control Block*/
 	//if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
@@ -410,7 +413,7 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 					console.log("Motor ID = "+ID+" has finished sending!");
 				}
 			});
-		}, 2);
+		}, 20);
 	});
 };
 
@@ -467,7 +470,7 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 					console.log("Motor ID = "+ID+" has finished sending!");
 				}
 			});
-		}, 2);
+		}, 20);
 	});
 	/*
 	this.serial.write(std, function() {
