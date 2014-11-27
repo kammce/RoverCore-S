@@ -10,9 +10,11 @@
 # Add Universe and Multiverse Repositories
 
 # Update 
+echo "Updating Jetson Kernel Software"
 sudo apt-get update 
 sudo apt-get -y upgrade
 sudo apt-get -y dist-upgrade
 # Install the following tools
 sudo apt-get install -y build-essential libssl-dev
 sudo apt-get install -y i2c-tools nodejs npm
+
