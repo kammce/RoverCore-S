@@ -3,10 +3,10 @@ I2C
 
 http://elinux.org/Jetson/I2C
 
-Use I2C General on the Jetson. That is connected to adapter /dev/i2c-1.
+Use I2C GEN2 on the pinout sheet of the Jetson. The I2C GEN2 is connected to adapter /dev/i2c-1.
 
 Use:
-	sudo i2cdetect -y 1
+	sudo i2cdetect -y -r 1
 
 Any Addresses that pop up here are the devices you have connected up to this bus.
 
