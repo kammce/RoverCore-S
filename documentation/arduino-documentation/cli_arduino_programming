@@ -1,0 +1,1 @@
+~/lbin/Programs/arduino-1.0.5/hardware/tools/avrdude -F -v -C ~/lbin/Programs/arduino-1.0.5/hardware/tools/avrdude.conf -p atmega328p -c stk500v1 -P /dev/ttyACM0 -D -U flash:w:"~/Arduino_Build/Fader/Fader.hex":i
