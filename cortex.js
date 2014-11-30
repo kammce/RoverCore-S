@@ -1,5 +1,7 @@
 "use strict";
 
+console.log("Starting Rover Cortex");
+
 // Includes
 var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
