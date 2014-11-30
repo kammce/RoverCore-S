@@ -1,0 +1,4 @@
+Adapted Layout of folder to accomidate the new technology.
+Wrote Cortex, MindController, and Skeleton of MindController
+Sub modules.
+Cortex can now communicate to Server signal-relay.
