@@ -11,4 +11,5 @@ function Arm(model_ref) {
 Arm.prototype.read = function(data) {
 	console.log("Arm Read Gravity: "+this.model.gravity);
 };
+
 module.exports = exports = Arm;

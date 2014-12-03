@@ -6,9 +6,22 @@ Motor.prototype.constructor = Motor;
 
 function Motor(model_ref) {
 	this.model = model_ref;
+	this.fs = require('fs');
+	this.exec = require('child_process').exec;
+	//this.dev_tty = "/dev/ttyS0";
+	//this.dev_tty = "/dev/ttyACM0";
+	this.dev_tty = "/dev/ttyACM3";
+	//Set Arduino to 115200 baud rate and lock it down
+	var setup_stty = this.exec('stty -F '+this.dev_tty+' raw speed 115200 ; tail -f '+this.dev_tty);
 }
-Motor.prototype.read = function() {
-	console.log("Motor Read Gravity: "+this.model.gravity);
+Motor.prototype.handle = function(data) {
+	if(typeof data == "string") {
+		if(isNaN(data)) {
+			console.log("invalid action: ", data);
+		} else {
+			this.fs.appendFileSync(this.dev_tty, data+'~');	
+		}
+	}
 };
 
 module.exports = exports = Motor;

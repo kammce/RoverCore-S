@@ -8,12 +8,12 @@ function Skeleton(module_name) {
 	this.module = module_name;
 	this.is_halted = false;
 	this.handle = undefined;
-	this._handler = function(data) {
+	this._handle = function(data) {
 		if(this.is_halted) { return; }
 		if(typeof this.handle == 'undefined') {
-			console.log("Empty "+module+" handler: ", data);
+			console.log("Empty "+module+" handle: ", data);
 		} else {
-			this.handler(data);
+			this.handle(data);
 		}
 	};
 	this.halt = undefined;
