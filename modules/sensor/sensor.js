@@ -10,6 +10,7 @@ function Sensor(model_ref) {
 Sensor.prototype.update = function(data) {
 	this.model.gravity += 5;
 };
-Sensor.prototype.forceUpdate = function(data) {};
+Sensor.prototype.resume = function() {};
+Sensor.prototype.halt = function() {};
 
 module.exports = exports = Sensor;

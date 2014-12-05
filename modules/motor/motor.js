@@ -9,8 +9,8 @@ function Motor(model_ref) {
 	this.fs = require('fs');
 	this.exec = require('child_process').exec;
 	//this.dev_tty = "/dev/ttyS0";
-	//this.dev_tty = "/dev/ttyACM0";
-	this.dev_tty = "/dev/ttyACM3";
+	this.dev_tty = "/dev/ttyACM0";
+	//this.dev_tty = "/dev/ttyACM2";
 	//Set Arduino to 115200 baud rate and lock it down
 	var setup_stty = this.exec('stty -F '+this.dev_tty+' raw speed 115200 ; tail -f '+this.dev_tty);
 }
@@ -23,5 +23,8 @@ Motor.prototype.handle = function(data) {
 		}
 	}
 };
+Motor.prototype.resume = function() {};
+Motor.prototype.halt = function() {};
+
 
 module.exports = exports = Motor;

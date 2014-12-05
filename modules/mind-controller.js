@@ -2,7 +2,6 @@
 
 function MindController() {
 	var model = require('./model.js');
-	
 	var Sensor = require('./sensor/sensor.js');
 	var Motor = require('./motor/motor.js');
 	var Arm = require('./arm/arm.js');
@@ -42,11 +41,11 @@ MindController.prototype.halt = function(data) {
 MindController.prototype.resume = function() {
 	if(this.is_halted) {
 		//// Tell everyone to resume and to accept interrupts again
-		this.sensor.resume();
-		this.motor.resume();
-		this.arm.resume();
-		this.tracker.resume();
-		//this.logger.resume();
+		this.sensor._resume();
+		this.motor._resume();
+		this.arm._resume();
+		this.tracker._resume();
+		//this.logger._resume();
 		this.is_halted = false;
 	}
 }
@@ -55,7 +54,7 @@ MindController.prototype.initialize = function() {
 		this.is_initialized = true;
 		//// Do something magical here. :D
 	} else {
-		this.resume();
+		this._resume();
 	}
 }
 

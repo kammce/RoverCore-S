@@ -25,10 +25,30 @@ function Skeleton(module_name) {
 		}
 		this.is_halted = true;
 	};
-	this.resume = function() {
+	this.resume = undefined;
+	this._resume = function() {
+	
 		console.log("Resuming "+this.module);
+		//// Stop acquiring data... not sure if this is a good idea though
+		if(typeof this.resume == 'function') {
+			this.resume();
+		}
 		this.is_halted = false;
 	}
 }
 
 module.exports = exports = Skeleton;
+
+/*
+var struct = {
+	"list": [1,2,3,4],
+	x: 5,
+	y: 2.3,
+	z: 7,
+	s: {
+
+	}
+};
+
+var array = [1,2,3,4, "hello", new Class(), new Date(), 'a', 5.3, [1,2,3,4] ];
+*/

@@ -8,8 +8,10 @@ function Arm(model_ref) {
 	this.model = model_ref;
 }
 
-Arm.prototype.read = function(data) {
-	console.log("Arm Read Gravity: "+this.model.gravity);
+Arm.prototype.handle = function(data) {
+	console.log("Arm Recieved ", data);
 };
+Arm.prototype.resume = function() {};
+Arm.prototype.halt = function(data) {};
 
 module.exports = exports = Arm;

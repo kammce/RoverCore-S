@@ -7,7 +7,10 @@ Tracker.prototype.constructor = Tracker;
 function Tracker(model_ref) {
 	this.model = model_ref;
 }
-Tracker.prototype.read = function(data) {
-	console.log("Tracker Read Gravity: "+this.model.gravity);
+Tracker.prototype.handle = function(data) {
+	console.log("Tracker Recieved ", data);
 };
+Tracker.prototype.resume = function() {};
+Tracker.prototype.halt = function() {};
+
 module.exports = exports = Tracker;
