@@ -27,7 +27,6 @@ function Skeleton(module_name) {
 	};
 	this.resume = undefined;
 	this._resume = function() {
-	
 		console.log("Resuming "+this.module);
 		//// Stop acquiring data... not sure if this is a good idea though
 		if(typeof this.resume == 'function') {

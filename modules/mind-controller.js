@@ -54,7 +54,7 @@ MindController.prototype.initialize = function() {
 		this.is_initialized = true;
 		//// Do something magical here. :D
 	} else {
-		this._resume();
+		this.resume();
 	}
 }
 

@@ -8,7 +8,6 @@ var MindController = require('./modules/mind-controller.js');
 
 // Initializing Variables
 //var ip = "localhost";
-//var ip = "localhost";
 var ip = "discovery.srkarra.com";
 var socket = new Socket('http://'+ip+':8080');
 var mcu = new MindController();
