@@ -37,17 +37,3 @@ function Skeleton(module_name) {
 }
 
 module.exports = exports = Skeleton;
-
-/*
-var struct = {
-	"list": [1,2,3,4],
-	x: 5,
-	y: 2.3,
-	z: 7,
-	s: {
-
-	}
-};
-
-var array = [1,2,3,4, "hello", new Class(), new Date(), 'a', 5.3, [1,2,3,4] ];
-*/

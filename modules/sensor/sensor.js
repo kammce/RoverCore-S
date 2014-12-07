@@ -7,6 +7,9 @@ Sensor.prototype.constructor = Sensor;
 function Sensor(model_ref) {
 	this.model = model_ref;
 }
+Sensor.prototype.handle = function (data) {
+	console.log(this.module+" Recieved ", data);
+}
 Sensor.prototype.update = function(data) {
 	this.model.gravity += 5;
 };

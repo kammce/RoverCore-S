@@ -9,7 +9,7 @@ function Arm(model_ref) {
 }
 
 Arm.prototype.handle = function(data) {
-	console.log("Arm Recieved ", data);
+	console.log(this.module+" Recieved ", data);
 };
 Arm.prototype.resume = function() {};
 Arm.prototype.halt = function(data) {};

@@ -8,7 +8,7 @@ function Tracker(model_ref) {
 	this.model = model_ref;
 }
 Tracker.prototype.handle = function(data) {
-	console.log("Tracker Recieved ", data);
+	console.log(this.module+" Recieved ", data);
 };
 Tracker.prototype.resume = function() {};
 Tracker.prototype.halt = function() {};
