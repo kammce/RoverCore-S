@@ -27,6 +27,9 @@ function MindController() {
 	this.is_halted = false;
 	this.is_initialized = false;
 }
+MindController.prototype.handle = function(data) {
+	console.log("No current handlers for MindController, found", data);
+}; 
 MindController.prototype.halt = function(data) {
 	if(!this.is_halted) {
 		//// Force everyone to halt and to stop accepting interrupts
