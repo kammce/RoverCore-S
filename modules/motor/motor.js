@@ -9,7 +9,9 @@ function Motor(model_ref) {
 	this.fs = require('fs');
 	this.exec = require('child_process').exec;
 	//this.dev_tty = "/dev/ttyACM0";
+	// Made for beaglebone black
 	this.dev_tty = "/dev/ttyO4";
+
 	//Set Arduino to 115200 baud rate and lock it down
 	var setup_stty = this.exec('stty -F '+this.dev_tty+' raw speed 115200 ; tail -f '+this.dev_tty);
 }
