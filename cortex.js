@@ -21,19 +21,23 @@ socket.on('connect', function () {
 		switch(data['directive']) {
 			case 'MOTOR':
 				setTimeout(function() { mcu.motor._handle(data["info"]); }, mcu.priority["motor"]);
-				console.log("Found motor directive", data);
+				console.log("Recieved motor directive", data);
 				break;
 			case 'ARM':
 				setTimeout(function() { mcu.arm._handle(data["info"]); }, mcu.priority["arm"]);
-				console.log("Found arm directive", data);
+				console.log("Recieved arm directive", data);
 				break;
 			case 'SENSOR':
 				setTimeout(function() { mcu.sensor._handle(data["info"]); }, mcu.priority["sensor"]);
-				console.log("Found sensor directive", data);
+				console.log("Recieved sensor directive", data);
 				break;
 			case 'TRACKER':
 				setTimeout(function() { mcu.tracker._handle(data["info"]); }, mcu.priority["tracker"]);
-				console.log("Found tracker directive", data);
+				console.log("Recieved tracker directive", data);
+				break;
+			case 'VIDEO':
+				setTimeout(function() { mcu.video._handle(data["info"]); }, mcu.priority["tracker"]);
+				console.log("Recieved video serversignal", data);
 				break;
 			case 'ROVER':
 				setTimeout(function() { mcu.handle(data["info"]); }, 1);

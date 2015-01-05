@@ -6,6 +6,7 @@ function MindController() {
 	var Motor = require('./motor/motor.js');
 	var Arm = require('./arm/arm.js');
 	var Tracker = require('./tracker/tracker.js');
+	var Video = require('./video/video.js');
 	var Logger = require('./logger.js');
 
 	this.model = model;
@@ -14,6 +15,7 @@ function MindController() {
 	this.motor = new Motor(model);
 	this.arm = new Arm(model);
 	this.tracker = new Tracker(model);
+	this.video = new Video(model);
 	this.logger = new Logger(model);
 
 	this.priority = {
