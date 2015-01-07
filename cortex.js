@@ -7,7 +7,8 @@ var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
 // Initializing Variables
-var ip = "discovery.srkarra.com"; // Long Range Testing Server in New York
+//var ip = "discovery.srkarra.com"; // Long Range Testing Server in New York
+var ip = "127.0.0.1"; // Long Range Testing Server in New York
 var socket = new Socket('http://'+ip+':8085');
 var mcu = new MindController();
 
@@ -21,19 +22,23 @@ socket.on('connect', function () {
 		switch(data['directive']) {
 			case 'MOTOR':
 				setTimeout(function() { mcu.motor._handle(data["info"]); }, mcu.priority["motor"]);
-				console.log("Found motor directive", data);
+				console.log("Recieved motor directive", data);
 				break;
 			case 'ARM':
 				setTimeout(function() { mcu.arm._handle(data["info"]); }, mcu.priority["arm"]);
-				console.log("Found arm directive", data);
+				console.log("Recieved arm directive", data);
 				break;
 			case 'SENSOR':
 				setTimeout(function() { mcu.sensor._handle(data["info"]); }, mcu.priority["sensor"]);
-				console.log("Found sensor directive", data);
+				console.log("Recieved sensor directive", data);
 				break;
 			case 'TRACKER':
 				setTimeout(function() { mcu.tracker._handle(data["info"]); }, mcu.priority["tracker"]);
-				console.log("Found tracker directive", data);
+				console.log("Recieved tracker directive", data);
+				break;
+			case 'VIDEO':
+				setTimeout(function() { mcu.video._handle(data["info"]); }, mcu.priority["tracker"]);
+				console.log("Recieved video serversignal", data);
 				break;
 			case 'ROVER':
 				setTimeout(function() { mcu.handle(data["info"]); }, 1);
