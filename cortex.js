@@ -8,7 +8,7 @@ var MindController = require('./modules/mind-controller.js');
 
 // Initializing Variables
 var ip = "discovery.srkarra.com"; // Long Range Testing Server in New York
-var socket = new Socket('http://'+ip+':8080');
+var socket = new Socket('http://'+ip+':8085');
 var mcu = new MindController();
 
 socket.on('connect', function () { 
