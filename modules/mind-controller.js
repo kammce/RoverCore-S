@@ -1,6 +1,6 @@
 "use strict";
 
-function MindController() {
+function MindController(feedback) {
 	var model = require('./model.js');
 	var Sensor = require('./sensor/sensor.js');
 	var Motor = require('./motor/motor.js');
@@ -11,12 +11,12 @@ function MindController() {
 
 	this.model = model;
 
-	this.sensor = new Sensor(model);
-	this.motor = new Motor(model);
-	this.arm = new Arm(model);
-	this.tracker = new Tracker(model);
-	this.video = new Video(model);
-	this.logger = new Logger(model);
+	this.sensor = new Sensor(model, feedback);
+	this.motor = new Motor(model, feedback);
+	this.arm = new Arm(model, feedback);
+	this.tracker = new Tracker(model, feedback);
+	this.video = new Video(model, feedback);
+	this.logger = new Logger(model, feedback);
 
 	this.priority = {
 		motor: 1,
