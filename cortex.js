@@ -1,5 +1,16 @@
 "use strict";
 
+if( process.argv.length < 3 ) {
+	console.log(
+		'Usage: \n' +
+		'\tnode cortex.js <websocket-server-address>\n'+
+		'Hints: server address can be\n' +
+		'\tlocalhost\n' + 
+		'\tor discovery.srkarra.com'
+	);
+	process.exit();
+}
+
 console.log("Starting Rover Cortex");
 
 // Includes
@@ -8,9 +19,8 @@ var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
 // Initializing Variables
-//var ip = "discovery.srkarra.com"; // Long Range Testing Server in New York
-var ip = "127.0.0.1"; // Long Range Testing Server in New York
-var socket = new Socket('http://'+ip+':8085');
+GLOBAL.address = process.argv[2];
+var socket = new Socket('http://'+address+':8085');
 
 var feedback = function(directive, rsignal) {
 	if(!_.isUndefined(rsignal)) {

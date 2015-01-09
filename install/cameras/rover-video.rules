@@ -1,0 +1,8 @@
+# SJSU Robotics Rover Cameras
+# This file should be installed to /etc/udev/rules.d so that RoverCore's video module can locate the approprate webcams for mission use.
+#
+# type this at the command prompt: sudo cp rover-video.rules /etc/udev/rules.d
+
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="HP Webcam", SYMLINK+="video-arm"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="HD Pro Webcam C920", SYMLINK+="video-navi"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="USB2.0 PC CAMERA", SYMLINK+="video-hull"

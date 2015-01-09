@@ -39,6 +39,7 @@ MindController.prototype.halt = function(data) {
 		this.motor._halt();
 		this.arm._halt();
 		this.tracker._halt();
+		this.video._halt();
 		//this.logger._halt();
 		this.is_halted = true;
 	}
@@ -50,6 +51,7 @@ MindController.prototype.resume = function() {
 		this.motor._resume();
 		this.arm._resume();
 		this.tracker._resume();
+		this.video._resume();
 		//this.logger._resume();
 		this.is_halted = false;
 	}
