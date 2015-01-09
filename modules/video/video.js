@@ -81,8 +81,16 @@ function Video(model_ref, feedback) {
 }
 Video.prototype.handle = function(data) {
 	var parent = this;
+	console.log("Handlin' dat!");
 	if(!_.isUndefined(this.mspawn)) {
-		this.mspawn.kill('SIGINT');
+		// Kill camera feed processes
+		try {
+			this.mspawn.kill('SIGINT');
+		} catch(e) {
+			console.log(e);
+			this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
+			this.mspawn = undefined;
+		}
 	}
 	if(data["view"] == "off") {
 		return "OFF";
@@ -121,8 +129,12 @@ Video.prototype.genArg = function(data) {
 };
 Video.prototype.activateCamera = function(caminfo) {
 	var parent = this;
+	console.log("Activate camera!");
 	try {
-		this.mspawn = this.process.spawn('ffmpeg', this.genArg(caminfo));	
+		this.mspawn = this.process.spawn('ffmpeg', 
+			this.genArg(caminfo)
+		).on('error', function( err ){ console.log("ffmpeg could not be found... ",err); });
+
 		if(this.debug) {
 			this.mspawn.stdout.on('data', function(out) {
 				console.log('stdout: ' + out);
@@ -155,12 +167,15 @@ Video.prototype.resume = function() {
 };
 Video.prototype.halt = function() {
 	// Kill camera feed processes
-	try {
-		this.mspawn.kill('SIGINT');
-	} catch(e) {
-		console.log(e);
-		this.feedback(this.module, "HALT COULD NOT KILL VIDEO FEED: "+e);
-		this.mspawn = undefined;
+	if(!_.isUndefined(this.mspawn)) {
+		// Kill camera feed processes
+		try {
+			this.mspawn.kill('SIGINT');
+		} catch(e) {
+			console.log(e);
+			this.feedback(this.module, "HALT COULD NOT KILL VIDEO FEED: "+e);
+			this.mspawn = undefined;
+		}
 	}
 };
 
