@@ -54,19 +54,9 @@ function Video(model_ref, feedback) {
 	this.cams = ["navi", "arm", "hull", "tracker"];
 	this.process = require('child_process');
 	this.cam_args = this.genArg({ view: 'off' });
+	this.debug = false; // process debug information
 	this.tspawn; // spawn of tracker process
-	this.mspawn = this.process.spawn('ffmpeg', this.cam_args);
-	/*
-	this.mspawn.stdout.on('data', function(data) {
-		console.log('stdout: ' + data);
-	});
-	this.mspawn.stderr.on('data', function(data) {
-		console.log('stderr: ' + data);
-	});
-	this.mspawn.on('close', function(code) {
-		console.log('closing code: ' + code);
-	});
-	*/
+	this.mspawn; // spawn of multicam process
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -99,33 +89,12 @@ Video.prototype.handle = function(data) {
 	if(_.isObject(data)) {
 		if(this.cams.indexOf(data["view"]) != -1) {
 			setTimeout(function() {
-				parent.mspawn = parent.process.spawn('ffmpeg', parent.genArg(data));	
-				/*parent.mspawn.stdout.on('data', function(data) {
-					console.log('stdout: ' + data);
-				});
-				parent.mspawn.stderr.on('data', function(data) {
-					console.log('stderr: ' + data);
-				});*/
-				parent.mspawn.on('close', function(code) {
-					parent.feedback(this.module, "VIEW "+data["view"]+" CLOSED, CODE: "+code);
-				});
-				parent.feedback(this.module, "BRINGING UP VIEW "+data["view"]);
+				parent.activateCamera(data);
 			}, 1000);
 			return "SWITCHING-VIEW TO "+data["view"];
 		}
 	}
 	return "FAIL";
-};
-Video.prototype.genCMD = function(data) {
-	var cmd = 'ffmpeg';
-		cmd += ' -s ' + this.videos[data]['width']+'x'+this.videos[data]['height'];
-		cmd += ' -f ' + 'video4linux2';
-		cmd += ' -i ' + this.videos[data]['dev'];
-		cmd += ' -f ' + 'mpeg1video';
-		cmd += ' -b:v ' + this.videos[data]['res'] + 'k';
-		cmd += ' -r ' + '20';
-		cmd += ' http://'+ADDRESS+':9001/destroymit/'+this.videos[data]['width']+'/'+this.videos[data]['height'];
-	return cmd;
 };
 Video.prototype.genArg = function(data) {
 	if(_.isUndefined(data)) { return this.data_args; }	
@@ -148,7 +117,27 @@ Video.prototype.genArg = function(data) {
 	}
 	return this.cam_args;
 };
-
+Video.prototype.activateCamera = function(caminfo) {
+	var parent = this;
+	try {
+		this.mspawn = this.process.spawn('ffmpeg', this.genArg(caminfo));	
+		if(this.debug) {
+			this.mspawn.stdout.on('data', function(out) {
+				console.log('stdout: ' + out);
+			});
+			this.mspawn.stderr.on('data', function(err) {
+				console.log('stderr: ' + err);
+			});	
+		}
+		this.mspawn.on('close', function(code) {
+			parent.feedback(parent.module, "VIEW "+caminfo["view"]+" CLOSED, CODE: "+code);
+		});
+		this.feedback(this.module, "BRINGING UP VIEW "+caminfo["view"]);
+	} catch(e) {
+		console.log(e);
+		this.feedback(this.module, "PROCESS FAILURE: "+e);
+	}
+}
 Video.prototype.resume = function() {
 	// Bring up previous camera
 	this.mspawn = this.process.spawn('ffmpeg', this.cam_args);
