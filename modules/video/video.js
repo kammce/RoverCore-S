@@ -54,6 +54,7 @@ function Video(model_ref, feedback) {
 	this.cams = ["navi", "arm", "hull", "tracker"];
 	this.process = require('child_process');
 	this.cam_args = this.genArg({ view: 'off' });
+	this.caminfo = "off";
 	this.debug = false; // process debug information
 	this.tspawn; // spawn of tracker process
 	this.mspawn; // spawn of multicam process
@@ -113,7 +114,8 @@ Video.prototype.genArg = function(data) {
 			'-b:v', res+'k',
 			'-r', '20',
 			'http://'+ADDRESS+':9001/destroymit/'+width+'/'+height
-		];	
+		];
+		this.caminfo = data;
 	}
 	return this.cam_args;
 };
@@ -136,15 +138,30 @@ Video.prototype.activateCamera = function(caminfo) {
 	} catch(e) {
 		console.log(e);
 		this.feedback(this.module, "PROCESS FAILURE: "+e);
+		this.mspawn = undefined;
 	}
 }
 Video.prototype.resume = function() {
+	// Kill camera feed processes
+	try {
+		this.activateCamera(this.caminfo);
+	} catch(e) {
+		console.log(e);
+		this.feedback(this.module, "COULD NOT BRING UP PREVIOUS VIDEO FEED: "+e);
+		this.mspawn = undefined;
+	}
 	// Bring up previous camera
-	this.mspawn = this.process.spawn('ffmpeg', this.cam_args);
+	
 };
 Video.prototype.halt = function() {
 	// Kill camera feed processes
-	this.mspawn.kill('SIGINT');
+	try {
+		this.mspawn.kill('SIGINT');
+	} catch(e) {
+		console.log(e);
+		this.feedback(this.module, "HALT COULD NOT KILL VIDEO FEED: "+e);
+		this.mspawn = undefined;
+	}
 };
 
 module.exports = exports = Video;
