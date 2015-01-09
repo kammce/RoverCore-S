@@ -124,7 +124,7 @@ Video.prototype.genCMD = function(data) {
 		cmd += ' -f ' + 'mpeg1video';
 		cmd += ' -b:v ' + this.videos[data]['res'] + 'k';
 		cmd += ' -r ' + '20';
-		cmd += ' http://'+address+':9001/destroymit/'+this.videos[data]['width']+'/'+this.videos[data]['height'];
+		cmd += ' http://'+ADDRESS+':9001/destroymit/'+this.videos[data]['width']+'/'+this.videos[data]['height'];
 	return cmd;
 };
 Video.prototype.genArg = function(data) {
@@ -143,7 +143,7 @@ Video.prototype.genArg = function(data) {
 			'-f', 'mpeg1video',
 			'-b:v', res+'k',
 			'-r', '20',
-			'http://'+address+':9001/destroymit/'+width+'/'+height
+			'http://'+ADDRESS+':9001/destroymit/'+width+'/'+height
 		];	
 	}
 	return this.cam_args;
