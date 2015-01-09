@@ -19,8 +19,8 @@ var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
 // Initializing Variables
-GLOBAL.address = process.argv[2];
-var socket = new Socket('http://'+address+':8085');
+GLOBAL.ADDRESS = process.argv[2];
+var socket = new Socket('http://'+ADDRESS+':8085');
 
 var feedback = function(directive, rsignal) {
 	if(!_.isUndefined(rsignal)) {
