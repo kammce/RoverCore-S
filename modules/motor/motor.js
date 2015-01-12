@@ -68,4 +68,5 @@ Motor.prototype.handle = function(data) {
 Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {};
 
+
 module.exports = exports = Motor;
