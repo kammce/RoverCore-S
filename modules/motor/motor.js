@@ -35,7 +35,7 @@ Motor.prototype.setSpeed=function(Left, Right){
 Motor.prototype.set=function( angle, speed){
 		var setSpeedLeft, setSpeedRight;
 		var Direction=1;
-		if(speed<0) Direction=-1; speed=speed*-1; //puts the rover in reverse
+		if(speed<0) {Direction=-1; speed=speed*-1}; //puts the rover in reverse
 		if(angle==0){ // checks for angle 0
 			this.setSpeed(speed,speed);
 			this.setDirection( 1,-1, Direction);
