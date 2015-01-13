@@ -15,7 +15,7 @@ console.log("Starting Rover Cortex");
 
 // Includes
 GLOBAL._ = require("underscore");
-GLOBAL.bone = require("bonescript");
+GLOBAL.BONE = require("bonescript");
 var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
