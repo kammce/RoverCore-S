@@ -10,27 +10,33 @@ function Motor(model_ref, feedback) {
 }
 Motor.prototype.setDirection=function(left, Right, Dir){ //Sets Motors Forward or Directon 
 		if(left==(1*Dir)) {
-			//b.digitalWrite('USR0', b.HIGH);
-			//b.digitalWrite('USR0', b.HIGH);
+			Bone.digitalWrite('P9_13', Bone.HIGH);
+			Bone.digitalWrite('P9_15', Bone.HIGH);
+			Bone.digitalWrite('P9_12', Bone.HIGH);
 		}
 		else if(left==(-1*Dir)){
-			//b.digitalWrite('USR0', b.LOW);
-			//b.digitalWrite('USR0', b.LOW);
+			Bone.digitalWrite('P9_14', Bone.LOW);
+			Bone.digitalWrite('P9_16', Bone.LOW);
+			Bone.digitalWrite('P9_18', Bone.LOW);
 		}
 		if(Right==(1*Dir)){
-			//b.digitalWrite('USR0', b.HIGH);
-			//b.digitalWrite('USR0', b.HIGH);
+			Bone.digitalWrite('P9_13', Bone.HIGH);
+			Bone.digitalWrite('P9_15', Bone.HIGH);
+			Bone.digitalWrite('P9_12', Bone.HIGH);
 		}
 		else if(Right==(-1*Dir)){
-			//b.digitalWrite('USR0', b.LOW);
-			//b.digitalWrite('USR0', b.LOW);
+			Bone.digitalWrite('P9_14', Bone.LOW);
+			Bone.digitalWrite('P9_16', Bone.LOW);
+			Bone.digitalWrite('P9_18', Bone.LOW);
 		}
 	}
 Motor.prototype.setSpeed=function(Left, Right){
-	//b.analogWrite('P9_14', Left/100, 2000, printJSON);
-	//b.analogWrite('P9_14', Left/100, 2000, printJSON);
-	//b.analogWrite('P9_14', Right/100, 2000, printJSON);
-	//b.analogWrite('P9_14', Right/100, 2000, printJSON);
+	Bone.analogWrite('P8_14', Left/100, 2000, printJSON);
+	Bone.analogWrite('P8_16', Left/100, 2000, printJSON);
+	Bone.analogWrite('P9_13', Left/100, 2000, printJSON);
+	Bone.analogWrite('P9_19', Right/100, 2000, printJSON);
+	Bone.analogWrite('P9_34', Right/100, 2000, printJSON);
+	Bone.analogWrite('P9_36', Right/100, 2000, printJSON);
 }
 Motor.prototype.set=function( angle, speed){
 		var setSpeedLeft, setSpeedRight;
