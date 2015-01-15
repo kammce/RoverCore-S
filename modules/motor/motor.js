@@ -23,6 +23,24 @@ function Motor(model_ref, feedback) {
 	//BONE.pinMode('P8_36', BONE.OUTPUT);
 
 }
+Motor.prototype.setDirectionTesting=function(Left, Right){
+	if(left==(1)) {
+			BONE.digitalWrite('P8_11', BONE.HIGH);
+			BONE.digitalWrite('P8_15', BONE.LOW);
+		}
+		else if(left==(-1)){
+			BONE.digitalWrite('P8_11', BONE.LOW);
+			BONE.digitalWrite('P8_15', BONE.HIGH);
+		}
+		if(Right==(1)){
+			BONE.digitalWrite('P8_14', BONE.HIGH);
+			BONE.digitalWrite('P8_16', BONE.LOW);
+		}
+		else if(Right==(-1)){
+			BONE.digitalWrite('P8_14', BONE.LOW);
+			BONE.digitalWrite('P8_16', BONE.HIGH);
+		}
+}
 Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Directon 
 		if(left==(1)) {
 			BONE.digitalWrite('P8_11', BONE.HIGH);
@@ -47,9 +65,9 @@ Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Dir
 	}
 Motor.prototype.setSpeed=function(Left, Right){
 	//BONE.analogWrite('P9_14', Left/100, 2000, console.log);
-	BONE.analogWrite('P9_16', 1-(Left/100), 2000, console.log);
-	BONE.analogWrite('P8_13', 1-(Left/100), 2000, console.log);
-	BONE.analogWrite('P8_19', 1-(Right/100), 2000, console.log);
+	BONE.analogWrite('P9_16', (Left/100), 2000, console.log);
+	BONE.analogWrite('P8_13', (Left/100), 2000, console.log);
+	BONE.analogWrite('P8_19', (Right/100), 2000, console.log);
 	//BONE.analogWrite('P8_34', Right/100, 2000, console.log);
 	//BONE.analogWrite('P8_36', Right/100, 2000, console.log);
 	this.feedback = "Left speed" + Left + "Right speed" + Right;
@@ -57,27 +75,27 @@ Motor.prototype.setSpeed=function(Left, Right){
 Motor.prototype.set=function( angle, speed){
 		if(angle==0 || angle==360){ // checks for angle 0
 			this.setSpeed(speed,0);
-			this.setDirection( 1,1);
+			this.setDirectionTesting( 1,1);
 		}
 		else if(angle<=90 && angle>0){ // checks for angles 1-90
 			this.setSpeed(speed,(angle/90)*speed);
-			this.setDirection( 1, 1);
+			this.setDirectionTesting( 1, 1);
 		}
 		else if(angle>90 && angle<180){ // checks for angles 91-179
 			this.setSpeed(((-1*(angle-180))/90)*speed,speed);
-			this.setDirection( 1, 1);
+			this.setDirectionTesting( 1, 1);
 		}
 		else if(angle==180){ // checks for angle 180
 			this.setSpeed(0,speed);
-			this.setDirection( 1, 1);
+			this.setDirectionTesting( 1, 1);
 		}
 		else if (angle>180 && angle <=270){
 			this.setSpeed(((angle-180)/90)*speed,speed);
-			this.setDirection( -1, -1);
+			this.setDirectionTesting( -1, -1);
 		}
 		else if (angle>270 && angle <360){
 			this.setSpeed(speed,((-1*(angle-360))/90)*speed);
-			this.setDirection( -1, -1);
+			this.setDirectionTesting( -1, -1);
 		}
 		else{
 			this.setSpeed(0,0);
