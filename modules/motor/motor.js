@@ -24,11 +24,11 @@ function Motor(model_ref, feedback) {
 
 }
 Motor.prototype.setDirectionTesting=function(Left, Right){
-	if(left==(1)) {
+	if(Left==(1)) {
 			BONE.digitalWrite('P8_11', BONE.HIGH);
 			BONE.digitalWrite('P8_15', BONE.LOW);
 		}
-		else if(left==(-1)){
+		else if(Left==(-1)){
 			BONE.digitalWrite('P8_11', BONE.LOW);
 			BONE.digitalWrite('P8_15', BONE.HIGH);
 		}
