@@ -47,9 +47,9 @@ Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Dir
 	}
 Motor.prototype.setSpeed=function(Left, Right){
 	//BONE.analogWrite('P9_14', Left/100, 2000, console.log);
-	BONE.analogWrite('P9_16', Left/100, 2000, console.log);
-	BONE.analogWrite('P8_13', Left/100, 2000, console.log);
-	BONE.analogWrite('P8_19', Right/100, 2000, console.log);
+	BONE.analogWrite('P9_16', 1-(Left/100), 2000, console.log);
+	BONE.analogWrite('P8_13', 1-(Left/100), 2000, console.log);
+	BONE.analogWrite('P8_19', 1-(Right/100), 2000, console.log);
 	//BONE.analogWrite('P8_34', Right/100, 2000, console.log);
 	//BONE.analogWrite('P8_36', Right/100, 2000, console.log);
 	this.feedback = "Left speed" + Left + "Right speed" + Right;
