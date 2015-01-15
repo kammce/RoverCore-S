@@ -8,50 +8,50 @@ function Motor(model_ref, feedback) {
 	this.model = model_ref;
 	this.feedback = feedback;
 	//Direction Pins
-	BONE.pinMode('P9_11', BONE.OUTPUT);
-	BONE.pinMode('P9_15', BONE.OUTPUT);
-	BONE.pinMode('P9_12', BONE.OUTPUT);
-	BONE.pinMode('P9_14', BONE.OUTPUT);
-	BONE.pinMode('P9_16', BONE.OUTPUT);
-	BONE.pinMode('P9_18', BONE.OUTPUT);
-	//PWM Pins
+	BONE.pinMode('P8_11', BONE.OUTPUT);
+	BONE.pinMode('P8_15', BONE.OUTPUT);
+	BONE.pinMode('P8_12', BONE.OUTPUT);
 	BONE.pinMode('P8_14', BONE.OUTPUT);
 	BONE.pinMode('P8_16', BONE.OUTPUT);
-	BONE.pinMode('P9_13', BONE.OUTPUT);
-	BONE.pinMode('P9_19', BONE.OUTPUT);
-	BONE.pinMode('P9_34', BONE.OUTPUT);
-	BONE.pinMode('P9_36', BONE.OUTPUT);
+	BONE.pinMode('P8_18', BONE.OUTPUT);
+	//PWM Pins
+	BONE.pinMode('P9_14', BONE.OUTPUT);
+	BONE.pinMode('P9_16', BONE.OUTPUT);
+	BONE.pinMode('P8_13', BONE.OUTPUT);
+	BONE.pinMode('P8_19', BONE.OUTPUT);
+	BONE.pinMode('P8_34', BONE.OUTPUT);
+	BONE.pinMode('P8_36', BONE.OUTPUT);
 
 }
 Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Directon 
 		if(left==(1)) {
-			BONE.digitalWrite('P9_13', BONE.HIGH);
-			BONE.digitalWrite('P9_15', BONE.HIGH);
-			BONE.digitalWrite('P9_12', BONE.HIGH);
+			BONE.digitalWrite('P8_11', BONE.HIGH);
+			BONE.digitalWrite('P8_15', BONE.HIGH);
+			BONE.digitalWrite('P8_12', BONE.HIGH);
 		}
 		else if(left==(-1)){
-			BONE.digitalWrite('P9_14', BONE.LOW);
-			BONE.digitalWrite('P9_16', BONE.LOW);
-			BONE.digitalWrite('P9_18', BONE.LOW);
+			BONE.digitalWrite('P8_14', BONE.LOW);
+			BONE.digitalWrite('P8_16', BONE.LOW);
+			BONE.digitalWrite('P8_18', BONE.LOW);
 		}
 		if(Right==(1)){
-			BONE.digitalWrite('P9_13', BONE.HIGH);
-			BONE.digitalWrite('P9_15', BONE.HIGH);
-			BONE.digitalWrite('P9_12', BONE.HIGH);
+			BONE.digitalWrite('P8_13', BONE.HIGH);
+			BONE.digitalWrite('P8_15', BONE.HIGH);
+			BONE.digitalWrite('P8_12', BONE.HIGH);
 		}
 		else if(Right==(-1)){
-			BONE.digitalWrite('P9_14', BONE.LOW);
-			BONE.digitalWrite('P9_16', BONE.LOW);
-			BONE.digitalWrite('P9_18', BONE.LOW);
+			BONE.digitalWrite('P8_14', BONE.LOW);
+			BONE.digitalWrite('P8_16', BONE.LOW);
+			BONE.digitalWrite('P8_18', BONE.LOW);
 		}
 	}
 Motor.prototype.setSpeed=function(Left, Right){
-	BONE.analogWrite('P8_14', Left/100, 2000, console.log);
-	BONE.analogWrite('P8_16', Left/100, 2000, console.log);
-	BONE.analogWrite('P9_13', Left/100, 2000, console.log);
-	BONE.analogWrite('P9_19', Right/100, 2000, console.log);
-	BONE.analogWrite('P9_34', Right/100, 2000, console.log);
-	BONE.analogWrite('P9_36', Right/100, 2000, console.log);
+	BONE.analogWrite('P9_14', Left/100, 2000, console.log);
+	BONE.analogWrite('P9_16', Left/100, 2000, console.log);
+	BONE.analogWrite('P8_13', Left/100, 2000, console.log);
+	BONE.analogWrite('P8_19', Right/100, 2000, console.log);
+	BONE.analogWrite('P8_34', Right/100, 2000, console.log);
+	BONE.analogWrite('P8_36', Right/100, 2000, console.log);
 	this.feedback = "Left speed" + Left + "Right speed" + Right;
 }
 Motor.prototype.set=function( angle, speed){
