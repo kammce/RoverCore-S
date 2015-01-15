@@ -19,8 +19,8 @@ function Motor(model_ref, feedback) {
 	BONE.pinMode('P9_16', BONE.OUTPUT);
 	BONE.pinMode('P8_13', BONE.OUTPUT);
 	BONE.pinMode('P8_19', BONE.OUTPUT);
-	BONE.pinMode('P8_34', BONE.OUTPUT);
-	BONE.pinMode('P8_36', BONE.OUTPUT);
+	//BONE.pinMode('P8_34', BONE.OUTPUT);
+	//BONE.pinMode('P8_36', BONE.OUTPUT);
 
 }
 Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Directon 
@@ -50,8 +50,8 @@ Motor.prototype.setSpeed=function(Left, Right){
 	BONE.analogWrite('P9_16', Left/100, 2000, console.log);
 	BONE.analogWrite('P8_13', Left/100, 2000, console.log);
 	BONE.analogWrite('P8_19', Right/100, 2000, console.log);
-	BONE.analogWrite('P8_34', Right/100, 2000, console.log);
-	BONE.analogWrite('P8_36', Right/100, 2000, console.log);
+	//BONE.analogWrite('P8_34', Right/100, 2000, console.log);
+	//BONE.analogWrite('P8_36', Right/100, 2000, console.log);
 	this.feedback = "Left speed" + Left + "Right speed" + Right;
 }
 Motor.prototype.set=function( angle, speed){
