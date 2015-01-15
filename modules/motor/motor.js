@@ -1,5 +1,5 @@
 "use strict";
-
+// Basic Funcionality Sketch
 var Skeleton = require("../skeleton.js");
 Motor.prototype = new Skeleton("Motor");
 Motor.prototype.constructor = Motor;
