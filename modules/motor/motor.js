@@ -30,14 +30,14 @@ Motor.prototype.setDirection=function(left, Right){ //Sets Motors Forward or Dir
 			BONE.digitalWrite('P8_12', BONE.HIGH);
 		}
 		else if(left==(-1)){
-			BONE.digitalWrite('P8_14', BONE.LOW);
-			BONE.digitalWrite('P8_16', BONE.LOW);
-			BONE.digitalWrite('P8_18', BONE.LOW);
+			BONE.digitalWrite('P8_11', BONE.LOW);
+			BONE.digitalWrite('P8_15', BONE.LOW);
+			BONE.digitalWrite('P8_12', BONE.LOW);
 		}
 		if(Right==(1)){
-			BONE.digitalWrite('P8_13', BONE.HIGH);
-			BONE.digitalWrite('P8_15', BONE.HIGH);
-			BONE.digitalWrite('P8_12', BONE.HIGH);
+			BONE.digitalWrite('P8_14', BONE.HIGH);
+			BONE.digitalWrite('P8_16', BONE.HIGH);
+			BONE.digitalWrite('P8_18', BONE.HIGH);
 		}
 		else if(Right==(-1)){
 			BONE.digitalWrite('P8_14', BONE.LOW);
