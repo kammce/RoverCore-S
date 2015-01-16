@@ -4,16 +4,6 @@
 /*
  * Command to stream webcam MPEG1Video to server
 	ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -b:v 800k -r 20 http://127.0.0.1:9001/destroymit/640/480/
- * Command to init easycap analog video capture 
-	sudo somagic-init -f 
- * Command to view easycap analog video capture with mplayer 
-	sudo somagic-capture --secam --iso-transfers=10 --sync=1 | mplayer -nocache -vf yadif -demuxer rawvideo -rawvideo "ntsc:format=uyvy:fps=25"
-
-	sudo somagic-capture -n --sync=1 | mplayer -vo xv -vf screenshot -demuxer rawvideo -rawvideo "ntsc:format=uyvy:fps=30000/1001" -aspect 4:3 -
-
-	
- * Command to stream easycap analog video capture to server ( will not work! This is a placeholder )
-	sudo somagic-capture --secam --iso-transfers=10 --sync=1 | ffmpeg
  */
 
 var Skeleton = require("./skeleton.js");
