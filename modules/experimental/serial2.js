@@ -4,7 +4,7 @@ var fs = require('fs');
 var UART = require('./neuron.js');
 //var uart = new UART('/dev/ttyACM0');
 
-var serialport = require('serialport');
+var SERIALPORT = require('serialport');
 var serialPort = new serialport.SerialPort("/dev/ttyACM0",
 {//Listening on the serial port for data coming from Arduino over USB
 	parser: serialport.parsers.readline('\n')
