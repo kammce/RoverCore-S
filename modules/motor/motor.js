@@ -98,7 +98,7 @@ Motor.prototype.setIndividualMotors=function(motor){
 	this.feedback ="Left speed" + Left + "Right speed" + Right + "   " + motor.m1 + ' '+ motor.m2 + ' '+ motor.m3 + ' '+ motor.m4 + ' '+ motor.m5 + ' '+ motor.m6;
 }
 Motor.prototype.setMotor = function(motorSelect, direction, speed){
-	if(motorSelect=='1'){
+	if(motorSelect==1){
 		BONE.analogWrite(this.motors.m1.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m1.dirPin, BONE.HIGH);
@@ -107,7 +107,7 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 			BONE.digitalWrite(this.motors.m1.dirPin, BONE.LOW);
 		}
 	}
-	else if(motorSelect=='2'){
+	else if(motorSelect==2){
 		BONE.analogWrite(this.motors.m2.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m2.dirPin, BONE.HIGH);
@@ -116,7 +116,7 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 			BONE.digitalWrite(this.motors.m2.dirPin, BONE.LOW);
 		}
 	}
-	else if(motorSelect=='3'){
+	else if(motorSelect==3){
 		BONE.analogWrite(this.motors.m3.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m3.dirPin, BONE.HIGH);
@@ -125,7 +125,7 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 			BONE.digitalWrite(this.motors.m3.dirPin, BONE.LOW);
 		}
 	}
-	else if(motorSelect=='4'){
+	else if(motorSelect==4){
 		BONE.analogWrite(this.motors.m4.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m4.dirPin, BONE.HIGH);
@@ -134,7 +134,7 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 			BONE.digitalWrite(this.motors.m4.dirPin, BONE.LOW);
 		}
 	}
-	else if(motorSelect=='5'){
+	else if(motorSelect==5){
 		//BONE.analogWrite(this.motors.m5.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m5.dirPin, BONE.HIGH);
@@ -143,7 +143,7 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 			BONE.digitalWrite(this.motors.m5.dirPin, BONE.LOW);
 		}
 	}
-	else if(motorSelect=='6'){
+	else if(motorSelect==6){
 		//BONE.analogWrite(this.motors.m6.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m6.dirPin, BONE.HIGH);
