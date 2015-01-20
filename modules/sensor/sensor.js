@@ -237,7 +237,7 @@ Sensor.prototype.gyro= function(){
     this.data.roll_gyro     =  (sensor_data.gyro.y*10)/1000.0;    //
     this.data.yaw_gyro      =  (sensor_data.gyro.z*10)/1000.0;    //
 
-    console.log("pitch: " + this.data.pitch_gyro + " roll: " + this.data.roll_gyro + " yaw: " + this.data.yaw_gryo + " degrees");
+    console.log("pitch: " + this.data.pitch_gyro + " roll: " + this.data.roll_gyro + " yaw: " + this.data.yaw_gyro + " degrees");
 
 };
 
