@@ -32,7 +32,7 @@ function Motor(model_ref, feedback) {
 			dirPin:'P8_18',
 		}
 	}
-	BONE.pinMode(this.motors.m1.pwmPin, BONE.OUTPUT);
+	//BONE.pinMode(this.motors.m1.pwmPin, BONE.OUTPUT);
 	BONE.pinMode(this.motors.m1.dirPin, BONE.OUTPUT);
 	BONE.pinMode(this.motors.m2.pwmPin, BONE.OUTPUT);
 	BONE.pinMode(this.motors.m2.dirPin, BONE.OUTPUT);
@@ -59,7 +59,7 @@ Motor.prototype.handle = function(data) {
 Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {};
 Motor.prototype.setIndividualMotors=function(motor){
-	if(m1.state=="on"){
+	if(motor.m1.state=="on"){
 		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
 	}
 	else{
@@ -99,7 +99,7 @@ Motor.prototype.setIndividualMotors=function(motor){
 }
 Motor.prototype.setMotor = function(motorSelect, direction, speed){
 	if(motorSelect==1){
-		BONE.analogWrite(this.motors.m1.pwmPin, speed, 2000, console.log);
+		//BONE.analogWrite(this.motors.m1.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			BONE.digitalWrite(this.motors.m1.dirPin, BONE.HIGH);
 		}
@@ -195,7 +195,7 @@ Motor.prototype.setAllMotors=function(angle, speed){
 	}
 }
 Motor.prototype.setAllSpeed=function(left, Right){
-	BONE.analogWrite(this.motor1.pwmPin, Left/100, 2000, console.log);
+	//BONE.analogWrite(this.motor1.pwmPin, Left/100, 2000, console.log);
 	BONE.analogWrite(this.motor2.pwmPin, Left/100, 2000, console.log);
 	BONE.analogWrite(this.motor3.pwmPin, Left/100, 2000, console.log);
 	BONE.analogWrite(this.motor4.pwmPin, Right/100, 2000, console.log);
