@@ -95,7 +95,8 @@ Motor.prototype.setIndividualMotors=function(motor){
 	else{
 		this.setMotor(6, motor.m6.direction, 0);
 	}
-	this.feedback ="Left speed" + Left + "Right speed" + Right + "   " + motor.m1 + ' '+ motor.m2 + ' '+ motor.m3 + ' '+ motor.m4 + ' '+ motor.m5 + ' '+ motor.m6;
+	this.feedback=motor;
+	// ="Left speed" + Left + "Right speed" + Right + "   " + motor.m1 + ' '+ motor.m2 + ' '+ motor.m3 + ' '+ motor.m4 + ' '+ motor.m5 + ' '+ motor.m6;
 }
 Motor.prototype.setMotor = function(motorSelect, direction, speed){
 	if(motorSelect==1){
