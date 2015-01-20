@@ -59,7 +59,7 @@ Motor.prototype.handle = function(data) {
 Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {};
 Motor.prototype.setIndividualMotors=function(motor){
-	if(motor.m1.state=="on"){
+	if(m1.state=="on"){
 		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
 	}
 	else{
