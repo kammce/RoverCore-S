@@ -1,0 +1,6 @@
+[19:39:20.8]  {"directive":"VIDEO","info":{"view":"tracker","res":400,"width":640,"height":480,"fps":20}}
+[19:39:31.417]  {"directive":"VIDEO","info":{"view":"tracker","res":800,"width":640,"height":480,"fps":20}}
+[19:44:24.106]  {"directive":"VIDEO","info":{"view":"tracker","res":800,"width":640,"height":480,"fps":20}}
+[19:44:48.988]  {"directive":"VIDEO","info":{"view":"navi","res":800,"width":640,"height":480,"fps":20}}
+[19:45:2.722]  {"directive":"VIDEO","info":{"view":"tracker","res":800,"width":640,"height":480,"fps":20}}
+[19:46:38.620]  {"directive":"VIDEO","info":{"view":"tracker","res":400,"width":640,"height":480,"fps":20}}

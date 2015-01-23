@@ -13,9 +13,13 @@ if( process.argv.length < 3 ) {
 
 console.log("Starting Rover Cortex");
 
-// Includes
+// GLOBAL Includes
 GLOBAL._ = require("underscore");
+GLOBAL.fs = require("fs");
 GLOBAL.BONE = require("bonescript");
+GLOBAL.SERIALPORT = require('serialport');
+GLOBAL.I2C = require('i2c');
+// Local Includes
 var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
