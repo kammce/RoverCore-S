@@ -1,8 +1,8 @@
 /*Includes*/
-var motorAngle = require("/home/rj/repos/bitbucket/rovercore/modules/arm/motorAngle.js");
-var chkSum_W = require("/home/rj/repos/bitbucket/rovercore/modules/arm/writeCheckSum.js");
-var hexify = require("/home/rj/repos/bitbucket/rovercore/modules/arm/dec2hex.js"); //For Debugging
-var motorSpeed = require("/home/rj/repos/bitbucket/rovercore/modules/arm/motorSpeed.js");
+var motorAngle = require("./motorAngle.js"); // The "./" tells node's "require()" to look in the directory of this file
+var chkSum_W = require("./writeCheckSum.js");
+var hexify = require("./dec2hex.js"); //For Debugging
+var motorSpeed = require("./motorSpeed.js");
 
 /*Main*/
 function anglePosition(value, motorID, ctrlTblAddress){
