@@ -5,7 +5,7 @@
 
 /*Globals*/
 
-var servoPos = require("/home/rj/repos/bitbucket/rovercore/modules/arm/writePacket.js");
+var servoPos = require("./writePacket.js");
 var Skeleton = require("../skeleton.js");
 var goalPosition = 0x1E, movingSpeed = 0x20, ccwAngleLimit = 0x08, cwAngleLimit = 0x06; //Motor Control Table Addresses
 var baseID = 0x00, shoulderLID = 0x01, shoulderRID = 0x02, elbowID = 0x03, wristID = 0x04, broadcastID = 0xFE; //Motor ID Tags **NOTE:broadcastID == broadcast to all motors
