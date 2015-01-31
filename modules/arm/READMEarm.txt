@@ -12,7 +12,7 @@ You can practice using the MX-64 data signal format with an arduino state machin
 Motors in the arm: 5 total. 1 for base, 2 for shoulder connecting upper arm to base, 1 on elbow, and 1 for the claw's wrist.
 Expected input command format from missioncontrol html:
 { 
-  "base": 0,        <---All paramters other than speed are positional parameters in angle degrees. Speed is in rpm
+  "base": 0,        <---All paramters other than speed are positional parameters in 0-360 degrees. Speed is in rpm
   "shoulderL": 0,
   "shoulderR": 0,
   "elbow": 0,
