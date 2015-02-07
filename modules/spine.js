@@ -180,7 +180,6 @@ function Spine(feedback) {
 	    }
 	];
 	var os = require('os');
-	var glob = require('glob');
 	
 	this.pins = {};
 	this.hardware = {
