@@ -77,40 +77,40 @@ Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {};
 Motor.prototype.setIndividualMotors=function(motor){
 	if(motor.m1.state=="on"){
-		this.setMotor(1, motor.1.direction, motor.m1.speed/100);
+		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
 	}
 	else{
-		this.setMotor(1, motor.1.direction, 0);
+		this.setMotor(1, motor.m1.direction, 0);
 	}
 	if(motor.m2.state=="on"){
-		this.setMotor(2, motor.2.direction, motor.m2.speed/100);
+		this.setMotor(2, motor.m2.direction, motor.m2.speed/100);
 	}
 	else{
-		this.setMotor(2, motor.2.direction, 0);
+		this.setMotor(2, motor.m2.direction, 0);
 	}
 	if(motor.m3.state=="on"){
-		this.setMotor(3, motor.3.direction, motor.m3.speed/100);
+		this.setMotor(3, motor.m3.direction, motor.m3.speed/100);
 	}
 	else{
-		this.setMotor(3, motor.3.direction, 0);
+		this.setMotor(3, motor.m3.direction, 0);
 	}
 	if(motor.m4.state=="on"){
-		this.setMotor(4, motor.4.direction, motor.m4.speed/100);
+		this.setMotor(4, motor.m4.direction, motor.m4.speed/100);
 	}
 	else{
-		this.setMotor(4, motor.4.direction, 0);
+		this.setMotor(4, motor.m4.direction, 0);
 	}
 	if(motor.m5.state=="on"){
-		this.setMotor(5, motor.5.direction, motor.m5.speed/100);
+		this.setMotor(5, motor.m5.direction, motor.m5.speed/100);
 	}
 	else{
-		this.setMotor(5, motor.5.direction, 0);
+		this.setMotor(5, motor.m5.direction, 0);
 	}
 	if(motor.m6.state=="on"){
-		this.setMotor(6, motor.6.direction, motor.m6.speed/100);
+		this.setMotor(6, motor.m6.direction, motor.m6.speed/100);
 	}
 	else{
-		this.setMotor(6, motor.6.direction, 0);
+		this.setMotor(6, motor.m6.direction, 0);
 	}
 	this.feedback=motor;
 	// ="Left speed" + Left + "Right speed" + Right + "   " + motor.m1 + ' '+ motor.m2 + ' '+ motor.m3 + ' '+ motor.m4 + ' '+ motor.m5 + ' '+ motor.m6;
