@@ -16,15 +16,11 @@ console.log("Starting Rover Cortex");
 // GLOBAL Includes
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
-<<<<<<< HEAD
-GLOBAL.BONE = require("bonescript");
-=======
 GLOBAL.glob = require('glob');
 GLOBAL.SERIALPORT = require('serialport');
 GLOBAL.I2C = require('i2c');
 GLOBAL.SPINE = require('./modules/spine.js');
 // Local Includes
->>>>>>> 7f330edf8bccee44595321efa03b2ec5b0a49b39
 var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
 
