@@ -8,28 +8,28 @@ function Motor(model_ref, feedback) {
 	this.feedback = feedback;
 	this.motors={
 		m1: { //Left Side
-			pwmPin:'P9_28', // doesnt work
-			dirPin:'P8_11',
+			pwmPin:'P9_13', // doesnt work
+			dirPin:'P8_39',
 		},
 		m2: { // Right Side
-			pwmPin:'P9_29',
-			dirPin:'P8_15',
+			pwmPin:'P9_19',
+			dirPin:'P8_40',
 		},
 		m3: { //Left Side
-			pwmPin:'P8_13',
-			dirPin:'P8_12',
+			pwmPin:'P8_34',
+			dirPin:'P8_41',
 		},
 		m4: { // Right Side
-			pwmPin:'P8_19',
-			dirPin:'P8_14',
+			pwmPin:'P8_36',
+			dirPin:'P8_42',
 		},
 		m5: { //Left Side
-			pwmPin:'P8_34',// doesnt work
-			dirPin:'P8_16',
+			pwmPin:'P8_28',// doesnt work
+			dirPin:'P8_43',
 		},
 		m6: { // Right Side
-			pwmPin:'P8_36',// doesnt work
-			dirPin:'P8_18',
+			pwmPin:'P8_29',// doesnt work
+			dirPin:'P8_44',
 		}
 	}
 	this.spine = new SPINE();
