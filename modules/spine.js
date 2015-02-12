@@ -276,7 +276,7 @@ Spine.prototype.setPWM = function(_pin, percent) {
 	};
 	var path = this.hardware.pwms[map[_pin]];
 	if(typeof path == "undefined") {
-		console.log("Invalid pwm pin: "+pin);  
+		console.log("Invalid pwm pin: "+_pin);  
 		return;
 	}
 	var maxnsec = 500000;
