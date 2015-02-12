@@ -257,7 +257,6 @@ function Spine(feedback) {
 		console.log("Running on none Beagblebone platform.");
 	}
 }
-
 Spine.prototype.setPWM = function(_pin, percent) {
 	if(typeof percent != "number") {
 		console.log("Invalid pwm value, must between 0.0 and 1.0 ");
@@ -277,7 +276,7 @@ Spine.prototype.setPWM = function(_pin, percent) {
 	};
 	var path = this.hardware.pwms[map[_pin]];
 	if(typeof path == "undefined") {
-		console.log("Invalid pwm pin: "+pin);  
+		console.log("Invalid pwm pin: "+_pin);  
 		return;
 	}
 	var maxnsec = 500000;
