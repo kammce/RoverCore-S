@@ -33,17 +33,11 @@ function Motor(model_ref, feedback) {
 		}
 	}
 	this.spine = new SPINE();
-	this.spine.expose(this.motors.m1.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m1.dirPin, "OUTPUT");
-	this.spine.expose(this.motors.m2.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m2.dirPin, "OUTPUT");
-	this.spine.expose(this.motors.m3.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m3.dirPin, "OUTPUT");
-	this.spine.expose(this.motors.m4.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m4.dirPin, "OUTPUT");
-	this.spine.expose(this.motors.m5.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m5.dirPin, "OUTPUT");
-	this.spine.expose(this.motors.m6.pwmPin, "OUTPUT");
 	this.spine.expose(this.motors.m6.dirPin, "OUTPUT");
 	//BONE.pinMode(this.motors.m1.dirPin, BONE.OUTPUT);
 	//BONE.pinMode(this.motors.m2.pwmPin, BONE.OUTPUT);
