@@ -1,7 +1,7 @@
 "use strict";
 //Dynamixel Instruction Packet Format: 0xFF 0xFF ID LENGTH INSTRUCTION PARAMETER#1 ... PARAMETER#N CHECK_SUM
 //default baud rate of servo is 9600 bps(baud)
-//For robotic arm, we'll probably have all motors except the base motor be in joint-mode, because they are joints, not meant to rotate at a limited angle
+//For robotic arm, we'll probably have all motors except the base motor be in joint-mode, because they are joints, not meant to rotate at an unlimited angle
 
 /*Globals*/
 
@@ -28,15 +28,15 @@ Arm.prototype.handle = function(data){ //Data is an object, with members outline
 			console.log("	<Set Motor ccW Limit: " + command + ">");
 		}
 		//All Motor's default is cw:0x0000, ccw:0x0FFF
-		// command = servoPos(180,baseID,ccwAngleLimit); //Sets Base motor ccw limit to 180, allowing it movement from 0-180* ccw, with the bottom == 0*
-		// console.log("	<Set Motor ccW Limit: " + command + ">");
-		// command = servoPos(180,baseID,cwAngleLimit); //Sets Base motor cw limit to 180, allowing it movement from 0-180* ccw, with the bottom == 0*
-		// console.log("	<Set Motor cW Limit: " + command + ">");
 		command = [];
 		setMotorMode = true;
 		//For Debugging
 		// console.log("setMotorMode: " + setMotorMode);
 	}
+	//Servo Position Write Data 
+	/*Each motor begins to move to its position instantaneously, I think, as opposed to using REG_WRITE, where goal position is stored into
+	Dynamixel, and then ACTION command will initiate the action
+	*/
 	if(data.base != undefined){
 		command = servoPos(data.base,baseID,goalPosition);
 		console.log("	<Set Motor Position: " + command + ">");
@@ -64,9 +64,10 @@ Arm.prototype.handle = function(data){ //Data is an object, with members outline
 	}
 	if(data.speed != undefined){ //All motors have same speed
 		command = servoPos(data.speed,broadcastID,movingSpeed);
-		console.log("	<Set Motor Speed: " + command + ">");
+		console.log("	<Set Motor Speed: " + command + ">"); 
 		command = [];
 	}
+	//After assigning each motor its destination position
 	//For debugging html response...
 	// console.log(this.module+" Received: " + data);
 	// console.log(">Base:" + data.base);
