@@ -42,18 +42,18 @@ function anglePosition(value, motorID, ctrlTblAddress){
 	//For Debugging
 	// console.log("motorAngle: " + temp);
 	// console.log("Base: " + output);
-	if(motorID == 0xFE && ctrlTblAddress == 0x20){ //Speed Broadcast (i.e. set speed for all motors)
-		console.log(motorTag[0] + " Motors " + ctrlTblTag[0] + ":" + "__________________"); //Broadcast output
-	}
-	else if(ctrlTblAddress == 0x08){
-		console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[2] + ":" + "__________________");
-	}
-	else if(ctrlTblAddress == 0x06){
-		console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[3] + ":" + "__________________");
-	}
-	else{
-		console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[1] + ":" + "__________________");
-	}
+	// if(motorID == 0xFE && ctrlTblAddress == 0x20){ //Speed Broadcast (i.e. set speed for all motors)
+	// 	console.log(motorTag[0] + " Motors " + ctrlTblTag[0] + ":"); //Broadcast output
+	// }
+	// else if(ctrlTblAddress == 0x08){
+	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[2] + ":");
+	// }
+	// else if(ctrlTblAddress == 0x06){
+	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[3] + ":");
+	// }
+	// else{
+	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[1] + ":");
+	// }
 	//For Debugging
 	//console.log("	<CHECK_SUM: " + CHECK_SUM + " CHECK_SUM Hex: " + CHECK_SUM_Hex + ">");
 	
