@@ -1,7 +1,7 @@
 /*Includes*/
 var motorAngle = require("./motorAngle.js"); // The "./" tells node's "require()" to look in the directory of this file
 var chkSum_W = require("./writeCheckSum.js");
-var hexify = require("./dec2hex.js"); //For Debugging
+// var hexify = require("./dec2hex.js"); //For Debugging
 var motorSpeed = require("./motorSpeed.js");
 
 /*Main*/
@@ -36,26 +36,8 @@ function anglePosition(value, motorID, ctrlTblAddress){
 		low = temp & 0xFF;
 	}
 	CHECK_SUM = chkSum_W(motorID, 0x05, 0x03, ctrlTblAddress, low, high); //standard pos length = 0x05, writeCommand = 0x03
-	output.push(0xFF, 0xFF, motorID, 0x05, 0x03, ctrlTblAddress, low, high, CHECK_SUM);
-	var CHECK_SUM_Hex = hexify(CHECK_SUM);
-
-	//For Debugging
-	// console.log("motorAngle: " + temp);
-	// console.log("Base: " + output);
-	// if(motorID == 0xFE && ctrlTblAddress == 0x20){ //Speed Broadcast (i.e. set speed for all motors)
-	// 	console.log(motorTag[0] + " Motors " + ctrlTblTag[0] + ":"); //Broadcast output
-	// }
-	// else if(ctrlTblAddress == 0x08){
-	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[2] + ":");
-	// }
-	// else if(ctrlTblAddress == 0x06){
-	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[3] + ":");
-	// }
-	// else{
-	// 	console.log(motorTag[motorID + 1] + " Motor " + ctrlTblTag[1] + ":");
-	// }
-	//For Debugging
-	//console.log("	<CHECK_SUM: " + CHECK_SUM + " CHECK_SUM Hex: " + CHECK_SUM_Hex + ">");
+	// Output each individual byte (will come up as ASCII/Unicode chars)
+	output.push(String.fromCharCode(0xFF), String.fromCharCode(0xFF), String.fromCharCode(motorID), String.fromCharCode(0x05), String.fromCharCode(0x03), String.fromCharCode(ctrlTblAddress), String.fromCharCode(low), String.fromCharCode(high), String.fromCharCode(CHECK_SUM));
 	
 	return output;
 }
