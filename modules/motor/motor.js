@@ -1,4 +1,8 @@
 "use strict";
+//make feedback optional
+//
+
+
 var Skeleton = require("../skeleton.js");
 Motor.prototype = new Skeleton("Motor");
 Motor.prototype.constructor = Motor;
@@ -54,13 +58,13 @@ function Motor(model_ref, feedback) {
 
 Motor.prototype.handle = function(data) {
 	console.log(this.module+" Recieved ", data);
-	if(data.signaltype=='individual'){
+	if(data.signaltype=='man'){
 		this.setIndividualMotors(data.motor);
 	}
-	if(data.signaltype=='all'){
+	if(data.signaltype=='fullAuto'){
 		this.setAllMotors(data.angle, data.speed);
 	}
-	if(data.signaltype=='both'){
+	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
 		this.setIndividualMotors(data.motor);
 		this.feedback=data;
@@ -75,6 +79,18 @@ Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {
 	this.setAllMotors(90, 0);
 };
+/*
+Motor.prototype.smartController= function(angle, speed){
+	var comp_val=this.getComp();
+	setTimeout(this.smartControllerAdjust(), 100);
+};
+Motor.prototype.smartControllerAdjust = function(){
+
+}
+Motor.prototype.getComp=function(){
+
+};
+*/
 Motor.prototype.setIndividualMotors=function(motor){
 	if(motor.m1.state=="on"){
 		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
@@ -113,7 +129,6 @@ Motor.prototype.setIndividualMotors=function(motor){
 		this.setMotor(6, motor.m6.direction, 0);
 	}
 	this.feedback=motor;
-	// ="Left speed" + Left + "Right speed" + Right + "   " + motor.m1 + ' '+ motor.m2 + ' '+ motor.m3 + ' '+ motor.m4 + ' '+ motor.m5 + ' '+ motor.m6;
 }
 Motor.prototype.setMotor = function(motorSelect, direction, speed){
 	if(motorSelect==1){
@@ -281,7 +296,8 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 	//BONE.analogWrite(this.motor4.pwmPin, Right/100, 2000, console.log);
 	//BONE.analogWrite(this.motor5.pwmPin, Right/100, 2000, console.log);
 	//BONE.analogWrite(this.motor6.pwmPin, Right/100, 2000, console.log);		
-	this.feedback = "Left speed" + Left + "Right speed" + Right;
+	this.feedback = "Left speed " + Left + "Right speed " + Right;
+	console.log("Left speed " + Left + "Right speed " + Right);
 }
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
