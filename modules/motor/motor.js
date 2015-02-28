@@ -62,7 +62,7 @@ Motor.prototype.handle = function(data) {
 		this.setIndividualMotors(data.motor);
 	}
 	if(data.signaltype=='fullAuto'){
-		this.setAllMotors(data.angle, data.speed);
+		this.setAllMotors(data.angle, data.speed, data.feedback);
 	}
 	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
