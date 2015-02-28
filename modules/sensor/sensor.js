@@ -1,110 +1,24 @@
+// ssh root@192.168.7.2
+
+
 "use strict";
 
 
-var sensor_data = {
-
-	gyro:{
-		x:11,
-		y:12,
-		z:13
-		},	
-
-	accelero:{
-		x:0,			
-		y:0,
-		z:0
-		},
-
-	compass:{							
-		x:0,			
-		y:0,
-		z:0
-		}, 
- 	
- 	GPS:{
-		altitude:0,
-		logitude:0,
-		latitude:0
-		},
-
-	 Power:{
-	 	voltage:0
-		},
-
-		wheel_speed:[0,0,0,0,0,0]	
-};
-
-var zeroOffset = 0.06957;		//constant for g-value
-var conversionFactor = 0.4584;	//constant for g-value
-var Lsb = 14.375; 	//constant use to get true rad/s
-//var bone = require("rovercore/node_modules/bonescript/bonescript.js");
 var Skeleton = require("../skeleton.js");
+var zeroOffset = 0.06957;		//constant for g-value
+var conversionFactor = 0.4584;	//constant for g-valuehttps://www.sparkfun.com/datasheets/Sensors/Accelerometer/ADXL345.pdf
+var Lsb = 14.375; 	//constant use to get true rad/s
+
+var ADXL345 = require('./index.js');
+var i2c = require('i2c'); 
+var port = '/dev/i2c-2';  
+      //i2c bus
+var address_gyroscope = 0x68;    //address of gyroscope
+var address_accelerometer = 0x53; //address of accelerometer
+var address_compass = 0x1e; //address of compass
+var compass_stop;
 
 
-// getting raw data input from sensor
-
-function callADC(){											
-    bone.analogRead('P9_36', print_X_acclero); 	// acclerometer data
-    bone.analogRead('P9_38', print_Y_acclero);
-    bone.analogRead('P9_40', print_Z_acclero);
-    bone.analogRead('some-pin', print_X_gyro);		//gyroscope data
-    bone.analogRead('some-pin', print_Y_gyro);
-    bone.analogRead('some-pin', print_Z_gyro);
-    bone.analogRead('some-pin', print_X_compass);	//magnometer data
-    bone.analogRead('some-pin', print_Y_compass);
-    bone.analogRead('some-pin', print_Z_compass);
-};
-
-//acclerometer functions
-
-function print_X_accelero(x) {								//convert raw data from accelerometer to get g-value
-    sensor_data.accelero.x = (x.value - zeroOffset)/conversionFactor;                                     
-    //console.log('Analog Read Value x: ' + sensor_data.accelero.x);    
-    // when the 9D0F resting flat on a table or
-    //board, then readings should be x:0
-};
-function print_Y_accelero(x) {								//convert raw data from accelerometer to get g-value
-   sensor_data.accelero.y = (x.value - zeroOffset)/conversionFactor;  
-    //console.log('Analog Read Value y: ' + sensor_data.accelero.y);
-    // when the 9D0F resting flat on a table or
-    //board, then readings should be y:0
-};
-function print_Z_accelero(x) {								//convert raw data from accelerometer to get g-value
-    sensor_data.accelero.z = (x.value - zeroOffset)/conversionFactor;  
-    //console.log('Analog Read Value z: ' + sensor_data.accelero.z);    
-    // when the 9D0F resting flat on a table or
-    //board, then readings should be z:0
-    //console.log('');
-};
-
-//gyro functions
-
-function print_X_gyro(x) {								//getting rad/s
-    sensor_data.gyro.x = ((x.value)/Lsb);
-    //console.log('Analog Read Value x: ' + sensor_data.gyro.x + ' rad/s'});    
-};
-function print_Y_gyro(x) {								//getting rad/s
-    sensor_data.gyro.y = ((x.value)/Lsb);
-    //console.log('Analog Read Value x: ' + sensor_data.gyro.y + ' rad/s'});    
-};
-function print_Z_gyro(x) {								//getting rad/s
-    sensor_data.gyro.z = ((x.value)/Lsb);
-    //console.log('Analog Read Value x: ' + sensor_data.gyro.z + ' rad/s'});    
-};
-
-// compass fuctions
-
-function print_X_compass(x) {								
-   sensor_data.compass.x = x.value;
-};
-
-function print_Y_compass(x) {								
-    sensor_data.compass.y = x.value;
-};
-
-function print_Z_compass(x) {								
-    rsensor_data.compass.z = x.value;
-};
 
 
 Sensor.prototype = new Skeleton("SENSOR");
@@ -112,86 +26,49 @@ Sensor.prototype.constructor = Sensor;
 function Sensor(model_ref, feedback) {
 	this.model = model_ref;
 	this.feedback = feedback;
-	this.data = {
-			roll_gyro:0,
-			pitch_gyro:0,
-			yaw_gyro:0,
-			roll_accelero:0,
-			pitch_accelero:0,
-			yaw_accelero:0,
-			headingDegrees:0
-
-	};
-
+		
 };	
 
 Sensor.prototype.handle = function (data) {				// take command from user interface
 	console.log(this.module+" Recieved ", data);
-	
-	if(data["request"] == "update"){
-		this.update();
-
-	}
-
-	/*else if(data == "start"){
-		switch(data["start"]){
-
-		case all:
-			this.gyro();
-			this.accelero();
-			this.compass();
-			return "gyro:  pitch:" + this.data.pitch_gyro + "  roll:" + this.data.roll_gyro + " yaw:"  + this.data.yaw_gyro
-			+ "  accelero:  pitch:" + this.data.pitch_accelero + "  roll:" + this.data.roll_accelero + " yaw:"  + this.data.yaw_accelero 
-			+ " Heading: " + this.data.headingDegrees + " degrees";
-			break;
-
-		case gyro:
-			this.gyro();
-			return "gyro:  pitch:" + this.data.pitch_gyro + "  roll:" + this.data.roll_gyro + " yaw:"  + this.data.yaw_gyro;	
-			break;
-
-		case accelero:
-			this.accelero();
-	   		return "accelero:  pitch:" + this.data.pitch_accelero +
-	   	 	"  roll:" + this.data.roll_accelero + " yaw:"  + this.data.yaw_accelero; 
-	   	 	break;
-
-	   	case compass:
-	   		this.compass();
-			return " Heading: " + this.data.headingDegrees + " degrees"; 
-			break;
-
-		default:
-			console.log("commmand invalid, look at readme for valid commnad");	
-		}
-	}*/	
-
-	else if(data.start== "all"){
+	if(data.start== "all"){
 
 		this.gyro();
 		this.accelero();
 		this.compass();
-		return "gyro:  pitch:" + this.data.pitch_gyro + "  roll:" + this.data.roll_gyro + " yaw:"  + this.data.yaw_gyro
-		+ "  accelero:  pitch:" + this.data.pitch_accelero + "  roll:" + this.data.roll_accelero + " yaw:"  + this.data.yaw_accelero 
-		+ " Heading: " + this.data.headingDegrees + " degrees";
+		return "gyro:  pitch:" + this.model.pitch_gyro + "  roll:" + this.model.roll_gyro + " yaw:"  + this.model.yaw_gyro
+		+ "  accelero:  pitch:" + this.model.pitch_accelero + "  roll:" + this.model.roll_accelero + " yaw:"  + this.model.yaw_accelero 
+		+ " Heading: " + this.model.headingDegrees + " degrees";
 	}
 
-	else if (data["start"] == "gyro"){
+	if(data.start == "gyro"){
 		this.gyro();
-		return "gyro:  pitch:" + this.data.pitch_gyro + "  roll:" + this.data.roll_gyro + " yaw:"  + this.data.yaw_gyro;
+		return "gyro:  pitch:" + this.model.pitch_gyro + "  roll:" + this.model.roll_gyro + " yaw:"  + this.model.yaw_gyro;
 	}
 		
-	else if (data["start"] == "accelero"){
+	if(data.start == "accelero"){
 		this.accelero();
-	   	return "accelero:  pitch:" + this.data.pitch_accelero +
-	   	 "  roll:" + this.data.roll_accelero + " yaw:"  + this.data.yaw_accelero; 
+	   	return "accelero:  pitch:" + this.model.pitch_accelero +
+	   	 "  roll:" + this.model.roll_accelero + " yaw:"  + this.model.yaw_accelero; 
 	}  	 
 
-	else if (data["start"] == "compass"){
+	if(data.start == "compass"){
 		this.compass();
-		return " Heading: " + this.data.headingDegrees + " degrees";
-	}	
+		this.model.headingDegrees = this.model.heading;
+		return " Heading: " + this.model.headingDegrees + " degrees" + " model: " + this.model.heading ;
+	}
+
+	if(data.stop == "all"){
+		clearInterval();
+		return "data stream has stopped";
+	}
+
+	if(data.stop == "compass" ){
+		clearInterval(compass_stop);
+		return "compass stream has stopped";
+	}
 };
+
 
 Sensor.prototype.update = function() {
 	sensor_data.gyro.x = (10/5);
@@ -200,58 +77,175 @@ Sensor.prototype.update = function() {
 
 Sensor.prototype.compass = function() {                 // degrees refer to North
 
-    //print_X_compass();
-    //print_Y_compass();
-    //print_Z_compass(); 
+   	var wire = new i2c(address_compass, {device: '/dev/i2c-2'});
+
+   	wire.writeBytes( 0x00, [0x70], function(err){});
+	wire.writeBytes( 0x01, [0xA0], function(err){});   	
+   	wire.writeBytes( 0x02, [0x00], function(err){});   //countinuous read mode
+
+  compass_stop = setInterval(function(){ 
+		wire.readBytes(0x03, 6, function(err,res){
+
+			if (!err){
+			console.log("Res" + JSON.stringify(res));
+			
+			// convert binary to signed decimal 
+
+			this.model.compass.x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first numer
+			this.model.compass.z = new Int16Array([res[2] << 8 | res[3]])[0]; 
+			this.model.compass.y = new Int16Array([res[4] << 8 | res[5]])[0];
+   			}
+
+   			else{
+   			console.log("Erro" + JSON.stringify(err));
+   			}	
+
     var declinationAngle = .226; //use in compass functions, value needed checking with sensor
     var pi = 3.14; 
-    var heading = Math.atan2(sensor_data.compass.y,sensor_data.compass.x);
+    var heading = Math.atan2(this.model.compass.y,this.model.compass.x);
 
     // Once you have your heading, you must then add your 'Declination Angle', which is the 'Error' of the magnetic field in your location.
     //If you cannot find your Declination, comment out this lines, your compass will be slightly off.
     heading += declinationAngle;
 
     // Correct for when signs are reversed.
-    if(heading < 0)
+    if(heading < 0){
     heading += 2*pi;
-    
+    }
      // Check for wrap due to addition of declination.
-    else if(heading > 2*pi )
+    else if(heading > 2*pi ){
     heading -= 2*pi ;
+	}
 
     // Convert radians to degrees for readability.
-    this.data.headingDegrees = ((heading * 180)/pi); 
+    heading = ((heading * 180)/pi); 
+
+    if( heading >= 0 && heading <= 137){
+    	this.model.heading *= .6569 
+    }
+
+    else if ( heading > 137 && heading <= 215){
+    	this.model.heading = ((heading-137)*1.16883117 + 90)
+
+    }
+
+     else if ( heading > 215 && heading <= 281){
+    	this.model.heading = ((heading-215)*1.3636 + 180)
+
+    }
+
+    else if ( heading > 281 && heading <= 0){
+    	this.model.heading = ((heading-281)*1.3924 + 270)
+
+    }
+
+    if ( heading >= 180 ){
+         	heading -= 180;
+    }
+
+    else if ( heading < 180 && heading >= 0){
+            heading += 180;
+    }
 
 
-    console.log("x: " + sensor_data.compass.x + " y: " + sensor_data.compass.y + " z: " + sensor_data.compass.z + " uT");    // Display the results 
+    console.log("x: " + this.model.compass.x + " y: " + this.model.compass.y + " z: " + this.model.compass.z + " uT");    // Display the results 
                                                                                                     //(magnetic vector values are in micro-Tesla (uT))
-    console.log('Heading: ' + this.data.headingDegrees + ' degrees' );
+    console.log('Heading: ' + this.model.heading + ' degrees' );
+
+
+		});
+
+	}, 1000);
+
 };
 
 Sensor.prototype.gyro= function(){
 
-	//print_X_gyro();
-    //print_Y_gyro();
-    //print_Z_gyro();
- 	this.data.pitch_gyro    =  (sensor_data.gyro.x*10)/1000.0;    // k not sure if this equation is right 
-    this.data.roll_gyro     =  (sensor_data.gyro.y*10)/1000.0;    //
-    this.data.yaw_gyro      =  (sensor_data.gyro.z*10)/1000.0;    //
+	var wire = new i2c(address_accelerometer, {device: '/dev/i2c-1'});
 
-    console.log("pitch: " + this.data.pitch_gyro + " roll: " + this.data.roll_gyro + " yaw: " + this.data.yaw_gyro + " degrees");
+	wire.writeBytes(0x16, [1 << 3], function(err) {}); // set rate 2000
+	
+	setInterval(function(){ 
+
+		wire.readBytes(0x1D, 6, function(err,res){
+
+			console.log("Res" + JSON.stringify(res));
+			
+			if(!err){
+
+			// convert binary to signed decimal 
+
+			this.model.gyro.x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first numer
+			this.model.gyro.z = new Int16Array([res[2] << 8 | res[3]])[0]; 
+			this.model.gyro.y = new Int16Array([res[4] << 8 | res[5]])[0];
+
+			}
+
+			else{
+
+			console.log("Error" + JSON.stringify(err));
+
+			}
+
+ 	this.model.pitch_gyro    =  (this.model.gyro.x*10)/1000.0;    // k not sure if this equation is right 
+    this.model.roll_gyro     =  (this.model.gyro.y*10)/1000.0;    //
+    this.model.yaw_gyro      =  (this.model.gyro.z*10)/1000.0;    //
+
+    console.log("pitch: " + this.model.pitch_gyro + " roll: " + this.model.roll_gyro + " yaw: " + this.model.yaw_gyro + " degrees");
+
+		});
+
+	}, 1000);
+
 
 };
 
 Sensor.prototype.accelero = function(){
 
-	//print_Z_accelero();
-    //print_Z_accelero();
-    //print_Z_accelero();
+this.model.accelero.x = 0;
+this.model.accelero.y = 1;
+this.model.accelero.z = 2;
 
- 	this.data.pitch_acclero =  Math.atan(sensor_data.accelero.x, Math.sqrt(Math.pow(sensor_data.accelero.y,2) + Math.pow(sensor_data.accelero.z,2)));
-    this.data.roll_acclero  =  Math.atan(sensor_data.accelero.y, Math.sqrt(Math.pow(sensor_data.accelero.x,2) + Math.pow(sensor_data.accelero.z,2)));
-    this.data.yaw_acclero   =  Math.atan(sensor_data.accelero.z, Math.sqrt(Math.pow(sensor_data.accelero.y,2) + Math.pow(sensor_data.accelero.x,2)));
+var ADXL345 = require('./index.js');
 
-     console.log("pitch: " + this.data.pitch_acclero + " roll: " + this.data.roll_acclero + " yaw: " + this.data.yaw_acclero + " degrees");
+var globalvar = {
+	SAMPLECOUNT : 400,
+	accelScaleFactor : [0.0, 0.0, 0.0],
+	runTimeAccelBias : [0, 0, 0],
+	accelOneG : 0.0,
+	meterPerSecSec : [0.0, 0.0, 0.0],
+	accelSample : [0, 0, 0],
+	accelSampleCount : 0
+}
+
+var accel = new ADXL345(function(err) {
+	accel.accelScaleFactor[this.model.accelero.x] = 0.0371299982;
+	accel.accelScaleFactor[this.model.accelero.y] = -0.0374319982;
+	accel.accelScaleFactor[this.model.accelero.z] = -0.0385979986;
+	if (!err) {
+		computeAccelBias();
+	} else {
+		console.log(err);
+	}
+})
+function computeAccelBias() {
+	accel.computeAccelBias(function() {
+		measureAccel();
+	});
+}
+
+function measureAccel() {
+	setInterval(function() {
+		accel.measureAccel(function(err) {
+			if (!err) {
+				console.log("Roll: " + accel.meterPerSecSec[this.model.accelero.x] + " Pitch : " + accel.meterPerSecSec[this.model.accelero.y] + " Yaw : " + accel.meterPerSecSec[this.model.accelero.z]);
+			} else {
+				console.log(err);
+			}
+		});
+	}, 10);
+}
+
 
 };
 
@@ -266,6 +260,8 @@ Sensor.prototype.power = function(){
 Sensor.prototype.optical = function(){
 //TODO
 };	
+
+
 
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
