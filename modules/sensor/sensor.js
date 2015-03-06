@@ -1,4 +1,3 @@
-// ssh root@192.168.7.2
 
 
 "use strict";
@@ -38,7 +37,7 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 		this.compass();
 		return "gyro:  pitch:" + this.model.pitch_gyro + "  roll:" + this.model.roll_gyro + " yaw:"  + this.model.yaw_gyro
 		+ "  accelero:  pitch:" + this.model.pitch_accelero + "  roll:" + this.model.roll_accelero + " yaw:"  + this.model.yaw_accelero 
-		+ " Heading: " + this.model.headingDegrees + " degrees";
+		+ " Heading: " + this.model.heading + " degrees";
 	}
 
 	if(data.start == "gyro"){
@@ -54,8 +53,7 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 
 	if(data.start == "compass"){
 		this.compass();
-		this.model.headingDegrees = this.model.heading;
-		return " Heading: " + this.model.headingDegrees + " degrees" + " model: " + this.model.heading ;
+		return " Heading: " + this.model.heading + " degrees" ;
 	}
 
 	if(data.stop == "all"){
@@ -71,8 +69,7 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 
 
 Sensor.prototype.update = function() {
-	sensor_data.gyro.x = (10/5);
-	console.log(sensor_data.gyro.x);
+	//TODO
 };
 
 Sensor.prototype.compass = function() {                 // degrees refer to North
@@ -163,7 +160,9 @@ Sensor.prototype.gyro= function(){
 
 	var wire = new i2c(address_accelerometer, {device: '/dev/i2c-1'});
 
-	wire.writeBytes(0x16, [1 << 3], function(err) {}); // set rate 2000
+	wire.writeBytes(0x16, [1<<3 | 1<<4 | 1<<0 ], function(err) {}); // set rate 2000
+	wire.writeBytes(0x15, [ 0x09 ], function(err) {}); // set sample rate to 100hz
+	
 	
 	setInterval(function(){ 
 
@@ -175,7 +174,7 @@ Sensor.prototype.gyro= function(){
 
 			// convert binary to signed decimal 
 
-			this.model.gyro.x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first numer
+			this.model.gyro.x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first number
 			this.model.gyro.z = new Int16Array([res[2] << 8 | res[3]])[0]; 
 			this.model.gyro.y = new Int16Array([res[4] << 8 | res[5]])[0];
 
@@ -187,9 +186,9 @@ Sensor.prototype.gyro= function(){
 
 			}
 
- 	this.model.pitch_gyro    =  (this.model.gyro.x*10)/1000.0;    // k not sure if this equation is right 
-    this.model.roll_gyro     =  (this.model.gyro.y*10)/1000.0;    //
-    this.model.yaw_gyro      =  (this.model.gyro.z*10)/1000.0;    //
+ 	this.model.pitch_gyro    =  (this.model.gyro.x)/14.375;    // 
+    this.model.roll_gyro     =  (this.model.gyro.y)/14.375;    //
+    this.model.yaw_gyro      =  (this.model.gyro.z)/14.375;    //
 
     console.log("pitch: " + this.model.pitch_gyro + " roll: " + this.model.roll_gyro + " yaw: " + this.model.yaw_gyro + " degrees");
 
