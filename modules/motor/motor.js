@@ -10,6 +10,11 @@ Motor.prototype.constructor = Motor;
 function Motor(model_ref, feedback) {
 	this.model = model_ref;
 	this.feedback = feedback;
+	//For Smart Controller
+	this.timeout;
+	this.angle;
+	this.speed;
+	//For pin sets
 	this.motors={
 		m1: { //Left Side
 			pwmPin:'P8_13', // doesnt work
@@ -43,17 +48,6 @@ function Motor(model_ref, feedback) {
 	this.spine.expose(this.motors.m4.dirPin, "OUTPUT");
 	this.spine.expose(this.motors.m5.dirPin, "OUTPUT");
 	this.spine.expose(this.motors.m6.dirPin, "OUTPUT");
-	//BONE.pinMode(this.motors.m1.dirPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m2.pwmPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m2.dirPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m3.pwmPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m3.dirPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m4.pwmPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m4.dirPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m5.pwmPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m5.dirPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m6.pwmPin, BONE.OUTPUT);
-	//BONE.pinMode(this.motors.m6.dirPin, BONE.OUTPUT);
 }
 
 Motor.prototype.handle = function(data) {
@@ -62,7 +56,7 @@ Motor.prototype.handle = function(data) {
 		this.setIndividualMotors(data.motor);
 	}
 	if(data.signaltype=='fullAuto'){
-		this.setAllMotors(data.angle, data.speed, data.feedback);
+		this.setAllMotors(data.angle, data.speed);
 	}
 	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
@@ -78,19 +72,33 @@ Motor.prototype.handle = function(data) {
 Motor.prototype.resume = function() {};
 Motor.prototype.halt = function() {
 	this.setAllMotors(90, 0);
+	clearInterval(this.timeout);
 };
-/*
+// =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
+	this.angle=angle;
+	this.speed=speed;
 	var comp_val=this.getComp();
-	setTimeout(this.smartControllerAdjust(), 100);
+	this.timeout=setInterval(this.smartControllerAdjust(comp_val, angle, speed), 100);
 };
-Motor.prototype.smartControllerAdjust = function(){
-
+Motor.prototype.smartControllerAdjust = function(comp_data_old, angle, speed){
+	var comp_data_new=this.getComp();
+	if(comp_data_new>comp_data_old){
+		this.angle=this.angle+1;
+		this.setAllMotors(this.angle, this.speed);
+	}
+	else if(comp_data_new<comp_data_old){
+		this.angle=this.angle-1;
+		this.setAllMotors(this.angle, this.speed);
+	}
+	else{
+		console.log("Angle is Equlized")
+	}
 }
 Motor.prototype.getComp=function(){
 
 };
-*/
+//==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
 	if(motor.m1.state=="on"){
 		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
@@ -133,80 +141,63 @@ Motor.prototype.setIndividualMotors=function(motor){
 Motor.prototype.setMotor = function(motorSelect, direction, speed){
 	if(motorSelect==1){
 		this.spine.setPWM(this.motors.m1.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m1.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m1.dirPin, 1);
-		//	BONE.digitalWrite(this.motors.m1.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m1.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m1.dirPin, BONE.LOW);
 		}
 	}
 	else if(motorSelect==2){
 		this.spine.setPWM(this.motors.m2.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m2.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m2.dirPin, 1);
-		//	BONE.digitalWrite(this.motors.m2.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m2.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m2.dirPin, BONE.LOW);
 		}
 	}
 	else if(motorSelect==3){
 		this.spine.setPWM(this.motors.m3.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m3.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m3.dirPin, 1);
-		//	BONE.digitalWrite(this.motors.m3.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m3.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m3.dirPin, BONE.LOW);
 		}
 	}
 	else if(motorSelect==4){
 		this.spine.setPWM(this.motors.m4.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m4.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m4.dirPin, 1);
-		//	BONE.digitalWrite(this.motors.m4.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m4.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m4.dirPin, BONE.LOW);
 		}
 	}
 	else if(motorSelect==5){
 		this.spine.setPWM(this.motors.m5.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m5.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m5.dirPin, 1);
-			//BONE.digitalWrite(this.motors.m5.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m5.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m5.dirPin, BONE.LOW);
 		}
 	}
 	else if(motorSelect==6){
 		this.spine.setPWM(this.motors.m6.pwmPin, speed);
-		//BONE.analogWrite(this.motors.m6.pwmPin, speed, 2000, console.log);
 		if(direction=='forward'){
 			this.spine.digitalWrite(this.motors.m6.dirPin, 1);
-		//	BONE.digitalWrite(this.motors.m6.dirPin, BONE.HIGH);
 		}
 		else if(direction=='reverse'){
 			this.spine.digitalWrite(this.motors.m6.dirPin, 0);
-		//	BONE.digitalWrite(this.motors.m6.dirPin, BONE.LOW);
 		}
 	}
 	else{
 		console.log(' ERROR: Motor could not be selected in the setMotor function');
 	}
 };
+//============================Set all motors///////////////////////////////
 Motor.prototype.setAllMotors=function(angle, speed){
 	if(angle==0 || angle==360){ // checks for angle 0
 		this.setAllSpeed(speed,0);
@@ -290,12 +281,6 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 	this.spine.setPWM(this.motors.m4.pwmPin, Right/100);
 	this.spine.setPWM(this.motors.m5.pwmPin, Right/100);
 	this.spine.setPWM(this.motors.m6.pwmPin, Right/100);
-	//BONE.analogWrite(this.motor1.pwmPin, Left/100, 2000, console.log);
-	//BONE.analogWrite(this.motor2.pwmPin, Left/100, 2000, console.log);
-	//BONE.analogWrite(this.motor3.pwmPin, Left/100, 2000, console.log);
-	//BONE.analogWrite(this.motor4.pwmPin, Right/100, 2000, console.log);
-	//BONE.analogWrite(this.motor5.pwmPin, Right/100, 2000, console.log);
-	//BONE.analogWrite(this.motor6.pwmPin, Right/100, 2000, console.log);		
 	this.feedback = "Left speed " + Left + "Right speed " + Right;
 	console.log("Left speed " + Left + "Right speed " + Right);
 }
@@ -304,57 +289,38 @@ Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or 
 		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
-	//	BONE.digitalWrite(this.motors.m1.dirPin, BONE.HIGH);
-		//BONE.digitalWrite(this.motors.m3.dirPin, BONE.HIGH);
-		//BONE.digitalWrite(this.motors.m5.dirPin, BONE.HIGH);
 	}
 	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
-		//BONE.digitalWrite(this.motors.m1.dirPin, BONE.LOW);
-		//BONE.digitalWrite(this.motors.m3.dirPin, BONE.LOW);
-		//BONE.digitalWrite(this.motors.m5.dirPin, BONE.LOW);
 	}
 	if(Right==(1)){
 		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
-	//	BONE.digitalWrite(this.motors.m2.dirPi, BONE.HIGH);
-	//	BONE.digitalWrite(this.motors.m4.dirPi, BONE.HIGH);
-	//	BONE.digitalWrite(this.motors.m6.dirPi, BONE.HIGH);
 		}
 	else if(Right==(-1)){
 		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
-		//BONE.digitalWrite(this.motors.m2.dirPi, BONE.LOW);
-		//BONE.digitalWrite(this.motors.m4.dirPi, BONE.LOW);
-		//BONE.digitalWrite(this.motors.m6.dirPi, BONE.LOW);
 	}
 }
+//========================direction control for aruinos=====================================
 Motor.prototype.setAllDirectionTemp=function(Left, Right){
 	if(Left==(1)) {
-		//BONE.digitalWrite('P8_11', BONE.HIGH);
-		//BONE.digitalWrite('P8_15', BONE.LOW);
 		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 	}
 	else if(Left==(-1)){
-		//BONE.digitalWrite('P8_11', BONE.LOW);
-		//BONE.digitalWrite('P8_15', BONE.HIGH);
 		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 	}
 	if(Right==(1)){
-		//BONE.digitalWrite('P8_14', BONE.HIGH);
-		//BONE.digitalWrite('P8_16', BONE.LOW);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
 	}
 	else if(Right==(-1)){
-		//BONE.digitalWrite('P8_14', BONE.LOW);
-		//BONE.digitalWrite('P8_16', BONE.HIGH);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
 	}
