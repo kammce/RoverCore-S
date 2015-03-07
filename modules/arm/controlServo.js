@@ -10,13 +10,13 @@ var defaultSet = false;
 var iterations = 0;
 /*SerialPort Communication*/
 /*For use in actual rover, controlled thru BeagleBone Black*/
-// var serial = new SERIALPORT.SerialPort("for/path/to/uart/device,/See_READMEarm.txt", {
-//     baudrate: 57600
-// });
-/*For use in local system testing; Read/Write stream to USB*/
-var serial = new SerialPort("/dev/ttyACM1", {
+var serial = new SERIALPORT.SerialPort("/dev/ttyO2", {
     baudrate: 57600
 });
+/*For use in local system testing; Read/Write stream to USB*/
+// var serial = new SerialPort("/dev/ttyACM1", {
+//     baudrate: 57600
+// });
 //Value Codes
 var ON = 0x01,
 	OFF = 0x00;
