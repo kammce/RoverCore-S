@@ -2,7 +2,8 @@
 //Dynamixel Instruction Packet Format: 0xFF 0xFF ID LENGTH INSTRUCTION PARAMETER#1 ... PARAMETER#N CHECK_SUM
 //MX-64AR VCC=12V, LC Electronics rs485 Uart converter VCC=5V
 /*Includes*/
-var SerialPort = require("serialport").SerialPort;
+// var SerialPort = require("serialport").SerialPort;
+var SerialPort = require("../../node_modules/serialport").SerialPort;
 var input = process.argv;
 
 /*Globals*/
