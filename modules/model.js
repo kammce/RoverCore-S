@@ -4,7 +4,7 @@ var Model = {
 	
 
 	gyro:{
-		x:0,
+		x:0,					
 		y:0,
 		z:0
 		},	
@@ -15,10 +15,11 @@ var Model = {
 		z:0
 		},
 
-	compass:{							
-		x:0,			
+	compass:{
+		x:0,
 		y:0,
-		z:0
+		z:0,
+		heading:0
 		}, 
  	
  	GPS:{
@@ -32,16 +33,6 @@ var Model = {
 		},
 
 		wheel_speed:[0,0,0,0,0,0]
-
-	heading:0,
-
-	pitch_gyro:0,
-	yaw_gyro:0,
-	roll_gyro:0,
-
-	pitch_accelero:0,
-	yaw_accelero:0,
-	roll_accelero:0		
 
 }
 
