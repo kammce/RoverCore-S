@@ -55,7 +55,7 @@ Arm.prototype.handle = function(info){ //Info is an object, with members outline
 	}
 	if(motorValuesSet == false){ 
 		if(defaultSet == false){/*For Debugging*/
-				serial.write("Communication Initiated-"); //For Debugging. Note there may be delay in the startup of serialport
+				// serial.write("Communication Initiated-"); //For Debugging. Note there may be delay in the startup of serialport
 		}
 
 		//Loop to send packets
