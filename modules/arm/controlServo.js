@@ -2,18 +2,21 @@
 //Dynamixel Instruction Packet Format: 0xFF 0xFF ID LENGTH INSTRUCTION PARAMETER#1 ... PARAMETER#N CHECK_SUM
 //MX-64AR VCC=12V, LC Electronics rs485 Uart converter VCC=5V
 /*Includes*/
-// var SerialPort = require("serialport").SerialPort;
-var SerialPort = require("../../node_modules/serialport").SerialPort;
-var input = process.argv;
-
+var SerialPort = require("serialport").SerialPort;
+// var SerialPort = require("../../node_modules/serialport").SerialPort;
+var input = process.argv;	
 /*Globals*/
 var defaultSet = false;
 var iterations = 0;
 /*SerialPort Communication*/
 /*For use in actual rover, controlled thru BeagleBone Black*/
-var serial = new SERIALPORT.SerialPort("/dev/ttyO2", {
+// var serial = new SERIALPORT.SerialPort("/dev/ttyO2", {
+//     baudrate: 57600
+// });
+var serial = new SerialPort("/dev/ttyO2", {
     baudrate: 57600
 });
+
 /*For use in local system testing; Read/Write stream to USB*/
 // var serial = new SerialPort("/dev/ttyACM1", {
 //     baudrate: 57600
