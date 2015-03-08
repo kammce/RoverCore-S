@@ -1,15 +1,14 @@
 How to send to Arm Motor via UART: Use the node serialport library (from voodootikigod)
 	~	RoverCore syntax:
-			var Name_of_SerialPort_Obj = new SERIALPORT.SerialPort("path/to/uart/device", { misc_options });
+			var Name_of_SerialPort_Obj = new SerialPort("path/to/uart/device", { baudrate: 57600 });
 	~	General syntax:
 			var Name_of_require_obj = require('serialport').SerialPort;
 			var Name_of_SerialPort_Obj = new Name_of_require_obj("path/to/uart/device", { misc_options }); //misc_options are optional
 	~	Path: ttyO1, ttyO2, ttyO4, ttyO5 are available. choose 1 (will be formatted like /dev/ttyO1, the O is an 'Oh', not a 0 'zero')
-	~	Baudrate: motor accepts 8000 bps(baud) - 3 Mbps, so we can just use the standard 9600 baud
-		>	Default Baudrate of Servo: 9600 bps(baud)
+	~	Baudrate: motor accepts 8000 bps(baud) - 3 Mbps, but with experimentation, RX-64AR only works well with 57600
+		>	Default Baudrate of Servo: 9600 bps(baud), unless otherwise specified
 	~	For robotic arm, we'll probably have all motors except the base motor be in joint-mode, because they are joints, not meant to 		rotate at an unlimited angle
-For more detailed info on formatting and usage of SerialPort Library ---> See https://github.com/voodootikigod/node-serialport
-	~	Format it as in RoverCore syntax because cortex.js does a require('serialport') as GLOBAL.SERIALPORT
+For more detailed info on formatting and usage of SerialPort Library ---> See https://github.com/voodootikigod/node-serialport/blob/master/README.md
 	~	See http://support.robotis.com/en/techsupport_eng.htm#software/dynamixelsdk.htm to figure out how to format read/write commands	
 		>	You can practice using the MX-64 data signal format with an arduino
 
@@ -36,7 +35,7 @@ Decided IDs for the different motors:
 	All motors, except for the base, should act as joints in an arm, and thus not be able to rotate infinitely. That means that all but the Base motor should be in "JOINT-MODE" which is acheived by setting non-zero minimum/maximum limits to the angular positions of the motors. This is done by assigning those non-zero values to CW(Address 0x06) and CCW(Address 0x08), respectively as min and max.
 
 **Setup Note:
-	The Dynamixels won't initially be set to these respective addresses, so you'll have to connect to each one manually to set them to these values!!
+	The Dynamixels won't initially be set to these respective IDs, so you'll have to connect to each one manually to set them to these values!!
 
 **Packet Formatting Note:
 	In Lowest and Highest Byte systems (see http://support.robotis.com/en/techsupport_eng.htm#software/dynamixelsdk.htm, example 10),
