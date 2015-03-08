@@ -76,7 +76,7 @@ Arm.prototype.handle = function(input){ //Info is an object, with members outlin
 	//This handle function Sends Commands to Dynamixel MX-64
 	if(defaulted == false){
 		console.log("Enabling Torque");
-		control(WRITE, ALL, TORQUE, ON);
+		writePacket(WRITE, ALL, TORQUE, ON);
 		defaulted = true;
 	}
 	if(input.base != undefined){
