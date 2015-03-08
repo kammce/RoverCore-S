@@ -21,6 +21,7 @@ var schema = { //format for data being passed to arm.prototype.handle(data);
 		"elbow" : "Number", //Degree value, from 0 to 360
 		"wrist" : "Number", //Degree value, from 0 to 360
 		"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
+		// "setID" : "Number" //For initial setup only. Used to set the ids of different servos
 	}
 }
 
