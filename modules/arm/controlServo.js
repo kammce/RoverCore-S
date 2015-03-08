@@ -14,8 +14,10 @@ var iterations = 0;
 //     baudrate: 57600
 // });
 var serial = new SerialPort("/dev/ttyO2", {
-    baudrate: 57600
-});
+    baudrate: 57600,
+    databits:8,
+    parity: 'none'
+}, false);
 
 /*For use in local system testing; Read/Write stream to USB*/
 // var serial = new SerialPort("/dev/ttyACM1", {
@@ -79,7 +81,13 @@ function armController(input) { //Info is an object, with members outlined when 
 function control(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
 	console.log("Moving Motor " + motorID);
 	highbyte = highbyte || 0xFFFF; //Sets highbyte to a default of 65535 unless otherwise specified (i.e. position commands require low and highbyte whereas torque and led commands require only one value byte, making highbyte unused)
-	var command = ""; //Command string. Servos read bytes; Strings are valid ways to send them
+	var command = new Buffer(10); //Command string. Servos read bytes; Strings are valid ways to send them
+	
+	for (var i = 0; i < command.length; i++) {
+		command[i] = 0x00;
+	};
+
+	var i = 0;
 	var length = 0;
 	var checksum = 0;
 	if(highbyte != 0xFFFF){ //If the highbyte value was specified, i.e. used in function call
@@ -125,22 +133,21 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 	// 	serial.write(chk); //Checksum
 	// }
 	/*Method 2: Send all at once*/
-	command += String.fromCharCode(0xFF); //ÿ Signature Byte Char
-	command += String.fromCharCode(0xFF); //ÿ Signature Byte Char
-	command += String.fromCharCode(motorID); // ID Byte Char
-	command += String.fromCharCode(length); //packet length
-	command += String.fromCharCode(instruction); //instruction byte
-	command += String.fromCharCode(register); //first parameter will always be the register address
-	command += String.fromCharCode(lowbyte); //value/lowbyte, depending on the function call
+	command[i++] = String.fromCharCode(0xFF); //ÿ Signature Byte Char
+	command[i++] = String.fromCharCode(0xFF); //ÿ Signature Byte Char
+	command[i++] = String.fromCharCode(motorID); // ID Byte Char
+	command[i++] = String.fromCharCode(length); //packet length
+	command[i++] = String.fromCharCode(instruction); //instruction byte
+	command[i++] = String.fromCharCode(register); //first parameter will always be the register address
+	command[i++] = String.fromCharCode(lowbyte); //value/lowbyte, depending on the function call
 	checksum = parseInt(motorID) + parseInt(length) + parseInt(instruction) + parseInt(register) + parseInt(lowbyte); //Assumes command is not PING, which uses neither lowbyte nor highbyte
 	if(highbyte != 0xFFFF){
 		command += String.fromCharCode(highbyte); //highbyte
 		checksum += parseInt(highbyte);
 	}
-	command += String.fromCharCode(~checksum & 0xFF); //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
+	command[i++] = String.fromCharCode(~checksum & 0xFF); //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
-	serial.write("hello", function() {});
-	console.log(">>Sent Control Signal: " + command); //For Debugging
-	command = ""; //clear command string for reuse
+	serial.write(command, function() {});
+	console.log(">>Sent Control Signal: " + typeof command); //For Debugging
 }
