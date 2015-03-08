@@ -25,7 +25,7 @@ console.log("Hello, starting...");
 // });
 //Value Codes
 var ON = 0x01,
-	OFF = 0x00;
+    OFF = 0x00;
 //Instruction Codes
 var PING = 0X01,
     READ = 0x02,
@@ -82,15 +82,15 @@ function armController(input) { //Info is an object, with members outlined when 
 function control(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
 	console.log("Moving Motor " + motorID);
 	var length = 0;
-	if(typeof highbyte == "undefined") {
+	if(typeof highbyte == "undefined") { //determine length through undefined parameter "highbyte"
 		length = 2+2;
 	} else {
 		length = 3+2;
 	}
  //Sets highbyte to a default of 65535 unless otherwise specified (i.e. position commands require low and highbyte whereas torque and led commands require only one value byte, making highbyte unused)
-	var command = new Buffer(10); //Command string. Servos read bytes; Strings are valid ways to send them
+	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
 	
-	for (var i = 0; i < command.length; i++) {
+	for (var i = 0; i < command.length; i++) { //clear the command buffer
 		command[i] = 0x00;
 	};
 
@@ -149,5 +149,5 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
 	serial.write(command, function() {});
-	console.log(">>Sent Control Signal: " + typeof command); //For Debugging
+	console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
 }
