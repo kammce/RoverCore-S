@@ -6,20 +6,15 @@ var SerialPort = require("serialport").SerialPort;
 // var SerialPort = require("../../node_modules/serialport").SerialPort;
 var input = process.argv;	
 /*Globals*/
-var defaultSet = false;
-var iterations = 0;
 /*SerialPort Communication*/
 /*For use in actual rover, controlled thru BeagleBone Black*/
-// var serial = new SERIALPORT.SerialPort("/dev/ttyO2", {
-//     baudrate: 57600
-// });
 var serial = new SerialPort("/dev/ttyO2", {
     baudrate: 57600,
     //databits:8,
     //parity: 'none'
 });
-console.log("Hello, starting...");
-/*For use in local system testing; Read/Write stream to USB*/
+console.log("Hello, starting..."); //For Debugging
+/*For use in local system testing with Arduino; Read/Write stream to USB*/
 // var serial = new SerialPort("/dev/ttyACM1", {
 //     baudrate: 57600
 // });
