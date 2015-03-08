@@ -18,7 +18,7 @@ var serial = new SerialPort("/dev/ttyO2", {
     databits:8,
     parity: 'none'
 }, false);
-
+console.log("Hello, starting...");
 /*For use in local system testing; Read/Write stream to USB*/
 // var serial = new SerialPort("/dev/ttyACM1", {
 //     baudrate: 57600
