@@ -15,9 +15,9 @@ var iterations = 0;
 // });
 var serial = new SerialPort("/dev/ttyO2", {
     baudrate: 57600,
-    databits:8,
-    parity: 'none'
-}, false);
+    //databits:8,
+    //parity: 'none'
+});
 console.log("Hello, starting...");
 /*For use in local system testing; Read/Write stream to USB*/
 // var serial = new SerialPort("/dev/ttyACM1", {
@@ -65,6 +65,7 @@ var POSITION = 0x1E,
 function armController(input) { //Info is an object, with members outlined when sending control signals via arm interface html
 		console.log("Enabling Torque");
 		control(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
+
 		var hexdeg = (input/360) * 4095;
 		if(hexdeg > 4095){
 			hexdeg = 4095;
@@ -80,7 +81,13 @@ function armController(input) { //Info is an object, with members outlined when 
 
 function control(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
 	console.log("Moving Motor " + motorID);
-	highbyte = highbyte || 0xFFFF; //Sets highbyte to a default of 65535 unless otherwise specified (i.e. position commands require low and highbyte whereas torque and led commands require only one value byte, making highbyte unused)
+	var length = 0;
+	if(typeof highbyte == "undefined") {
+		length = 2+2;
+	} else {
+		length = 3+2;
+	}
+ //Sets highbyte to a default of 65535 unless otherwise specified (i.e. position commands require low and highbyte whereas torque and led commands require only one value byte, making highbyte unused)
 	var command = new Buffer(10); //Command string. Servos read bytes; Strings are valid ways to send them
 	
 	for (var i = 0; i < command.length; i++) {
@@ -88,14 +95,7 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 	};
 
 	var i = 0;
-	var length = 0;
 	var checksum = 0;
-	if(highbyte != 0xFFFF){ //If the highbyte value was specified, i.e. used in function call
-		length = 3+2; //(register address, lowbyte, highbyte) + (instruction byte, checksum)
-	}
-	else{
-		length = 2+2; //(register address, value byte) + (instruction byte, checksum)
-	}
 	/*Put the control packet together*/
 	/*Method 1: Send piece by piece*/ //Reflects Arduino Version of armDriver
 	// checksum = motorID + length + instruction + register + lowbyte; //Assumes command is not PING, which uses neither lowbyte nor highbyte
@@ -133,19 +133,19 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 	// 	serial.write(chk); //Checksum
 	// }
 	/*Method 2: Send all at once*/
-	command[i++] = String.fromCharCode(0xFF); //ÿ Signature Byte Char
-	command[i++] = String.fromCharCode(0xFF); //ÿ Signature Byte Char
-	command[i++] = String.fromCharCode(motorID); // ID Byte Char
-	command[i++] = String.fromCharCode(length); //packet length
-	command[i++] = String.fromCharCode(instruction); //instruction byte
-	command[i++] = String.fromCharCode(register); //first parameter will always be the register address
-	command[i++] = String.fromCharCode(lowbyte); //value/lowbyte, depending on the function call
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = motorID; // ID Byte Char
+	command[i++] = length; //packet length
+	command[i++] = instruction; //instruction byte
+	command[i++] = register; //first parameter will always be the register address
+	command[i++] = lowbyte; //value/lowbyte, depending on the function call
 	checksum = parseInt(motorID) + parseInt(length) + parseInt(instruction) + parseInt(register) + parseInt(lowbyte); //Assumes command is not PING, which uses neither lowbyte nor highbyte
-	if(highbyte != 0xFFFF){
-		command += String.fromCharCode(highbyte); //highbyte
+	if(typeof highbyte != "undefined"){
+		command[i++] = highbyte; //highbyte
 		checksum += parseInt(highbyte);
 	}
-	command[i++] = String.fromCharCode(~checksum & 0xFF); //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
+	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
 	serial.write(command, function() {});
