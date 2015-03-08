@@ -95,7 +95,7 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 		checksum += parseInt(highbyte);
 	}
 	checksum = ~checksum & 0xFF;
-		var ox = String.fromCharCode(0xFF); //ÿ Signature Byte Char
+		// var ox = String.fromCharCode(0xFF); //ÿ Signature Byte Char
 		var id = String.fromCharCode(motorID); //ID Byte Char
 		var ln = String.fromCharCode(length); //Length Byte Char
 		var cmd = String.fromCharCode(instruction); //Instruction Byte Char
@@ -104,29 +104,25 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 		var hb = String.fromCharCode(highbyte); //Highbyte
 		var chk = String.fromCharCode(checksum); //Checksum
 	if(highbyte != 0xFFFF){
-		serial.write(ox); //ÿ Signature Byte Char
-		serial.write(ox); //ÿ Signature Byte Char
+		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
+		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
 		serial.write(id); //ID Byte Char
 		serial.write(ln); //Length Byte Char
 		serial.write(cmd); //Instruction Byte Char
 		serial.write(addr); //Register Address Byte Char
 		serial.write(lb); //Value/Lowbyte (depends on function call)
 		serial.write(hb); //Highbyte
-		serial.write(chk, function(err, results){
-			// serial.close();
-		}); //Checksum
+		serial.write(chk); //Checksum
 	}
 	else{
-		serial.write(ox); //ÿ Signature Byte Char
-		serial.write(ox); //ÿ Signature Byte Char
+		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
+		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
 		serial.write(id); //ID Byte Char
 		serial.write(ln); //Length Byte Char
 		serial.write(cmd); //Instruction Byte Char
 		serial.write(addr); //Register Address Byte Char
 		serial.write(lb); //Value/Lowbyte (depends on function call)
-		serial.write(chk, function(err, results){
-			// serial.close();
-		}); //Checksum
+		serial.write(chk); //Checksum
 	}
 	/*Method 2: Send all at once*/
 	// command += String.fromCharCode(0xFF); //ÿ Signature Byte Char
