@@ -104,8 +104,8 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 		var hb = String.fromCharCode(highbyte); //Highbyte
 		var chk = String.fromCharCode(checksum); //Checksum
 	if(highbyte != 0xFFFF){
-		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
-		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
+		serial.write(0xFF); //ÿ Signature Byte Char
+		serial.write(0xFF); //ÿ Signature Byte Char
 		serial.write(id); //ID Byte Char
 		serial.write(ln); //Length Byte Char
 		serial.write(cmd); //Instruction Byte Char
@@ -115,8 +115,8 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 		serial.write(chk); //Checksum
 	}
 	else{
-		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
-		serial.write(String.fromCharCode(0xFF)); //ÿ Signature Byte Char
+		serial.write(0xFF); //ÿ Signature Byte Char
+		serial.write(0xFF); //ÿ Signature Byte Char
 		serial.write(id); //ID Byte Char
 		serial.write(ln); //Length Byte Char
 		serial.write(cmd); //Instruction Byte Char
