@@ -140,7 +140,7 @@ function control(instruction, motorID, register, lowbyte, highbyte){ //parameter
 	command += String.fromCharCode(~checksum & 0xFF); //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
-	serial.write(command, function() {});
+	serial.write("hello", function() {});
 	console.log(">>Sent Control Signal: " + command); //For Debugging
 	command = ""; //clear command string for reuse
 }
