@@ -131,24 +131,23 @@ function setSpeed(ID, number) { //Info is an object, with members outlined when 
 };
 
 function writePacket(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
-	console.log("Controlling Motor " + motorID);
+	console.log("Controlling Motor " + motorID); //For Debugging
 	var length = 0;
+	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
 	if(typeof highbyte == "undefined") { //determine length through undefined parameter "highbyte"
 		length = 2+2;
 	} else {
 		length = 3+2;
-	}
- //Sets highbyte to a default of 65535 unless otherwise specified (i.e. position commands require low and highbyte whereas torque and led commands require only one value byte, making highbyte unused)
-	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
+	}	
 	
-	for (var i = 0; i < command.length; i++) { //clear the command buffer
+	for(var i = 0; i < command.length; i++) { //clear the command buffer
 		command[i] = 0x00;
 	};
 
 	var i = 0;
 	var checksum = 0;
 	/*Put the control packet together*/
-	/*Method 2: Send all at once*/
+	/*Method 2: Send all at once after compiling elements together into buffer*/
 	command[i++] = 0xFF; //ÿ Signature Byte Char
 	command[i++] = 0xFF; //ÿ Signature Byte Char
 	command[i++] = motorID; // ID Byte Char
