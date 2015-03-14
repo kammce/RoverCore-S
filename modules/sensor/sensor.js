@@ -1,3 +1,6 @@
+// ssh root@192.168.7.2
+
+
 "use strict";
 
 var Skeleton = require("../skeleton.js");
@@ -8,6 +11,12 @@ Sensor.prototype.constructor = Sensor;
 function Sensor(model_ref, feedback) {
 	this.model = model_ref;
 	this.feedback = feedback;
+	var interval_compass = 1000;
+	var interval_gyro = 1000;
+	var interval_accelero = 10000;
+	var compass_stop;
+	var accelero_stop;
+	var gyro_stop;
 		
 };	
 
@@ -40,7 +49,9 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 	}
 
 	if(data.stop == "all"){
-		clearInterval();
+		clearInterval(compass_stop);
+		clearInterval(gyro_stop);
+		clearInterval(accelero_stop);
 		return "data stream has stopped";
 	}
 
@@ -48,6 +59,38 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 		clearInterval(compass_stop);
 		return "compass stream has stopped";
 	}
+
+	if(data.stop == "compass" ){
+		clearInterval(gyro_stop);
+		return "gyro stream has stopped";
+	}
+
+	if(data.stop == "compass" ){
+		clearInterval(accelero_stop);
+		return "accelero stream has stopped";
+	}
+
+	if(data.priority == "gyro high" | data.priority == "accelero high" | data.priority == "compass high" ){
+		interval_gyro = 1000;
+		interval_compass = 1000;
+		interval_accelero = 1000; 
+		
+	}
+
+	if(data.priority == "gyro medium" | data.priority == "accelero medium" | data.priority == "compass medium" ){
+		interval_gyro = 10000;
+		interval_compass = 10000;
+		interval_accelero = 10000; 
+		
+	}
+
+	if(data.priority == "gyro low" | data.priority == "accelero low" | data.priority == "compass low" ){
+		interval_gyro = 30000;
+		interval_compass = 30000;
+		interval_accelero = 30000; 
+		
+	}
+
 };
 
 
@@ -136,20 +179,21 @@ Sensor.prototype.compass = function() {                 // degrees refer to Nort
 
 		});
 
-	}, 1000);
+	}, interval_compass);
 
 };
 
 Sensor.prototype.gyro= function(){
 
-	var address_accelerometer = 0x53; //address of accelerometer
-	var wire = new I2C (address_accelerometer, {device: '/dev/i2c-2'});
+	var address_gyroscope = 0x68;    //address of gyroscope
+	var wire = new I2C (address_gyroscope, {device: '/dev/i2c-2'});
+	var x , y ,z;
 
 	wire.writeBytes(0x16, [1<<3 | 1<<4 | 1<<0 ], function(err) {}); // set rate 2000
 	wire.writeBytes(0x15, [ 0x09 ], function(err) {}); // set sample rate to 100hz
 	
 	
-	setInterval(function(){ 
+	gyro_stop = setInterval(function(){ 
 
 		wire.readBytes(0x1D, 6, function(err,res){
 
@@ -159,9 +203,9 @@ Sensor.prototype.gyro= function(){
 
 			// convert binary to signed decimal 
 
-			var x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first number
-			var z = new Int16Array([res[2] << 8 | res[3]])[0]; 
-			var y = new Int16Array([res[4] << 8 | res[5]])[0];
+			 x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first number
+			 z = new Int16Array([res[2] << 8 | res[3]])[0]; 
+			 y = new Int16Array([res[4] << 8 | res[5]])[0];
 
 			}
 
@@ -171,22 +215,46 @@ Sensor.prototype.gyro= function(){
 
 			}
 
- 	this.model.gyro.x    =  (x)/14.375;    // 
-    this.model.gyro.y    =  (y)/14.375;    //
-    this.model.gyro.z    =  (z)/14.375;    //
+ 	this.model.gyro.x    = this.model.gyro.x ((x)/14.375)*.1;    //to get degrees 
+    this.model.gyro.y    = this.model.gyro.y ((y)/14.375)*.1;    //
+    this.model.gyro.z    = this.model.gyro.z ((z)/14.375)*.1;    //
+
+    if(this.model.gyro.x > 360){
+    	this.model.gyro.x = this.model.gyro.x%360;
+    }
+
+    if(this.model.gyro.x < -360){
+    	this.model.gyro.x = this.model.gyro.x%360;
+    }
+
+    if(this.model.gyro.y > 360){
+    	this.model.gyro.y = this.model.gyro.y%360;
+    }
+
+    if(this.model.gyro.y < -360){
+    	this.model.gyro.y = this.model.gyro.y%360;
+    }
+
+    if(this.model.gyro.z > 360){
+    	this.model.gyro.z = this.model.gyro.z%360;
+    }
+
+    if(this.model.gyro.z < -360){
+    	this.model.gyro.z = this.model.gyro.z%360;
+    }
 
     console.log("pitch: " + this.model.gyro.x + " roll: " + this.model.gyro.y + " yaw: " + this.model.gyro.z + " degrees");
 
 		});
 
-	}, 1000);
+	}, interval_gyro);
 
 
 };
 
 Sensor.prototype.accelero = function(){
 
-var address_gyroscope = 0x68;    //address of gyroscope
+
 this.model.accelero.x = 0;
 this.model.accelero.y = 1;
 this.model.accelero.z = 2;
@@ -220,7 +288,8 @@ function computeAccelBias() {
 }
 
 function measureAccel() {
-	setInterval(function() {
+
+accelero_stop =	setInterval(function() {
 		accel.measureAccel(function(err) {
 			if (!err) {
 				console.log("Roll: " + accel.meterPerSecSec[this.model.accelero.x] + " Pitch : " + accel.meterPerSecSec[this.model.accelero.y] + " Yaw : " + accel.meterPerSecSec[this.model.accelero.z]);
@@ -228,7 +297,7 @@ function measureAccel() {
 				console.log(err);
 			}
 		});
-	}, 10);
+	}, interval_accelero);
 }
 
 
