@@ -3,7 +3,7 @@
 if( process.argv.length < 3 ) {
 	console.log(
 		'Usage: \n' +
-		'\tnode cortex.js <websocket-server-address>\n'+
+		'\tnode cortex.js <websocket-server-address> [--simulate]\n'+
 		'Hints: server address can be\n' +
 		'\tlocalhost\n' + 
 		'\tor discovery.srkarra.com'
@@ -17,9 +17,13 @@ console.log("Starting Rover Cortex");
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
 GLOBAL.glob = require('glob');
-GLOBAL.SERIALPORT = require('serialport');
-GLOBAL.I2C = require('i2c');
-GLOBAL.SPINE = require('./modules/spine.js');
+GLOBAL.os = require('os');
+
+if(os.hostname() == 'beaglebone') {
+	GLOBAL.SERIALPORT = require('serialport');
+	GLOBAL.I2C = require('i2c');
+	GLOBAL.SPINE = require('./modules/spine.js');
+}
 // Local Includes
 var Socket = require('socket.io-client');
 var MindController = require('./modules/mind-controller.js');
@@ -29,16 +33,22 @@ GLOBAL.ADDRESS = process.argv[2];
 var socket = new Socket('http://'+ADDRESS+':8085');
 
 var feedback = function(directive, rsignal) {
-	if(!_.isUndefined(rsignal)) {
+	if(!_.isUndefined(rsignal) && !_.isUndefined(directive)) {
 		socket.emit("ROVERSIG", { status: 'feedback', directive: directive, info: rsignal });
 	}
 }
 
-var mcu = new MindController(feedback);
+var simulate = false;
+var production = false;
+if(process.argv[3] == "--simulate") {
+	simulate = true;
+}
+var mcu = new MindController(feedback, simulate);
 
 socket.on('connect', function () { 
-	console.log("Rover connected to server!");
+	console.log("RoverCore is connected to server!");
 	if(mcu.is_halted) { mcu.resume(); }
+	if(!mcu.is_initialized) { mcu.initialize(); }
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) { 
 		console.log("INCOMING CTRLSIG", data);
@@ -90,12 +100,20 @@ socket.on('connect', function () {
 	});
 	// =========== SERVER SIGNAL =========== //
 	socket.on('SERVERSIG', function (data) {
-		if(data == "MISSION_CONTROL_CONNECTED") {
-			console.log("MISSION CONTROL CONNECTED"); 
-			mcu.initialize();
-		} else if(data == "MISSION_CONTROL_DISCONNECTED") {
-			console.log("MISSION CONTROL DISCONNECTED"); 
-			mcu.halt();
+		console.log(data);
+		// =========== PRODUCTION MODE =========== // 
+		if(production == true) {
+			if(data == "MISSION_CONTROL_CONNECTED") {
+				console.log("MISSION CONTROL CONNECTED"); 
+				mcu.initialize();
+			} else if(data == "MISSION_CONTROL_DISCONNECTED") {
+				console.log("MISSION CONTROL DISCONNECTED"); 
+				mcu.halt();
+			}
+		} else {
+			// =========== DEBUG MODE =========== // 
+			// MCU will handle disconnects and such.
+			mcu.handle(data);
 		}
 	});
 	// =========== DISCONNECT SIGNAL =========== //
@@ -104,5 +122,5 @@ socket.on('connect', function () {
 		mcu.halt();
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
-	socket.emit('REGISTER', { entity: 'rover', password: 'destroymit' });
+	socket.emit('REGISTER', { entity: 'core', password: 'destroymit' });
 });

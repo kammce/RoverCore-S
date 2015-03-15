@@ -10,12 +10,11 @@
 	sudo somagic-capture --secam --iso-transfers=10 --sync=1 | ffmpeg
  */
 
-var Skeleton = require("../skeleton.js");
+var Skeleton = require("./skeleton.js");
 Video.prototype = new Skeleton("VIDEO");
 Video.prototype.constructor = Video;
 
-function Video(model_ref, feedback) {
-	this.model = model_ref;
+function Video(feedback) {
 	this.feedback = feedback;
 	this.videos = {
 		navi: {
@@ -65,16 +64,16 @@ function Video(model_ref, feedback) {
 				"type" : "string"
 			},
 			"res" : {
-				"type" : "number",
-				"optional": true
+				"type" : "number"
 			},
-			"size" : {
-				"type" : "number",
-				"optional": true
+			"width" : {
+				"type" : "number"
+			},
+			"height" : {
+				"type" : "number"
 			},
 			"fps" : {
-				"type" : "number",
-				"optional": true
+				"type" : "number"
 			}
 		}
 	};

@@ -1,5 +1,14 @@
-**Jan 8 2015**
+**Mar 13 2015**
+* Seperated the video module from cortex and created OCULUS
+* Oculus has not been fully tested
+* Cortex now has a simulation mode for working on telecommunications (soon will add the ability to isolate individual models and work on them)
+* MindController now sends sensor information to Mainframe to be sent to all of Mission Control
+* Added in the beginnings of Production mode 
+* MindController now halts individual modules based on who is logged in
+* Cortex will not make global instances of the spine, i2c and serialport until used on the beaglebone black.
 
+
+**Jan 8 2015**
 * Cortex now must be supplied with the server to connect to
 * Cortex now creates a global variable called address that can be used anywhere in the code to reference the server that the rover is connected to.
 * Fixed some minor issues with video.

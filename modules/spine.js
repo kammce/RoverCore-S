@@ -179,7 +179,6 @@ function Spine(feedback) {
 	        "key": "P9_42",
 	    }
 	];
-	var os = require('os');
 	
 	this.pins = {};
 	this.hardware = {
