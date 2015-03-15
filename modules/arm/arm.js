@@ -4,72 +4,56 @@
 var SerialPort = require("serialport").SerialPort;
 var Skeleton = require("../skeleton.js");
 
-/*Globals*/
-var serial = new SerialPort("/dev/ttyO2", {
-    baudrate: 57600,
-    //databits:8,
-    //parity: 'none'
-});
-var defaulted = false;
-// console.log("Hello, starting..."); //For Debugging
-var schema = { //format for data being passed to arm.prototype.handle(data);
-	"type" : "object",
-	"properties" : {
-		"base" : "Number", //Degree value, from 0 to 360
-		"shoulderL" : "Number", //Degree value, from 0 to 360
-		"shoulderR" : "Number", //Degree value, from 0 to 360
-		"elbow" : "Number", //Degree value, from 0 to 360
-		"wrist" : "Number", //Degree value, from 0 to 360
-		"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
-		// "setID" : "Number" //For initial setup only. Used to set the ids of different servos
-	}
-}
-
-//Value Codes
-var ON = 0x01,
-    OFF = 0x00;
-//Instruction Codes
-var PING = 0X01,
-    READ = 0x02,
-    WRITE = 0x03,
-    REGWRITE = 0X04,
-    ACTION = 0X05;
-//Motor IDs **NOTE:ALL == broadcast to all motors for execution
-var ALL = 0xFE,
-    BASE = 0x00,
-    LEFTSHOULDER = 0x01,
-    RIGHTSHOULDER = 0x02,
-    ELBOW = 0x03,
-    WRIST = 0x04;
-//Servo Register Addresses
-var POSITION = 0x1E,
-    SPEED = 0x20,
-    CCW = 0x08,
-    CW = 0x06,
-    TORQUE = 0x18, //Used to enable motor movement
-    LED = 0x19;
-
-/*Initiate Serialport*/
-	serial.on('open', function(err) {
-	    if(err){
-	    	console.log(err);
-	    }
-	    else{
-	    	console.log('>>SerialPort is Open<<'); //For Debugging
-	    	// moveMotor(input[2]);
-	    	// serial.close();
-	    }
-	});
-	serial.on('err', function(err){
-		console.log(err);
-	});
-
 /*Functions/Prototypes*/
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 function Arm (model_ref){
 	this.model = model_ref;
+	/*Globals*/
+	var serial = new SerialPort("/dev/ttyO2", {
+	    baudrate: 57600,
+	    //databits:8,
+	    //parity: 'none'
+	});
+	var defaulted = false;
+	// console.log("Hello, starting..."); //For Debugging
+	var schema = { //format for data being passed to arm.prototype.handle(data);
+		"type" : "object",
+		"properties" : {
+			"base" : "Number", //Degree value, from 0 to 360
+			"shoulderL" : "Number", //Degree value, from 0 to 360
+			"shoulderR" : "Number", //Degree value, from 0 to 360
+			"elbow" : "Number", //Degree value, from 0 to 360
+			"wrist" : "Number", //Degree value, from 0 to 360
+			"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
+			// "setID" : "Number" //For initial setup only. Used to set the ids of different servos
+		}
+	}
+
+	//Switch Activator Codes
+	var turn{ON: 0x01, OFF: 0x00};
+	//Instruction Codes
+	var operation{PING: 0x01, READ: 0x02, WRITE: 0x03, REGWRITE: 0x04, ACTION:0x05};
+	//Motor IDs **NOTE:ALL == broadcast to all motors for execution
+	var id{ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
+	//Servo Register Addresses **NOTE:TORQUE enables motor movement
+	var edit{POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
+
+	/*Initiate Serialport*/
+		serial.on('open', function(err) {
+		    if(err){
+		    	console.log(err);
+		    }
+		    else{
+		    	console.log('>>SerialPort is Open<<'); //For Debugging
+		    	// moveMotor(input[2]);
+		    	// serial.close();
+		    }
+		});
+		serial.on('err', function(err){
+			console.log(err);
+		});
 }
 
 
@@ -77,26 +61,26 @@ Arm.prototype.handle = function(input){ //Info is an object, with members outlin
 	//This handle function Sends Commands to Dynamixel MX-64
 	if(defaulted == false){
 		console.log("Enabling Torque");
-		writePacket(WRITE, ALL, TORQUE, ON);
+		writePacket(operation.WRITE, id.ALL, edit.TORQUE, turn.ON);
 		defaulted = true;
 	}
 	if(input.base != undefined){
-		moveMotor(BASE, input.base);
+		moveMotor(id.BASE, input.base);
 	}
 	if(input.shoulderL != undefined){
-		moveMotor(LEFTSHOULDER, input.shoulderL);
+		moveMotor(id.LEFTSHOULDER, input.shoulderL);
 	}
 	if(input.shoulderR != undefined){
-		moveMotor(RIGHTSHOULDER, input.shoulderR);
+		moveMotor(id.RIGHTSHOULDER, input.shoulderR);
 	}
 	if(input.elbow != undefined){
-		moveMotor(ELBOW, input.elbow);
+		moveMotor(id.ELBOW, input.elbow);
 	}
 	if(input.wrist != undefined){
-		moveMotor(WRIST, input.wrist);
+		moveMotor(id.WRIST, input.wrist);
 	}
 	// if(input.speed != undefined){
-	// 	setSpeed(ALL, input.speed);
+	// 	setSpeed(id.ALL, input.speed);
 	// }
 };
 
@@ -113,7 +97,7 @@ function moveMotor(ID, number) { //Info is an object, with members outlined when
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	console.log("H:" + high + "  L:" + low);
-	writePacket(WRITE, ID, POSITION, low, high);
+	writePacket(operation.WRITE, ID, edit.POSITION, low, high);
 };
 
 function setSpeed(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -127,7 +111,7 @@ function setSpeed(ID, number) { //Info is an object, with members outlined when 
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	console.log("H:" + high + "  L:" + low);
-	writePacket(WRITE, ID, SPEED, low, high);
+	writePacket(operation.WRITE, ID, edit.SPEED, low, high);
 };
 
 function writePacket(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
