@@ -32,13 +32,13 @@ function Arm (model_ref){
 	}
 
 	//Switch Activator Codes
-	var turn{ON: 0x01, OFF: 0x00};
+	var turn = {ON: 0x01, OFF: 0x00};
 	//Instruction Codes
-	var operation{PING: 0x01, READ: 0x02, WRITE: 0x03, REGWRITE: 0x04, ACTION:0x05};
+	var operation = {PING: 0x01, READ: 0x02, WRITE: 0x03, REGWRITE: 0x04, ACTION:0x05};
 	//Motor IDs **NOTE:ALL == broadcast to all motors for execution
-	var id{ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
+	var id = {ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
 	//Servo Register Addresses **NOTE:TORQUE enables motor movement
-	var edit{POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
+	var edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
 
 	/*Initiate Serialport*/
 		serial.on('open', function(err) {
