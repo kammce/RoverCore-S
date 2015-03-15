@@ -1,6 +1,3 @@
-//RJ note to self: install rovercore into BeagleBone Black and from there, locally initiate cortex.js as such: node cortex.js discovery.srkarra.com
-//To run locally on a laptop for testing, run as such: node cortex.js localhost. Regardless of the chosen method of utilisation, you would
-//then initiate an interface (either mission-control-test.html or arm-interface.html)
 "use strict";
 
 if( process.argv.length < 3 ) {
