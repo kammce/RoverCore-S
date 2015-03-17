@@ -4,10 +4,11 @@
 "use strict";
 
 var Skeleton = require("../skeleton.js");
-var ADXL345 = require('./index.js');
+
 
 Sensor.prototype = new Skeleton("SENSOR");
 Sensor.prototype.constructor = Sensor;
+
 function Sensor(model_ref, feedback) {
 	this.model = model_ref;
 	this.feedback = feedback;
@@ -17,6 +18,8 @@ function Sensor(model_ref, feedback) {
 	var compass_stop;
 	var accelero_stop;
 	var gyro_stop;
+	var ADXL345 = require('./ADXL345.js');
+
 		
 };	
 
@@ -304,7 +307,61 @@ accelero_stop =	setInterval(function() {
 };
 
 Sensor.prototype.GPS = function(){
-//TODO
+
+ var serialport = require('serialport'),// include the library
+    SerialPort = serialport.SerialPort, // make a local instance of it
+    portName = 'dev/tty01';   // <-- get port name from the command line (node GPS.js *NAME*)
+
+var myPort = new SerialPort(portName, { // <--Then you open the port using new() like so
+   baudRate: 9600,
+   parser: serialport.parsers.readline("\r\n") // look for return and newline at the end of each data packet
+ });
+
+
+myPort.on('open', showPortOpen);
+myPort.on('close', showPortClose);
+myPort.on('error', showError);
+myPort.on('data', saveLatestData);
+
+
+function showPortOpen() {
+
+console.log('port open. Data rate: ' + myPort.options.baudRate);
+console.log("begin initialization");//begin initialization
+myPort.write("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n");
+myPort.write("$PMTK220,200*2C\r\n");          //5hz update
+myPort.write("$PMTK300,200,0,0,0,0*2F\r\n");  //    //5hz
+console.log("initialization complete!"); //print out to terminal
+}
+
+function showPortClose() {
+   console.log('port closed.');
+}
+function showError(error) {
+   console.log('Serial port error: ' + error);
+}
+function saveLatestData(data) {
+	console.log(' '); //adds line to separate
+    console.log(data); // full unparsed data
+    var piece = data.split(",",7);
+    console.log(piece[0],piece[2]); //$GPRMC, A/V
+    console.log(piece[3],piece[4]); // LAT, dir
+    console.log(piece[5],piece[6]); // LONG, dir
+    //making variables
+    var lat = piece[3];
+    var lat_dir = piece[4];
+    var lng = piece[5];
+    var lng_dir = piece[6];
+
+    this.model.GPS.longitude = lng;
+    this.model.GPS.lattitude = lat;
+    this.model.GPS.longitude_dir = lng_dir;
+    this.model.GPS.lattitude_dir = lat_dir;
+
+    console.log("lat: " + this.model.GPS.lattitude + " long: " + this.model.GPS.longitude);
+}
+
+
 };
 
 Sensor.prototype.power = function(){
@@ -319,5 +376,7 @@ Sensor.prototype.optical = function(){
 
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
+
+module.exports = exports = Sensor;
 
 module.exports = exports = Sensor;
