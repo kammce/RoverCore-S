@@ -22,10 +22,11 @@ var Model = {
 		heading:0
 		}, 
  	
- 	GPS:{
-		altitude:0,
-		logitude:0,
-		latitude:0
+ 	GPS:{	
+		longitude:0,      
+		latitude:0, 
+		longitude_dir:0, //dir = direction
+		latitude_dir:0
 		},
 
 	 Power:{
