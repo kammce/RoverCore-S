@@ -18,6 +18,11 @@ GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
 GLOBAL.glob = require('glob');
 GLOBAL.os = require('os');
+GLOBAL.simulate = false;
+GLOBAL.production = false;
+if(process.argv[3] == "--simulate") {
+	simulate = true;
+}
 
 if(os.hostname() == 'beaglebone') {
 	GLOBAL.SERIALPORT = require('serialport');
@@ -38,11 +43,6 @@ var feedback = function(directive, rsignal) {
 	}
 }
 
-var simulate = false;
-var production = false;
-if(process.argv[3] == "--simulate") {
-	simulate = true;
-}
 var mcu = new MindController(feedback, simulate);
 
 socket.on('connect', function () { 
@@ -122,5 +122,5 @@ socket.on('connect', function () {
 		mcu.halt();
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
-	socket.emit('REGISTER', { entity: 'core', password: 'destroymit' });
+	socket.emit('REGISTER', { entity: 'cortex', password: 'destroymit' });
 });
