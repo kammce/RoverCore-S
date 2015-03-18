@@ -1,4 +1,5 @@
 **Mar 13 2015**
+
 * Seperated the video module from cortex and created OCULUS
 * Oculus has not been fully tested
 * Cortex now has a simulation mode for working on telecommunications (soon will add the ability to isolate individual models and work on them)
@@ -9,6 +10,7 @@
 
 
 **Jan 8 2015**
+
 * Cortex now must be supplied with the server to connect to
 * Cortex now creates a global variable called address that can be used anywhere in the code to reference the server that the rover is connected to.
 * Fixed some minor issues with video.
