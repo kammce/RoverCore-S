@@ -1,0 +1,11 @@
+{ 
+	"name" : "RoverCore",
+	"version" : "1.5.0",
+	"dependencies" : { 
+		"glob" : "latest",
+		"i2c" : "latest",
+		"serialport" : "latest",
+		"socket.io-client" : "latest",
+		"underscore" : "latest"
+	} 
+}
