@@ -20,7 +20,7 @@ function Motor(model_ref, feedback) {
 			pwmPin:'P8_13', // doesnt work
 			dirPin:'P8_39',
 		},
-		m2: { // Right Side
+		m2: { //Left Side
 			pwmPin:'P8_19',
 			dirPin:'P8_40',
 		},
@@ -28,11 +28,11 @@ function Motor(model_ref, feedback) {
 			pwmPin:'P8_34',
 			dirPin:'P8_41',
 		},
-		m4: { // Right Side
+		m4: { //Right Side
 			pwmPin:'P8_36',
 			dirPin:'P8_42',
 		},
-		m5: { //Left Side
+		m5: { //Right Side
 			pwmPin:'P9_28',// doesnt work
 			dirPin:'P8_43',
 		},
@@ -287,22 +287,22 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
 		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
 	}
 	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
 	}
 	if(Right==(1)){
-		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
 		}
 	else if(Right==(-1)){
-		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
 	}
 }
