@@ -169,28 +169,28 @@ Motor.prototype.setMotor = function(motorSelect, direction, speed){
 	else if(motorSelect==4){
 		this.spine.setPWM(this.motors.m4.pwmPin, speed);
 		if(direction=='forward'){
-			this.spine.digitalWrite(this.motors.m4.dirPin, 1);
+			this.spine.digitalWrite(this.motors.m4.dirPin, 0);
 		}
 		else if(direction=='reverse'){
-			this.spine.digitalWrite(this.motors.m4.dirPin, 0);
+			this.spine.digitalWrite(this.motors.m4.dirPin, 1);
 		}
 	}
 	else if(motorSelect==5){
 		this.spine.setPWM(this.motors.m5.pwmPin, speed);
 		if(direction=='forward'){
-			this.spine.digitalWrite(this.motors.m5.dirPin, 1);
+			this.spine.digitalWrite(this.motors.m5.dirPin, 0);
 		}
 		else if(direction=='reverse'){
-			this.spine.digitalWrite(this.motors.m5.dirPin, 0);
+			this.spine.digitalWrite(this.motors.m5.dirPin, 1);
 		}
 	}
 	else if(motorSelect==6){
 		this.spine.setPWM(this.motors.m6.pwmPin, speed);
 		if(direction=='forward'){
-			this.spine.digitalWrite(this.motors.m6.dirPin, 1);
+			this.spine.digitalWrite(this.motors.m6.dirPin, 0);
 		}
 		else if(direction=='reverse'){
-			this.spine.digitalWrite(this.motors.m6.dirPin, 0);
+			this.spine.digitalWrite(this.motors.m6.dirPin, 1);
 		}
 	}
 	else{
