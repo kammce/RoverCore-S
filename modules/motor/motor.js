@@ -281,29 +281,29 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 	this.spine.setPWM(this.motors.m4.pwmPin, Right/100);
 	this.spine.setPWM(this.motors.m5.pwmPin, Right/100);
 	this.spine.setPWM(this.motors.m6.pwmPin, Right/100);
-	this.feedback = "Left speed " + Left + "Right speed " + Right;
+	this.feedback = "|------------->Left speed " + Left + "  Right speed " + Right;
 	console.log("Left speed " + Left + "Right speed " + Right);
 }
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
-		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
-	}
-	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
 	}
+	else if(left==(-1)){
+		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
+	}
 	if(Right==(1)){
-		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
-		}
-	else if(Right==(-1)){
 		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
+		}
+	else if(Right==(-1)){
+		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
 	}
 }
 //========================direction control for aruinos=====================================
