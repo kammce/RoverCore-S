@@ -18,6 +18,7 @@ GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
 GLOBAL.glob = require('glob');
 GLOBAL.os = require('os');
+GLOBAL.async = require('async');
 GLOBAL.simulate = false;
 GLOBAL.production = false;
 if(process.argv[3] == "--simulate") {

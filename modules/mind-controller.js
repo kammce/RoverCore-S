@@ -15,7 +15,8 @@ function MindController(feedback, simulation) {
 
 	var Skeleton = require('./skeleton.js');
 	var parent = this;
-	this.model = require('./model.js');
+	var model = require('./model.js');
+	this.model = model;
 
 	if(simulation == true) {
 		this.sensor = new Skeleton("SENSOR");
@@ -29,7 +30,6 @@ function MindController(feedback, simulation) {
 		var Arm = require('./arm/arm.js');
 		var Tracker = require('./tracker/tracker.js');
 		var Logger = require('./logger.js');
-		this.model = model;
 		this.sensor = new Sensor(model, feedback);
 		this.motor = new Motor(model, feedback);
 		this.arm = new Arm(model, feedback);

@@ -1,6 +1,7 @@
 "use strict";
 
 var Model = {
+	test: 0.0,
 	gyro : {
 		x:0,					
 		y:0,

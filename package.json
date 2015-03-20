@@ -6,6 +6,7 @@
 		"i2c" : "latest",
 		"serialport" : "latest",
 		"socket.io-client" : "latest",
+		"async": "latest",
 		"underscore" : "latest"
 	} 
 }

@@ -378,5 +378,3 @@ Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
 
 module.exports = exports = Sensor;
-
-module.exports = exports = Sensor;
