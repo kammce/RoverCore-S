@@ -286,14 +286,14 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 }
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
-		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
-	}
-	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
+	}
+	else if(left==(-1)){
+		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
 	}
 	if(Right==(1)){
 		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
