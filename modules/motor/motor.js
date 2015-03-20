@@ -17,27 +17,27 @@ function Motor(model_ref, feedback) {
 	//For pin sets
 	this.motors={
 		m1: { //Left Side
-			pwmPin:'P8_13', // doesnt work
+			pwmPin:'P8_36', // doesnt work
 			dirPin:'P8_39',
 		},
 		m2: { //Left Side
-			pwmPin:'P8_19',
+			pwmPin:'P9_28',
 			dirPin:'P8_40',
 		},
 		m3: { //Left Side
-			pwmPin:'P8_34',
+			pwmPin:'P9_29',
 			dirPin:'P8_41',
 		},
 		m4: { //Right Side
-			pwmPin:'P8_36',
+			pwmPin:'P8_13',
 			dirPin:'P8_42',
 		},
 		m5: { //Right Side
-			pwmPin:'P9_28',// doesnt work
+			pwmPin:'P8_19',// doesnt work
 			dirPin:'P8_43',
 		},
 		m6: { // Right Side
-			pwmPin:'P9_29',// doesnt work
+			pwmPin:'P8_34',// doesnt work
 			dirPin:'P8_44',
 		}
 	}
@@ -286,24 +286,24 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 }
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
-		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
-	}
-	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
 	}
+	else if(left==(-1)){
+		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
+	}
 	if(Right==(1)){
-		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
-		}
-	else if(Right==(-1)){
 		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
+		}
+	else if(Right==(-1)){
+		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
 	}
 }
 //========================direction control for aruinos=====================================
