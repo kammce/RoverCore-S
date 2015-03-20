@@ -242,11 +242,11 @@ Motor.prototype.setAllMotorsTemp=function(angle, speed){
 		this.setAllDirectionTemp(1,1);
 	}
 	else if(angle<=90 && angle>0){ // checks for angles 1-90
-		this.setAllSpeed(speed,(angle/90)*speed);
+		this.setAllSpeed((angle/90)*speed, speed);
 		this.setAllDirectionTemp(1,1);
 	}
 	else if(angle>90 && angle<180){ // checks for angles 91-179
-		this.setAllSpeed(((-1*(angle-180))/90)*speed,speed);
+		this.setAllSpeed(speed,((-1*(angle-180))/90)*speed);
 		this.setAllDirectionTemp(1,1);
 	}
 	else if(angle==180){ // checks for angle 180
@@ -254,11 +254,11 @@ Motor.prototype.setAllMotorsTemp=function(angle, speed){
 		this.setAllDirectionTemp(1,1);
 	}
 	else if (angle>180 && angle <=270){
-		this.setAllSpeed(((angle-180)/90)*speed,speed);
+		this.setAllSpeed(speed, ((angle-180)/90)*speed);
 		this.setAllDirectionTemp(-1,-1);
 	}
 	else if (angle>270 && angle <360){
-		this.setAllSpeed(speed,((-1*(angle-360))/90)*speed);
+		this.setAllSpeed(((-1*(angle-360))/90)*speed, speed);
 		this.setAllDirectionTemp(-1,-1);
 	}
 	else if (angle==361){
