@@ -1,0 +1,27 @@
+[12:37:17.788]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":61.29404745659892}}
+[12:37:19.667]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:37:30.180]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:37:45.730]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:37:45.730]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:38:11.632]  {"directive":"MOTOR","info":{"angle":0,"speed":0}}
+[12:38:11.632]  {"directive":"MOTOR","info":{"angle":0,"speed":0}}
+[12:44:21.441]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":0.5}}
+[12:44:21.442]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":0.5}}
+[12:44:21.442]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":0.5}}
+[12:44:22.367]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":82.5685920288275}}
+[12:44:22.368]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":82.5685920288275}}
+[12:44:22.369]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":82.5685920288275}}
+[12:44:23.905]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:44:23.905]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:44:23.906]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:45:4.381]  {"directive":"VIDEO","info":{"view":"navi","res":400,"width":640,"height":480,"fps":20}}
+[12:45:4.381]  {"directive":"VIDEO","info":{"view":"navi","res":400,"width":640,"height":480,"fps":20}}
+[12:45:4.383]  {"directive":"VIDEO","info":{"view":"navi","res":400,"width":640,"height":480,"fps":20}}
+[12:46:0.427]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":63.924644416051244}}
+[12:46:0.427]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":63.924644416051244}}
+[12:46:0.428]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":63.924644416051244}}
+[12:46:0.428]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":63.924644416051244}}
+[12:46:1.460]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:46:1.461]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:46:1.461]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:46:1.463]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}

@@ -1,0 +1,14 @@
+[15:18:19.716]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":20.67442476087389,"yaw":39.093858886229505}}
+[15:18:33.79]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":20.67442476087389,"yaw":110.85445803957835}}
+[15:18:39.431]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":20.67442476087389,"yaw":154.0934920004856}}
+[15:19:0.254]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":69.30454926593671,"yaw":154.0934920004856}}
+[15:19:0.816]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.833]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.850]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.867]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.884]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.905]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.919]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.936]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:0.952]  {"directive":"TRACKER","info":{"req":"Set Zoom","zoom":30}}
+[15:19:17.908]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":83.36748538486154,"yaw":154.0934920004856}}
