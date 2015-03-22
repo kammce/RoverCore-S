@@ -15,10 +15,18 @@ function Sensor(model_ref, feedback) {
 	var interval_compass = 1000;
 	var interval_gyro = 1000;
 	var interval_accelero = 10000;
+	var interval_GPS = 30000;
+	var GPS_stop;
 	var compass_stop;
 	var accelero_stop;
 	var gyro_stop;
 	var ADXL345 = require('./ADXL345.js');
+
+	this.gyro();
+	this.accelero();
+	this.compass();
+	this.GPS();
+	this.power();
 
 		
 };	
@@ -30,6 +38,7 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 		this.gyro();
 		this.accelero();
 		this.compass();
+		this.GPS();
 		return "gyro:  pitch:" + this.model.pitch_gyro + "  roll:" + this.model.roll_gyro + " yaw:"  + this.model.yaw_gyro
 		+ "  accelero:  pitch:" + this.model.pitch_accelero + "  roll:" + this.model.roll_accelero + " yaw:"  + this.model.yaw_accelero 
 		+ " Heading: " + this.model.compass.heading + " degrees";
@@ -51,10 +60,16 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 		return " Heading: " + this.model.compass.heading + " degrees" ;
 	}
 
+	if(data.start == "GPS"){
+		this.GPS();
+		return " Lat: " + this.model.GPS.lattitude + " Lon: " + this.model.GPS.longitude ;
+	}
+
 	if(data.stop == "all"){
 		clearInterval(compass_stop);
 		clearInterval(gyro_stop);
 		clearInterval(accelero_stop);
+		clearInterval(GPS_stop)
 		return "data stream has stopped";
 	}
 
@@ -63,43 +78,49 @@ Sensor.prototype.handle = function (data) {				// take command from user interfa
 		return "compass stream has stopped";
 	}
 
-	if(data.stop == "compass" ){
+	if(data.stop == "gyro" ){
 		clearInterval(gyro_stop);
 		return "gyro stream has stopped";
 	}
 
-	if(data.stop == "compass" ){
+	if(data.stop == "accelero" ){
 		clearInterval(accelero_stop);
 		return "accelero stream has stopped";
 	}
 
-	if(data.priority == "gyro high" | data.priority == "accelero high" | data.priority == "compass high" ){
+	if(data.stop == "GPS" ){
+		clearInterval(GPS_stop);
+		return "GPS stream has stopped";
+	}
+
+	if(data.priority == "gyro high" | data.priority == "accelero high" | data.priority == "compass high" | data.priority == "GPS high" ){
 		interval_gyro = 1000;
 		interval_compass = 1000;
-		interval_accelero = 1000; 
+		interval_accelero = 1000;
+		interval_GPS = 10000; 
 		
 	}
 
-	if(data.priority == "gyro medium" | data.priority == "accelero medium" | data.priority == "compass medium" ){
+	if(data.priority == "gyro medium" | data.priority == "accelero medium" | data.priority == "compass medium" | data.priority == "GPS medium" ){
 		interval_gyro = 10000;
 		interval_compass = 10000;
-		interval_accelero = 10000; 
+		interval_accelero = 10000;
+		interval_GPS = 30000;  
 		
 	}
 
-	if(data.priority == "gyro low" | data.priority == "accelero low" | data.priority == "compass low" ){
+	if(data.priority == "gyro low" | data.priority == "accelero low" | data.priority == "compass low" | data.priority == "GPS low" ){
 		interval_gyro = 30000;
 		interval_compass = 30000;
-		interval_accelero = 30000; 
+		interval_accelero = 30000;
+		interval_GPS = 10000;  
 		
 	}
 
 };
 
 
-Sensor.prototype.update = function() {
-	//TODO
-};
+
 
 Sensor.prototype.compass = function() {                 // degrees refer to North
 
@@ -218,9 +239,9 @@ Sensor.prototype.gyro= function(){
 
 			}
 
- 	this.model.gyro.x    = this.model.gyro.x ((x)/14.375)*.1;    //to get degrees 
-    this.model.gyro.y    = this.model.gyro.y ((y)/14.375)*.1;    //
-    this.model.gyro.z    = this.model.gyro.z ((z)/14.375)*.1;    //
+ 	this.model.gyro.x    = this.model.gyro.x + ((x)/14.375)*.1;    //to get degrees 
+    this.model.gyro.y    = this.model.gyro.y + ((y)/14.375)*.1;    //
+    this.model.gyro.z    = this.model.gyro.z + ((z)/14.375)*.1;    //
 
     if(this.model.gyro.x > 360){
     	this.model.gyro.x = this.model.gyro.x%360;
@@ -258,9 +279,9 @@ Sensor.prototype.gyro= function(){
 Sensor.prototype.accelero = function(){
 
 
-this.model.accelero.x = 0;
-this.model.accelero.y = 1;
-this.model.accelero.z = 2;
+global.XAXIS = 0;
+global.YAXIS = 1;
+global.ZAXIS = 2;
 
 
 
@@ -275,9 +296,9 @@ var globalvar = {
 }
 
 var accel = new ADXL345(function(err) {
-	accel.accelScaleFactor[this.model.accelero.x] = 0.0371299982;
-	accel.accelScaleFactor[this.model.accelero.y] = -0.0374319982;
-	accel.accelScaleFactor[this.model.accelero.z] = -0.0385979986;
+	accel.accelScaleFactor[XAXIS] = 0.0371299982;
+	accel.accelScaleFactor[YAXIS] = -0.0374319982;
+	accel.accelScaleFactor[ZAXIS] = -0.0385979986;
 	if (!err) {
 		computeAccelBias();
 	} else {
@@ -291,18 +312,25 @@ function computeAccelBias() {
 }
 
 function measureAccel() {
-
-accelero_stop =	setInterval(function() {
-		accel.measureAccel(function(err) {
+ accelero_stop	= setInterval(function() {
+	accel.measureAccel(function(err) {
 			if (!err) {
-				console.log("Roll: " + accel.meterPerSecSec[this.model.accelero.x] + " Pitch : " + accel.meterPerSecSec[this.model.accelero.y] + " Yaw : " + accel.meterPerSecSec[this.model.accelero.z]);
+
+				this.model.accelero.x = accel.meterPerSecSec[global.XAXIS];
+				this.model.accelero.y = accel.meterPerSecSec[global.YAXIS];
+				this.model.accelero.z = accel.meterPerSecSec[global.ZAXIS];
+
+
+				console.log("Roll: " + this.model.accelero.x + " Pitch : " + this.model.accelero.y + " Yaw : " + this.model.accelero.z);
+
+
+
 			} else {
 				console.log(err);
 			}
 		});
 	}, interval_accelero);
 }
-
 
 };
 
@@ -318,10 +346,14 @@ var myPort = new SerialPort(portName, { // <--Then you open the port using new()
  });
 
 
+
+
+
 myPort.on('open', showPortOpen);
 myPort.on('close', showPortClose);
 myPort.on('error', showError);
 myPort.on('data', saveLatestData);
+
 
 
 function showPortOpen() {
@@ -340,6 +372,9 @@ function showPortClose() {
 function showError(error) {
    console.log('Serial port error: ' + error);
 }
+
+GPS_stop = setInterval(function(){ 
+
 function saveLatestData(data) {
 	console.log(' '); //adds line to separate
     console.log(data); // full unparsed data
@@ -359,8 +394,10 @@ function saveLatestData(data) {
     this.model.GPS.lattitude_dir = lat_dir;
 
     console.log("lat: " + this.model.GPS.lattitude + " long: " + this.model.GPS.longitude);
-}
+   
+	}
 
+ }, interval_GPS);
 
 };
 
@@ -377,6 +414,5 @@ Sensor.prototype.optical = function(){
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
 
-module.exports = exports = Sensor;
 
 module.exports = exports = Sensor;
