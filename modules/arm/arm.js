@@ -12,7 +12,7 @@ function Arm (model_ref){
 	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
 	this.model = model_ref;
 	/*Globals*/
-	var serial = new SerialPort("/dev/ttyO2", {
+	this.serial = new SerialPort("/dev/ttyO2", {
 	    baudrate: 57600,
 	    //databits:8,
 	    //parity: 'none'
@@ -43,17 +43,18 @@ function Arm (model_ref){
 	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
 
 	/*Initiate Serialport*/
-		serial.on('open', function(err) {
+		this.serial.on('open', function(err) {
 		    if(err){
 		    	console.log(err);
 		    }
 		    else{
-		    	console.log('>>SerialPort is Open<<'); //For Debugging
-		    	// moveMotor(input[2]);
-		    	// serial.close();
+		    	// console.log('>>SerialPort is Open<<'); //For Debugging
 		    }
 		});
-		serial.on('err', function(err){
+		// this.serial.on('data', function(data){ //For debugging
+		// 	console.log(">>Response:" + data);
+		// });
+		this.serial.on('err', function(err){
 			console.log(err);
 		});
 }
@@ -152,7 +153,7 @@ Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, hi
 	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
-	serial.write(command, function() {});
+	this.serial.write(command, function() {});
 	console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
 }
 
@@ -163,9 +164,19 @@ Arm.prototype.print = function(){ //For Debugging
 	console.log("Hello " + this.model_ref);
 }
 
-// /*Main, For Debugging*/
+/*Main, For Debugging*/
 // var a = new Arm(); //For Debugging: Object initialization
+// var interval = 0;
 
-// a.handle({base: 360, shoulderL: 180, shoulderR: 30, elbow: 0, wrist: 0}); //For Debugging: For the member function
+// setInterval(function(){
+// 	if(interval = 0){
+// 		a.handle({base: 360, shoulderL: 180, shoulderR: 30, elbow: 0, wrist: 0}); //For Debugging: For the member function
+// 		interval = 1;
+// 	}
+// 	else if(interval = 1){
+// 		a.handle({base: 360, shoulderL: 0, shoulderR: 30, elbow: 0, wrist: 0}); /*//For Debugging: For the member function*/
+// 		interval = 0;
+// 	}
+// }, 1000);
 
 module.exports = exports = Arm;
