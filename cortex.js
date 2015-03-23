@@ -53,7 +53,7 @@ socket.on('connect', function () {
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) { 
 		console.log("INCOMING CTRLSIG", data);
-		mcu.logger.log(data);
+		//mcu.logger.log(data);
 		switch(data['directive']) {
 			case 'MOTOR':
 				setTimeout(function() { 
