@@ -2,114 +2,181 @@
 //Dynamixel Instruction Packet Format: 0xFF 0xFF ID LENGTH INSTRUCTION PARAMETER#1 ... PARAMETER#N CHECK_SUM
 /*Includes*/
 var SerialPort = require("serialport").SerialPort;
-var servoPos = require("./writePacket.js");
 var Skeleton = require("../skeleton.js");
-
-/*Globals*/
-// var serial = new SERIALPORT.SerialPort("for/path/to/uart/device,/See_READMEarm.txt", { baudrate: 9600 }); //For use in actual rover
-var serial = new SerialPort("/dev/ttyACM0", { baudrate: 9600 } ); //For use in local system testing; Read/Write stream to USB
-var goalPosition = 0x1E, movingSpeed = 0x20, ccwAngleLimit = 0x08, cwAngleLimit = 0x06; //Motor Control Table Addresses
-var baseID = 0x00, shoulderLID = 0x01, shoulderRID = 0x02, elbowID = 0x03, wristID = 0x04, broadcastID = 0xFE; //Motor ID Tags **NOTE:broadcastID == broadcast to all motors
-var command = [];
-var motorValuesSet = false;
-var inbox = ""; //data buffer for recieving responses from device
-var defaultSet = false;
-var i = 0;
-var schema = { //format for data being passed to arm.prototype.handle(data);
-	"type" : "object",
-	"properties" : {
-		"base" : "Number", //Degree value, from 0 to 360
-		"shoulderL" : "Number", //Degree value, from 0 to 360
-		"shoulderR" : "Number", //Degree value, from 0 to 360
-		"elbow" : "Number", //Degree value, from 0 to 360
-		"wrist" : "Number", //Degree value, from 0 to 360
-		"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
-	}
-}
 
 /*Functions/Prototypes*/
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 function Arm (model_ref){
+	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
 	this.model = model_ref;
+	/*Globals*/
+	this.serial = new SerialPort("/dev/ttyO2", {
+	    baudrate: 57600,
+	    //databits:8,
+	    //parity: 'none'
+	});
+	this.defaulted = false;
+	// console.log("Hello, starting..."); //For Debugging
+	this.schema = { //format for data being passed to arm.prototype.handle(data);
+		"type" : "object",
+		"properties" : {
+			"base" : "Number", //Degree value, from 0 to 360
+			"shoulderL" : "Number", //Degree value, from 0 to 360
+			"shoulderR" : "Number", //Degree value, from 0 to 360
+			"elbow" : "Number", //Degree value, from 0 to 360
+			"wrist" : "Number", //Degree value, from 0 to 360
+			"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
+			// "setID" : "Number" //For initial setup only. Used to set the ids of different servos
+		}
+	}
+
+	//Switch Activator Codes
+	this.turn = {ON: 0x01, OFF: 0x00};
+	//Instruction Codes
+	this.operation = {PING: 0x01, READ: 0x02, WRITE: 0x03, REGWRITE: 0x04, ACTION:0x05};
+	//Motor IDs **NOTE:ALL == broadcast to all motors for execution
+	this.id = {ALL: 0xFE, BASE: 0x00, LEFTSHOULDER: 0x01, RIGHTSHOULDER: 0x02, ELBOW: 0x03, WRIST: 0x04};
+	this.testing = "hello world";
+	//Servo Register Addresses **NOTE:TORQUE enables motor movement
+	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
+
+	/*Initiate Serialport*/
+		this.serial.on('open', function(err) {
+		    if(err){
+		    	console.log(err);
+		    }
+		    else{
+		    	// console.log('>>SerialPort is Open<<'); //For Debugging
+		    }
+		});
+		// this.serial.on('data', function(data){ //For debugging
+		// 	console.log(">>Response:" + data);
+		// });
+		this.serial.on('err', function(err){
+			console.log(err);
+		});
 }
 
-serial.on('open', function(){
-	console.log('>>SerialPort is Open<<'); //For Debugging
-	/*Data watcher is for Debugging*/
-	serial.on('data', function(data) {
-		// inbox += data.toString('ascii');
-		inbox += data.toString('utf8'); //In ASCII format, save what is received in a buffer
-		if(inbox.indexOf("-") != -1) { //When you find the end of line char, print out the buffer
-			console.log(">>Response: " + inbox); //For debugging. Output the response from device to console
-			inbox = ""; //Once buffer is sent out, clear it
-		}
-	});
-});
 
-Arm.prototype.handle = function(info){ //Info is an object, with members outlined when sending control signals via mission-control-test.html
+Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
 	//This handle function Sends Commands to Dynamixel MX-64
-	if(info){
-		motorValuesSet = false;
+	if(this.defaulted == false){
+		console.log("Enabling Torque");
+		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
+		this.defaulted = true;
 	}
-	if(motorValuesSet == false){ 
-		if(defaultSet == false){/*For Debugging*/
-				serial.write("Communication Initiated-"); //For Debugging. Note there may be delay in the startup of serialport
-		}
-
-		//Loop to send packets
-		for(var i = 0; i < 10; i++){
-			if(i >= 4){
-				defaultSet = true; //Once the initial motor restraints are set, don't reset them.
-			}
-			//Send packets defining initial motor restraints
-			if(i < 4 && defaultSet == false){
-				command = servoPos(180,i+1,ccwAngleLimit); 
-				console.log("	<Set Motor ccW Limit: " + command + ">");
-			}
-			else if(i == 4 && info.base != undefined){
-				command = servoPos(info.base,baseID,goalPosition);
-				console.log("	<Set Motor Position: " + command + ">");
-			}
-			else if(i == 5 && info.shoulderL != undefined){
-				command = servoPos(info.shoulderL,shoulderLID,goalPosition);
-				console.log("	<Set Motor Position: " + command + ">");
-			}
-			else if(i == 6 && info.shoulderR != undefined){
-				command = servoPos(info.shoulderR,shoulderRID,goalPosition);
-				console.log("	<Set Motor Position: " + command + ">");
-			}
-			else if(i == 7 && info.elbow != undefined){
-				command = servoPos(info.elbow,elbowID,goalPosition);
-				console.log("	<Set Motor Position: " + command + ">");
-			}
-			else if(i == 8 && info.wrist != undefined){
-				command = servoPos(info.wrist,wristID,goalPosition);
-				console.log("	<Set Motor Position: " + command + ">");
-			}
-			else if(i == 9 && info.speed != undefined){ //All motors have same speed
-				command = servoPos(info.speed,broadcastID,movingSpeed);
-				console.log("	<Set Motor Speed: " + command + ">");
-			}
-			//Send command buffer to device
-			serial.write(command + "-", function(){
-				serial.drain(function(){ //Wait for buffer to be fully sent, and then do the stuff below...
-					command = [];
-					if(i >= 9){ //Once all motor values are sent...
-						motorValuesSet = true;
-					}
-				});
-			});
-		}
-
-		//For debugging
-		// console.log("Waiting..."); 
-		//All Motor's default is cw:0x0000, ccw:0x0FFF
+	if(input.base != undefined){
+		this.moveMotor(this.id.BASE, input.base);
 	}
+	if(input.shoulderL != undefined){
+		this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
+	}
+	if(input.shoulderR != undefined){
+		this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
+	}
+	if(input.elbow != undefined){
+		this.moveMotor(this.id.ELBOW, input.elbow);
+	}
+	if(input.wrist != undefined){
+		this.moveMotor(this.id.WRIST, input.wrist);
+	}
+	// if(input.speed != undefined){
+	// 	setSpeed(id.ALL, input.speed);
+	// }
+	// this.print(); //this.print points to the print method prototyped in Arm class (functions can be classes!)
+	// this.moveMotor(this.id.ELBOW, input.elbow);
+	// console.log("Elbow:" + input.elbow);
 };
+
+Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
+	// console.log("Enabling Torque");
+	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
+	var hexdeg = (number/360) * 4095;
+	if(hexdeg > 4095){
+		hexdeg = 4095;
+	}
+	if(hexdeg < 0){
+		hexdeg = 0;
+	}
+	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
+	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
+	console.log("H:" + high + "  L:" + low);
+	this.writePacket(this.operation.WRITE, ID, this.edit.POSITION, low, high);
+};
+
+Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
+	var hexdeg = (number/360) * 4095;
+	if(hexdeg > 4095){
+		hexdeg = 4095;
+	}
+	if(hexdeg < 0){
+		hexdeg = 0;
+	}
+	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
+	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
+	console.log("H:" + high + "  L:" + low);
+	this.writePacket(this.operation.WRITE, ID, this.edit.SPEED, low, high);
+};
+
+Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
+	console.log("Controlling Motor " + motorID); //For Debugging
+	var length = 0;
+	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
+	if(typeof highbyte == "undefined") { //determine length through undefined parameter "highbyte"
+		length = 2+2;
+	} else {
+		length = 3+2;
+	}	
+	
+	for(var i = 0; i < command.length; i++) { //clear the command buffer
+		command[i] = 0x00;
+	};
+
+	var i = 0;
+	var checksum = 0;
+	/*Put the control packet together*/
+	/*Method 2: Send all at once after compiling elements together into buffer*/
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = motorID; // ID Byte Char
+	command[i++] = length; //packet length
+	command[i++] = instruction; //instruction byte
+	command[i++] = register; //first parameter will always be the register address
+	command[i++] = lowbyte; //value/lowbyte, depending on the function call
+	checksum = parseInt(motorID) + parseInt(length) + parseInt(instruction) + parseInt(register) + parseInt(lowbyte); //Assumes command is not PING, which uses neither lowbyte nor highbyte
+	if(typeof highbyte != "undefined"){
+		command[i++] = highbyte; //highbyte
+		checksum += parseInt(highbyte);
+	}
+	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
+	// command += "-"; //For use in testing with Arduino Feedback
+	/*Send control packet and prep for reuse*/
+	this.serial.write(command, function() {});
+	console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
+}
 
 Arm.prototype.resume = function() {};
 Arm.prototype.halt = function(data) {};
+
+Arm.prototype.print = function(){ //For Debugging
+	console.log("Hello " + this.model_ref);
+}
+
+/*Main, For Debugging*/
+// var a = new Arm(); //For Debugging: Object initialization
+// var interval = 0;
+
+// setInterval(function(){
+// 	if(interval = 0){
+// 		a.handle({base: 360, shoulderL: 180, shoulderR: 30, elbow: 0, wrist: 0}); //For Debugging: For the member function
+// 		interval = 1;
+// 	}
+// 	else if(interval = 1){
+// 		a.handle({base: 360, shoulderL: 0, shoulderR: 30, elbow: 0, wrist: 0}); /*//For Debugging: For the member function*/
+// 		interval = 0;
+// 	}
+// }, 1000);
 
 module.exports = exports = Arm;
