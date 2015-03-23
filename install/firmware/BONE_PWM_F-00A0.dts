@@ -13,21 +13,21 @@
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
 
 	/* identification */
-	part-number = "bone_pwm_P8_19_custom";
+	part-number = "BONE_PWM_F_P9_29";
 	version = "00A0";
 
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
-		"P8.19",		/* pwm: ehrpwm2A */
+		"P9.29",		/* pwm: ehrpwm0B */
 		/* the hardware IP uses */
-		"ehrpwm2A";
+		"ehrpwm0B";
 
 	fragment@0 {
 		target = <&am33xx_pinmux>;
 		__overlay__ {
-			pwm_P8_19: pinmux_pwm_P8_19_pins {
-				pinctrl-single,pins = <0x020  0x4>; /* P8_19 (ZCZ ball U10) | MODE 4 */
+			pwm_P9_29: pinmux_pwm_P9_29_pins {
+				pinctrl-single,pins = <0x194  0x1>; /* P9_29 (ZCZ ball B13) | MODE 1 */
 			};
 		};
 	};
@@ -35,14 +35,12 @@
 	fragment@1 {
 		target = <&ocp>;
 		__overlay__ {
-			pwm_test_P8_19 {
+			pwm_test_P9_29 {
 				compatible	= "pwm_test";
-				pwms 		= <&ehrpwm2 0 500000 0>;
-				pwm-names 	= "PWM_P8_19";
-
-				pinctrl-names	= "default";
-				pinctrl-0	= <&pwm_P8_19>;
-
+				pwms 		= <&ehrpwm0 1 500000 0>;
+				pwm-names 	= "PWM_P9_29";
+			    pinctrl-names	= "default";
+			    pinctrl-0	= <&pwm_P9_29>;
 				enabled		= <1>;
 				duty		= <0>;
 				status 		= "okay";
