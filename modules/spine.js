@@ -194,44 +194,44 @@ function Spine(feedback) {
 		}
 	}
 
+	/*
 	function uEnvMsg() {
 		console.log("Please add this line to the /boot/uboot/uEnv.txt file: ");
 		console.log("\t optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-UART5,am33xx_pwm,bone_pwm_P8_13,bone_pwm_P8_19,bone_pwm_P8_34,bone_pwm_P8_36,bone_pwm_P9_28,bone_pwm_P9_29,BB-I2C0,BB-I2C1");
-	}
-
+	}*/
 	console.log("Systems Check...");
 	if(os.hostname() == 'beaglebone') {
 		console.log("System Hostname is Beaglebone");
-		console.log("Checking if UARTS are enabled");
-		var uflag = false;
-		for (var i = this.hardware.uarts.length - 1; i >= 0; i--) {
-			if(!fs.existsSync(this.hardware.uarts[i])) {
-				console.log("Not all UARTS are initalized!");
-				uEnvMsg();
-				return;
-			}
-		};
-		console.log("\tUART Check complete");		
-		var pwmflag = false;
-		console.log("Checking if PWMs are enabled");
-		for (var i = this.hardware.pwms.length - 1; i >= 0; i--) {
-			var path = glob.sync("/sys/devices/ocp.*/pwm_test_"+this.hardware.pwms[i]+".*/");
-			if(path.length == 0) {
-				console.log("Not all PWMs are initalized!");
-				uEnvMsg();
-				return;
-			}
-			this.hardware.pwms[i] = path[0];
-		};
-		console.log("PWMS exist and paths generated.");
-		console.log("\tPWM Check complete");
-		
+		console.log("Setting up UARTS");
+
+		var slots_path = glob.sync("/sys/devices/bone_capemgr.*/slots"); 
+		if(slots_path.length == 0) {
+			console.log("Could not find bone cape manager slots file!");
+			return;
+		}
+		// Inserting firmware into Device tree structure slots.
+
+		console.log("Setting up UARTs");	
+		fs.writeFileSync(slots_path, "BB-UART1");
+		fs.writeFileSync(slots_path, "BB-UART2");
+		fs.writeFileSync(slots_path, "BB-UART4");
+		fs.writeFileSync(slots_path, "BB-UART5");
+		console.log("\tUARTs set");
+
+		console.log("Setting up I2Cs");
+		fs.writeFileSync(slots_path, "BB-I2C0");
+		fs.writeFileSync(slots_path, "BB-I2C1");
+		console.log("\tI2Cs set");
+
 		console.log("Setting up PWMs");
-		for (var i = this.hardware.pwms.length - 1; i >= 0; i--) {
-			var path = this.hardware.pwms[i];
-			fs.writeFileSync(path+"polarity", "0");
-			fs.writeFileSync(path+"duty", "0");
-		};
+		fs.writeFileSync(slots_path, "am33xx_pwm");
+		fs.writeFileSync(slots_path, "bone_pwm_P8_13_custom");
+		fs.writeFileSync(slots_path, "bone_pwm_P8_19_custom");
+		fs.writeFileSync(slots_path, "bone_pwm_P8_34_custom");
+		fs.writeFileSync(slots_path, "bone_pwm_P8_36_custom");
+		fs.writeFileSync(slots_path, "bone_pwm_P9_28_custom");
+		fs.writeFileSync(slots_path, "bone_pwm_P9_29_custom");
+		console.log("\tPWMs set");
 		
 		console.log("Exporting GPIOs");
 		for (var i = 72; i <= 77; ++i) {
