@@ -9,13 +9,11 @@ systemd=quiet init=/lib/systemd/systemd
 
 ##BeagleBone Black:
 
-optargs=quiet video=HDMI-A-1:1280x1024@60e drm.debug=7 capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-UART5,am33xx_pwm,bone_pwm_P8_13,bone_pwm_P8_19,bone_pwm_P8_34,bone_pwm_P8_36,bone_pwm_P8_45,bone_pwm_P8_46,bone_pwm_P9_14,bone_pwm_P9_16,bone_pwm_P9_21,bone_pwm_P9_22,bone_pwm_P9_28,bone_pwm_P9_29,bone_pwm_P9_31,bone_pwm_P9_42 
-
 ##Disable HDMI/eMMC
 #cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN,BB-BONE-EMMC-2G
 
 ##Disable HDMI
-#cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
+cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
 
 ##Audio Cape (needs HDMI Audio disabled)
 #cape_disable=capemgr.disable_partno=BB-BONELT-HDMI
@@ -54,5 +52,3 @@ loadfiles=run loadkernel; run loadinitrd; run loadfdt
 mmcargs=setenv bootargs console=tty0 console=${console} ${optargs} ${cape_disable} ${cape_enable} ${kms_force_mode} root=${mmcroot} rootfstype=${mmcrootfstype} ${systemd}
 
 uenvcmd=run loadfiles; run mmcargs; bootz ${loadaddr} ${initrd_addr}:${initrd_size} ${fdtaddr}
-#
-

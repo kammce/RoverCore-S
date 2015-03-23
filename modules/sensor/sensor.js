@@ -310,7 +310,7 @@ Sensor.prototype.GPS = function(){
 
  var serialport = require('serialport'),// include the library
     SerialPort = serialport.SerialPort, // make a local instance of it
-    portName = 'dev/tty01';   // <-- get port name from the command line (node GPS.js *NAME*)
+    portName = 'dev/ttyO1';   // <-- get port name from the command line (node GPS.js *NAME*)
 
 var myPort = new SerialPort(portName, { // <--Then you open the port using new() like so
    baudRate: 9600,

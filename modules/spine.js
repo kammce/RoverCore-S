@@ -199,6 +199,13 @@ function Spine(feedback) {
 		console.log("Please add this line to the /boot/uboot/uEnv.txt file: ");
 		console.log("\t optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-UART5,am33xx_pwm,bone_pwm_P8_13,bone_pwm_P8_19,bone_pwm_P8_34,bone_pwm_P8_36,bone_pwm_P9_28,bone_pwm_P9_29,BB-I2C0,BB-I2C1");
 	}*/
+	function loadFirmware(path, firmware) {
+		try {
+			fs.writeFileSync(path, "BB-UART1");
+		} catch(e) {
+			console.log("DTS "+firmware+" is already loaded");
+		}
+	}
 	console.log("Systems Check...");
 	if(os.hostname() == 'beaglebone') {
 		console.log("System Hostname is Beaglebone");
@@ -212,25 +219,25 @@ function Spine(feedback) {
 		// Inserting firmware into Device tree structure slots.
 
 		console.log("Setting up UARTs");	
-		fs.writeFileSync(slots_path, "BB-UART1");
-		fs.writeFileSync(slots_path, "BB-UART2");
-		fs.writeFileSync(slots_path, "BB-UART4");
-		fs.writeFileSync(slots_path, "BB-UART5");
+		loadFirmware(slots_path, "BB-UART1");
+		loadFirmware(slots_path, "BB-UART2");
+		loadFirmware(slots_path, "BB-UART4");
+		loadFirmware(slots_path, "BB-UART5");
 		console.log("\tUARTs set");
 
 		console.log("Setting up I2Cs");
-		fs.writeFileSync(slots_path, "BB-I2C0");
-		fs.writeFileSync(slots_path, "BB-I2C1");
+		loadFirmware(slots_path, "BB-I2C0");
+		loadFirmware(slots_path, "BB-I2C1");
 		console.log("\tI2Cs set");
 
 		console.log("Setting up PWMs");
-		fs.writeFileSync(slots_path, "am33xx_pwm");
-		fs.writeFileSync(slots_path, "bone_pwm_P8_13_custom");
-		fs.writeFileSync(slots_path, "bone_pwm_P8_19_custom");
-		fs.writeFileSync(slots_path, "bone_pwm_P8_34_custom");
-		fs.writeFileSync(slots_path, "bone_pwm_P8_36_custom");
-		fs.writeFileSync(slots_path, "bone_pwm_P9_28_custom");
-		fs.writeFileSync(slots_path, "bone_pwm_P9_29_custom");
+		loadFirmware(slots_path, "am33xx_pwm");
+		loadFirmware(slots_path, "bone_pwm_P8_13_custom");
+		loadFirmware(slots_path, "bone_pwm_P8_19_custom");
+		loadFirmware(slots_path, "bone_pwm_P8_34_custom");
+		loadFirmware(slots_path, "bone_pwm_P8_36_custom");
+		loadFirmware(slots_path, "bone_pwm_P9_28_custom");
+		loadFirmware(slots_path, "bone_pwm_P9_29_custom");
 		console.log("\tPWMs set");
 		
 		console.log("Exporting GPIOs");

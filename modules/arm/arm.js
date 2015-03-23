@@ -7,7 +7,7 @@ var Skeleton = require("../skeleton.js");
 
 /*Globals*/
 // var serial = new SERIALPORT.SerialPort("for/path/to/uart/device,/See_READMEarm.txt", { baudrate: 9600 }); //For use in actual rover
-var serial = new SerialPort("/dev/ttyACM0", { baudrate: 9600 } ); //For use in local system testing; Read/Write stream to USB
+var serial = new SerialPort("/dev/ttyO2", { baudrate: 9600 } ); //For use in local system testing; Read/Write stream to USB
 var goalPosition = 0x1E, movingSpeed = 0x20, ccwAngleLimit = 0x08, cwAngleLimit = 0x06; //Motor Control Table Addresses
 var baseID = 0x00, shoulderLID = 0x01, shoulderRID = 0x02, elbowID = 0x03, wristID = 0x04, broadcastID = 0xFE; //Motor ID Tags **NOTE:broadcastID == broadcast to all motors
 var command = [];
