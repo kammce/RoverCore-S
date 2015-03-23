@@ -9,13 +9,16 @@ echo "Only install on Beagle Bone Black! (5 second halt)"
 sleep 5s
 
 echo "Compiling Device Tree Structure files (fireware)"
+dtc -O dtb -o BONE_PWM_A-00A0.dtbo -b 0 -@ BONE_PWM_A-00A0.dts 
+dtc -O dtb -o BONE_PWM_B-00A0.dtbo -b 0 -@ BONE_PWM_B-00A0.dts 
+dtc -O dtb -o BONE_PWM_C-00A0.dtbo -b 0 -@ BONE_PWM_C-00A0.dts 
+dtc -O dtb -o BONE_PWM_D-00A0.dtbo -b 0 -@ BONE_PWM_D-00A0.dts 
+dtc -O dtb -o BONE_PWM_E-00A0.dtbo -b 0 -@ BONE_PWM_E-00A0.dts 
+dtc -O dtb -o BONE_PWM_F-00A0.dtbo -b 0 -@ BONE_PWM_F-00A0.dts 
 
-dtc -O dtb -o bone_pwm_P8_13_custom-00A0.dtbo -b 0 -@ bone_pwm_P8_13_custom-00A0.dts
-dtc -O dtb -o bone_pwm_P8_19_custom-00A0.dtbo -b 0 -@ bone_pwm_P8_19_custom-00A0.dts
-dtc -O dtb -o bone_pwm_P8_34_custom-00A0.dtbo -b 0 -@ bone_pwm_P8_34_custom-00A0.dts
-dtc -O dtb -o bone_pwm_P8_36_custom-00A0.dtbo -b 0 -@ bone_pwm_P8_36_custom-00A0.dts
-dtc -O dtb -o bone_pwm_P9_28_custom-00A0.dtbo -b 0 -@ bone_pwm_P9_28_custom-00A0.dts
-dtc -O dtb -o bone_pwm_P9_29_custom-00A0.dtbo -b 0 -@ bone_pwm_P9_29_custom-00A0.dts
 
 echo "Installing Compiled Firware into /lib/fireware"
-cp bone_pwm_P8_13_custom-00A0.dtbo bone_pwm_P8_19_custom-00A0.dtbo bone_pwm_P8_34_custom-00A0.dtbo bone_pwm_P8_36_custom-00A0.dtbo bone_pwm_P9_28_custom-00A0.dtbo bone_pwm_P9_29_custom-00A0.dtbo /lib/firmware
+cp BONE_PWM_A-00A0.dtbo BONE_PWM_B-00A0.dtbo \
+BONE_PWM_C-00A0.dtbo BONE_PWM_D-00A0.dtbo \ 
+BONE_PWM_E-00A0.dtbo BONE_PWM_F-00A0.dtbo \
+ /lib/firmware
