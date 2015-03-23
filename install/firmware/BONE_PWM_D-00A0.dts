@@ -13,7 +13,7 @@
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
 
 	/* identification */
-	part-number = "bone_pwm_P8_36_custom";
+	part-number = "BONE_PWM_D_P8_36";
 	version = "00A0";
 
 	/* state the resources this cape uses */
