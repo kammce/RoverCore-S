@@ -19,11 +19,17 @@ ntpdate pool.ntp.org
 apt-get update 
 apt-get -y upgrade
 apt-get -y dist-upgrade
+# Installing nodejs deb source
+apt-get install curl
+curl -sL https://deb.nodesource.com/setup | bash -
 # Installing latest nodejs
-apt-get install -y nodejs npm
+apt-get install -y nodejs
 # Running firware installation
-cd cameras
+cd camera-install
 ./camera-install.sh
+# Install FFMPEG
+cd ../ffmpeg
+./ffmpeg-install.sh
 # Leaving firmware directory and going to root
 cd ../..
 # Installing dependencies
