@@ -27,9 +27,7 @@ Tracker.prototype.handle = function(data) {
 	console.log(this.module+" Recieved ", data);
 	if(data["req"] == "Set Rotations") {
 		this.setRotations(data);
-	} else if (data["req"] == "Get Rotations") {
-		return this.getRotations();
-	}  else if (data["req"] == "Set Zoom") {
+	} else if (data["req"] == "Set Zoom") {
 		this.setZoom(data);
 	}
 };
@@ -43,6 +41,8 @@ Tracker.prototype.setRotations = function(data) {
 	var yaw = data["yaw"];
 	this.yaw = yaw;
 	this.pitch = pitch;
+	this.model.tracker.pitch = pitch;
+	this.model.tracker.yaw = yaw;
 	// this.serialport.write(data["pitch"]+","+data["yaw"]+"\r\n");
 
 	// this.serialport.on("data", function(data) {
@@ -62,7 +62,7 @@ Tracker.prototype.getRotations = function() {
 Tracker.prototype.setZoom = function(data) {
 	console.log("Setting zoom");
 	this.zoom = data["zoom"];
-	this.model.zoom = data["zoom"];
+	this.model.tracker.zoom = data["zoom"];
 }
 
 module.exports = exports = Tracker;
