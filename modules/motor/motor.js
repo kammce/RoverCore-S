@@ -15,9 +15,9 @@ function Motor(model_ref, feedback) {
 	this.controlAngle;
 	this.controlSpeed;
 	this.controlRate;
+        this.limit;
+        this.limitCount=0;
 	this.tranAngle;
-	this.transSpeed;
-	this.angleRate;
 	this.compOld;
 	//For pin sets
 	this.motors={
@@ -80,10 +80,11 @@ Motor.prototype.halt = function() {
 	clearInterval(this.timeout);
 };
 // =========================Smart Controller==========================
-Motor.prototype.smartController= function(angle, speed){
+Motor.prototype.smartController= function(angle, speed, limit){
 	this.controlAngle=angle;
+        this.transAngle=angle;
 	this.controlSpeed=speed;
-	this.controlRate=this.createRate(angle,speed);
+	this.controlRate=this.createRate(angle,speed,100);
 	this.compOld=this.getComp();
 	clearInterval(this.timeout);
 	this.timeout=setInterval(this.smartControllerAdjust(), 100);
@@ -91,22 +92,39 @@ Motor.prototype.smartController= function(angle, speed){
 Motor.prototype.smartControllerAdjust = function(){
 	var compNew=this.getComp();
 	var compRate=compNew-this.compOld;
-	if(compRate>this.controlRate){
-		this.controlAngle++;
-	}
-	else if(compRate<this.controlRate){
-
-	}
-	else{
-		console.log("Angle is Equlized")
-	}
+        if(limitCount<this.limit && limitCount>(-1*this.limit)){  //checks if incrementation is below limit
+                if((this.controlAngle>0 && this.controlAngle<90)||(this.controlAngle>180 && this.controlAngle<270)){  //if spinning right
+                        if(compRate>this.controlRate){ // If rover is chaning direction faster than it should. 50 > 45
+                                this.transAngle++;
+                                this.limitCount++;
+                        }
+                        else if(compRate<this.controlRate){   // If rover is chaning direction slower than it should. 20 < 45
+                                this.transAngle--;
+                                this.limitCount--;
+                        }
+                }       
+                else if((this.controlAngle>90 && this.controlAngle<180)||(this.controlAngle>270 && this.controlAngle<360)){  // if spinning Left so reverse logic
+                        if(compRate<this.controlRate){ // If rover is chaning direction faster than it should.  -50 < -45
+                              this.transAngle--;
+                              this.limitCount--;
+                        }
+                        else if(compRate>this.controlRate){   // If rover is chaning direction slower than it should. -20 > -45
+                                this.transAngle++;
+                                this.limitCount++;
+                        }
+                }
+	        else{
+		      console.log("Angle is Equlized")
+	        }
+                this.setAllMotorsTemp(this.transAngle, this.controlSpeed);
+        }
 }
-Motor.prototype.createRate=function(controlAngle,controlSpeed){
+Motor.prototype.createRate=function(controlAngle, controlSpeed, interval){
 	var output=0;	
-	else if(controlAngle<=90 && controlAngle>=0){ // checks for angles 1-90
+	else if(controlAngle<=90 && controlAngle>=0){ 
 		output=90-controlAngle;
 	}
-	else if(controlAngle>90 && controlAngle<180){ // checks for angles 91-179
+	else if(controlAngle>90 && controlAngle<180){ 
 		output=(-1*(controlAngle-90));
 	}
 	else if (controlAngle>=180 && controlAngle <=270){
@@ -122,8 +140,11 @@ Motor.prototype.createRate=function(controlAngle,controlSpeed){
 		output=0;
 		console.log("Incorrect angle is being inserted into createRate function");
 	}
-	return (output*(controlSpeed/100));
+	return (output*(controlSpeed/100)*(interval/100000));
 };
+Motor.prototype.calibrate=function(){
+        
+}
 Motor.prototype.getComp=function(){
 
 };
