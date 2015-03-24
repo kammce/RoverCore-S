@@ -12,8 +12,13 @@ function Motor(model_ref, feedback) {
 	this.feedback = feedback;
 	//For Smart Controller
 	this.timeout;
-	this.angle;
-	this.speed;
+	this.controlAngle;
+	this.controlSpeed;
+	this.controlRate;
+	this.tranAngle;
+	this.transSpeed;
+	this.angleRate;
+	this.compOld;
 	//For pin sets
 	this.motors={
 		m1: { //Left Side
@@ -76,25 +81,49 @@ Motor.prototype.halt = function() {
 };
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
-	this.angle=angle;
-	this.speed=speed;
-	var comp_val=this.getComp();
-	this.timeout=setInterval(this.smartControllerAdjust(comp_val, angle, speed), 100);
+	this.controlAngle=angle;
+	this.controlSpeed=speed;
+	this.controlRate=this.createRate(angle,speed);
+	this.compOld=this.getComp();
+	clearInterval(this.timeout);
+	this.timeout=setInterval(this.smartControllerAdjust(), 100);
 };
-Motor.prototype.smartControllerAdjust = function(comp_data_old, angle, speed){
-	var comp_data_new=this.getComp();
-	if(comp_data_new>comp_data_old){
-		this.angle=this.angle+1;
-		this.setAllMotors(this.angle, this.speed);
+Motor.prototype.smartControllerAdjust = function(){
+	var compNew=this.getComp();
+	var compRate=compNew-this.compOld;
+	if(compRate>this.controlRate){
+		this.controlAngle++;
 	}
-	else if(comp_data_new<comp_data_old){
-		this.angle=this.angle-1;
-		this.setAllMotors(this.angle, this.speed);
+	else if(compRate<this.controlRate){
+
 	}
 	else{
 		console.log("Angle is Equlized")
 	}
 }
+Motor.prototype.createRate=function(controlAngle,controlSpeed){
+	var output=0;	
+	else if(controlAngle<=90 && controlAngle>=0){ // checks for angles 1-90
+		output=90-controlAngle;
+	}
+	else if(controlAngle>90 && controlAngle<180){ // checks for angles 91-179
+		output=(-1*(controlAngle-90));
+	}
+	else if (controlAngle>=180 && controlAngle <=270){
+		output=(270-controlAngle);
+	}
+	else if (controlAngle>270 && controlAngle <=360){
+		output=(-1*(controlAngle-270));
+	}
+	else if (controlAngle==361 || controlAngle==362){
+		output=180;
+	}
+	else{
+		output=0;
+		console.log("Incorrect angle is being inserted into createRate function");
+	}
+	return (output*(controlSpeed/100));
+};
 Motor.prototype.getComp=function(){
 
 };
