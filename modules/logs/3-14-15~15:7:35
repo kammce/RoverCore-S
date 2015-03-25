@@ -1,5 +1,0 @@
-[15:7:35.204]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":150.64224645720873,"yaw":25.559965171823812}}
-[15:7:55.578]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
-[15:7:58.487]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":150.64224645720873,"yaw":70.82099197418928}}
-[15:7:59.843]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":46.14576283817511,"yaw":70.82099197418928}}
-[15:8:0.741]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}

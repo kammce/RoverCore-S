@@ -121,7 +121,7 @@ Motor.prototype.smartControllerAdjust = function(){
 }
 Motor.prototype.createRate=function(controlAngle, controlSpeed, interval){
 	var output=0;	
-	else if(controlAngle<=90 && controlAngle>=0){ 
+	if(controlAngle<=90 && controlAngle>=0){ 
 		output=90-controlAngle;
 	}
 	else if(controlAngle>90 && controlAngle<180){ 

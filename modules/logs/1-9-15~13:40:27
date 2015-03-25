@@ -1,4 +1,0 @@
-[13:40:27.720]  {"directive":"TRACKER","info":{"request":"Set Rotations","pitch":"89","yaw":"90"}}
-[13:40:32.40]  {"directive":"TRACKER","info":{"request":"Get Rotations"}}
-[13:43:7.673]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
-[13:43:18.566]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":"89","yaw":"90"}}

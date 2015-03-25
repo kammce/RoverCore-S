@@ -1,6 +1,0 @@
-[13:18:40.103]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":24.22774531795416,"yaw":27.258540601060027}}
-[13:18:42.617]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
-[13:18:47.299]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
-[13:18:57.681]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
-[13:19:16.666]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":83.23382517744695,"yaw":0}}
-[13:19:18.242]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
