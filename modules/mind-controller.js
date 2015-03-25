@@ -24,7 +24,7 @@ function MindController(feedback, simulation) {
 		this.sensor = new Skeleton("SENSOR");
 		this.motor = new Skeleton("MOTOR");
 		this.arm = new Skeleton("ARM");
-		this.tracker = new Tracker("TRACKER");
+		this.tracker = new Skeleton("TRACKER");
 		this.logger = new Skeleton("LOGGER");
 	} else {
 		var Sensor = require('./sensor/sensor.js');
