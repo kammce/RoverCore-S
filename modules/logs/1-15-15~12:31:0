@@ -1,0 +1,8 @@
+[12:31:0.174]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":59.858614447924666}}
+[12:31:10.800]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:31:24.711]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:31:38.679]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:31:38.679]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:32:53.167]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:32:53.167]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:32:53.167]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}

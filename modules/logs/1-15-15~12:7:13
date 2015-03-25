@@ -1,0 +1,5 @@
+[12:7:13.997]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":87.03906386583625,"yaw":0}}
+[12:7:16.510]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":87.03906386583625,"yaw":165.20323775494265}}
+[12:7:18.117]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:8:24.474]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:8:24.475]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}

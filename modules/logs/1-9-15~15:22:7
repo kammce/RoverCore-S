@@ -1,0 +1,11 @@
+[15:22:7.375]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[15:22:27.110]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":"80","yaw":"80"}}
+[15:22:28.201]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[15:22:37.2]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[17:48:11.160]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":"89","yaw":"90"}}
+[17:48:12.214]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[8:38:14.98]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:44:39.209]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":"89","yaw":"90"}}
+[12:44:46.998]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:45:8.484]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
+[12:48:31.728]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}

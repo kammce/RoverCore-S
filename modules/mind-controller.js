@@ -19,6 +19,8 @@ function MindController(feedback, simulation) {
 	this.model = model;
 
 	if(simulation == true) {
+		// var Tracker = require('./tracker/tracker.js');
+		// this.tracker = new Tracker(model, feedback);
 		this.sensor = new Skeleton("SENSOR");
 		this.motor = new Skeleton("MOTOR");
 		this.arm = new Skeleton("ARM");

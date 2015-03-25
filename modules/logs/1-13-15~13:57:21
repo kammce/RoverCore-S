@@ -1,0 +1,3 @@
+[13:57:21.518]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":0,"yaw":56.309932474020215}}
+[13:57:22.359]  {"directive":"TRACKER","info":{"req":"Set Rotations","pitch":112.83365417791754,"yaw":56.309932474020215}}
+[13:57:24.244]  {"directive":"TRACKER","info":{"req":"Get Rotations"}}
