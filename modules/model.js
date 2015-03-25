@@ -16,9 +16,6 @@ var Model = {
 		},
 
 	compass:{
-		x:0,
-		y:0,
-		z:0,
 		heading:0
 		}, 
  	
