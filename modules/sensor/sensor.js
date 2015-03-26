@@ -341,6 +341,7 @@ function measureAccel() {
 Sensor.prototype.GPS = function(){
   
    var parent = this;
+   var SerialPort = SERIALPORT.SerialPort; // make a local instant
    var myPort = new SerialPort("dev/ttyO1", { // <--Then you open the port using new() like so
    baudRate: 9600,
    parser: serialport.parsers.readline("\r\n") // look for return and newline at the end of each data packet
