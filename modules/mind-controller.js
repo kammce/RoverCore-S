@@ -19,8 +19,6 @@ function MindController(feedback, simulation) {
 	this.model = model;
 
 	if(simulation == true) {
-		// var Tracker = require('./tracker/tracker.js');
-		// this.tracker = new Tracker(model, feedback);
 		this.sensor = new Skeleton("SENSOR");
 		this.motor = new Skeleton("MOTOR");
 		this.arm = new Skeleton("ARM");
@@ -39,6 +37,7 @@ function MindController(feedback, simulation) {
 		this.logger = new Logger(model, feedback);
 	}
 }
+
 MindController.prototype.handle = function(data) {
 	switch(data['directive']) {
 		case "DISCONNECT":
