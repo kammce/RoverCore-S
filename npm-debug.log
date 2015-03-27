@@ -1,0 +1,101 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'glob' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.33
+4 warn package.json RoverCore@1.5.0 No repository field.
+5 verbose readDependencies using package.json deps
+6 verbose cache add [ 'glob@latest', null ]
+7 verbose cache add name=undefined spec="glob@latest" args=["glob@latest",null]
+8 verbose parsed url { protocol: null,
+8 verbose parsed url   slashes: null,
+8 verbose parsed url   auth: null,
+8 verbose parsed url   host: null,
+8 verbose parsed url   port: null,
+8 verbose parsed url   hostname: null,
+8 verbose parsed url   hash: null,
+8 verbose parsed url   search: null,
+8 verbose parsed url   query: null,
+8 verbose parsed url   pathname: 'glob@latest',
+8 verbose parsed url   path: 'glob@latest',
+8 verbose parsed url   href: 'glob@latest' }
+9 verbose cache add name="glob" spec="latest" args=["glob","latest"]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: 'latest',
+10 verbose parsed url   path: 'latest',
+10 verbose parsed url   href: 'latest' }
+11 verbose addNamed [ 'glob', 'latest' ]
+12 verbose addNamed [ null, null ]
+13 silly lockFile 25ceac78-glob-latest glob@latest
+14 verbose lock glob@latest /Users/mitchellwaldman/.npm/25ceac78-glob-latest.lock
+15 info addNameTag [ 'glob', 'latest' ]
+16 verbose request where is /glob
+17 verbose request registry https://registry.npmjs.org/
+18 verbose request id 5eecd4298f7b1e17
+19 verbose url raw /glob
+20 verbose url resolving [ 'https://registry.npmjs.org/', './glob' ]
+21 verbose url resolved https://registry.npmjs.org/glob
+22 verbose request where is https://registry.npmjs.org/glob
+23 info trying registry request attempt 1 at 11:32:17
+24 verbose etag "BDWOTESN4ETCELHV6CCDNCJNB"
+25 http GET https://registry.npmjs.org/glob
+26 http 200 https://registry.npmjs.org/glob
+27 silly registry.get cb [ 200,
+27 silly registry.get   { date: 'Mon, 23 Mar 2015 18:32:21 GMT',
+27 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+27 silly registry.get     etag: '"1NLSW958HWQKTU57OSD79NHUZ"',
+27 silly registry.get     'content-type': 'application/json',
+27 silly registry.get     'cache-control': 'max-age=60',
+27 silly registry.get     'content-length': '92947',
+27 silly registry.get     'accept-ranges': 'bytes',
+27 silly registry.get     via: '1.1 varnish',
+27 silly registry.get     age: '34',
+27 silly registry.get     'x-served-by': 'cache-lax1424-LAX',
+27 silly registry.get     'x-cache': 'HIT',
+27 silly registry.get     'x-cache-hits': '7',
+27 silly registry.get     'x-timer': 'S1427135541.659650,VS0,VE0',
+27 silly registry.get     vary: 'Accept',
+27 silly registry.get     'keep-alive': 'timeout=10, max=50',
+27 silly registry.get     connection: 'Keep-Alive' } ]
+28 verbose addNamed [ 'glob', '5.0.3' ]
+29 verbose addNamed [ '5.0.3', '5.0.3' ]
+30 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+31 verbose lock glob@5.0.3 /Users/mitchellwaldman/.npm/7d5136e3-glob-5-0-3.lock
+32 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+33 verbose lock https://registry.npmjs.org/glob/-/glob-5.0.3.tgz /Users/mitchellwaldman/.npm/e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz.lock
+34 verbose addRemoteTarball [ 'https://registry.npmjs.org/glob/-/glob-5.0.3.tgz',
+34 verbose addRemoteTarball   '15528c1c727e474a8e7731541c00b00ec802952d' ]
+35 info retry fetch attempt 1 at 11:32:22
+36 verbose fetch to= /var/folders/_n/p0_6r4hd0yxd6nvp5f2ldvf80000gp/T/npm-12848-no7JY77w/registry.npmjs.org/glob/-/glob-5.0.3.tgz
+37 http GET https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+38 http 200 https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+39 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+40 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+41 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+42 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+43 silly lockFile 25ceac78-glob-latest glob@latest
+44 silly lockFile 25ceac78-glob-latest glob@latest
+45 error Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3'
+45 error  { [Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3']
+45 error   errno: 3,
+45 error   code: 'EACCES',
+45 error   path: '/Users/mitchellwaldman/.npm/glob/5.0.3',
+45 error   parent: 'RoverCore' }
+46 error Please try running this command again as root/Administrator.
+47 error System Darwin 13.4.0
+48 error command "node" "/usr/local/bin/npm" "install" "glob"
+49 error cwd /Users/mitchellwaldman/Sites/ROBOTICS2/rovercore
+50 error node -v v0.10.33
+51 error npm -v 1.4.28
+52 error path /Users/mitchellwaldman/.npm/glob/5.0.3
+53 error code EACCES
+54 error errno 3
+55 error stack Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3'
+56 verbose exit [ 3, true ]

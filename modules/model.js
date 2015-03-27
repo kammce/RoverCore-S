@@ -2,6 +2,11 @@
 
 var Model = {
 	test: 0.0,
+	tracker: {
+		pitch:0,
+		yaw:0,
+		zoom: 1
+	},
 	gyro : {
 		x:0,					
 		y:0,
@@ -16,7 +21,7 @@ var Model = {
 		x:0,
 		y:0,
 		z:0,
-		heading:0
+		heading:270
 	},
  	GPS: {
 		longitude:0,      
@@ -28,6 +33,7 @@ var Model = {
 	 	voltage:0
 	},
 	wheel_speed:[0,0,0,0,0,0]
+
 }
 
 module.exports = exports = Model;

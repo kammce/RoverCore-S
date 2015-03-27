@@ -37,6 +37,7 @@ function MindController(feedback, simulation) {
 		this.logger = new Logger(model, feedback);
 	}
 }
+
 MindController.prototype.handle = function(data) {
 	switch(data['directive']) {
 		case "DISCONNECT":

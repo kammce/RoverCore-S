@@ -242,7 +242,28 @@ function Spine(feedback) {
 		loadFirmware(slots_path, "BONE_PWM_E");
 		loadFirmware(slots_path, "BONE_PWM_F");
 		console.log("\tPWMs set");
-		
+	
+		console.log("Checking if PWMs are enabled");
+		for (var i = this.hardware.pwms.length - 1; i >= 0; i--) {
+			var path = glob.sync("/sys/devices/ocp.*/pwm_test_"+this.hardware.pwms[i]+".*/");
+			if(path.length == 0) {
+				console.log("Not all PWMs are initalized!");
+				return;
+			}
+			this.hardware.pwms[i] = path[0];
+		};
+		console.log("PWMS exist and paths generated.");
+		console.log("\tPWM Check complete");
+
+		console.log("Setting up PWMs");
+		for (var i = this.hardware.pwms.length - 1; i >= 0; i--) {
+			var path = this.hardware.pwms[i];
+			console.log(path);
+			fs.writeFileSync(path+"polarity", "0");
+			fs.writeFileSync(path+"duty", "0");
+		};
+		console.log("Exporting GPIOs");
+	
 		console.log("Exporting GPIOs");
 		for (var i = 72; i <= 77; ++i) {
 			if(!fs.existsSync("/sys/class/gpio/gpio"+i)) {
@@ -267,6 +288,7 @@ function Spine(feedback) {
 	}
 }
 Spine.prototype.setPWM = function(_pin, percent) {
+	console.log("Pwm is being set!");
 	if(typeof percent != "number") {
 		console.log("Invalid pwm value, must between 0.0 and 1.0 ");
 		return false;
