@@ -4,7 +4,7 @@ How to send to Arm Motor via UART: Use the node serialport library (from voodoot
 	~	General syntax:
 			var Name_of_require_obj = require('serialport').SerialPort;
 			var Name_of_SerialPort_Obj = new Name_of_require_obj("path/to/uart/device", { misc_options }); //misc_options are optional
-	~	Path: ttyO1, ttyO2, ttyO4, ttyO5 are available. choose 1 (will be formatted like /dev/ttyO1, the O is an 'Oh', not a 0 'zero')
+	~	Path: using Beaglebone Black /dev/ttyO2
 	~	Baudrate: motor accepts 8000 bps(baud) - 3 Mbps, but with experimentation, RX-64AR only works well with 57600
 		>	Default Baudrate of Servo: 9600 bps(baud), unless otherwise specified
 	~	For robotic arm, we'll probably have all motors except the base motor be in joint-mode, because they are joints, not meant to 		rotate at an unlimited angle
@@ -14,12 +14,13 @@ For more detailed info on formatting and usage of SerialPort Library ---> See ht
 
 Motors in the arm: 5 total. 1 for base, 2 for shoulder connecting upper arm to base, 1 on elbow, and 1 for the claw's wrist.
 	~	Expected input command format from mission-control-test.html:
-		{ 
-		  "base": 0,        //<---All paramters other than speed are positional parameters in 0-360 degrees. Speed is in rpm
-		  "shoulderL": 0,
-		  "shoulderR": 0,
-		  "elbow": 0,
-		  "wrist": 0,
+		
+		var schema { 
+		  "base": 0,        //<---0-360 degrees
+		  "shoulderL": 0,	//<---63-243 degree limits
+		  "shoulderR": 0,	//<---83-263 degree limits
+		  "elbow": 0,		//<---127-270 degree limits
+		  "wrist": 0,		//<---0-149 degree limits
 		  "speed": 0	//<---Expects rpm val of range 0.114rpm to ~117.07rpm (1 - 1023, aka 0x0 - 0x3FF joint mode). 0x00 uses max speed.
 		}
 
