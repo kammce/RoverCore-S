@@ -182,8 +182,11 @@ function Spine(feedback) {
 	
 	this.pins = {};
 	this.hardware = {
+		// Labels for PWM pins
 		pwms: ["P8_13", "P8_19", "P8_34", "P8_36", "P9_28", "P9_29"],
+		// UART communication devices
 		uarts: ["/dev/ttyO1", "/dev/ttyO2", "/dev/ttyO4", "/dev/ttyO5" ],
+		// Motor Control GPIOs
 		gpios: {
 			"P8_39": "/sys/class/gpio/gpio76",
 			"P8_40": "/sys/class/gpio/gpio77",
@@ -194,13 +197,9 @@ function Spine(feedback) {
 		}
 	}
 
-	/*
-	function uEnvMsg() {
-		console.log("Please add this line to the /boot/uboot/uEnv.txt file: ");
-		console.log("\t optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-UART5,am33xx_pwm,bone_pwm_P8_13,bone_pwm_P8_19,bone_pwm_P8_34,bone_pwm_P8_36,bone_pwm_P9_28,bone_pwm_P9_29,BB-I2C0,BB-I2C1");
-	}*/
 	function loadFirmware(path, firmware) {
 		try {
+			console.log("Loading Firmware "+firmware);
 			fs.writeFileSync(path, firmware);
 		} catch(e) {
 			console.log("DTS "+firmware+" is already loaded");
@@ -256,14 +255,15 @@ function Spine(feedback) {
 		console.log("\tPWM Check complete");
 
 		console.log("Setting up PWMs");
+		// NOTE: This has been removed because polarity and duty cycle are set to 0 by default in the firmware configurations.
+		/*
 		for (var i = this.hardware.pwms.length - 1; i >= 0; i--) {
 			var path = this.hardware.pwms[i];
 			console.log(path);
 			fs.writeFileSync(path+"polarity", "0");
 			fs.writeFileSync(path+"duty", "0");
 		};
-		console.log("Exporting GPIOs");
-	
+		*/
 		console.log("Exporting GPIOs");
 		for (var i = 72; i <= 77; ++i) {
 			if(!fs.existsSync("/sys/class/gpio/gpio"+i)) {
