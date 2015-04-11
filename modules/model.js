@@ -17,13 +17,12 @@ var Model = {
 		y:0,
 		z:0
 	},
-	compass: {
-		x:0,
-		y:0,
-		z:0,
-		heading:270
-	},
- 	GPS: {
+
+	compass:{
+		heading:0
+		}, 
+ 	
+ 	GPS:{
 		longitude:0,      
 		latitude:0, 
 		longitude_dir:0, //dir = direction
