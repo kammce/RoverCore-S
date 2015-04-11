@@ -67,10 +67,10 @@ socket.on('connect', function () {
 	socket.on('SERVERSIG', function (data) {
 		switch(data['directive']) {
 			case 'CONNECT':
-				console.log(data['category']+" has connected!");
+				console.log(data['info']+" has connected!");
 				break;
 			case 'DISCONNECT':
-				console.log(data['category']+" has disconnected!");
+				console.log(data['info']+" has disconnected!");
 				break;
 			default:
 				console.log("Invalid Directive");
