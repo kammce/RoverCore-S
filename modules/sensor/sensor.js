@@ -321,8 +321,8 @@ Sensor.prototype.accelero = function() {
             accel.measureAccel(function(err) {
                 if (!err) {
 
-                    parent.model.accelero.x = accel.meterPerSecSec[global.XAXIS];
-                    parent.model.accelero.y = accel.meterPerSecSec[global.YAXIS];
+                    parent.model.accelero.x = (accel.meterPerSecSec[global.XAXIS])*(-8.85);
+                    parent.model.accelero.y = (accel.meterPerSecSec[global.YAXIS])*(8.17);
                     parent.model.accelero.z = accel.meterPerSecSec[global.ZAXIS];
 
 
