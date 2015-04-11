@@ -23,12 +23,13 @@ function Sensor(model_ref, feedback) {
 	this.accelero_stop;
 	this.gyro_stop;
 
-	//initiane function
+if(GLOBAL.I2C != 'i2c'){	
+	//initiate function
 	this.gyro();
 	this.accelero();
 	this.compass();
 	this.GPS();
-
+}
 
 
 };
