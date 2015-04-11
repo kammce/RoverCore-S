@@ -24,9 +24,11 @@ function Sensor(model_ref, feedback) {
 	this.gyro_stop;
 
 	//initiane function
+/*
 	this.gyro();
 	this.accelero();
 	this.compass();
+*/
 	this.GPS();
 
 
