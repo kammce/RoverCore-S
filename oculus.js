@@ -36,7 +36,7 @@ var Video = require("./modules/video.js");
 var video = new Video(feedback);
 
 socket.on('connect', function () { 
-	console.log("Rover connected to server!");
+	console.log("Oculus connected to server!");
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) { 
 		console.log("INCOMING CTRLSIG", data);
@@ -65,10 +65,20 @@ socket.on('connect', function () {
 	});
 	// =========== SERVER SIGNAL =========== //
 	socket.on('SERVERSIG', function (data) {
-		if(data == "MISSION_CONTROL_CONNECTED") {
-			console.log("MISSION CONTROL CONNECTED"); 
-		} else if(data == "MISSION_CONTROL_DISCONNECTED") {
-			console.log("MISSION CONTROL DISCONNECTED"); 
+		switch(data['directive']) {
+			case 'CONNECT':
+				console.log(data['category']+" has connected!");
+				break;
+			case 'DISCONNECT':
+				console.log(data['category']+" has disconnected!");
+				break;
+			default:
+				console.log("Invalid Directive");
+				socket.emit("OCULARSIG", { 
+					status: 'warning', 
+					info: 'Invalid directive '+data['directive'] 
+				});
+				break;
 		}
 	});
 	// =========== DISCONNECT SIGNAL =========== //
