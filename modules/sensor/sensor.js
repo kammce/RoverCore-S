@@ -23,13 +23,13 @@ function Sensor(model_ref, feedback) {
 	this.accelero_stop;
 	this.gyro_stop;
 
-if(GLOBAL.I2C != 'i2c'){	
+	
 	//initiate function
 	this.gyro();
 	this.accelero();
 	this.compass();
 	this.GPS();
-}
+
 
 
 };
@@ -132,7 +132,7 @@ Sensor.prototype.compass = function() { // degrees refer to North
 
 	var address_compass = 0x1e; //address of compass
 	var wire = new I2C(address_compass, {
-		device: '/dev/i2c-2'
+		device: '/dev/i2c-1'
 	});
 	var parent = this;
 	var x = 0;
@@ -211,7 +211,7 @@ Sensor.prototype.gyro = function() {
 
 	var address_gyroscope = 0x68; //address of gyroscope
 	var wire = new I2C(address_gyroscope, {
-		device: '/dev/i2c-2'
+		device: '/dev/i2c-1'
 	});
 	var x, y, z;
 	var parent = this;
