@@ -370,22 +370,33 @@ Sensor.prototype.GPS = function() {
 Sensor.prototype.power = function() {
 	var parent = this;
 	var SerialPort = SERIALPORT.SerialPort; // make a local instant
-	var myPort = new SerialPort("dev/ttyO1", { // <--Then you open the port using new() like so
+	var myPort = new SerialPort("dev/ttyO2", { // <--Then you open the port using new() like so
 		baudRate: 9600,
 	});
 	myPort.on('data', function(data) {
 		var holder = [0,0,0,];
-		console.log(data); // full unparsed data
+		var current = 0;
+		var voltage = 0;
 		holder = data;
-		if ( holder[0] == '*'){
-			holder[1] = parent.model.power.current
+
+		// reconversion : will be adjusted 
+		if (holder < 1 ){
+			current = holder*10;
 		}
-		if ( holder[1] == '*'){
-			holder[2] = parent.model.power.current
+
+		else if (holder > 99 ){
+			voltage = holder-99;
+			parent.model.power.voltage= voltage;
 		}
-		if ( holder[2] == '*'){
-			holder[3] = parent.model.power.current
+
+		if ( current !=0){
+			parent.model.power.current = current;
 		}
+
+		console.log("voltage: " + parent.model.power.voltage);
+		console.log("current: " + parent.model.power.current);
+		
+		
 	});
 };
 Sensor.prototype.optical = function() {
