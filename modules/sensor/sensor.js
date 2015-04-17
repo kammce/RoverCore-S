@@ -397,9 +397,9 @@ Sensor.prototype.power = function() {
                 holder = data;
 
                 if (holder < 1) {
-                    current = (holder) * 10;
-                } else if (holder > 99) {
-                    voltage = holder - 99;
+                    current = (holder) * 100;
+                } else if (holder > 100) {
+                    voltage = holder - 100;
                     parent.model.power.voltage = voltage;
                     console.log("voltage: " + voltage);
                 }
