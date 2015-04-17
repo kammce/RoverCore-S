@@ -7,7 +7,7 @@ var Skeleton = require("../skeleton.js");
 Motor.prototype = new Skeleton("Motor");
 Motor.prototype.constructor = Motor;
 
-function Motor(model_ref, feedback) {
+function Motor(model_ref, feedback, spine) {
 	this.model = model_ref;
 	this.feedback = feedback;
 	//For Smart Controller
@@ -46,7 +46,7 @@ function Motor(model_ref, feedback) {
 			dirPin:'P8_44',
 		}
 	}
-	this.spine = new SPINE();
+	this.spine = spine;
 	this.spine.expose(this.motors.m1.dirPin, "OUTPUT");
 	this.spine.expose(this.motors.m2.dirPin, "OUTPUT");
 	this.spine.expose(this.motors.m3.dirPin, "OUTPUT");
