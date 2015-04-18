@@ -19,7 +19,7 @@ function ADXL345(callback)
 	this.accelSampleCount = 0;
 	//init stuff here
 	this.wire = new i2c(address, {
-		device : '/dev/i2c-1'
+		device : '/dev/i2c-2'
 	});
 	
 	var self = this;
