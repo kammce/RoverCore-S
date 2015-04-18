@@ -29,6 +29,7 @@ var Model = {
 		latitude_dir:0
 	},
 	power: {
+		current:0,
 	 	voltage:0
 	},
 	wheel_speed:[0,0,0,0,0,0]
