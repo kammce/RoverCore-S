@@ -30,7 +30,7 @@ function Sensor(model_ref, feedback) {
     this.compass();
     this.GPS();
     this.power();
-}
+
 
 };
 
@@ -331,7 +331,7 @@ Sensor.prototype.accelero = function() {
 Sensor.prototype.GPS = function() {
     var parent = this;
     var SerialPort = SERIALPORT.SerialPort; // make a local instant
-    var myPort = new SerialPort("dev/ttyO1", { // <--Then you open the port using new() like so
+    var myPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port using new() like so
         baudRate: 9600,
         parser: SERIALPORT.parsers.readline("\r\n") // look for return and newline at the end of each data packet
     });
