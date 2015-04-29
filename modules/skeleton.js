@@ -12,6 +12,7 @@ function Skeleton(module_name) {
 		if(this.is_halted) { return; }
 		if(typeof this.handle == 'undefined') {
 			console.log("Empty "+module+" handle: ", data);
+			return "UNDEFINED Input sent to module handler: "+this.module;
 		} else {
 			return this.handle(data, feedback);
 		}

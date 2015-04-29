@@ -47,6 +47,12 @@ socket.on('connect', function () {
 				}, 10);
 				console.log("Recieved video serversignal", data);
 				break;
+			case 'AUDIO':
+				setTimeout(function() { 
+					feedback(data['directive'], audio._handle(data["info"])); 
+				}, 10);
+				console.log("Recieved video serversignal", data);
+				break;
 			case 'OCULUS':
 				setTimeout(function() { 
 					feedback(data['directive'], function() {
