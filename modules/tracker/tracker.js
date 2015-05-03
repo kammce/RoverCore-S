@@ -23,7 +23,7 @@ function Tracker(model_ref, feedback) {
 	var SerialPort = serialport.SerialPort;
 	console.log("Starting serial connection");
 
-	this.serialport = new SerialPort("/dev/ttyO2", {
+	this.serialport = new SerialPort("/dev/ttyO4", {
 		baudrate: 9600,
 		parse : serialport.parsers.readline("\r\n")
 	});

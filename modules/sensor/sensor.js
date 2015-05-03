@@ -14,11 +14,11 @@ function Sensor(model_ref, feedback) {
     this.interval_accelero = 1000;
     this.interval_GPS = 30000;
     //initiate 
-    this.gyro();
-    this.accelero();
-    this.compass();
-    this.GPS();
-    this.power();
+//    this.gyro();
+  //  this.accelero();
+   // this.compass();
+    //this.GPS();
+   // this.power();
 };
 
 Sensor.prototype.handle = function(data) { // take command from user interface
