@@ -34,6 +34,8 @@ var feedback = function(directive, rsignal) {
 
 var Video = require("./modules/video.js");
 var video = new Video(feedback);
+var Audio = require("./modules/audio.js");
+var audio = new Audio(feedback);
 
 socket.on('connect', function () { 
 	console.log("Oculus connected to server!");
@@ -55,9 +57,15 @@ socket.on('connect', function () {
 				break;
 			case 'OCULUS':
 				setTimeout(function() { 
+					if(data['info'] == "RESTART") {
+						feedback("OCULUS", "Shutting down OCULUS (should be revived by forever-monitor)");
+						process.exit();
+					} else {
 					feedback(data['directive'], function() {
 						console.log("empty handler for OCULUS", data["info"]);
 					});
+
+					}
 				}, 10);
 				break;
 			default:
@@ -88,8 +96,9 @@ socket.on('connect', function () {
 		}
 	});
 	// =========== DISCONNECT SIGNAL =========== //
-	socket.on('disconnect', function(){
+	socket.on('disconnect', function() {
 		console.log('Disconnected from server!');
+		process.exit();
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'oculus', password: 'destroymit' });

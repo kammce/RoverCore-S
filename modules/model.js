@@ -29,10 +29,10 @@ var Model = {
 		latitude_dir:0
 	},
 	power: {
-	 	voltage:0
+	 	voltage:0,
+	 	current:0,
 	},
 	wheel_speed:[0,0,0,0,0,0]
-
 }
 
 module.exports = exports = Model;

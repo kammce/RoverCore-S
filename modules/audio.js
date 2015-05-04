@@ -1,45 +1,58 @@
 "use strict";
-//// Video feed Controller
+//// Audio feed Controller
 
-/*
- * Command to stream webcam MPEG1Video to server
-	ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -b:v 800k -r 20 http://127.0.0.1:9001/destroymit/640/480/
- * Command to view easycap analog video capture with mplayer 
-	sudo somagic-capture --secam --iso-transfers=10 --sync=1 | mplayer -nocache -vf yadif -demuxer rawvideo -rawvideo "ntsc:format=uyvy:fps=25"
- * Command to stream easycap analog video capture to server ( will not work! This is a placeholder )
-	sudo somagic-capture --secam --iso-transfers=10 --sync=1 | ffmpeg
- */
+/* FFMpeg command:
+	ffmpeg -re -f alsa -i "hw:1,0" -acodec libmp3lame -b:a 192k -vn -f rtp rtp://kammce.io:9005
+	ffmpeg -re -f alsa -i "hw:1,0" -acodec libmp3lame -b:a 96k -vn -f rtp rtp://kammce.io:9005
+*/
 
 var Skeleton = require("./skeleton.js");
-Audio.prototype = new Skeleton("AUDIO");
-Audio.prototype.constructor = Video;
+Audio.prototype = new Skeleton("Audio");
+Audio.prototype.constructor = Audio;
 
 function Audio(feedback) {
 	this.feedback = feedback;
-	this.audio = {
-		low: {
-			dev: "hw:1,0",
-			bitrate: 400
-		},
-		high: {
-			dev: "hw:2,0",
-			bitrate: 400
-		}
+	//// Logitech sizes
+	// 
+
+	// All possible video feeds
+	this.defaults = {
+		mic: 1,
+		bitrate: "96k"
 	};
-	this.streams = ["low", "high"];
 	this.process = require('child_process');
-	this.cam_args = this.genArg({ view: 'off' });
-	//this.caminfo = "off";
-	this.debug = false; // process debug information
-	this.lspawn; // spawn of lower audio process
-	this.hspawn; // spawn of higher audio process
+	this.streams = [
+		{ // Chassis Stream
+			// Possible streams for stream[0]
+			// All streams come from webcams
+			// mics: [0 /*navi*/, 1 /*arm*/, 2 /*hull*/],
+			current_audio: "off",
+			micargs: this.genArg({ mic: 'off' }),
+			port: 9005,
+			busy: false,
+			source: undefined
+		},
+		{ // Tracker Stream
+			// All streams come from webcams
+			// mics: [0],
+			current_audio: "off",
+			micargs: this.genArg({ mic: 'off' }),
+			port: 9007,
+			busy: false,
+			source: undefined
+		}
+	];
+	this.debug = true; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
-			"stream" : {
-				"type" : "string"
+			"nic" : {
+				"type" : "number"
 			},
-			"res" : {
+			"bitrate" : {
+				"type" : "number"
+			},
+			"stream" : {
 				"type" : "number"
 			}
 		}
@@ -48,101 +61,136 @@ function Audio(feedback) {
 Audio.prototype.handle = function(data) {
 	var parent = this;
 	console.log("Handlin' dat!");
-	if(!_.isUndefined(this.mspawn)) {
+	//// Check if data exists
+	console.log(data);
+	if(_.isUndefined(data)) {
+		return "Mic data not specified!";
+	}
+	if(_.isUndefined(data["mic"])) {
+		return "MIC was not specified, no action will be taken!";
+	}
+	if(_.isUndefined(data["stream"])) {
+		return "STREAM was not specified, no action will be taken!";
+	}
+	if(data["mic"] == "off") {
+		if(_.isNumber(data["stream"]) && 
+			data["stream"] >= 0 && 
+			data["stream"] < this.streams.length) {
+			// Kill camera feed processes
+			try {
+				this.streams[data["stream"]].source.kill('SIGINT');
+			} catch(e) {
+				console.log(e);
+				return "COULD NOT KILL VIDEO FEED: "+e;
+				//this.streams[i].source = undefined;
+			}
+			return "STREAM "+data["stream"]+" HAS BEEN TURNED OFF";
+		}
+	}
+	if(data["mic"] == "killall") {
+		parent.process.spawn('killall', [ 'ffmpeg' ]);
+		return "KILLING OFF ALL FFmpeg PROCESSES.";
+	}
+	if(parent.streams[data["stream"]].busy) {
+		return "STREAM "+data["stream"]+" IS BUSY IN CONFIGURATIONS";
+	}
+	parent.streams[data["stream"]].busy = true;
+	if(!_.isUndefined(this.streams[data["stream"]].source)) {
 		// Kill camera feed processes
 		try {
-			this.mspawn.kill('SIGINT');
+			this.streams[data["stream"]].source.kill('SIGINT');
 		} catch(e) {
 			console.log(e);
 			this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
-			this.mspawn = undefined;
+			//this.streams[data["stream"]].source = undefined;
 		}
 	}
-	if(data["view"] == "off") {
-		return "OFF";
-	}
-	if(_.isObject(data)) {
-		if(this.cams.indexOf(data["view"]) != -1) {
-			setTimeout(function() {
-				parent.activateCamera(data);
-			}, 1000);
-			return "SWITCHING-VIEW TO "+data["view"];
-		}
-	}
+	setTimeout(function() {
+		parent.activateMic(data, data["stream"]);
+		parent.streams[data["stream"]].busy = false;
+	}, 2000);
+	return "SWITCHING-AUDIO FEED "+data["STREAM"]+" TO "+data["mic"];
 	return "FAIL";
 };
-Audio.prototype.genArg = function(data) {
-	if(_.isUndefined(data)) { return this.data_args; }	
+Audio.prototype.genArg = function(data, port) {
 	if(_.isObject(data)) {
-		var view	= data["view"];
-		var dev		= this.videos[view]['dev'];
-		var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
-		var width 	= (_.isNumber(data['width'])) ? data['width'] : this.videos[view]['width'];
-		var height 	= (_.isNumber(data['height'])) ? data['height'] : this.videos[view]['height'];
-		var fps 	= (_.isNumber(data['fps'])) ? 25 : ['fps'];
-		this.cam_args = [
-			'-s', width+'x'+height,
-			'-f', 'video4linux2',
-			'-i', dev,
-			'-f', 'mpeg1video',
-			'-b:v', res+'k',
-			'-r', '20',
-			'http://'+ADDRESS+':9001/destroymit/'+width+'/'+height
-		];
+		var mic 	= (_.isNumber(data['mic'])) ? "hw:"+data['mic']+",0" : this.defaults['mic'];
+		var bitrate	= (_.isNumber(data['bitrate'])) ? data['bitrate']+"k" : this.defaults['bitrate'];
 		this.caminfo = data;
+		return [
+			'-re',
+			'-f', 'alsa',
+			'-ac', '2',
+			'-i', mic,
+			'-acodec', 'libmp3lame',
+			'-b:a', bitrate,
+			'-vn',
+			'-f', 'rtp',
+			'rtp://'+ADDRESS+':'+port			
+		];
 	}
-	return this.cam_args;
+	return false;
 };
-Audio.prototype.activateCamera = function(caminfo) {
+Audio.prototype.activateMic = function(mic_select, stream_number) {
 	var parent = this;
-	console.log("Activate camera!");
+	console.log("Activate Mic!");
 	try {
-		this.mspawn = this.process.spawn('ffmpeg', 
-			this.genArg(caminfo)
-		).on('error', function( err ){ console.log("ffmpeg could not be found... ",err); });
+		var args = this.genArg(mic_select, this.streams[stream_number].port);
+		if(args == false) {
+			parent.feedback(parent.module, "Could not generate arguments for FFmpeg: "+code);
+			return;
+		}
+
+		this.streams[stream_number].source = this.process.spawn('ffmpeg', 
+			args
+		).on('error', function( err ){ console.log("ERROR: Either Oculus could not find FFMpeg or Oculus was not run as superuser!!! ",err); });
 
 		if(this.debug) {
-			this.mspawn.stdout.on('data', function(out) {
+			this.streams[stream_number].source.stdout.on('data', function(out) {
 				console.log('stdout: ' + out);
 			});
-			this.mspawn.stderr.on('data', function(err) {
+			this.streams[stream_number].source.stderr.on('data', function(err) {
 				console.log('stderr: ' + err);
 			});	
 		}
-		this.mspawn.on('close', function(code) {
-			parent.feedback(parent.module, "VIEW "+caminfo["view"]+" CLOSED, CODE: "+code);
+
+		this.streams[stream_number].source.on('close', function(code) {
+			parent.feedback(parent.module, "MIC "+mic_select["mic"]+" CLOSED, CODE: "+code);
 		});
-		this.feedback(this.module, "BRINGING UP VIEW "+caminfo["view"]);
+		this.feedback(this.module, "BRINGING UP MIC hw:"+mic_select["mic"]+",0");
 	} catch(e) {
 		console.log(e);
-		this.feedback(this.module, "PROCESS FAILURE: "+e);
-		this.mspawn = undefined;
+		this.feedback(this.module, "PROCESS FAILURE STREAM "+stream_number+": "+e);
+		//this.mspawn = undefined;
 	}
 }
 Audio.prototype.resume = function() {
+	//// Never halted, no need to resume anything
+
 	// Kill camera feed processes
-	try {
-		this.activateCamera(this.caminfo);
-	} catch(e) {
-		console.log(e);
-		this.feedback(this.module, "COULD NOT BRING UP PREVIOUS VIDEO FEED: "+e);
-		this.mspawn = undefined;
-	}
+	// try {
+	// 	this.activateCamera(this.caminfo);
+	// } catch(e) {
+	// 	console.log(e);
+	// 	this.feedback(this.module, "COULD NOT BRING UP PREVIOUS VIDEO FEED: "+e);
+	// 	this.mspawn = undefined;
+	// }
 	// Bring up previous camera
-	
 };
 Audio.prototype.halt = function() {
+	//// Do not halt anything
+
 	// Kill camera feed processes
-	if(!_.isUndefined(this.mspawn)) {
-		// Kill camera feed processes
-		try {
-			this.mspawn.kill('SIGINT');
-		} catch(e) {
-			console.log(e);
-			this.feedback(this.module, "HALT COULD NOT KILL VIDEO FEED: "+e);
-			this.mspawn = undefined;
-		}
-	}
+	// if(!_.isUndefined(this.mspawn)) {
+	// 	// Kill camera feed processes
+	// 	try {
+	// 		this.mspawn.kill('SIGINT');
+	// 	} catch(e) {
+	// 		console.log(e);
+	// 		this.feedback(this.module, "HALT COULD NOT KILL VIDEO FEED: "+e);
+	// 		this.mspawn = undefined;
+	// 	}
+	// }
 };
 
-module.exports = exports = Video;
+module.exports = exports = Audio;

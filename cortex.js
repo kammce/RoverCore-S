@@ -121,6 +121,7 @@ socket.on('connect', function () {
 	socket.on('disconnect', function(){
 		console.log('Disconnected from server!');
 		mcu.halt();
+		process.exit();
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'cortex', password: 'destroymit' });
