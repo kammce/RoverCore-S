@@ -62,34 +62,32 @@ Audio.prototype.handle = function(data) {
 	var parent = this;
 	console.log("Handlin' dat!");
 	//// Check if data exists
-	if(_.isUndefined(data)) {
-		return "Mic data not specified!";
-	}
-	if(_.isUndefined(data["mic"])) {
-		return "MIC was not specified, no action will be taken!";
-	}
-	if(_.isUndefined(data["stream"])) {
-		return "STREAM was not specified, no action will be taken!";
-	}
+	if(_.isUndefined(data)) { return "Mic data not specified!"; }
+	if(_.isUndefined(data["mic"])) { return "MIC was not specified, no action will be taken!"; }
+	if(_.isUndefined(data["stream"])) { return "STREAM was not specified, no action will be taken!"; }
+	
+	var parent = this;
+	console.log("Handlin' dat!");
 	if(data["mic"] == "off") {
 		if(_.isNumber(data["stream"]) && 
 			data["stream"] >= 0 && 
 			data["stream"] < this.streams.length) {
-			// Kill camera feed processes
-			try {
-				this.streams[data["stream"]].source.kill('SIGINT');
-			} catch(e) {
-				console.log(e);
-				return "COULD NOT KILL VIDEO FEED: "+e;
-				//this.streams[i].source = undefined;
+			if(!_.isUndefined(this.streams[data["stream"]].source)) {
+				// Kill camera feed processes
+				try {
+					this.streams[data["stream"]].source.kill('SIGTERM');
+				} catch(e) {
+					console.log(e);
+					return "COULD NOT KILL VIDEO FEED: "+e;
+				}
 			}
 			return "STREAM "+data["stream"]+" HAS BEEN TURNED OFF";
 		}
 	}
-	if(data["mic"] == "killall") {
-		parent.process.spawn('killall', [ 'ffmpeg' ]);
-		return "KILLING OFF ALL FFmpeg PROCESSES.";
-	}
+	// if(data["mic"] == "killall") {
+	// 	parent.process.spawn('killall', [ 'ffmpeg' ]);
+	// 	return "KILLING OFF ALL FFmpeg PROCESSES.";
+	// }
 	if(parent.streams[data["stream"]].busy) {
 		return "STREAM "+data["stream"]+" IS BUSY IN CONFIGURATIONS";
 	}
@@ -97,11 +95,10 @@ Audio.prototype.handle = function(data) {
 	if(!_.isUndefined(this.streams[data["stream"]].source)) {
 		// Kill camera feed processes
 		try {
-			this.streams[data["stream"]].source.kill('SIGINT');
+			this.streams[data["stream"]].source.kill('SIGTERM');
 		} catch(e) {
 			console.log(e);
 			this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
-			//this.streams[data["stream"]].source = undefined;
 		}
 	}
 	setTimeout(function() {
@@ -109,7 +106,6 @@ Audio.prototype.handle = function(data) {
 		parent.streams[data["stream"]].busy = false;
 	}, 2000);
 	return "SWITCHING-AUDIO FEED "+data["STREAM"]+" TO "+data["mic"];
-	return "FAIL";
 };
 Audio.prototype.genArg = function(data, port) {
 	if(_.isObject(data)) {

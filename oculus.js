@@ -48,9 +48,9 @@ socket.on('connect', function () {
 	console.log("Oculus connected to server!");
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) {
-		if(data["stream"] != STREAM) { return; }
+		if(_.isUndefined(data["info"])) { return; }
+		if(data["info"]["stream"] != STREAM) { return; }
 		console.log("INCOMING CTRLSIG", data);
-		console.log(self_directive);
 		switch(data['directive']) {
 			case 'VIDEO':
 				setTimeout(function() { 
@@ -66,7 +66,7 @@ socket.on('connect', function () {
 				break;
 			case self_directive:
 				setTimeout(function() { 
-					if(data['info'] == "RESTART") {
+					if(data['info']['signal'] == "RESTART") {
 						feedback("OCULUS", "Shutting down OCULUS (should be revived by forever-monitor)");
 						process.exit();
 					} else {

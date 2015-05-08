@@ -1,6 +1,2 @@
-Major changes in video, audio, oculus and framework as a whole
-Oculus and Cortex is now wrapped around forever to allow it to do a full restart.
-Oculus can be dedicated to a single stream for both audio and video.
-Fixed some debugging issues in both video and audio.
-
-TODO: seperate and name alsa audio hw devices.
+Tightened some holes in the system where stream 1 could not work properly
+Added forever-monitor into package.json

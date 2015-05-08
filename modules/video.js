@@ -102,47 +102,72 @@ Video.prototype.handle = function(data) {
 		if(_.isNumber(data["stream"]) && 
 			data["stream"] >= 0 && 
 			data["stream"] < this.streams.length) {
-			// Kill camera feed processes
-			try {
-				console.log(data["stream"]);
-				this.streams[data["stream"]].source.kill('SIGTERM');
-				//this.streams[data["stream"]].source.kill('SIGKILL');
-			} catch(e) {
-				console.log(e);
-				return "COULD NOT KILL VIDEO FEED: "+e;
-				//this.streams[i].source = undefined;
+			if(!_.isUndefined(this.streams[data["stream"]].source)) {
+				// Kill camera feed processes
+				try {
+					console.log(data["stream"]);
+					this.streams[data["stream"]].source.kill('SIGTERM');
+					//this.streams[data["stream"]].source.kill('SIGKILL');
+				} catch(e) {
+					console.log(e);
+					return "COULD NOT KILL VIDEO FEED: "+e;
+					//this.streams[i].source = undefined;
+				}
 			}
-			return "STREAM "+data["stream"]+" HAS BEEN TURNED OFF";
+			return "STREAM "+data["stream"]+" IS NOT ON or HAS BEEN TURNED OFF";
 		}
 	}
 	if(data["view"] == "killall") {
 		parent.process.spawn('killall', [ 'ffmpeg' ]);
 		return "KILLING OFF ALL FFmpeg PROCESSES.";
 	}
-	for (var i = this.streams.length - 1; i >= 0; i--) {
-		if(this.streams[i].cams.indexOf(data["view"]) != -1) {
-			if(parent.streams[i].busy) {
-				return "STREAM "+i+" IS BUSY IN CONFIGURATIONS";
-			}
-			parent.streams[i].busy = true;
-			if(!_.isUndefined(this.streams[i].source)) {
-				// Kill camera feed processes
-				try {
-					this.streams[i].source.kill('SIGTERM');
-					//this.streams[I].source.kill('SIGKILL');
-				} catch(e) {
-					console.log(e);
-					this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
-					//this.streams[i].source = undefined;
-				}
-			}
-			setTimeout(function() {
-				parent.activateCamera(data, i);
-				parent.streams[i].busy = false;
-			}, 2000);
-			return "SWITCHING-VIEW FEED "+i+" TO "+data["view"];
+	// for (var i = this.streams.length - 1; i >= 0; i--) {
+	// 	if(this.streams[i].cams.indexOf(data["view"]) != -1) {
+	// 		if(parent.streams[i].busy) {
+	// 			return "STREAM "+i+" IS BUSY IN CONFIGURATIONS";
+	// 		}
+	// 		parent.streams[i].busy = true;
+	// 		if(!_.isUndefined(this.streams[i].source)) {
+	// 			// Kill camera feed processes
+	// 			try {
+	// 				this.streams[i].source.kill('SIGTERM');
+	// 				//this.streams[I].source.kill('SIGKILL');
+	// 			} catch(e) {
+	// 				console.log(e);
+	// 				this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
+	// 				//this.streams[i].source = undefined;
+	// 			}
+	// 		}
+	// 		setTimeout(function() {
+	// 			parent.activateCamera(data, i);
+	// 			parent.streams[i].busy = false;
+	// 		}, 2000);
+	// 		return "SWITCHING-VIEW FEED "+i+" TO "+data["view"];
+	// 	}
+	// };
+	var i = data["stream"];
+	if(this.streams[i].cams.indexOf(data["view"]) != -1) {
+		if(parent.streams[i].busy) {
+			return "STREAM "+i+" IS BUSY IN CONFIGURATIONS";
 		}
-	};
+		parent.streams[i].busy = true;
+		if(!_.isUndefined(this.streams[i].source)) {
+			// Kill camera feed processes
+			try {
+				this.streams[i].source.kill('SIGTERM');
+				//this.streams[I].source.kill('SIGKILL');
+			} catch(e) {
+				console.log(e);
+				this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
+				//this.streams[i].source = undefined;
+			}
+		}
+		setTimeout(function() {
+			parent.activateCamera(data, i);
+			parent.streams[i].busy = false;
+		}, 2000);
+		return "SWITCHING-VIEW FEED "+i+" TO "+data["view"];
+	}
 	return "FAIL";
 };
 Video.prototype.genArg = function(data, port) {
