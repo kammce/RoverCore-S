@@ -65,22 +65,23 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(this.defaulted == false){
 		console.log("Enabling Torque");
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
+		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x96,0x00); //Set movement speed to 33.3 rpm, 300 in decimal
 		this.defaulted = true;
 	}
-	if(input.base != undefined && input.base > 0 && input.base < 360){
+	if(input.base != undefined /*&& input.base > 0 && input.base < 360*/){
 		this.moveMotor(this.id.BASE, input.base);
 	}
 	//Because motors have a wierd offset and different orientations, the degree values need to be mapped... For safety, I am disabling the shoulder motors temporarily
-	// if(input.shoulderL != undefined && input.shoulderL > 63 && input.shoulderL < 243){
-	// 	this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
-	// }
-	// if(input.shoulderR != undefined && input.shoulderR > 83 && input.shoulderR < 263){
-	// 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
-	// }
-	if(input.elbow != undefined && input.elbow > 127 && input.elbow < 270){
+	 if(input.shoulderL != undefined /*&& input.shoulderL > 63 && input.shoulderL < 243*/){
+	 	this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
+	 }
+	 if(input.shoulderR != undefined /*&& input.shoulderR > 83 && input.shoulderR < 263*/){
+	 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
+         }
+	if(input.elbow != undefined /*&& input.elbow > 127 && input.elbow < 270*/){
 		this.moveMotor(this.id.ELBOW, input.elbow);
 	}
-	if(input.wrist != undefined && input.wrist > 0 && input.wrist < 149){
+	if(input.wrist != undefined /*&& input.wrist > 0 && input.wrist < 149*/){
 		this.moveMotor(this.id.WRIST, input.wrist);
 	}
 	// if(input.speed != undefined){
@@ -94,9 +95,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
 	// console.log("Enabling Torque");
 	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
-	var hexdeg = (number/360) * 4095;
-	if(hexdeg > 4095){
-		hexdeg = 4095;
+	var hexdeg = (number/300) * 1023;/*(number/360) * 4095;*/ //for MX series: 360 and 4095. for RX series: 300 and 1023
+	if(hexdeg > 1023){ /*4095){*/
+		hexdeg = 1023; /*4095;*/
 	}
 	if(hexdeg < 0){
 		hexdeg = 0;
