@@ -44,12 +44,14 @@ MindController.prototype.handle = function(data) {
 		case "DISCONNECT":
 			this.halt(data['info']);
 			break;
+		case 'NOTCONNECTED':
+			break;
 		case "CONNECT":
 			this.resume(data['info']);
 			break;
 		case "RESTART":
 			this.halt();
-			feedback("CORTEX", "Shutting down CORTEX (should be revived by forever-monitor)");
+			this.feedback("CORTEX", "Shutting down CORTEX (should be revived by forever-monitor)");
 			process.exit();
 		default:
 			console.log("MindController does not have a handler for", data);

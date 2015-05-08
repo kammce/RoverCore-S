@@ -10,8 +10,9 @@ var Skeleton = require("./skeleton.js");
 Video.prototype = new Skeleton("VIDEO");
 Video.prototype.constructor = Video;
 
-function Video(feedback) {
+function Video(feedback, stream) {
 	this.feedback = feedback;
+	this.selected_stream = stream;
 	//// Logitech sizes
 	// ++640x480++ 160x90 160x120 176x144 320x180 320x240 352x288 432x240 640x360 800x448 800x600 
 	// ++ 864x480 ++ (1st Fav) 960x720 +1024x576+ (0th Fav) 1280x720 1600x896 1920x1080 2304x1296 2304x1536
@@ -103,8 +104,9 @@ Video.prototype.handle = function(data) {
 			data["stream"] < this.streams.length) {
 			// Kill camera feed processes
 			try {
+				console.log(data["stream"]);
 				this.streams[data["stream"]].source.kill('SIGTERM');
-				this.streams[data["stream"]].source.kill('SIGKILL');
+				//this.streams[data["stream"]].source.kill('SIGKILL');
 			} catch(e) {
 				console.log(e);
 				return "COULD NOT KILL VIDEO FEED: "+e;
@@ -127,7 +129,7 @@ Video.prototype.handle = function(data) {
 				// Kill camera feed processes
 				try {
 					this.streams[i].source.kill('SIGTERM');
-					this.streams[I].source.kill('SIGKILL');
+					//this.streams[I].source.kill('SIGKILL');
 				} catch(e) {
 					console.log(e);
 					this.feedback(this.module, "COULD NOT KILL VIDEO FEED: "+e);
@@ -182,12 +184,12 @@ Video.prototype.activateCamera = function(cam_select, stream_number) {
 		).on('error', function( err ){ console.log("ERROR: Either Oculus could not find FFMpeg or Oculus was not run as superuser!!! ", err); });
 
 		this.streams[stream_number].source.stdout.on('data', function(out) {
-			if(this.debug) {
+			if(parent.debug) {
 				console.log('stdout: ' + out);
 			}
 		});
 		this.streams[stream_number].source.stderr.on('data', function(err) {
-			if(this.debug) {
+			if(parent.debug) {
 				console.log('stderr: ' + err);
 			}
 		});

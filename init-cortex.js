@@ -1,4 +1,4 @@
-if( process.argv.length < 4 ) {
+if( process.argv.length < 3 ) {
 	console.log(
 		'Usage: \n' +
 		'\tnode init-cortex.js <websocket-server-address> --simulate\n'+

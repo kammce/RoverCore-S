@@ -85,7 +85,7 @@ socket.on('connect', function () {
 				}, mcu.priority["tracker"]);
 				console.log("Recieved video serversignal", data);
 				break;
-			case 'ROVER':
+			case 'CORTEX':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.handle(data["info"]));
 				}, 1);

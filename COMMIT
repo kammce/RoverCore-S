@@ -1,4 +1,6 @@
-Adapted Layout of folder to accomidate the new technology.
-Wrote Cortex, MindController, and Skeleton of MindController
-Sub modules.
-Cortex can now communicate to Server signal-relay.
+Major changes in video, audio, oculus and framework as a whole
+Oculus and Cortex is now wrapped around forever to allow it to do a full restart.
+Oculus can be dedicated to a single stream for both audio and video.
+Fixed some debugging issues in both video and audio.
+
+TODO: seperate and name alsa audio hw devices.

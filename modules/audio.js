@@ -42,7 +42,7 @@ function Audio(feedback) {
 			source: undefined
 		}
 	];
-	this.debug = true; // process debug information
+	this.debug = false; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -62,7 +62,6 @@ Audio.prototype.handle = function(data) {
 	var parent = this;
 	console.log("Handlin' dat!");
 	//// Check if data exists
-	console.log(data);
 	if(_.isUndefined(data)) {
 		return "Mic data not specified!";
 	}
@@ -145,14 +144,16 @@ Audio.prototype.activateMic = function(mic_select, stream_number) {
 			args
 		).on('error', function( err ){ console.log("ERROR: Either Oculus could not find FFMpeg or Oculus was not run as superuser!!! ",err); });
 
-		if(this.debug) {
-			this.streams[stream_number].source.stdout.on('data', function(out) {
+		this.streams[stream_number].source.stdout.on('data', function(out) {
+			if(this.debug) {
 				console.log('stdout: ' + out);
-			});
-			this.streams[stream_number].source.stderr.on('data', function(err) {
-				console.log('stderr: ' + err);
-			});	
-		}
+			}
+		});
+		this.streams[stream_number].source.stderr.on('data', function(err) {
+			if(this.debug) {
+				console.log('stderr: ' + err);	
+			}
+		});	
 
 		this.streams[stream_number].source.on('close', function(code) {
 			parent.feedback(parent.module, "MIC "+mic_select["mic"]+" CLOSED, CODE: "+code);
