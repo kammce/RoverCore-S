@@ -1,101 +1,420 @@
 0 info it worked if it ends with ok
-1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'glob' ]
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
 2 info using npm@1.4.28
-3 info using node@v0.10.33
-4 warn package.json RoverCore@1.5.0 No repository field.
-5 verbose readDependencies using package.json deps
-6 verbose cache add [ 'glob@latest', null ]
-7 verbose cache add name=undefined spec="glob@latest" args=["glob@latest",null]
-8 verbose parsed url { protocol: null,
-8 verbose parsed url   slashes: null,
-8 verbose parsed url   auth: null,
-8 verbose parsed url   host: null,
-8 verbose parsed url   port: null,
-8 verbose parsed url   hostname: null,
-8 verbose parsed url   hash: null,
-8 verbose parsed url   search: null,
-8 verbose parsed url   query: null,
-8 verbose parsed url   pathname: 'glob@latest',
-8 verbose parsed url   path: 'glob@latest',
-8 verbose parsed url   href: 'glob@latest' }
-9 verbose cache add name="glob" spec="latest" args=["glob","latest"]
-10 verbose parsed url { protocol: null,
-10 verbose parsed url   slashes: null,
-10 verbose parsed url   auth: null,
-10 verbose parsed url   host: null,
-10 verbose parsed url   port: null,
-10 verbose parsed url   hostname: null,
-10 verbose parsed url   hash: null,
-10 verbose parsed url   search: null,
-10 verbose parsed url   query: null,
-10 verbose parsed url   pathname: 'latest',
-10 verbose parsed url   path: 'latest',
-10 verbose parsed url   href: 'latest' }
-11 verbose addNamed [ 'glob', 'latest' ]
-12 verbose addNamed [ null, null ]
-13 silly lockFile 25ceac78-glob-latest glob@latest
-14 verbose lock glob@latest /Users/mitchellwaldman/.npm/25ceac78-glob-latest.lock
-15 info addNameTag [ 'glob', 'latest' ]
-16 verbose request where is /glob
-17 verbose request registry https://registry.npmjs.org/
-18 verbose request id 5eecd4298f7b1e17
-19 verbose url raw /glob
-20 verbose url resolving [ 'https://registry.npmjs.org/', './glob' ]
-21 verbose url resolved https://registry.npmjs.org/glob
-22 verbose request where is https://registry.npmjs.org/glob
-23 info trying registry request attempt 1 at 11:32:17
-24 verbose etag "BDWOTESN4ETCELHV6CCDNCJNB"
-25 http GET https://registry.npmjs.org/glob
-26 http 200 https://registry.npmjs.org/glob
-27 silly registry.get cb [ 200,
-27 silly registry.get   { date: 'Mon, 23 Mar 2015 18:32:21 GMT',
-27 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
-27 silly registry.get     etag: '"1NLSW958HWQKTU57OSD79NHUZ"',
-27 silly registry.get     'content-type': 'application/json',
-27 silly registry.get     'cache-control': 'max-age=60',
-27 silly registry.get     'content-length': '92947',
-27 silly registry.get     'accept-ranges': 'bytes',
-27 silly registry.get     via: '1.1 varnish',
-27 silly registry.get     age: '34',
-27 silly registry.get     'x-served-by': 'cache-lax1424-LAX',
-27 silly registry.get     'x-cache': 'HIT',
-27 silly registry.get     'x-cache-hits': '7',
-27 silly registry.get     'x-timer': 'S1427135541.659650,VS0,VE0',
-27 silly registry.get     vary: 'Accept',
-27 silly registry.get     'keep-alive': 'timeout=10, max=50',
-27 silly registry.get     connection: 'Keep-Alive' } ]
-28 verbose addNamed [ 'glob', '5.0.3' ]
-29 verbose addNamed [ '5.0.3', '5.0.3' ]
-30 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
-31 verbose lock glob@5.0.3 /Users/mitchellwaldman/.npm/7d5136e3-glob-5-0-3.lock
-32 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
-33 verbose lock https://registry.npmjs.org/glob/-/glob-5.0.3.tgz /Users/mitchellwaldman/.npm/e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz.lock
-34 verbose addRemoteTarball [ 'https://registry.npmjs.org/glob/-/glob-5.0.3.tgz',
-34 verbose addRemoteTarball   '15528c1c727e474a8e7731541c00b00ec802952d' ]
-35 info retry fetch attempt 1 at 11:32:22
-36 verbose fetch to= /var/folders/_n/p0_6r4hd0yxd6nvp5f2ldvf80000gp/T/npm-12848-no7JY77w/registry.npmjs.org/glob/-/glob-5.0.3.tgz
-37 http GET https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
-38 http 200 https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
-39 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
-40 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
-41 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
-42 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
-43 silly lockFile 25ceac78-glob-latest glob@latest
-44 silly lockFile 25ceac78-glob-latest glob@latest
-45 error Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3'
-45 error  { [Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3']
-45 error   errno: 3,
-45 error   code: 'EACCES',
-45 error   path: '/Users/mitchellwaldman/.npm/glob/5.0.3',
-45 error   parent: 'RoverCore' }
-46 error Please try running this command again as root/Administrator.
-47 error System Darwin 13.4.0
-48 error command "node" "/usr/local/bin/npm" "install" "glob"
-49 error cwd /Users/mitchellwaldman/Sites/ROBOTICS2/rovercore
-50 error node -v v0.10.33
-51 error npm -v 1.4.28
-52 error path /Users/mitchellwaldman/.npm/glob/5.0.3
-53 error code EACCES
-54 error errno 3
-55 error stack Error: EACCES, mkdir '/Users/mitchellwaldman/.npm/glob/5.0.3'
-56 verbose exit [ 3, true ]
+3 info using node@v0.10.38
+4 verbose node symlink /usr/bin/node
+5 warn package.json RoverCore@1.5.0 No repository field.
+6 verbose readDependencies using package.json deps
+7 verbose install where, deps [ '/home/rj/repos/bitbucket/rovercore',
+7 verbose install   [ 'glob',
+7 verbose install     'i2c',
+7 verbose install     'serialport',
+7 verbose install     'socket.io-client',
+7 verbose install     'async',
+7 verbose install     'underscore' ] ]
+8 info preinstall RoverCore@1.5.0
+9 verbose readDependencies using package.json deps
+10 verbose cache add [ 'glob@5.0.3', null ]
+11 verbose cache add name=undefined spec="glob@5.0.3" args=["glob@5.0.3",null]
+12 verbose parsed url { protocol: null,
+12 verbose parsed url   slashes: null,
+12 verbose parsed url   auth: null,
+12 verbose parsed url   host: null,
+12 verbose parsed url   port: null,
+12 verbose parsed url   hostname: null,
+12 verbose parsed url   hash: null,
+12 verbose parsed url   search: null,
+12 verbose parsed url   query: null,
+12 verbose parsed url   pathname: 'glob@5.0.3',
+12 verbose parsed url   path: 'glob@5.0.3',
+12 verbose parsed url   href: 'glob@5.0.3' }
+13 verbose cache add [ 'i2c@0.1.8', null ]
+14 verbose cache add name=undefined spec="i2c@0.1.8" args=["i2c@0.1.8",null]
+15 verbose parsed url { protocol: null,
+15 verbose parsed url   slashes: null,
+15 verbose parsed url   auth: null,
+15 verbose parsed url   host: null,
+15 verbose parsed url   port: null,
+15 verbose parsed url   hostname: null,
+15 verbose parsed url   hash: null,
+15 verbose parsed url   search: null,
+15 verbose parsed url   query: null,
+15 verbose parsed url   pathname: 'i2c@0.1.8',
+15 verbose parsed url   path: 'i2c@0.1.8',
+15 verbose parsed url   href: 'i2c@0.1.8' }
+16 verbose cache add [ 'serialport@1.6.3', null ]
+17 verbose cache add name=undefined spec="serialport@1.6.3" args=["serialport@1.6.3",null]
+18 verbose parsed url { protocol: null,
+18 verbose parsed url   slashes: null,
+18 verbose parsed url   auth: null,
+18 verbose parsed url   host: null,
+18 verbose parsed url   port: null,
+18 verbose parsed url   hostname: null,
+18 verbose parsed url   hash: null,
+18 verbose parsed url   search: null,
+18 verbose parsed url   query: null,
+18 verbose parsed url   pathname: 'serialport@1.6.3',
+18 verbose parsed url   path: 'serialport@1.6.3',
+18 verbose parsed url   href: 'serialport@1.6.3' }
+19 verbose cache add [ 'socket.io-client@1.3.5', null ]
+20 verbose cache add name=undefined spec="socket.io-client@1.3.5" args=["socket.io-client@1.3.5",null]
+21 verbose parsed url { protocol: null,
+21 verbose parsed url   slashes: null,
+21 verbose parsed url   auth: null,
+21 verbose parsed url   host: null,
+21 verbose parsed url   port: null,
+21 verbose parsed url   hostname: null,
+21 verbose parsed url   hash: null,
+21 verbose parsed url   search: null,
+21 verbose parsed url   query: null,
+21 verbose parsed url   pathname: 'socket.io-client@1.3.5',
+21 verbose parsed url   path: 'socket.io-client@1.3.5',
+21 verbose parsed url   href: 'socket.io-client@1.3.5' }
+22 verbose cache add [ 'async@0.9.0', null ]
+23 verbose cache add name=undefined spec="async@0.9.0" args=["async@0.9.0",null]
+24 verbose parsed url { protocol: null,
+24 verbose parsed url   slashes: null,
+24 verbose parsed url   auth: null,
+24 verbose parsed url   host: null,
+24 verbose parsed url   port: null,
+24 verbose parsed url   hostname: null,
+24 verbose parsed url   hash: null,
+24 verbose parsed url   search: null,
+24 verbose parsed url   query: null,
+24 verbose parsed url   pathname: 'async@0.9.0',
+24 verbose parsed url   path: 'async@0.9.0',
+24 verbose parsed url   href: 'async@0.9.0' }
+25 verbose cache add [ 'underscore@1.8.2', null ]
+26 verbose cache add name=undefined spec="underscore@1.8.2" args=["underscore@1.8.2",null]
+27 verbose parsed url { protocol: null,
+27 verbose parsed url   slashes: null,
+27 verbose parsed url   auth: null,
+27 verbose parsed url   host: null,
+27 verbose parsed url   port: null,
+27 verbose parsed url   hostname: null,
+27 verbose parsed url   hash: null,
+27 verbose parsed url   search: null,
+27 verbose parsed url   query: null,
+27 verbose parsed url   pathname: 'underscore@1.8.2',
+27 verbose parsed url   path: 'underscore@1.8.2',
+27 verbose parsed url   href: 'underscore@1.8.2' }
+28 verbose cache add name="glob" spec="5.0.3" args=["glob","5.0.3"]
+29 verbose parsed url { protocol: null,
+29 verbose parsed url   slashes: null,
+29 verbose parsed url   auth: null,
+29 verbose parsed url   host: null,
+29 verbose parsed url   port: null,
+29 verbose parsed url   hostname: null,
+29 verbose parsed url   hash: null,
+29 verbose parsed url   search: null,
+29 verbose parsed url   query: null,
+29 verbose parsed url   pathname: '5.0.3',
+29 verbose parsed url   path: '5.0.3',
+29 verbose parsed url   href: '5.0.3' }
+30 verbose addNamed [ 'glob', '5.0.3' ]
+31 verbose addNamed [ '5.0.3', '5.0.3' ]
+32 verbose cache add name="i2c" spec="0.1.8" args=["i2c","0.1.8"]
+33 verbose parsed url { protocol: null,
+33 verbose parsed url   slashes: null,
+33 verbose parsed url   auth: null,
+33 verbose parsed url   host: null,
+33 verbose parsed url   port: null,
+33 verbose parsed url   hostname: null,
+33 verbose parsed url   hash: null,
+33 verbose parsed url   search: null,
+33 verbose parsed url   query: null,
+33 verbose parsed url   pathname: '0.1.8',
+33 verbose parsed url   path: '0.1.8',
+33 verbose parsed url   href: '0.1.8' }
+34 verbose addNamed [ 'i2c', '0.1.8' ]
+35 verbose addNamed [ '0.1.8', '0.1.8' ]
+36 verbose cache add name="serialport" spec="1.6.3" args=["serialport","1.6.3"]
+37 verbose parsed url { protocol: null,
+37 verbose parsed url   slashes: null,
+37 verbose parsed url   auth: null,
+37 verbose parsed url   host: null,
+37 verbose parsed url   port: null,
+37 verbose parsed url   hostname: null,
+37 verbose parsed url   hash: null,
+37 verbose parsed url   search: null,
+37 verbose parsed url   query: null,
+37 verbose parsed url   pathname: '1.6.3',
+37 verbose parsed url   path: '1.6.3',
+37 verbose parsed url   href: '1.6.3' }
+38 verbose addNamed [ 'serialport', '1.6.3' ]
+39 verbose addNamed [ '1.6.3', '1.6.3' ]
+40 verbose cache add name="socket.io-client" spec="1.3.5" args=["socket.io-client","1.3.5"]
+41 verbose parsed url { protocol: null,
+41 verbose parsed url   slashes: null,
+41 verbose parsed url   auth: null,
+41 verbose parsed url   host: null,
+41 verbose parsed url   port: null,
+41 verbose parsed url   hostname: null,
+41 verbose parsed url   hash: null,
+41 verbose parsed url   search: null,
+41 verbose parsed url   query: null,
+41 verbose parsed url   pathname: '1.3.5',
+41 verbose parsed url   path: '1.3.5',
+41 verbose parsed url   href: '1.3.5' }
+42 verbose addNamed [ 'socket.io-client', '1.3.5' ]
+43 verbose addNamed [ '1.3.5', '1.3.5' ]
+44 verbose cache add name="async" spec="0.9.0" args=["async","0.9.0"]
+45 verbose parsed url { protocol: null,
+45 verbose parsed url   slashes: null,
+45 verbose parsed url   auth: null,
+45 verbose parsed url   host: null,
+45 verbose parsed url   port: null,
+45 verbose parsed url   hostname: null,
+45 verbose parsed url   hash: null,
+45 verbose parsed url   search: null,
+45 verbose parsed url   query: null,
+45 verbose parsed url   pathname: '0.9.0',
+45 verbose parsed url   path: '0.9.0',
+45 verbose parsed url   href: '0.9.0' }
+46 verbose addNamed [ 'async', '0.9.0' ]
+47 verbose addNamed [ '0.9.0', '0.9.0' ]
+48 verbose cache add name="underscore" spec="1.8.2" args=["underscore","1.8.2"]
+49 verbose parsed url { protocol: null,
+49 verbose parsed url   slashes: null,
+49 verbose parsed url   auth: null,
+49 verbose parsed url   host: null,
+49 verbose parsed url   port: null,
+49 verbose parsed url   hostname: null,
+49 verbose parsed url   hash: null,
+49 verbose parsed url   search: null,
+49 verbose parsed url   query: null,
+49 verbose parsed url   pathname: '1.8.2',
+49 verbose parsed url   path: '1.8.2',
+49 verbose parsed url   href: '1.8.2' }
+50 verbose addNamed [ 'underscore', '1.8.2' ]
+51 verbose addNamed [ '1.8.2', '1.8.2' ]
+52 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+53 verbose lock glob@5.0.3 /home/rj/.npm/7d5136e3-glob-5-0-3.lock
+54 silly lockFile c2a6a918-i2c-0-1-8 i2c@0.1.8
+55 verbose lock i2c@0.1.8 /home/rj/.npm/c2a6a918-i2c-0-1-8.lock
+56 silly lockFile a8ec228e-serialport-1-6-3 serialport@1.6.3
+57 verbose lock serialport@1.6.3 /home/rj/.npm/a8ec228e-serialport-1-6-3.lock
+58 silly lockFile ea29f377-socket-io-client-1-3-5 socket.io-client@1.3.5
+59 verbose lock socket.io-client@1.3.5 /home/rj/.npm/ea29f377-socket-io-client-1-3-5.lock
+60 silly lockFile 9a58a886-async-0-9-0 async@0.9.0
+61 verbose lock async@0.9.0 /home/rj/.npm/9a58a886-async-0-9-0.lock
+62 silly lockFile 004e52f6-underscore-1-8-2 underscore@1.8.2
+63 verbose lock underscore@1.8.2 /home/rj/.npm/004e52f6-underscore-1-8-2.lock
+64 verbose request where is /i2c
+65 verbose request registry https://registry.npmjs.org/
+66 verbose request id b09248003bfb1857
+67 verbose url raw /i2c
+68 verbose url resolving [ 'https://registry.npmjs.org/', './i2c' ]
+69 verbose url resolved https://registry.npmjs.org/i2c
+70 verbose request where is https://registry.npmjs.org/i2c
+71 info trying registry request attempt 1 at 16:49:51
+72 http GET https://registry.npmjs.org/i2c
+73 verbose request where is /glob
+74 verbose request registry https://registry.npmjs.org/
+75 verbose url raw /glob
+76 verbose url resolving [ 'https://registry.npmjs.org/', './glob' ]
+77 verbose url resolved https://registry.npmjs.org/glob
+78 verbose request where is https://registry.npmjs.org/glob
+79 info trying registry request attempt 1 at 16:49:51
+80 verbose etag "9XIJS97FWQU7LHJIU5ZDX0NOW"
+81 http GET https://registry.npmjs.org/glob
+82 verbose request where is /underscore
+83 verbose request registry https://registry.npmjs.org/
+84 verbose url raw /underscore
+85 verbose url resolving [ 'https://registry.npmjs.org/', './underscore' ]
+86 verbose url resolved https://registry.npmjs.org/underscore
+87 verbose request where is https://registry.npmjs.org/underscore
+88 info trying registry request attempt 1 at 16:49:51
+89 verbose etag "8SXMDGGWIHHGAS6XTKZQDB565"
+90 http GET https://registry.npmjs.org/underscore
+91 verbose request where is /async
+92 verbose request registry https://registry.npmjs.org/
+93 verbose url raw /async
+94 verbose url resolving [ 'https://registry.npmjs.org/', './async' ]
+95 verbose url resolved https://registry.npmjs.org/async
+96 verbose request where is https://registry.npmjs.org/async
+97 info trying registry request attempt 1 at 16:49:51
+98 verbose etag "3VOC7S49J0KOTUE8RND8643J2"
+99 http GET https://registry.npmjs.org/async
+100 verbose request where is /serialport
+101 verbose request registry https://registry.npmjs.org/
+102 verbose url raw /serialport
+103 verbose url resolving [ 'https://registry.npmjs.org/', './serialport' ]
+104 verbose url resolved https://registry.npmjs.org/serialport
+105 verbose request where is https://registry.npmjs.org/serialport
+106 info trying registry request attempt 1 at 16:49:51
+107 verbose etag "268J2IZ2SS9396U62SVQ2WKCD"
+108 http GET https://registry.npmjs.org/serialport
+109 verbose request where is /socket.io-client
+110 verbose request registry https://registry.npmjs.org/
+111 verbose url raw /socket.io-client
+112 verbose url resolving [ 'https://registry.npmjs.org/', './socket.io-client' ]
+113 verbose url resolved https://registry.npmjs.org/socket.io-client
+114 verbose request where is https://registry.npmjs.org/socket.io-client
+115 info trying registry request attempt 1 at 16:49:52
+116 verbose etag "D8PL4UV4XGHUIRX92NMDUOQVH"
+117 http GET https://registry.npmjs.org/socket.io-client
+118 http 304 https://registry.npmjs.org/underscore
+119 silly registry.get cb [ 304,
+119 silly registry.get   { date: 'Sat, 02 May 2015 23:49:51 GMT',
+119 silly registry.get     via: '1.1 varnish',
+119 silly registry.get     'last-modified': 'Sat, 02 May 2015 23:49:51 GMT',
+119 silly registry.get     'cache-control': 'max-age=60',
+119 silly registry.get     etag: '"8SXMDGGWIHHGAS6XTKZQDB565"',
+119 silly registry.get     age: '25',
+119 silly registry.get     connection: 'keep-alive',
+119 silly registry.get     'x-served-by': 'cache-sjc3124-SJC',
+119 silly registry.get     'x-cache': 'HIT',
+119 silly registry.get     'x-cache-hits': '1',
+119 silly registry.get     'x-timer': 'S1430610591.967028,VS0,VE0',
+119 silly registry.get     vary: 'Accept' } ]
+120 verbose etag https://registry.npmjs.org/underscore from cache
+121 http 304 https://registry.npmjs.org/glob
+122 silly registry.get cb [ 304,
+122 silly registry.get   { date: 'Sat, 02 May 2015 23:49:51 GMT',
+122 silly registry.get     via: '1.1 varnish',
+122 silly registry.get     'last-modified': 'Sat, 02 May 2015 23:49:51 GMT',
+122 silly registry.get     'cache-control': 'max-age=60',
+122 silly registry.get     etag: '"9XIJS97FWQU7LHJIU5ZDX0NOW"',
+122 silly registry.get     age: '25',
+122 silly registry.get     connection: 'keep-alive',
+122 silly registry.get     'x-served-by': 'cache-sjc3126-SJC',
+122 silly registry.get     'x-cache': 'HIT',
+122 silly registry.get     'x-cache-hits': '1',
+122 silly registry.get     'x-timer': 'S1430610591.966868,VS0,VE0',
+122 silly registry.get     vary: 'Accept' } ]
+123 verbose etag https://registry.npmjs.org/glob from cache
+124 http 304 https://registry.npmjs.org/async
+125 silly registry.get cb [ 304,
+125 silly registry.get   { date: 'Sat, 02 May 2015 23:49:51 GMT',
+125 silly registry.get     via: '1.1 varnish',
+125 silly registry.get     'cache-control': 'max-age=60',
+125 silly registry.get     etag: '"3VOC7S49J0KOTUE8RND8643J2"',
+125 silly registry.get     age: '35',
+125 silly registry.get     connection: 'keep-alive',
+125 silly registry.get     'x-served-by': 'cache-sjc3127-SJC',
+125 silly registry.get     'x-cache': 'HIT',
+125 silly registry.get     'x-cache-hits': '252',
+125 silly registry.get     'x-timer': 'S1430610591.969695,VS0,VE0',
+125 silly registry.get     vary: 'Accept' } ]
+126 verbose etag https://registry.npmjs.org/async from cache
+127 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+128 verbose lock https://registry.npmjs.org/glob/-/glob-5.0.3.tgz /home/rj/.npm/e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz.lock
+129 verbose addRemoteTarball [ 'https://registry.npmjs.org/glob/-/glob-5.0.3.tgz',
+129 verbose addRemoteTarball   '15528c1c727e474a8e7731541c00b00ec802952d' ]
+130 silly lockFile 9a58a886-async-0-9-0 async@0.9.0
+131 silly lockFile 9a58a886-async-0-9-0 async@0.9.0
+132 info retry fetch attempt 1 at 16:49:52
+133 verbose fetch to= /tmp/npm-3740-iMoSk6Ud/registry.npmjs.org/glob/-/glob-5.0.3.tgz
+134 http GET https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+135 silly lockFile 004e52f6-underscore-1-8-2 underscore@1.8.2
+136 silly lockFile 004e52f6-underscore-1-8-2 underscore@1.8.2
+137 http 200 https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+138 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+139 silly lockFile e1867030-ry-npmjs-org-glob-glob-5-0-3-tgz https://registry.npmjs.org/glob/-/glob-5.0.3.tgz
+140 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+141 silly lockFile 7d5136e3-glob-5-0-3 glob@5.0.3
+142 http 200 https://registry.npmjs.org/i2c
+143 silly registry.get cb [ 200,
+143 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+143 silly registry.get     etag: '"CLY0TF6FO9F6QU25LT9BZURXR"',
+143 silly registry.get     'content-type': 'application/json',
+143 silly registry.get     'cache-control': 'max-age=60',
+143 silly registry.get     'content-length': '15316',
+143 silly registry.get     'accept-ranges': 'bytes',
+143 silly registry.get     date: 'Sat, 02 May 2015 23:49:52 GMT',
+143 silly registry.get     via: '1.1 varnish',
+143 silly registry.get     age: '0',
+143 silly registry.get     connection: 'keep-alive',
+143 silly registry.get     'x-served-by': 'cache-sjc3126-SJC',
+143 silly registry.get     'x-cache': 'MISS',
+143 silly registry.get     'x-cache-hits': '0',
+143 silly registry.get     'x-timer': 'S1430610591.965598,VS0,VE181',
+143 silly registry.get     vary: 'Accept' } ]
+144 silly lockFile d23319ce-stry-npmjs-org-i2c-i2c-0-1-8-tgz https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+145 verbose lock https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz /home/rj/.npm/d23319ce-stry-npmjs-org-i2c-i2c-0-1-8-tgz.lock
+146 verbose addRemoteTarball [ 'https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz',
+146 verbose addRemoteTarball   '551a582ed48af3d78165c932b0280b3c02f67701' ]
+147 info retry fetch attempt 1 at 16:49:52
+148 verbose fetch to= /tmp/npm-3740-iMoSk6Ud/registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+149 http GET https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+150 http 200 https://registry.npmjs.org/socket.io-client
+151 silly registry.get cb [ 200,
+151 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+151 silly registry.get     etag: '"5PATU4MO2KULCSW08JBABZ1OL"',
+151 silly registry.get     'content-type': 'application/json',
+151 silly registry.get     'cache-control': 'max-age=60',
+151 silly registry.get     'content-length': '88783',
+151 silly registry.get     'accept-ranges': 'bytes',
+151 silly registry.get     date: 'Sat, 02 May 2015 23:49:52 GMT',
+151 silly registry.get     via: '1.1 varnish',
+151 silly registry.get     age: '0',
+151 silly registry.get     connection: 'keep-alive',
+151 silly registry.get     'x-served-by': 'cache-sjc3124-SJC',
+151 silly registry.get     'x-cache': 'HIT',
+151 silly registry.get     'x-cache-hits': '1',
+151 silly registry.get     'x-timer': 'S1430610591.978725,VS0,VE347',
+151 silly registry.get     vary: 'Accept' } ]
+152 silly lockFile b2fc778b-lient-socket-io-client-1-3-5-tgz https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+153 verbose lock https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz /home/rj/.npm/b2fc778b-lient-socket-io-client-1-3-5-tgz.lock
+154 verbose addRemoteTarball [ 'https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz',
+154 verbose addRemoteTarball   '9c3a6fbdbd99420c3633a16b4e2543e73f1303ea' ]
+155 info retry fetch attempt 1 at 16:49:52
+156 verbose fetch to= /tmp/npm-3740-iMoSk6Ud/registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+157 http GET https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+158 http 200 https://registry.npmjs.org/serialport
+159 silly registry.get cb [ 200,
+159 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+159 silly registry.get     etag: '"BRT71W54MN9GFYPD8WO4OGMTB"',
+159 silly registry.get     'content-type': 'application/json',
+159 silly registry.get     'cache-control': 'max-age=60',
+159 silly registry.get     'content-length': '109261',
+159 silly registry.get     'accept-ranges': 'bytes',
+159 silly registry.get     date: 'Sat, 02 May 2015 23:49:52 GMT',
+159 silly registry.get     via: '1.1 varnish',
+159 silly registry.get     age: '0',
+159 silly registry.get     connection: 'keep-alive',
+159 silly registry.get     'x-served-by': 'cache-sjc3124-SJC',
+159 silly registry.get     'x-cache': 'HIT',
+159 silly registry.get     'x-cache-hits': '1',
+159 silly registry.get     'x-timer': 'S1430610591.990165,VS0,VE364',
+159 silly registry.get     vary: 'Accept' } ]
+160 silly lockFile ab7575f0--serialport-serialport-1-6-3-tgz https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+161 verbose lock https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz /home/rj/.npm/ab7575f0--serialport-serialport-1-6-3-tgz.lock
+162 verbose addRemoteTarball [ 'https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz',
+162 verbose addRemoteTarball   '96a8ccd380b5426de119d47c977983934f77b2eb' ]
+163 info retry fetch attempt 1 at 16:49:52
+164 verbose fetch to= /tmp/npm-3740-iMoSk6Ud/registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+165 http GET https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+166 http 200 https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+167 http 200 https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+168 silly lockFile b2fc778b-lient-socket-io-client-1-3-5-tgz https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+169 silly lockFile b2fc778b-lient-socket-io-client-1-3-5-tgz https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.3.5.tgz
+170 silly lockFile ea29f377-socket-io-client-1-3-5 socket.io-client@1.3.5
+171 silly lockFile ea29f377-socket-io-client-1-3-5 socket.io-client@1.3.5
+172 http 200 https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+173 silly lockFile d23319ce-stry-npmjs-org-i2c-i2c-0-1-8-tgz https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+174 silly lockFile d23319ce-stry-npmjs-org-i2c-i2c-0-1-8-tgz https://registry.npmjs.org/i2c/-/i2c-0.1.8.tgz
+175 silly lockFile c2a6a918-i2c-0-1-8 i2c@0.1.8
+176 silly lockFile c2a6a918-i2c-0-1-8 i2c@0.1.8
+177 silly lockFile ab7575f0--serialport-serialport-1-6-3-tgz https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+178 silly lockFile ab7575f0--serialport-serialport-1-6-3-tgz https://registry.npmjs.org/serialport/-/serialport-1.6.3.tgz
+179 silly lockFile a8ec228e-serialport-1-6-3 serialport@1.6.3
+180 silly lockFile a8ec228e-serialport-1-6-3 serialport@1.6.3
+181 error Error: EACCES, mkdir '/home/rj/.npm/glob/5.0.3'
+181 error  { [Error: EACCES, mkdir '/home/rj/.npm/glob/5.0.3']
+181 error   errno: 3,
+181 error   code: 'EACCES',
+181 error   path: '/home/rj/.npm/glob/5.0.3',
+181 error   parent: 'RoverCore' }
+182 error Please try running this command again as root/Administrator.
+183 error System Linux 3.13.0-49-generic
+184 error command "/usr/bin/node" "/usr/bin/npm" "install"
+185 error cwd /home/rj/repos/bitbucket/rovercore
+186 error node -v v0.10.38
+187 error npm -v 1.4.28
+188 error path /home/rj/.npm/glob/5.0.3
+189 error code EACCES
+190 error errno 3
+191 error stack Error: EACCES, mkdir '/home/rj/.npm/glob/5.0.3'
+192 verbose exit [ 3, true ]

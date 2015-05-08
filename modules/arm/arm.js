@@ -72,12 +72,12 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		this.moveMotor(this.id.BASE, input.base);
 	}
 	//Because motors have a wierd offset and different orientations, the degree values need to be mapped... For safety, I am disabling the shoulder motors temporarily
-	 if(input.shoulderL != undefined /*&& input.shoulderL > 63 && input.shoulderL < 243*/){
-	 	this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
-	 }
-	 if(input.shoulderR != undefined /*&& input.shoulderR > 83 && input.shoulderR < 263*/){
+	if(input.shoulderL != undefined /*&& input.shoulderL > 63 && input.shoulderL < 243*/){
+		this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
+	}
+	if(input.shoulderR != undefined /*&& input.shoulderR > 83 && input.shoulderR < 263*/){
 	 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
-         }
+    }
 	if(input.elbow != undefined /*&& input.elbow > 127 && input.elbow < 270*/){
 		this.moveMotor(this.id.ELBOW, input.elbow);
 	}
