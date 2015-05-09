@@ -5,32 +5,20 @@ var Skeleton = require("../skeleton.js");
 Sensor.prototype = new Skeleton("SENSOR");
 Sensor.prototype.constructor = Sensor;
 
-
-
 function Sensor(model_ref, feedback) {
-
     this.model = model_ref;
     this.feedback = feedback;
-
     //interval
     this.interval_compass = 1000;
     this.interval_gyro = 1000;
     this.interval_accelero = 1000;
     this.interval_GPS = 30000;
-
-    //stop function
-    this.GPS_stop;
-    this.compass_stop;
-    this.accelero_stop;
-    this.gyro_stop;
-
     //initiate 
     this.gyro();
     this.accelero();
     this.compass();
     this.GPS();
-    this.power();
-
+    this.Serialdata();    // [power,voltage,potentiometer]
 
 };
 
@@ -124,6 +112,19 @@ Sensor.prototype.handle = function(data) { // take command from user interface
         this.interval_GPS = 10000;
 
     }
+
+
+    //acuator command 
+
+    if (data.acuator == "UP"){
+        parent.model.acuator.sent_position = "U";
+        this.acuator();
+    }
+
+    else if (data.acuator == "DOWN"){
+        parent.model.acuator.sent_position = "D"
+        this.acuator();
+    }    
 
 };
 
@@ -331,7 +332,7 @@ Sensor.prototype.accelero = function() {
 Sensor.prototype.GPS = function() {
     var parent = this;
     var SerialPort = SERIALPORT.SerialPort; // make a local instant
-    var myPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port using new() like so
+    var myPort = new SerialPort("/dev/ttyO4", { // <--Then you open the port using new() like so
         baudRate: 9600,
         parser: SERIALPORT.parsers.readline("\r\n") // look for return and newline at the end of each data packet
     });
@@ -357,7 +358,7 @@ Sensor.prototype.GPS = function() {
         parent.model.GPS.longitude_dir = lng_dir;
         parent.model.GPS.latitude_dir = lat_dir;
 
-        console.log("lat: " + parent.model.GPS.lattitude + " long: " + parent.model.GPS.longitude);
+        console.log("lat: " + parent.model.GPS.latitude + " long: " + parent.model.GPS.longitude);
     });
 
     function showPortOpen() {
@@ -377,43 +378,89 @@ Sensor.prototype.GPS = function() {
         console.log('Serial port error: ' + error);
     }
 };
-Sensor.prototype.power = function() {
-    var parent = this;
-    var SerialPort = require("serialport").SerialPort
-    var serialPort = new SerialPort("/dev/ttyO4", {
-        baudrate: 9600
-    }, false); // this is the openImmediately flag [default is true]
+Sensor.prototype.Serialdata = function() {
 
-    serialPort.open(function(error) {
-        if (error) {
-            console.log('failed to open: ' + error);
-        } else {
-            console.log('open');
-            serialPort.on('data', function(data) {
-                var holder = [0, 0, 0, 0, 0, 0];
+  global.buffer = new Buffer(100);
+  var parent = this;
+ 
+  var SerialPort = SERIALPORT.SerialPort; // make a local instant
+  var PowerPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
+      baudRate: 9600,
+      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
+  });
 
-                var current = 0;
-                var voltage = 0;
-                holder = data;
+  PowerPort.open(function(error) {
+    if (error) {
+      console.log('failed to open: ' + error);} 
+    else {
+    console.log('open');
+    PowerPort.on('data', function(data) {
 
-                if (holder < 1) {
-                    current = (holder) * 100;
-                } else if (holder > 100) {
-                    voltage = holder - 100;
-                    parent.model.power.voltage = voltage;
-                    console.log("voltage: " + voltage);
-                }
+      var voltage_string = [""];      //initiate a string
+      var current_string = [""];
+      var potentiometer_string = [""];
+                         
+      
+      var end_bit = '#'; 
 
-                if (curr != 0) {
-                    parent.model.power.current = current;
-                    console.log("current: " + curr);
-                }
+      parent.buffer = data;
+      for (var i = 0; i < 20; i++) {
 
-                console.log();
-
-            });
+        //current evaluation 
+        if (parent.buffer[i] == 'C' ) {
+          while (parent.buffer[++i] != end_bit) {
+          current_string += parent.buffer[i];   // populate string
+          parent.model.power.current = parseFloat(current_string)*10; // change string into float
+          }
         }
-    });
+        //voltage evaluation
+        if (parent.buffer[i] == 'V') {
+          while (parent.buffer[++i] != end_bit) {
+            voltage_string += parent.buffer[i];  // populate string
+            parent.model.power.voltage = parseFloat(voltage_string)*10; // change string into float 
+          }
+        }
+
+        //acuator evaluation 
+       if (parent.buffer[i] == 'P') {
+          while (parent.buffer[++i] <= end_bit) {
+            potentiometer_string += parent.buffer[i];  // populate string
+            parent.model.acuator.potentiometer = parseFloat(potentiometer_string); // change string into float 
+          }
+        }
+      }
+
+      console.log("voltage: " + parent.model.power.voltage);
+      console.log("current: " + parent.model.power.current);
+      console.log("potentiometer: " + parent.model.acuator.potentiometer);
+      });
+	}
+   });
+                              
+
+};
+
+Sensor.prototype.acuator = function() {
+
+  var parent = this;
+  var SerialPort = SERIALPORT.SerialPort; // make a local instant
+  var AcuatorPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
+      baudRate: 9600,
+      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
+  });
+
+  AcuatorPort.open(function(error) {
+    if (error) {
+      console.log('failed to open: ' + error);
+        } 
+    else {
+
+    console.log('open');
+    console.log('command being sent'); 
+    AcuatorPort.write(parent.model.acuator.sent_position);
+    console.log('command sent finished');
+        }
+   });
 };
 Sensor.prototype.optical = function() {
     //TODO
