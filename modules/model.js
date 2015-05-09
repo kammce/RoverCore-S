@@ -1,7 +1,7 @@
 "use strict";
 
 var Model = {
-	test: 0.0,
+	
 	tracker: {
 		pitch:0,
 		yaw:0,
@@ -32,7 +32,11 @@ var Model = {
 		current:0,
 	 	voltage:0
 	},
-	wheel_speed:[0,0,0,0,0,0]
+	acuator: {
+		sent_position: "I",  //idle mode 
+		potentiometer:0
+		
+	}
 
 }
 
