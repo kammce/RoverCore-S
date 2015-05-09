@@ -14,12 +14,20 @@ function Arm (model_ref){
 	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
 	this.model = model_ref;
 	/*Globals*/
-	this.serial = new SerialPort("/dev/ttyO2", {
+	this.serial = new SerialPort("/dev/ttyO1", {
 	    baudrate: 57600,
 	    //databits:8,
 	    //parity: 'none'
 	});
 	this.defaulted = false;
+
+	this.ready = {
+		base: false,
+		shoulderL: false,
+		shoulderR: false,
+		elbow: false,
+		wrist: false
+	}
 
 	/*Setup Action call*/
 	this.actionBuffer = new Buffer(6);
@@ -96,6 +104,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		 	var newval = (pos - 300) * (-1);
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
+
 		 }
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
@@ -121,7 +130,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
 	}
-	this.callAction(this.actionBuffer);
+	if(this.ready.shoulderL && this.ready.shoulderR){
+		this.callAction(this.actionBuffer);
+	}
 };
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -175,9 +186,12 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 };
 
 Arm.prototype.callAction = function(input){
-	this.serial.write(input, function(){
+	var ptr = this;
+	this.serial.write(input, function(ptr){
 		busy = false;
 		console.log("No longer busy");
+		ptr.ready.shoulderL = false;
+		ptr.ready.shoulderR = false;
 	});
 }
 
@@ -214,7 +228,15 @@ Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs a
 	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
-	this.serial.write(command, function() {});
+	var ptr = this;
+	this.serial.write(command, function(ptr) {
+		if(obj.motorID == 0x01){
+			ptr.ready.shoulderL = true;
+		}
+		else if(obj.motorID == 0x02){
+			ptr.ready.shoulderR = true;
+		}
+	});
 	//console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
 }
 
