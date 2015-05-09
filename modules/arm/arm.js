@@ -25,12 +25,12 @@ function Arm (model_ref){
 	this.actionBuffer = new Buffer(6);
 		var index = 0;
 		var checksum = 0xFE + 0x02 + 0x05;
-		actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
-		actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
-		actionBuffer[index++] = 0xFE; // ID Byte Char
-		actionBuffer[index++] = 0x02; //packet length
-		actionBuffer[index++] = 0x05; //instruction byte
-		actionBuffer[index++] = ~checksum & 0xFF;
+		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+		this.actionBuffer[index++] = 0xFE; // ID Byte Char
+		this.actionBuffer[index++] = 0x02; //packet length
+		this.actionBuffer[index++] = 0x05; //instruction byte
+		this.actionBuffer[index++] = ~checksum & 0xFF;
 	/*Setup Data Schema*/
 	this.schema = { //format for data being passed to arm.prototype.handle(data);
 		"type" : "object",
