@@ -3,6 +3,7 @@
 #
 # type this at the command prompt: sudo cp rover-video.rules /etc/udev/rules.d
 
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="HP Webcam", SYMLINK+="video-arm"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="HD Pro Webcam C920", SYMLINK+="video-navi"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="USB2.0 PC CAMERA", SYMLINK+="video-hull"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0BFD493F", SYMLINK+="video-arm"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="9FB1593F", SYMLINK+="video-hull"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="8574D65F", SYMLINK+="video-navi"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0011426250", SYMLINK+="video-tracker"
