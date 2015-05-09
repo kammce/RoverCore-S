@@ -23,7 +23,7 @@ function Arm (model_ref){
 
 	/*Setup Action call*/
 	this.actionBuffer = new Buffer(6);
-		var index = 0;
+		var index = 0; //index iterator
 		var checksum = 0xFE + 0x02 + 0x05;
 		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
 		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
