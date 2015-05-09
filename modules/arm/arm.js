@@ -8,7 +8,7 @@ var Skeleton = require("../skeleton.js");
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
-var busy = false;
+var busy = false;//Handles signal traffic jams
 
 function Arm (model_ref){
 	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
@@ -20,12 +20,23 @@ function Arm (model_ref){
 	    //parity: 'none'
 	});
 	this.defaulted = false;
-	// console.log("Hello, starting..."); //For Debugging
+
+	/*Setup Action call*/
+	this.actionBuffer = new Buffer(6);
+		var index = 0;
+		var checksum = 0xFE + 0x02 + 0x05;
+		actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+		actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+		actionBuffer[index++] = 0xFE; // ID Byte Char
+		actionBuffer[index++] = 0x02; //packet length
+		actionBuffer[index++] = 0x05; //instruction byte
+		actionBuffer[index++] = ~checksum & 0xFF;
+	/*Setup Data Schema*/
 	this.schema = { //format for data being passed to arm.prototype.handle(data);
 		"type" : "object",
 		"properties" : {
 			"base" : "Number", //Degree value, from 0 to 360
-			"shoulderL" : "Number", //Degree value, from 0 to 360
+			//"shoulderL" : "Number", //Degree value, from 0 to 360
 			"shoulderR" : "Number", //Degree value, from 0 to 360
 			"elbow" : "Number", //Degree value, from 0 to 360
 			"wrist" : "Number", //Degree value, from 0 to 360
@@ -44,6 +55,11 @@ function Arm (model_ref){
 	//Servo Register Addresses **NOTE:TORQUE enables motor movement
 	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
 
+	/*Setup command standards (saves processing time)*/
+	this.standards = {
+		write: {instruction: this.operation.WRITE, register: this.edit.POSITION},
+		regwrite: {instruction: this.operation.REGWRITE, register: this.edit.POSITION},
+	}
 	/*Initiate Serialport*/
 		this.serial.on('open', function(err) {
 		    if(err){
@@ -53,9 +69,6 @@ function Arm (model_ref){
 		    	// console.log('>>SerialPort is Open<<'); //For Debugging
 		    }
 		});
-		// this.serial.on('data', function(data){ //For debugging
-		// 	console.log(">>Response:" + data);
-		// });
 		this.serial.on('err', function(err){
 			console.log(err);
 		});
@@ -84,9 +97,6 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
 		 }
-	//	 if(typeof input.shoulderR != "undefined"){
-	//	 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
-	//       }
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
 		}
@@ -110,20 +120,14 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
-		// if(typeof input.speed != "undefined"){
-		// 	setSpeed(id.ALL, input.speed);
-		// }
-		// this.print(); //this.print points to the print method prototyped in Arm class (functions can be classes!)
 	}
-	this.callAction();
+	this.callAction(this.actionBuffer);
 };
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
-	// console.log("Enabling Torque");
-	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
 	var hexdeg = (number/300) * 1023;/*(number/360) * 4095;*/ //for MX series: 360 and 4095. for RX series: 300 and 1023
-	if(hexdeg > 1023){ /*4095){*/
-		hexdeg = 1023; /*4095;*/
+	if(hexdeg > 1023){
+		hexdeg = 1023;
 	}
 	if(hexdeg < 0){
 		hexdeg = 0;
@@ -131,7 +135,10 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	//console.log("H:" + high + "  L:" + low);
-	this.writePacket(this.operation.REGWRITE, ID, this.edit.POSITION, low, high);
+	this.standards.regwrite.motorID = ID;
+	this.standards.regwrite.lowbyte = low;
+	this.standards.regwrite.highbyte = high;
+	this.writePacket(this.standards.regwrite);
 };
 
 Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -147,7 +154,10 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	//console.log("H:" + high + "  L:" + low);
-	this.writePacket(this.operation.REGWRITE, ID, this.edit.POSITION, low, high);
+	this.standards.regwrite.motorID = ID;
+	this.standards.regwrite.lowbyte = low;
+	this.standards.regwrite.highbyte = high;
+	this.writePacket(this.standards.regwrite);
 };
 
 Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -164,30 +174,18 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 	this.writePacket(this.operation.WRITE, ID, this.edit.SPEED, low, high);
 };
 
-Arm.prototype.callAction = function(){
-	var command = new Buffer(10);
-	for(var i = 0; i < command.length; i++) { //clear the command buffer
-		command[i] = 0x00;
-	};
-	var i = 0;
-	var checksum = 0xFE + 0x02 + 0x05;
-	command[i++] = 0xFF; //ÿ Signature Byte Char
-	command[i++] = 0xFF; //ÿ Signature Byte Char
-	command[i++] = 0xFE; // ID Byte Char
-	command[i++] = 0x02; //packet length
-	command[i++] = 0x05; //instruction byte
-	command[i++] = ~checksum & 0xFF;
-	this.serial.write(command, function(){
+Arm.prototype.callAction = function(input){
+	this.serial.write(input, function(){
 		busy = false;
 		console.log("No longer busy");
 	});
 }
 
-Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
-	console.log("Controlling Motor " + motorID); //For Debugging
+Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs and values, use member finding to determine what to do
+	console.log("Controlling Motor " + obj.motorID); //For Debugging
 	var length = 0;
 	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
-	if(typeof highbyte == "undefined") { //determine length through undefined parameter "highbyte"
+	if(typeof obj.highbyte == "undefined") { //determine length through undefined parameter "highbyte"
 		length = 2+2;
 	} else {
 		length = 3+2;
@@ -203,15 +201,15 @@ Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, hi
 	/*Method 2: Send all at once after compiling elements together into buffer*/
 	command[i++] = 0xFF; //ÿ Signature Byte Char
 	command[i++] = 0xFF; //ÿ Signature Byte Char
-	command[i++] = motorID; // ID Byte Char
+	command[i++] = obj.motorID; // ID Byte Char
 	command[i++] = length; //packet length
-	command[i++] = instruction; //instruction byte
-	command[i++] = register; //first parameter will always be the register address
-	command[i++] = lowbyte; //value/lowbyte, depending on the function call
-	checksum = parseInt(motorID) + parseInt(length) + parseInt(instruction) + parseInt(register) + parseInt(lowbyte); //Assumes command is not PING, which uses neither lowbyte nor highbyte
-	if(typeof highbyte != "undefined"){
-		command[i++] = highbyte; //highbyte
-		checksum += parseInt(highbyte);
+	command[i++] = obj.instruction; //instruction byte
+	command[i++] = obj.register; //first parameter will always be the register address
+	command[i++] = obj.lowbyte; //value/lowbyte, depending on the function call
+	checksum = parseInt(obj.motorID) + parseInt(length) + parseInt(obj.instruction) + parseInt(obj.register) + parseInt(obj.lowbyte); //Assumes command is not PING, which uses neither lowbyte nor highbyte
+	if(typeof obj.highbyte != "undefined"){
+		command[i++] = obj.highbyte; //highbyte
+		checksum += parseInt(obj.highbyte);
 	}
 	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
