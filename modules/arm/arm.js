@@ -67,14 +67,21 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(this.defaulted == false){
 		console.log("Enabling Torque");
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
-		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x96,0x00); //Set movement speed to 33.3 rpm, 300 in decimal
+		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 33.3 rpm, 300 in decimal
 		this.defaulted = true;
 	}
 	if(!busy){
 		busy = true;
 		 if(typeof input.shoulderL != "undefined"){
-		 	var newval = ((input.shoulderL) - 300) * (-1);
-			this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
+			var pos = input.shoulderL;
+			if(pos < 45){
+				pos = 45;
+			}
+			else if(pos > 220){
+				pos = 220;
+			}
+		 	var newval = (pos - 300) * (-1);
+			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
 		 }
 	//	 if(typeof input.shoulderR != "undefined"){
@@ -84,9 +91,23 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			this.moveMotorMX(this.id.BASE, input.base);
 		}
 		if(typeof input.elbow != "undefined"){
-			this.moveMotor(this.id.ELBOW, input.elbow);
+			var pos = input.elbow;
+			if(pos < 70){
+				pos = 70;
+			}
+			else if(pos > 220){
+				pos = 220;
+			}
+			this.moveMotor(this.id.ELBOW, pos);
 		}
 		if(typeof input.wrist != "undefined"){
+			var pos = input.wrist;
+			if(pos < 120){
+				pos = 120;
+			}
+			else if(pos > 240){
+				pos = 240;
+			}
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
 		// if(typeof input.speed != "undefined"){
