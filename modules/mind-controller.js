@@ -16,6 +16,8 @@ function MindController(feedback, simulation) {
 	var Skeleton = require('./skeleton.js');
 	var parent = this;
 	var model = require('./model.js');
+	
+	this.spine = new SPINE();
 	this.model = model;
 
 	if(simulation == true) {
@@ -30,11 +32,11 @@ function MindController(feedback, simulation) {
 		var Arm = require('./arm/arm.js');
 		var Tracker = require('./tracker/tracker.js');
 		var Logger = require('./logger.js');
-		this.sensor = new Sensor(model, feedback);
-		this.motor = new Motor(model, feedback);
-		this.arm = new Arm(model, feedback);
-		this.tracker = new Tracker(model, feedback);
-		this.logger = new Logger(model, feedback);
+		this.sensor = new Sensor(model, feedback, this.spine);
+		this.motor = new Motor(model, feedback, this.spine);
+		this.arm = new Arm(model, feedback, this.spine);
+		this.tracker = new Tracker(model, feedback, this.spine);
+		this.logger = new Logger(model, feedback, this.spine);
 	}
 }
 
