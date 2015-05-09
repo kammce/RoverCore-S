@@ -116,7 +116,7 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 
     //acuator command 
 
-    if (data. == "UP"){
+    if (data == "UP"){
         parent.model.acuator.sent_position = "U";
         this.acuator();
     }
