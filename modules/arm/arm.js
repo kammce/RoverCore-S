@@ -9,6 +9,7 @@ Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 var busy = false;//Handles signal traffic jams
+var ready4next = true;
 var ready = {
 	base: false,
 	shoulderL: false,
@@ -87,49 +88,38 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(this.defaulted == false){
 		console.log("Enabling Torque");
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
-		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 33.3 rpm, 300 in decimal
+		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 15 rpm, 300 in decimal
 		this.defaulted = true;
 	}
-	if(!busy){
+	if(!busy /*&& ready4next*/){
 		busy = true;
-		 if(typeof input.shoulderL != "undefined"){
+		ready4next = false;
+		if(typeof input.shoulderL != "undefined"){
 			var pos = input.shoulderL;
-			if(pos < 45){
-				pos = 45;
-			}
-			else if(pos > 220){
-				pos = 220;
-			}
-		 	var newval = (pos - 300) * (-1);
+			if(pos < 45){pos = 45;}	else if (pos > 220){	pos = 220;} //angle limiter
+			var newval = (pos - 300) * (-1);
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
-			this.callAction(this.actionBuffer);
-		 }
+			if(ready.shoulderL && ready.shoulderR){
+				this.callAction(this.actionBuffer);
+			}
+		}
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
 		}
 		if(typeof input.elbow != "undefined"){
 			var pos = input.elbow;
-			if(pos < 70){
-				pos = 70;
-			}
-			else if(pos > 220){
-				pos = 220;
-			}
+			if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
 			this.moveMotor(this.id.ELBOW, pos);
 		}
 		if(typeof input.wrist != "undefined"){
 			var pos = input.wrist;
-			if(pos < 120){
-				pos = 120;
-			}
-			else if(pos > 240){
-				pos = 240;
-			}
+			if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
 	}
-	// if(ready.shoulderL && ready.shoulderR){
+	
+	// if(ready4next = false){
 	// 	this.callAction(this.actionBuffer);
 	// }
 };
@@ -190,6 +180,9 @@ Arm.prototype.callAction = function(input){
 		console.log("No longer busy");
 		ready.shoulderL = false;
 		ready.shoulderR = false;
+		setTimeout(function(){
+			ready4next = true;
+		}, 100);
 	});
 }
 
