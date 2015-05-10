@@ -9,7 +9,6 @@ Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 var busy = false;//Handles signal traffic jams
-var ready4next = true;
 var ready = {
 	base: false,
 	shoulderL: false,
@@ -91,18 +90,15 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 15 rpm, 300 in decimal
 		this.defaulted = true;
 	}
-	if(!busy /*&& ready4next*/){
+	if(!busy){
 		busy = true;
-		ready4next = false;
 		if(typeof input.shoulderL != "undefined"){
 			var pos = input.shoulderL;
 			if(pos < 45){pos = 45;}	else if (pos > 220){	pos = 220;} //angle limiter
 			var newval = (pos - 300) * (-1);
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
-			if(ready.shoulderL && ready.shoulderR){
-				this.callAction(this.actionBuffer);
-			}
+			this.callAction(this.actionBuffer);
 		}
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
@@ -118,8 +114,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
 	}
-	
-	// if(ready4next = false){
+	// if(ready.shoulderL && ready.shoulderR){
 	// 	this.callAction(this.actionBuffer);
 	// }
 };
@@ -180,9 +175,6 @@ Arm.prototype.callAction = function(input){
 		console.log("No longer busy");
 		ready.shoulderL = false;
 		ready.shoulderR = false;
-		setTimeout(function(){
-			ready4next = true;
-		}, 100);
 	});
 }
 
