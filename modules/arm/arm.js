@@ -87,7 +87,7 @@ function Arm (model_ref) {
 Arm.prototype.checkAllMotors = function(first_argument) {
 	var parent = this;
 	console.log(this.ready);
-	if(this.ready[1] && this.ready[2] && this.ready[3]) {
+	if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
 		console.log("Getting called into action!!");
 		this.serial.write(this.actionBuffer, function() {
 			parent.ready = [false,false,false,false,false];
@@ -117,7 +117,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL,
 			register:this.edit.SPEED, 
-			lowbyte:0x8C,
+			lowbyte:0x48,
 			highbyte:0x00
 		}); //Set movement speed to 15 rpm, 300 in decimal
 		this.defaulted = true;
@@ -129,8 +129,8 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		var pos = input.shoulder;
 		if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
 		var newval = (pos - 300) * (-1);
-		this.moveMotor(this.id.LEFTSHOULDER, pos);
-		this.moveMotor(this.id.RIGHTSHOULDER, newval);
+		this.moveMotor(this.id.LEFTSHOULDER, newval);
+		this.moveMotor(this.id.RIGHTSHOULDER, pos);
 		console.log("sholder if statement has been called");
 		// this.callAction(this.actionBuffer);
 	}
@@ -193,6 +193,7 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
 	// console.log("Enabling Torque");
 	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
+	/*	
 	var hexdeg = (number/360) * 4095; //for MX series: 360 and 4095. for RX series: 300 and 1023
 	if(hexdeg > 4095){
 		hexdeg = 4095;
@@ -211,6 +212,36 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	this.motorStandard[6] = low;
 	this.motorStandard[7] = high;
 	this.writePacket(this.motorStandard);
+	*/
+
+	var parent = this;
+	var std = JSON.parse(JSON.stringify(this.motorStandard));
+	var hexdeg = (number/360) * 4095; //for MX series: 360 and 4095. for RX series: 300 and 1023
+	if(hexdeg > 4095){
+		hexdeg = 4095;
+	}
+	if(hexdeg < 0){
+		hexdeg = 0;
+	}
+	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
+	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
+	//console.log("H:" + high + "  L:" + low);
+	std[2] = ID;
+	std[6] = low;
+	std[7] = high;
+	std[8] = 0x00;
+	var sum = 0;
+	for (var i = 2; i < std.length; i++) {
+		sum += std[i];
+	};
+	std[8] = (~sum) & 0xFF;
+	console.log(std);
+	this.serial.write(std, function() {
+		parent.ready[ID] = true;
+		parent.checkAllMotors();
+		console.log("Motor ID = "+ID+" has finished sending!");
+	});
+
 };
 
 Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
