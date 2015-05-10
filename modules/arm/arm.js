@@ -8,16 +8,11 @@ var Skeleton = require("../skeleton.js");
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
-var busy = false;//Handles signal traffic jams
-var ready = {
-	base: false,
-	shoulderL: false,
-	shoulderR: false,
-	elbow: false,
-	wrist: false
-}
+function Arm (model_ref) {
 
-function Arm (model_ref){
+	this.busy = false;//Handles signal traffic jams
+	this.ready = [false,false,false,false,false];
+
 	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
 	this.model = model_ref;
 	/*Globals*/
@@ -27,17 +22,16 @@ function Arm (model_ref){
 	    //parity: 'none'
 	});
 	this.defaulted = false;
-
 	/*Setup Action call*/
 	this.actionBuffer = new Buffer(6);
-		var index = 0; //index iterator
-		var checksum = 0xFE + 0x02 + 0x05;
-		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
-		this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
-		this.actionBuffer[index++] = 0xFE; // ID Byte Char
-		this.actionBuffer[index++] = 0x02; //packet length
-		this.actionBuffer[index++] = 0x05; //instruction byte
-		this.actionBuffer[index++] = ~checksum & 0xFF;
+	var index = 0; //index iterator
+	var checksum = 0xFE + 0x02 + 0x05;
+	this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+	this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+	this.actionBuffer[index++] = 0xFE; // ID Byte Char
+	this.actionBuffer[index++] = 0x02; //packet length
+	this.actionBuffer[index++] = 0x05; //instruction byte
+	this.actionBuffer[index++] = ~checksum & 0xFF;
 	/*Setup Data Schema*/
 	this.schema = { //format for data being passed to arm.prototype.handle(data);
 		"type" : "object",
@@ -67,64 +61,110 @@ function Arm (model_ref){
 		write: {instruction: this.operation.WRITE, register: this.edit.POSITION},
 		regwrite: {instruction: this.operation.REGWRITE, register: this.edit.POSITION},
 	}
-	/*Initiate Serialport*/
-		this.serial.on('open', function(err) {
-		    if(err){
-		    	console.log(err);
-		    }
-		    else{
-		    	// console.log('>>SerialPort is Open<<'); //For Debugging
-		    }
-		});
-		this.serial.on('err', function(err){
-			console.log(err);
-		});
-}
 
+	// generate motor standard
+	this.motorStandard = new Buffer(9);
+	this.motorStandard[0] = 0xFF; // ÿ Signature Byte Char
+	this.motorStandard[1] = 0xFF; // ÿ Signature Byte Char
+	this.motorStandard[2] = 0x00; // ID Byte Char NEEDS TO CHANGE
+	this.motorStandard[3] = 0x05; // packet length
+	this.motorStandard[4] = 0x04; // instruction byte
+	this.motorStandard[5] = 0x1E; // register addr 0x05
+	this.motorStandard[6] = 0xFF; // low
+	this.motorStandard[7] = 0x01; // high
+	this.motorStandard[8] = 0x00; // checksum
+
+	/*Initiate Serialport*/
+	this.serial.on('open', function(err) {
+	    if(err) { console.log(err); }
+	});
+	this.serial.on('err', function(err){
+		console.log(err);
+	});
+
+	this.invalid_input = false;
+}
+Arm.prototype.checkAllMotors = function(first_argument) {
+	var parent = this;
+	console.log(this.ready);
+	if(this.ready[1] && this.ready[2] && this.ready[3]) {
+		console.log("Getting called into action!!");
+		this.serial.write(this.actionBuffer, function() {
+			parent.ready = [false,false,false,false,false];
+			parent.busy = false;
+			console.log("No longer busy");
+		});
+	}	
+	// for (var i = 0; i < this.ready.length; i++) {
+	// 	if(!this.ready[i]) { return; }
+	// };
+	// this.callAction(this.actionBuffer);
+};
 
 Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
 	//This handle function Sends Commands to Dynamixel MX-64
-	if(this.defaulted == false){
+	console.log("handling arm");
+	if(this.busy) { return "ARM IS BUSY!"; }
+	if(this.defaulted == false) {
 		console.log("Enabling Torque");
-		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
-		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 15 rpm, 300 in decimal
+		this.writePacket({
+			instruction:this.operation.WRITE, 
+			motorID:this.id.ALL, 
+			register:this.edit.TORQUE, 
+			lowbyte:this.turn.ON
+		});
+		this.writePacket({
+			instruction:this.operation.WRITE, 
+			motorID:this.id.ALL,
+			register:this.edit.SPEED, 
+			lowbyte:0x8C,
+			highbyte:0x00
+		}); //Set movement speed to 15 rpm, 300 in decimal
 		this.defaulted = true;
 	}
-	if(!busy){
-		busy = true;
-		if(typeof input.shoulderL != "undefined"){
-			var pos = input.shoulderL;
-			if(pos < 45){pos = 45;}	else if (pos > 220){	pos = 220;} //angle limiter
-			var newval = (pos - 300) * (-1);
-			this.moveMotor(this.id.LEFTSHOULDER, pos);
-			this.moveMotor(this.id.RIGHTSHOULDER, newval);
-			// this.callAction(this.actionBuffer);
-		}
-		if(typeof input.base != "undefined"){
-			this.moveMotorMX(this.id.BASE, input.base);
-		}
-		if(typeof input.elbow != "undefined"){
-			var pos = input.elbow;
-			if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
-			this.moveMotor(this.id.ELBOW, pos);
-		}
-		if(typeof input.wrist != "undefined"){
-			var pos = input.wrist;
-			if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
-			this.moveMotor(this.id.WRIST, input.wrist);
-		}
-		if(ready.shoulderL && ready.shoulderR){
-			this.callAction(this.actionBuffer);
-		}
+	this.busy = true;
+	this.invalid_input = true;
+	if(!_.isUndefined(input["shoulder"])) {
+		this.invalid_input = false;
+		var pos = input.shoulder;
+		if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
+		var newval = (pos - 300) * (-1);
+		this.moveMotor(this.id.LEFTSHOULDER, pos);
+		this.moveMotor(this.id.RIGHTSHOULDER, newval);
+		console.log("sholder if statement has been called");
+		// this.callAction(this.actionBuffer);
 	}
-	// if(ready.shoulderL && ready.shoulderR){
+	if(!_.isUndefined(input["base"])) {
+		this.invalid_input = false;
+		console.log("base if statement has been called");
+		this.moveMotorMX(this.id.BASE, input.base);
+	}
+	if(!_.isUndefined(input["elbow"])) {
+		this.invalid_input = false;
+		var pos = input.elbow;
+		if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
+		this.moveMotor(this.id.ELBOW, pos);
+	}
+	if(!_.isUndefined(input["wrist"])) {
+		this.invalid_input = false;
+		var pos = input.wrist;
+		if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
+		this.moveMotor(this.id.WRIST, input.wrist);
+	}
+	if(this.invalid_input) {
+		this.busy = false;
+		console.log("invalid input to arm handler!");
+	}
+	// if(this.ready.shoulderL && this.ready.shoulderR){
 	// 	this.callAction(this.actionBuffer);
 	// }
 };
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
+	var parent = this;
+	var std = JSON.parse(JSON.stringify(this.motorStandard));
 	var hexdeg = (number/300) * 1023;/*(number/360) * 4095;*/ //for MX series: 360 and 4095. for RX series: 300 and 1023
-	if(hexdeg > 1023){
+	if(hexdeg > 1023) {
 		hexdeg = 1023;
 	}
 	if(hexdeg < 0){
@@ -133,10 +173,21 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	//console.log("H:" + high + "  L:" + low);
-	this.standards.regwrite.motorID = ID;
-	this.standards.regwrite.lowbyte = low;
-	this.standards.regwrite.highbyte = high;
-	this.writePacket(this.standards.regwrite);
+	std[2] = ID;
+	std[6] = low;
+	std[7] = high;
+	std[8] = 0x00;
+	var sum = 0;
+	for (var i = 2; i < std.length; i++) {
+		sum += std[i];
+	};
+	std[8] = (~sum) & 0xFF;
+	console.log(std);
+	this.serial.write(std, function() {
+		parent.ready[ID] = true;
+		parent.checkAllMotors();
+		console.log("Motor ID = "+ID+" has finished sending!");
+	});
 };
 
 Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -152,10 +203,14 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	//console.log("H:" + high + "  L:" + low);
-	this.standards.regwrite.motorID = ID;
-	this.standards.regwrite.lowbyte = low;
-	this.standards.regwrite.highbyte = high;
-	this.writePacket(this.standards.regwrite);
+	// this.standards.regwrite.motorID = ID;
+	// this.standards.regwrite.lowbyte = low;
+	// this.standards.regwrite.highbyte = high;
+	// this.writePacket(this.standards.regwrite);
+	this.motorStandard[2] = ID;
+	this.motorStandard[6] = low;
+	this.motorStandard[7] = high;
+	this.writePacket(this.motorStandard);
 };
 
 Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -171,15 +226,6 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 	//console.log("H:" + high + "  L:" + low);
 	this.writePacket(this.operation.WRITE, ID, this.edit.SPEED, low, high);
 };
-
-Arm.prototype.callAction = function(input){
-	this.serial.write(input, function(ptr){
-		busy = false;
-		console.log("No longer busy");
-		ready.shoulderL = false;
-		ready.shoulderR = false;
-	});
-}
 
 Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs and values, use member finding to determine what to do
 	console.log("Controlling Motor " + obj.motorID); //For Debugging
@@ -214,15 +260,8 @@ Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs a
 	command[i++] = ~checksum & 0xFF; //Invert bits with Not bit operator and shave off high bytes, leaving only the lowest byte to determine checksum length
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
-	var ptr = this;
-	this.serial.write(command, function(ptr) {
-		if(obj.motorID == 0x01){
-			ready.shoulderL = true;
-		}
-		else if(obj.motorID == 0x02){
-			ready.shoulderR = true;
-		}
-	});
+	var parent = this;
+	this.serial.write(command, function() {});
 	//console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
 }
 
