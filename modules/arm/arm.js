@@ -103,7 +103,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		 	var newval = (pos - 300) * (-1);
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
-
+			this.callAction(this.actionBuffer);
 		 }
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
@@ -129,9 +129,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			this.moveMotor(this.id.WRIST, input.wrist);
 		}
 	}
-	if(ready.shoulderL && ready.shoulderR){
-		this.callAction(this.actionBuffer);
-	}
+	// if(ready.shoulderL && ready.shoulderR){
+	// 	this.callAction(this.actionBuffer);
+	// }
 };
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
