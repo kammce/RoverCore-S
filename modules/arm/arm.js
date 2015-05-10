@@ -98,7 +98,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			var newval = (pos - 300) * (-1);
 			this.moveMotor(this.id.LEFTSHOULDER, pos);
 			this.moveMotor(this.id.RIGHTSHOULDER, newval);
-			this.callAction(this.actionBuffer);
+			// this.callAction(this.actionBuffer);
 		}
 		if(typeof input.base != "undefined"){
 			this.moveMotorMX(this.id.BASE, input.base);
@@ -112,6 +112,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			var pos = input.wrist;
 			if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
 			this.moveMotor(this.id.WRIST, input.wrist);
+		}
+		if(ready.shoulderL && ready.shoulderR){
+			this.callAction(this.actionBuffer);
 		}
 	}
 	// if(ready.shoulderL && ready.shoulderR){
