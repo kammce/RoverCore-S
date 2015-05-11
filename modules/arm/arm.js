@@ -27,11 +27,11 @@ Therefore, use 'this.defaulted'
 	    //parity: 'none'
 	});
 	/*Pump Pinouts*/
-	this.depressurizer: { //deflate Balloon
+	this.depressurizer = { //deflate Balloon
 		valve: 'P8_26',
 		pump: 'P8_27'
 	},
-	this.pressurizer:{ //inflate Balloon
+	this.pressurizer = { //inflate Balloon
 		valve: 'P8_28',
 		pump: 'P8_29'
 	}
