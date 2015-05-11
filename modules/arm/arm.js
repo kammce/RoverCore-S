@@ -118,6 +118,7 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 
 Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
 	console.log("Handling arm"); //The handle function Sends Commands to Dynamixel MX-64 & RX-64
+	var parent = this; //pointer to the arm class
 	/*Pump Control Block*/
 	if(!_.isUndefined(input["pump"])){ //If a pump command to pump in/out exists
 		if(typeof input["pump"] == "string"){
@@ -140,9 +141,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				this.spine.digitalWrite(this.depressurizer.valve, this.turn.OFF); //then valve
 				this.spine.digitalWrite(this.pressurizer.valve, this.turn.ON); //then other valve
 				this.spine.digitalWrite(this.pressurizer.pump, this.turn.ON); //other pump on last
-				setTimeout(function(){
-					this.spine.digitalWrite(this.pressurizer.pump, this.turn.OFF); //pump off first
-					this.spine.digitalWrite(this.pressurizer.valve, this.turn.OFF); //then valve
+				setTimeout(function(parent){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
+					this.spine.digitalWrite(parent.pressurizer.pump, this.turn.OFF); //pump off first
+					this.spine.digitalWrite(parent.pressurizer.valve, this.turn.OFF); //then valve
 				}, 4000); //In case of connection loss, balloon inflation will cease after x seconds
 			}
 		}
