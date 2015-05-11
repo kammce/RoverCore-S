@@ -26,7 +26,7 @@ Therefore, use 'this.defaulted'
 	    //databits:8,
 	    //parity: 'none'
 	});
-	/*Pump Pinouts*/
+	/*Setup Pump Pinouts*/
 	this.depressurizer = { //deflate Balloon
 		valve: 'P8_26',
 		pump: 'P8_27'
@@ -35,6 +35,11 @@ Therefore, use 'this.defaulted'
 		valve: 'P8_28',
 		pump: 'P8_29'
 	}
+	this.spine.expose(this.depressurizer.valve, "OUTPUT"); //Same as Arduino's pinMode
+	this.spine.expose(this.depressurizer.pump, "OUTPUT");
+	this.spine.expose(this.pressurizer.valve, "OUTPUT");
+	this.spine.expose(this.pressurizer.pump, "OUTPUT");
+
 	this.defaulted = false;
 	/*Setup Action call*/
 	this.actionBuffer = new Buffer(6);
@@ -122,6 +127,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	/*Pump Control Block*/
 	if(!_.isUndefined(input["pump"])){ //If a pump command to pump in/out exists
 		if(typeof input["pump"] == "string"){
+			this.invalid_input = false;
 			if(input.pump == "grip"){ //-1 = suck air out of balloon
 				this.spine.digitalWrite(this.pressurizer.pump, this.turn.OFF); //pump off first
 				this.spine.digitalWrite(this.pressurizer.valve, this.turn.OFF); //then valve
@@ -141,9 +147,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				this.spine.digitalWrite(this.depressurizer.valve, this.turn.OFF); //then valve
 				this.spine.digitalWrite(this.pressurizer.valve, this.turn.ON); //then other valve
 				this.spine.digitalWrite(this.pressurizer.pump, this.turn.ON); //other pump on last
-				setTimeout(function(parent){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
-					this.spine.digitalWrite(parent.pressurizer.pump, this.turn.OFF); //pump off first
-					this.spine.digitalWrite(parent.pressurizer.valve, this.turn.OFF); //then valve
+				setTimeout(function(){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
+					parent.spine.digitalWrite(parent.pressurizer.pump, parent.turn.OFF); //pump off first
+					parent.spine.digitalWrite(parent.pressurizer.valve, parent.turn.OFF); //then valve
 				}, 4000); //In case of connection loss, balloon inflation will cease after x seconds
 			}
 		}
