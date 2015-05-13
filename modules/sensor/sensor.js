@@ -116,12 +116,12 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 
     //acuator command 
 
-    if (data == "UP"){
+    if (data == "MAST-UP"){
         parent.model.acuator.sent_position = "U";
         this.acuator();
     }
 
-    else if (data == "DOWN"){
+    else if (data == "MAST-DOWN"){
         parent.model.acuator.sent_position = "D"
         this.acuator();
     }    
@@ -317,9 +317,18 @@ Sensor.prototype.accelero = function() {
         parent.accelero_stop = setInterval(function() {
             accel.measureAccel(function(err) {
                 if (!err) {
-                    parent.model.accelero.x = (accel.meterPerSecSec[global.XAXIS]) * (-8.85);
-                    parent.model.accelero.y = (accel.meterPerSecSec[global.YAXIS]) * (8.17);
+
+                    //parent.model.accelero.x = (accel.meterPerSecSec[global.XAXIS]) * (-8.85);
+                    //parent.model.accelero.y = (accel.meterPerSecSec[global.YAXIS]) * (8.17);
+
+                    var x = (accel.meterPerSecSec[global.XAXIS]) ;
+                    var y = (accel.meterPerSecSec[global.YAXIS]) ;
                     parent.model.accelero.z = accel.meterPerSecSec[global.ZAXIS];
+
+                    parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
+                    parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
+
+
                     console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
                 } else {
                     console.log(err);
@@ -410,14 +419,14 @@ Sensor.prototype.Serialdata = function() {
         if (parent.buffer[i] == 'C' ) {
           while (parent.buffer[++i] != end_bit) {
           current_string += parent.buffer[i];   // populate string
-          parent.model.power.current = parseFloat(current_string)*10; // change string into float
+          parent.model.power.current = parseFloat(current_string); // change string into float
           }
         }
         //voltage evaluation
         if (parent.buffer[i] == 'V') {
           while (parent.buffer[++i] != end_bit) {
             voltage_string += parent.buffer[i];  // populate string
-            parent.model.power.voltage = parseFloat(voltage_string)*10; // change string into float 
+            parent.model.power.voltage = parseFloat(voltage_string); // change string into float 
           }
         }
 
