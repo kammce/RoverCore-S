@@ -22,7 +22,7 @@ Therefore, use 'this.defaulted'
 	this.model = model_ref;
 	this.feedback = feedback;
 	this.spine = spine;
-	this.serial = new SerialPort("/dev/ttyO1", { //set up serial comms
+	this.serial = new SerialPort("/dev/ttyO5", { //set up serial comms
 	    baudrate: 57600,
 	    //databits:8,
 	    //parity: 'none'
