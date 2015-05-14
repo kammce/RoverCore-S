@@ -10,7 +10,7 @@ var Skeleton = require("./skeleton.js");
 Video.prototype = new Skeleton("VIDEO");
 Video.prototype.constructor = Video;
 
-function Video(feedback, stream) {
+function Video(feedback, stream, debug) {
 	this.feedback = feedback;
 	this.selected_stream = stream;
 	//// Logitech sizes
@@ -41,9 +41,7 @@ function Video(feedback, stream) {
 		},
 		tracker: {
 			dev: "/dev/video-tracker",
-			width: 640,
-			height: 480,
-			res: 400
+			res: 1000
 		},
 		off: { dev: "" }
 	};
@@ -66,7 +64,7 @@ function Video(feedback, stream) {
 			source: undefined
 		}
 	];
-	this.debug = true; // process debug information
+	this.debug = debug; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -173,25 +171,44 @@ Video.prototype.handle = function(data) {
 Video.prototype.genArg = function(data, port) {
 	if(_.isObject(data)) {
 		var view	= data["view"];
-		var dev		= this.videos[view]['dev'];
-		var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
-		var width 	= (_.isNumber(data['width'])) ? data['width'] : this.videos[view]['width'];
-		var height 	= (_.isNumber(data['height'])) ? data['height'] : this.videos[view]['height'];
-		var fps 	= (_.isNumber(data['fps'])) ? data['fps'] : 30;
-		this.caminfo = data;
-		return [
-			//'-re', 
-			'-rtbufsize', '1000000k',
-			'-s', width+'x'+height,
-			'-f', 'video4linux2',
-			'-i', dev,
-			'-f', 'mpeg1video',
-			'-b:v', res+'k',
-			'-r', fps,
-			//'-b', 0,
-			//'-vf', 'crop=iw-mod(iw\,2):ih-mod(ih\,2)',
-			'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
-		];
+		if(view == "tracker") {
+			var dev		= this.videos[view]['dev'];
+			var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
+			var fps 	= (_.isNumber(data['fps'])) ? data['fps'] : 'ntsc';
+			this.caminfo = data;
+			return [
+				'-rtbufsize', '1000000k',
+				'-threads', '2',
+				'-threads', '2',
+				'-s', '480x320',
+				'-f', 'video4linux2',
+				'-i', dev,
+				'-f', 'mpeg1video',
+				'-b:v', res+'k',
+				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
+			];
+		} else {
+			var dev		= this.videos[view]['dev'];
+			var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
+			var width 	= (_.isNumber(data['width'])) ? data['width'] : this.videos[view]['width'];
+			var height 	= (_.isNumber(data['height'])) ? data['height'] : this.videos[view]['height'];
+			var fps 	= (_.isNumber(data['fps'])) ? data['fps'] : 'ntsc';
+			this.caminfo = data;
+			return [
+				'-rtbufsize', '1000000k',
+				'-s', width+'x'+height,
+				'ntsc-',
+				'-f', 'video4linux2',
+				'-i', dev,
+				'-f', 'mpeg1video',
+				'-b:v', res+'k',
+				'-r', fps,
+				//'-b', 0,
+				//'-vf', 'crop=iw-mod(iw\,2):ih-mod(ih\,2)',
+				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
+			];
+		}
+		
 	}
 };
 Video.prototype.activateCamera = function(cam_select, stream_number) {
