@@ -8,7 +8,7 @@ var Skeleton = require("../skeleton.js");
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
-function Arm (model_ref, feedback, spine) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
+function Arm (model_ref, feedback, spine, debug) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
 	this.busy = false;//Handles signal traffic jams
 	this.ready = [false,false,false,false,false]; //readiness flags (when all true, send Action cmd)
 
@@ -106,13 +106,19 @@ Therefore, use 'this.defaulted'
 
 Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends action when all true
 	var parent = this; //points to function Arm (the Arm class)
-	console.log(this.ready);
+	if(this.debug){
+		console.log(this.ready);
+	}
 	if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
-		console.log("Getting called into action!!");
+		if(this.debug){
+			console.log("Getting called into action!!");
+		}
 		this.serial.write(this.actionBuffer, function() {
 			parent.ready = [false,false,false,false,false];
 			parent.busy = false;
-			console.log("No longer busy");
+			if(this.debug){
+				console.log("No longer busy");
+			}
 		});
 	}	
 	// for (var i = 0; i < this.ready.length; i++) {
@@ -122,7 +128,9 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 };
 
 Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
-	console.log("Handling arm"); //The handle function Sends Commands to Dynamixel MX-64 & RX-64
+	if(this.debug){
+		console.log("Handling arm"); //The handle function Sends Commands to Dynamixel MX-64 & RX-64
+	}
 	var parent = this; //pointer to the arm class
 	/*Pump Control Block*/
 	if(!_.isUndefined(input["pump"])){ //If a pump command to pump in/out exists
@@ -154,13 +162,17 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 		}
 		else{
-			console.log("Invalid pump control value!");
+			if(this.debug){
+				console.log("Invalid pump control value!");
+			}
 		}
 	}
 	/*Arm Control Block*/
 	if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
 	if(this.defaulted == false) { //If defaults not yet set
-		console.log("Enabling Torque");
+		if(this.debug){
+			console.log("Enabling Torque");
+		}
 		this.writePacket({ //Enable Torque
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL, 
@@ -185,12 +197,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		var newval = (pos - 300) * (-1);
 		this.moveMotor(this.id.LEFTSHOULDER, newval);
 		this.moveMotor(this.id.RIGHTSHOULDER, pos);
-		console.log("sholder if statement has been called");
+		if(this.debug){
+			console.log("sholder if statement has been called");
+		}
 		// this.callAction(this.actionBuffer);
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		this.invalid_input = false;
-		console.log("base if statement has been called");
+		if(this.debug){
+			console.log("base if statement has been called");
+		}
 		this.moveMotorMX(this.id.BASE, input.base);
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
@@ -207,7 +223,9 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	}
 	if(this.invalid_input) {
 		this.busy = false;
-		console.log("invalid input to arm handler!");
+		if(this.debug){
+			console.log("invalid input to arm handler!");
+		}
 	}
 	// if(this.ready.shoulderL && this.ready.shoulderR){
 	// 	this.callAction(this.actionBuffer);
@@ -240,15 +258,16 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
-		console.log("Motor ID = "+ID+" has finished sending!");
+		if(this.debug){
+			console.log("Motor ID = "+ID+" has finished sending!");
+		}
 	});
 };
 
 Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
 	// console.log("Enabling Torque");
 	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
-	/*	
-	var hexdeg = (number/360) * 4095; //for MX series: 360 and 4095. for RX series: 300 and 1023
+/*	var hexdeg = (number/360) * 4095; //for MX series: 360 and 4095. for RX series: 300 and 1023
 	if(hexdeg > 4095){
 		hexdeg = 4095;
 	}
@@ -266,7 +285,7 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	this.motorStandard[6] = low;
 	this.motorStandard[7] = high;
 	this.writePacket(this.motorStandard);
-	*/
+*/
 
 	var parent = this;
 	var std = JSON.parse(JSON.stringify(this.motorStandard));
@@ -293,7 +312,9 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
-		console.log("Motor ID = "+ID+" has finished sending!");
+		if(this.debug){
+			console.log("Motor ID = "+ID+" has finished sending!");
+		}
 	});
 
 };
@@ -313,7 +334,9 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 };
 
 Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs and values, use member finding to determine what to do
-	console.log("Controlling Motor " + obj.motorID); //For Debugging
+	if(this.debug){
+		console.log("Controlling Motor " + obj.motorID); //For Debugging
+	}
 	var length = 0;
 	var command = new Buffer(10); //Command buffer object. Sending Strings caused problems, resulting in data corruption
 	if(typeof obj.highbyte == "undefined") { //determine length through undefined parameter "highbyte"
