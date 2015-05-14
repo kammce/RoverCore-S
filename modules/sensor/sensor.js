@@ -13,7 +13,8 @@ function Sensor(model_ref, feedback, debug) {
     this.interval_compass = 1000;
     this.interval_gyro = 1000;
     this.interval_accelero = 1000;
-    this.interval_GPS = 30000;
+    this.interval_GPS = 5000;
+    this.interval_Serialdata = 10000;
     //initiate 
     this.gyro();
     this.accelero();
@@ -348,7 +349,7 @@ Sensor.prototype.accelero = function() {
 Sensor.prototype.GPS = function() {
     var parent = this;
     var SerialPort = SERIALPORT.SerialPort; // make a local instant
-    var myPort = new SerialPort("/dev/ttyO4", { // <--Then you open the port using new() like so
+    var myPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port using new() like so
         baudRate: 9600,
         parser: SERIALPORT.parsers.readline("\r\n") // look for return and newline at the end of each data packet
     });
@@ -356,7 +357,9 @@ Sensor.prototype.GPS = function() {
     myPort.on('open', showPortOpen);
     myPort.on('close', showPortClose);
     myPort.on('error', showError);
-    myPort.on('data', function(data) {
+
+    setInterval(function() {
+      myPort.on('data', function(data) {
         console.log(' '); //adds line to separate
         console.log(data); // full unparsed data
         var piece = data.split(",", 7);
@@ -377,8 +380,8 @@ Sensor.prototype.GPS = function() {
         if (parent.debug == 'true'){ 
         console.log("lat: " + parent.model.GPS.latitude + " long: " + parent.model.GPS.longitude);
         }
-
-    });
+      }); 
+    }, parent.interval_GPS);   
 
     function showPortOpen() {
         console.log('port open. Data rate: ' + myPort.options.baudRate);
@@ -403,7 +406,7 @@ Sensor.prototype.Serialdata = function() {
   var parent = this;
  
   var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var PowerPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
+  var PowerPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
       baudRate: 9600,
       parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
   });
@@ -413,13 +416,13 @@ Sensor.prototype.Serialdata = function() {
       console.log('failed to open: ' + error);} 
     else {
     console.log('open');
+
+setInterval(function() {
     PowerPort.on('data', function(data) {
 
       var voltage_string = [""];      //initiate a string
       var current_string = [""];
-      var potentiometer_string = [""];
-                         
-      
+      var potentiometer_string = [""];                  
       var end_bit = '#'; 
 
       parent.buffer = data;
@@ -454,7 +457,8 @@ Sensor.prototype.Serialdata = function() {
       console.log("current: " + parent.model.power.current);
       console.log("potentiometer: " + parent.model.acuator.potentiometer);
             }
-        });
+         });
+       }, parent.interval_Serialdata); 
 	  }
    });                       
 };
@@ -465,7 +469,7 @@ Sensor.prototype.acuator = function() {
   var SerialPort = SERIALPORT.SerialPort; // make a local instant
   var AcuatorPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
       baudRate: 9600,
-      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
+      parser: SERIALPORT.parsers.readline("\r\n") // look for return and new ln
   });
 
   AcuatorPort.open(function(error) {
@@ -474,10 +478,12 @@ Sensor.prototype.acuator = function() {
         } 
     else {
     console.log('open');
+
+    //write command to arduino 
     AcuatorPort.write(parent.model.acuator.sent_position, function() {
         console.log("command sended");   
-            });
-        }
+        });
+      }
    });
 };
 Sensor.prototype.optical = function() {
