@@ -9,6 +9,7 @@ Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 function Arm (model_ref, feedback, spine, debug) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
+	this.debug = debug; //boolean value to toggle console log traffic.
 	this.busy = false;//Handles signal traffic jams
 	this.ready = [false,false,false,false,false]; //readiness flags (when all true, send Action cmd)
 
