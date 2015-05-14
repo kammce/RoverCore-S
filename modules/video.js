@@ -174,18 +174,16 @@ Video.prototype.genArg = function(data, port) {
 		if(view == "tracker") {
 			var dev		= this.videos[view]['dev'];
 			var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
-			var fps 	= (_.isNumber(data['fps'])) ? data['fps'] : 'ntsc';
 			this.caminfo = data;
 			return [
 				'-rtbufsize', '1000000k',
-				'-threads', '2',
 				'-threads', '2',
 				'-s', '480x320',
 				'-f', 'video4linux2',
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
-				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
+				'http://'+ADDRESS+':'+port+'/destroymit/480/320'
 			];
 		} else {
 			var dev		= this.videos[view]['dev'];
