@@ -335,7 +335,7 @@ Sensor.prototype.accelero = function() {
 					var y = (accel.meterPerSecSec[YAXIS]) ;
 					parent.model.accelero.z = accel.meterPerSecSec[ZAXIS];
 
-					parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
+					parent.model.accelero.y = -0.0583*y*y*y - 0.0471*y*y - 1.9784*y + 0.2597 
 					parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
 
 					if (parent.debug == 'true'){ 

@@ -84,35 +84,33 @@ Motor.prototype.halt = function() {
 };
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
+	var parent = this;
 	this.controlSpeed=speed;
 	this.controlAngle=angle;
-    this.transSpeed=speed;
+	this.transSpeed=speed;
 	this.transAngle=angle;
 	clearInterval(this.timeout);
-	this.timeout=setInterval(this.elevationAdjust, 100);
+ 	var elevationAdjust = function(){
+		var acceleroNew=parent.getaccelero();
+		if(acceleroNew < (-3) && parent.controlSpeed == 0){
+			parent.transAngle=90;
+			parent.transSpeed=acceleroNew*0.8351*(-1); 
+			parent.setAllMotors(parent.transAngle, parent.transSpeed);
+			console.log("SMART CONTROLLER SD (" + parent.transSpeed + ") AG (" + parent.transAngle + ") ACCELEROMETER--" + acceleroNew);
+		}
+		else if(acceleroNew>3 && parent.controlSpeed==0){
+			parent.transAngle=270;
+			parent.transSpeed=acceleroNew*0.8351;
+			parent.setAllMotors(parent.transAngle, parent.transSpeed);
+			console.log("SMART CONTROLLER SD (" + parent.transSpeed + ") AG (" + parent.transAngle + ") ACCELEROMETER--" + acceleroNew);
+		}
+	}
+	this.timeout=setInterval(elevationAdjust, 499);
 };
 //===========================================Elevation Adjust=====================================
 
-Motor.prototype.elevationAdjust = function(){
-	var acceleroNew=this.getaccelero();
-	if(acceleroNew < (-5) && this.controlSpeed == 0){
-		this.transAngle=90;
-		this.transSpeed=acceleroNew*0.8351; 
-	}
-	else if(acceleroNew>5 && this.controlSpeed==0){
-		this.transAngle=270;
-		this.transSpeed=acceleroNew*0.8351; 
-	}
-	else{
-		this.transSpeed=this.controlSpeed
-		this.transAngle=this.controlAngle;
-	}
-	this.setAllMotorsTemp(this.transAngle, this.transSpeed);
-}
-
-
 //===========================================Straight Adjust======================================
-Motor.prototype.smartControllerAdjust = function(){
+/*Motor.prototype.smartControllerAdjust = function(){
 	var compNew=this.getComp();
 	var compRate=compNew-this.compOld;
         if(limitCount<this.limit && limitCount>(-1*this.limit)){  //checks if incrementation is below limit
@@ -165,6 +163,7 @@ Motor.prototype.createRate=function(controlAngle, controlSpeed, interval){
 	}
 	return (output*(controlSpeed/100)*(interval/100000));
 };
+*/
 Motor.prototype.calibrate=function(){
         
 }
@@ -172,7 +171,7 @@ Motor.prototype.getComp=function(){
 
 };
 Motor.prototype.getaccelero=function(){
-	return this.model.accelero.x;
+	return this.model.accelero.y;
 };
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){

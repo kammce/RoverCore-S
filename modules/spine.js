@@ -311,7 +311,7 @@ Spine.prototype.setPWM = function(_pin, percent) {
 	}
 	var maxnsec = 500000;
 	var duty = Math.round(maxnsec*percent)+"";
-	fs.writeFile(path+"/duty", duty);
+	fs.writeFile(path+"/duty", duty, function(){});
 	return true;
 }; 
 Spine.prototype.digitalWrite = function(_pin, level) {
@@ -328,7 +328,7 @@ Spine.prototype.digitalWrite = function(_pin, level) {
 		console.log("Invalid gpio pin: "+_pin);  
 		return;
 	}
-	fs.writeFile(path+"/value", level);
+	fs.writeFile(path+"/value", level, function(){});
 	return true;
 }; 
 Spine.prototype.digitalRead = function(_pin) {
