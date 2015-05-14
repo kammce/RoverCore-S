@@ -375,7 +375,10 @@ Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs a
 }
 
 Arm.prototype.resume = function() {};
-Arm.prototype.halt = function(data) {};
+Arm.prototype.halt = function(data) {
+	this.busy = false;
+	this.ready = [false,false,false,false,false];
+};
 
 Arm.prototype.print = function(){ //For Debugging
 	console.log("Hello " + this.model_ref);

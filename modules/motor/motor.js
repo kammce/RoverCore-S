@@ -89,7 +89,7 @@ Motor.prototype.smartController= function(angle, speed){
     this.transSpeed=speed;
 	this.transAngle=angle;
 	clearInterval(this.timeout);
-	this.timeout=setInterval(this.elevationAdjust(), 100);
+	this.timeout=setInterval(this.elevationAdjust, 100);
 };
 //===========================================Elevation Adjust=====================================
 

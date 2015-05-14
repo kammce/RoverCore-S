@@ -18,9 +18,9 @@ function Sensor(model_ref, feedback, debug) {
 	this.interval_GPS = 5000;
 	this.interval_Serialdata = 10000;
 
-	this.XAXIS = 0;
-	this.YAXIS = 1;
-	this.ZAXIS = 2;
+	global.XAXIS = 0;
+	global.YAXIS = 1;
+	global.ZAXIS = 2;
 		
 	this.buffer = new Buffer(100);
 
@@ -297,10 +297,6 @@ Sensor.prototype.accelero = function() {
 	var ADXL345 = require('./ADXL345.js');
 	var parent = this;
 
-	this.XAXIS = 0;
-	this.YAXIS = 1;
-	this.ZAXIS = 2;
-
 	var globalvar = {
 		SAMPLECOUNT: 400,
 		accelScaleFactor: [0.0, 0.0, 0.0],
@@ -335,9 +331,9 @@ Sensor.prototype.accelero = function() {
 					//parent.model.accelero.x = (accel.meterPerSecSec[parent.XAXIS]) * (-8.85);
 					//parent.model.accelero.y = (accel.meterPerSecSec[parent.YAXIS]) * (8.17);
 
-					var x = (accel.meterPerSecSec[parent.XAXIS]) ;
-					var y = (accel.meterPerSecSec[parent.YAXIS]) ;
-					parent.model.accelero.z = accel.meterPerSecSec[parent.ZAXIS];
+					var x = (accel.meterPerSecSec[XAXIS]) ;
+					var y = (accel.meterPerSecSec[YAXIS]) ;
+					parent.model.accelero.z = accel.meterPerSecSec[ZAXIS];
 
 					parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
 					parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
@@ -496,3 +492,4 @@ Sensor.prototype.halt = function() {};
 
 
 module.exports = exports = Sensor;
+

@@ -288,7 +288,6 @@ function Spine(feedback) {
 	}
 }
 Spine.prototype.setPWM = function(_pin, percent) {
-	console.log("Pwm is being set!");
 	if(typeof percent != "number") {
 		console.log("Invalid pwm value, must between 0.0 and 1.0 ");
 		return false;

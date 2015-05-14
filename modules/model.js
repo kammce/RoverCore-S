@@ -37,7 +37,6 @@ var Model = {
 	acuator: {
 		sent_position: "I",  //idle mode 
 		potentiometer:0
-		
 	}
 }
 
