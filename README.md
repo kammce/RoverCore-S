@@ -14,6 +14,9 @@ Run:
 ```npm install
 to install the necessary dependancies for the application.
 
+**May 13 2015**
+* Merging everyone's code into master!!!
+
 **Mar 13 2015**
 
 * Seperated the video module from cortex and created OCULUS
