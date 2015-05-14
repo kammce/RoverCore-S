@@ -7,7 +7,7 @@ var Skeleton = require("../skeleton.js");
 Motor.prototype = new Skeleton("Motor");
 Motor.prototype.constructor = Motor;
 
-function Motor(model_ref, feedback, spine) {
+function Motor(model_ref, feedback, spine, debug) {
 	this.spine = spine;
 	this.model = model_ref;
 	this.feedback = feedback;
@@ -18,8 +18,10 @@ function Motor(model_ref, feedback, spine) {
 	this.controlRate;
         this.limit;
         this.limitCount=0;
+    this.transSpeed;
 	this.tranAngle;
 	this.compOld;
+	this.acceleroOld;
 	//For pin sets
 	this.motors={
 		m1: { //Left Side
@@ -61,6 +63,7 @@ Motor.prototype.handle = function(data) {
 		this.setIndividualMotors(data.motor);
 	}
 	if(data.signaltype=='fullAuto'){
+		this.smartController(data.angle, data.speed);
 		this.setAllMotors(data.angle, data.speed);
 	}
 	if(data.signaltype=='auto'){
@@ -80,15 +83,35 @@ Motor.prototype.halt = function() {
 	clearInterval(this.timeout);
 };
 // =========================Smart Controller==========================
-Motor.prototype.smartController= function(angle, speed, limit){
-	this.controlAngle=angle;
-        this.transAngle=angle;
+Motor.prototype.smartController= function(angle, speed){
 	this.controlSpeed=speed;
-	this.controlRate=this.createRate(angle,speed,100);
-	this.compOld=this.getComp();
+	this.controlAngle=angle;
+    this.transSpeed=speed;
+	this.transAngle=angle;
 	clearInterval(this.timeout);
-	this.timeout=setInterval(this.smartControllerAdjust(), 100);
+	this.timeout=setInterval(this.elevationAdjust(), 100);
 };
+//===========================================Elevation Adjust=====================================
+
+Motor.prototype.elevationAdjust = function(){
+	var acceleroNew=this.getaccelero();
+	if(acceleroNew < (-5) && this.controlSpeed == 0){
+		this.transAngle=90;
+		this.transSpeed=acceleroNew*0.8351; 
+	}
+	else if(acceleroNew>5 && this.controlSpeed==0){
+		this.transAngle=270;
+		this.transSpeed=acceleroNew*0.8351; 
+	}
+	else{
+		this.transSpeed=this.controlSpeed
+		this.transAngle=this.controlAngle;
+	}
+	this.setAllMotorsTemp(this.transAngle, this.transSpeed);
+}
+
+
+//===========================================Straight Adjust======================================
 Motor.prototype.smartControllerAdjust = function(){
 	var compNew=this.getComp();
 	var compRate=compNew-this.compOld;
@@ -147,6 +170,9 @@ Motor.prototype.calibrate=function(){
 }
 Motor.prototype.getComp=function(){
 
+};
+Motor.prototype.getaccelero=function(){
+	return this.model.accelero.x;
 };
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
