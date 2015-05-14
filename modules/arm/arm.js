@@ -8,6 +8,8 @@ var Skeleton = require("../skeleton.js");
 Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
+var busy = false;
+
 function Arm (model_ref){
 	/*When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them, for they need to be properties, not variables, so for the prototype function "moveMotor" to access 'defaulted', for example, defaulted needs to be declared as a property of function Arm, not a variable. Therefore, we use 'this.defaulted'*/
 	this.model = model_ref;
@@ -65,36 +67,81 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(this.defaulted == false){
 		console.log("Enabling Torque");
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
+<<<<<<< HEAD
 		setSpeed(id.ALL, 330);
+=======
+		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.SPEED, 0x48,0x00); //Set movement speed to 33.3 rpm, 300 in decimal
+>>>>>>> 628779d22dc07b55ee5640a02091d4ed98bf4323
 		this.defaulted = true;
 	}
-	if(input.base != undefined && input.base > 0 && input.base < 360){
-		this.moveMotor(this.id.BASE, input.base);
+	if(!busy){
+		busy = true;
+		 if(typeof input.shoulderL != "undefined"){
+			var pos = input.shoulderL;
+			if(pos < 45){
+				pos = 45;
+			}
+			else if(pos > 220){
+				pos = 220;
+			}
+		 	var newval = (pos - 300) * (-1);
+			this.moveMotor(this.id.LEFTSHOULDER, pos);
+			this.moveMotor(this.id.RIGHTSHOULDER, newval);
+		 }
+	//	 if(typeof input.shoulderR != "undefined"){
+	//	 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
+	//       }
+		if(typeof input.base != "undefined"){
+			this.moveMotorMX(this.id.BASE, input.base);
+		}
+		if(typeof input.elbow != "undefined"){
+			var pos = input.elbow;
+			if(pos < 70){
+				pos = 70;
+			}
+			else if(pos > 220){
+				pos = 220;
+			}
+			this.moveMotor(this.id.ELBOW, pos);
+		}
+		if(typeof input.wrist != "undefined"){
+			var pos = input.wrist;
+			if(pos < 120){
+				pos = 120;
+			}
+			else if(pos > 240){
+				pos = 240;
+			}
+			this.moveMotor(this.id.WRIST, input.wrist);
+		}
+		// if(typeof input.speed != "undefined"){
+		// 	setSpeed(id.ALL, input.speed);
+		// }
+		// this.print(); //this.print points to the print method prototyped in Arm class (functions can be classes!)
 	}
-	//Because motors have a wierd offset and different orientations, the degree values need to be mapped... For safety, I am disabling the shoulder motors temporarily
-	// if(input.shoulderL != undefined && input.shoulderL > 63 && input.shoulderL < 243){
-	// 	this.moveMotor(this.id.LEFTSHOULDER, input.shoulderL);
-	// }
-	// if(input.shoulderR != undefined && input.shoulderR > 83 && input.shoulderR < 263){
-	// 	this.moveMotor(this.id.RIGHTSHOULDER, input.shoulderR);
-	// }
-	if(input.elbow != undefined && input.elbow > 127 && input.elbow < 270){
-		this.moveMotor(this.id.ELBOW, input.elbow);
-	}
-	if(input.wrist != undefined && input.wrist > 0 && input.wrist < 149){
-		this.moveMotor(this.id.WRIST, input.wrist);
-	}
-	// if(input.speed != undefined){
-	// 	setSpeed(id.ALL, input.speed);
-	// }
-	// this.print(); //this.print points to the print method prototyped in Arm class (functions can be classes!)
-	// this.moveMotor(this.id.ELBOW, input.elbow);
-	// console.log("Elbow:" + input.elbow);
+	this.callAction();
 };
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
 	// console.log("Enabling Torque");
 	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
+	var hexdeg = (number/300) * 1023;/*(number/360) * 4095;*/ //for MX series: 360 and 4095. for RX series: 300 and 1023
+	if(hexdeg > 1023){ /*4095){*/
+		hexdeg = 1023; /*4095;*/
+	}
+	if(hexdeg < 0){
+		hexdeg = 0;
+	}
+	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
+	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
+	//console.log("H:" + high + "  L:" + low);
+	this.writePacket(this.operation.REGWRITE, ID, this.edit.POSITION, low, high);
+};
+
+Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
+	// console.log("Enabling Torque");
+	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
+<<<<<<< HEAD
 	var hexdeg = (number/360) * 4095;
 	if(hexdeg > 4095){ hexdeg = 4095; }
 	if(hexdeg < 0) { hexdeg = 0; }
@@ -102,6 +149,19 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
 	//console.log("H:" + high + "  L:" + low);
 	this.writePacket(this.operation.WRITE, ID, this.edit.POSITION, low, high);
+=======
+	var hexdeg = (number/360) * 4095; //for MX series: 360 and 4095. for RX series: 300 and 1023
+	if(hexdeg > 4095){
+		hexdeg = 4095;
+	}
+	if(hexdeg < 0){
+		hexdeg = 0;
+	}
+	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
+	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
+	//console.log("H:" + high + "  L:" + low);
+	this.writePacket(this.operation.REGWRITE, ID, this.edit.POSITION, low, high);
+>>>>>>> 628779d22dc07b55ee5640a02091d4ed98bf4323
 };
 
 Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
@@ -117,6 +177,25 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 	//console.log("H:" + high + "  L:" + low);
 	this.writePacket(this.operation.WRITE, ID, this.edit.SPEED, low, high);
 };
+
+Arm.prototype.callAction = function(){
+	var command = new Buffer(10);
+	for(var i = 0; i < command.length; i++) { //clear the command buffer
+		command[i] = 0x00;
+	};
+	var i = 0;
+	var checksum = 0xFE + 0x02 + 0x05;
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = 0xFE; // ID Byte Char
+	command[i++] = 0x02; //packet length
+	command[i++] = 0x05; //instruction byte
+	command[i++] = ~checksum & 0xFF;
+	this.serial.write(command, function(){
+		busy = false;
+		console.log("No longer busy");
+	});
+}
 
 Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, highbyte){ //parameters==object with motor IDs and values, use member finding to determine what to do
 	console.log("Controlling Motor " + motorID); //For Debugging
@@ -152,7 +231,7 @@ Arm.prototype.writePacket = function(instruction, motorID, register, lowbyte, hi
 	// command += "-"; //For use in testing with Arduino Feedback
 	/*Send control packet and prep for reuse*/
 	this.serial.write(command, function() {});
-	console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
+	//console.log(">>Sent " + typeof command +  " Ctrl Signal To " + motorID + ":" + command); //For Debugging
 }
 
 Arm.prototype.resume = function() {};
