@@ -5,9 +5,10 @@ var Skeleton = require("../skeleton.js");
 Sensor.prototype = new Skeleton("SENSOR");
 Sensor.prototype.constructor = Sensor;
 
-function Sensor(model_ref, feedback) {
+function Sensor(model_ref, feedback, debug) {
     this.model = model_ref;
     this.feedback = feedback;
+    this.debug = debug;
     //interval
     this.interval_compass = 1000;
     this.interval_gyro = 1000;
@@ -207,8 +208,9 @@ Sensor.prototype.compass = function() { // degrees refer to North
 
             parent.model.compass.heading = -(parent.model.compass.heading-360)
 
+           if (parent.debug == 'true'){ 
             console.log('Heading: ' + parent.model.compass.heading + ' degrees');
-
+            }
 
         });
 
@@ -274,7 +276,10 @@ Sensor.prototype.gyro = function() {
                 parent.model.gyro.z = parent.model.gyro.z % 360;
             }
 
+            if (parent.debug == 'true'){ 
             console.log("pitch: " + parent.model.gyro.x + " roll: " + parent.model.gyro.y + " yaw: " + parent.model.gyro.z + " degrees");
+            }
+
         });
     }, parent.interval_gyro);
 };
@@ -328,8 +333,10 @@ Sensor.prototype.accelero = function() {
                     parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
                     parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
 
-
+                    if (parent.debug == 'true'){ 
                     console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
+                    }
+
                 } else {
                     console.log(err);
                 }
@@ -367,7 +374,10 @@ Sensor.prototype.GPS = function() {
         parent.model.GPS.longitude_dir = lng_dir;
         parent.model.GPS.latitude_dir = lat_dir;
 
+        if (parent.debug == 'true'){ 
         console.log("lat: " + parent.model.GPS.latitude + " long: " + parent.model.GPS.longitude);
+        }
+
     });
 
     function showPortOpen() {
@@ -439,14 +449,14 @@ Sensor.prototype.Serialdata = function() {
         }
       }
 
+      if (parent.debug == 'true'){ 
       console.log("voltage: " + parent.model.power.voltage);
       console.log("current: " + parent.model.power.current);
       console.log("potentiometer: " + parent.model.acuator.potentiometer);
-      });
-	}
-   });
-                              
-
+            }
+        });
+	  }
+   });                       
 };
 
 Sensor.prototype.acuator = function() {
@@ -463,11 +473,10 @@ Sensor.prototype.acuator = function() {
       console.log('failed to open: ' + error);
         } 
     else {
-
     console.log('open');
-    console.log('command being sent'); 
-    AcuatorPort.write(parent.model.acuator.sent_position);
-    console.log('command sent finished');
+    AcuatorPort.write(parent.model.acuator.sent_position, function() {
+        console.log("command sended");   
+            });
         }
    });
 };
