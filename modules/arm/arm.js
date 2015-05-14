@@ -65,6 +65,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(this.defaulted == false){
 		console.log("Enabling Torque");
 		this.writePacket(this.operation.WRITE, this.id.ALL, this.edit.TORQUE, this.turn.ON);
+		setSpeed(id.ALL, 330);
 		this.defaulted = true;
 	}
 	if(input.base != undefined && input.base > 0 && input.base < 360){
@@ -95,15 +96,11 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	// console.log("Enabling Torque");
 	// writePacket(WRITE, ALL, TORQUE, ON); //highbyte not used, set to default 0xFFFF
 	var hexdeg = (number/360) * 4095;
-	if(hexdeg > 4095){
-		hexdeg = 4095;
-	}
-	if(hexdeg < 0){
-		hexdeg = 0;
-	}
+	if(hexdeg > 4095){ hexdeg = 4095; }
+	if(hexdeg < 0) { hexdeg = 0; }
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
-	console.log("H:" + high + "  L:" + low);
+	//console.log("H:" + high + "  L:" + low);
 	this.writePacket(this.operation.WRITE, ID, this.edit.POSITION, low, high);
 };
 
@@ -117,7 +114,7 @@ Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with member
 	}
 	var high = (hexdeg >> 8) & 0xFF; //grab the highbyte
 	var low = hexdeg & 0xFF; //format hexdeg to have only the lowbyte
-	console.log("H:" + high + "  L:" + low);
+	//console.log("H:" + high + "  L:" + low);
 	this.writePacket(this.operation.WRITE, ID, this.edit.SPEED, low, high);
 };
 

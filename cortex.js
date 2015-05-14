@@ -3,7 +3,7 @@
 if( process.argv.length < 3 ) {
 	console.log(
 		'Usage: \n' +
-		'\tnode cortex.js <websocket-server-address> [--simulate]\n'+
+		'\tnode cortex.js <websocket-server-address> [--simulate|--debug]\n'+
 		'Hints: server address can be\n' +
 		'\tlocalhost\n' + 
 		'\tor discovery.srkarra.com'
@@ -21,8 +21,11 @@ GLOBAL.os = require('os');
 GLOBAL.async = require('async');
 GLOBAL.simulate = false;
 GLOBAL.production = false;
+GLOBAL.debug = false;
 if(process.argv[3] == "--simulate") {
 	simulate = true;
+} else if(process.argv[3] == "--debug") {
+	GLOBAL.debug = true;
 }
 
 if(os.hostname() == 'beaglebone') {
@@ -52,46 +55,46 @@ socket.on('connect', function () {
 	if(!mcu.is_initialized) { mcu.initialize(); }
 	// =========== CTRL SIGNAL =========== //
 	socket.on('CTRLSIG', function (data) { 
-		console.log("INCOMING CTRLSIG", data);
+		if(GLOBAL.debug) { console.log("INCOMING CTRLSIG", data); }
 		//mcu.logger.log(data);
 		switch(data['directive']) {
 			case 'MOTOR':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.motor._handle(data["info"])); 
 				}, mcu.priority["motor"]);
-				console.log("Recieved motor directive", data);
+				if(GLOBAL.debug) { console.log("Recieved motor directive", data); }
 				break;
 			case 'ARM':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.arm._handle(data["info"])); 
 				}, mcu.priority["arm"]);
-				console.log("Recieved arm directive", data);
+				if(GLOBAL.debug) { console.log("Recieved arm directive", data); }
 				break;
 			case 'SENSOR':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.sensor._handle(data["info"])); 
 				}, mcu.priority["sensor"]);
-				console.log("Recieved sensor directive", data);
+				if(GLOBAL.debug) { console.log("Recieved sensor directive", data); }
 				break;
 			case 'TRACKER':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.tracker._handle(data["info"])); 
 				}, mcu.priority["tracker"]);
-				console.log("Recieved tracker directive", data);
+				if(GLOBAL.debug) { console.log("Recieved tracker directive", data); }
 				break;
 			case 'VIDEO':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.video._handle(data["info"])); 
 				}, mcu.priority["tracker"]);
-				console.log("Recieved video serversignal", data);
+				if(GLOBAL.debug) { console.log("Recieved video serversignal", data); }
 				break;
-			case 'ROVER':
+			case 'CORTEX':
 				setTimeout(function() { 
 					feedback(data['directive'], mcu.handle(data["info"]));
 				}, 1);
 				break;
 			default:
-				console.log("Invalid Directive");
+				if(GLOBAL.debug) { console.log("Invalid Directive"); }
 				socket.emit("ROVERSIG", { 
 					status: 'warning', 
 					info: 'Invalid directive '+data['directive'] 
@@ -121,6 +124,7 @@ socket.on('connect', function () {
 	socket.on('disconnect', function(){
 		console.log('Disconnected from server!');
 		mcu.halt();
+		process.exit();
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'cortex', password: 'destroymit' });

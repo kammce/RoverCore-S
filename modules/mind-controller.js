@@ -27,29 +27,36 @@ function MindController(feedback, simulation) {
 		this.tracker = new Skeleton("TRACKER");
 		this.logger = new Skeleton("LOGGER");
 	} else {
+		var spine = new SPINE();
 		var Sensor = require('./sensor/sensor.js');
 		var Motor = require('./motor/motor.js');
 		var Arm = require('./arm/arm.js');
 		var Tracker = require('./tracker/tracker.js');
 		var Logger = require('./logger.js');
-		this.sensor = new Sensor(model, feedback, this.spine);
-		this.motor = new Motor(model, feedback, this.spine);
-		this.arm = new Arm(model, feedback, this.spine);
-		this.tracker = new Tracker(model, feedback, this.spine);
-		this.logger = new Logger(model, feedback, this.spine);
+		this.sensor = new Sensor(model, feedback, spine, debug);
+		this.motor = new Motor(model, feedback, spine, debug);
+		this.arm = new Arm(model, feedback, spine, debug);
+		this.tracker = new Tracker(model, feedback, spine, debug);
+		this.logger = new Logger(model, feedback, spine, debug);
 	}
 }
 
 MindController.prototype.handle = function(data) {
-	switch(data['directive']) {
+	switch(data) {
 		case "DISCONNECT":
 			this.halt(data['info']);
+			break;
+		case 'NOTCONNECTED':
 			break;
 		case "CONNECT":
 			this.resume(data['info']);
 			break;
+		case "RESTART":
+			this.halt();
+			this.feedback("CORTEX", "Shutting down CORTEX (should be revived by forever-monitor)");
+			process.exit();
 		default:
-			console.log("No current handlers for MindController, found", data);
+			console.log("MindController does not have a handler for", data);
 			break;
 	}
 }; 

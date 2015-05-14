@@ -1,4 +1,2 @@
-Adapted Layout of folder to accomidate the new technology.
-Wrote Cortex, MindController, and Skeleton of MindController
-Sub modules.
-Cortex can now communicate to Server signal-relay.
+Tightened some holes in the system where stream 1 could not work properly
+Added forever-monitor into package.json

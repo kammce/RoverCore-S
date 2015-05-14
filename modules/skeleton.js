@@ -11,7 +11,8 @@ function Skeleton(module_name) {
 	this._handle = function(data, feedback) {
 		if(this.is_halted) { return; }
 		if(typeof this.handle == 'undefined') {
-			console.log("Empty "+module+" handle: ", data);
+			console.log("Empty "+this.module+" handler recieved: ", data);
+			return this.module+"'s empty module recieved: "+data;
 		} else {
 			return this.handle(data, feedback);
 		}
