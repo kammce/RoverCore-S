@@ -62,8 +62,9 @@ Motor.prototype.handle = function(data) {
 	if(data.signaltype=='man'){
 		this.setIndividualMotors(data.motor);
 	}
-	if(data.signaltype=='fullAuto'){
+	if(data.signaltype=='smart'){
 		this.smartController(data.angle, data.speed);
+		this.setIndividualMotors(data.motor);
 		this.setAllMotors(data.angle, data.speed);
 	}
 	if(data.signaltype=='auto'){
