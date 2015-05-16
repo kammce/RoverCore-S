@@ -1,10 +1,10 @@
 "use strict";
 
-function MindController(feedback, simulation,debug) {
+function MindController(feedback, simulation, debug) {
 	this.priority = {
 		motor: 1,
 		arm: 1,
-		sensor: 500,
+		sensor: 250,
 		tracker: 1
 	}
 
