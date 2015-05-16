@@ -25,10 +25,10 @@ function Sensor(model_ref, feedback, debug) {
 	this.buffer = new Buffer(100);
 
 	//initiate 
-	this.gyro();
-	this.accelero();
-	this.compass();
-	this.GPS();
+	//this.gyro();
+	//this.accelero();
+	//this.compass();
+	//this.GPS();
 	this.Serialdata();    // [power,voltage,potentiometer]
 };
 
@@ -311,9 +311,9 @@ Sensor.prototype.accelero = function() {
 		accelSampleCount: 0
 	};
 	var accel = new ADXL345(function(err) {
-		accel.accelScaleFactor[XAXIS] = 0.0371299982;
-		accel.accelScaleFactor[YAXIS] = -0.0374319982;
-		accel.accelScaleFactor[ZAXIS] = -0.0385979986;
+		accel.accelScaleFactor[parent.XAXIS] = 0.0371299982;
+		accel.accelScaleFactor[parent.YAXIS] = -0.0374319982;
+		accel.accelScaleFactor[parent.ZAXIS] = -0.0385979986;
 		if (!err) {
 			computeAccelBias();
 		} else {

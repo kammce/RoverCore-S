@@ -61,10 +61,13 @@ Motor.prototype.handle = function(data) {
 	console.log(this.module+" Recieved ", data);
 	if(data.signaltype=='man'){
 		this.setIndividualMotors(data.motor);
+		this.feedback=data;
 	}
-	if(data.signaltype=='fullAuto'){
+	if(data.signaltype=='smart'){
 		this.smartController(data.angle, data.speed);
 		this.setAllMotors(data.angle, data.speed);
+		this.setIndividualMotors(data.motor);
+		this.feedback=data;
 	}
 	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
@@ -97,11 +100,11 @@ Motor.prototype.elevationAdjust = function(){
 	var acceleroNew=this.getaccelero();
 	if(acceleroNew < (-5) && this.controlSpeed == 0){
 		this.transAngle=90;
-		this.transSpeed=acceleroNew*0.8351; 
+		this.transSpeed=acceleroNew*3.5; 
 	}
 	else if(acceleroNew>5 && this.controlSpeed==0){
 		this.transAngle=270;
-		this.transSpeed=acceleroNew*0.8351; 
+		this.transSpeed=acceleroNew*2.8; 
 	}
 	else{
 		this.transSpeed=this.controlSpeed
@@ -177,37 +180,43 @@ Motor.prototype.getaccelero=function(){
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
 	if(motor.m1.state=="on"){
-		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
+		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);i
+		console.log("Motor 1 :" + motor.m1.state);
 	}
 	else{
 		this.setMotor(1, motor.m1.direction, 0);
 	}
 	if(motor.m2.state=="on"){
 		this.setMotor(2, motor.m2.direction, motor.m2.speed/100);
+		console.log("Motor 2 :" + motor.m2.state);
 	}
 	else{
 		this.setMotor(2, motor.m2.direction, 0);
 	}
 	if(motor.m3.state=="on"){
 		this.setMotor(3, motor.m3.direction, motor.m3.speed/100);
+		console.log("Motor 3 :" + motor.m3.state);
 	}
 	else{
 		this.setMotor(3, motor.m3.direction, 0);
 	}
 	if(motor.m4.state=="on"){
 		this.setMotor(4, motor.m4.direction, motor.m4.speed/100);
+		console.log("Motor 4 :" + motor.m4.state);
 	}
 	else{
 		this.setMotor(4, motor.m4.direction, 0);
 	}
 	if(motor.m5.state=="on"){
 		this.setMotor(5, motor.m5.direction, motor.m5.speed/100);
+		console.log("Motor 5 :" + motor.m5.state);
 	}
 	else{
 		this.setMotor(5, motor.m5.direction, 0);
 	}
 	if(motor.m6.state=="on"){
 		this.setMotor(6, motor.m6.direction, motor.m6.speed/100);
+		console.log("Motor 6 :" + motor.m6.state);
 	}
 	else{
 		this.setMotor(6, motor.m6.direction, 0);
