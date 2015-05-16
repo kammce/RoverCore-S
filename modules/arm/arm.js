@@ -29,17 +29,15 @@ Therefore, use 'this.defaulted'
 	});
 	/*Setup Pump Pinouts*/
 	this.depressurizer = { //deflate Balloon
-		valve: 'P8_26',
-		pump: 'P8_27'
+		// valve: 'P8_26',
+		pin: 'P8_27'
 	},
 	this.pressurizer = { //inflate Balloon
-		valve: 'P8_28',
-		pump: 'P8_29'
+		// valve: 'P8_28',
+		pin: 'P8_29'
 	}
-	this.spine.expose(this.depressurizer.valve, "OUTPUT"); //Same as Arduino's pinMode
-	this.spine.expose(this.depressurizer.pump, "OUTPUT");
-	this.spine.expose(this.pressurizer.valve, "OUTPUT");
-	this.spine.expose(this.pressurizer.pump, "OUTPUT");
+	this.spine.expose(this.depressurizer.pin, "OUTPUT"); //Same as Arduino's pinMode
+	this.spine.expose(this.pressurizer.pin, "OUTPUT");
 
 	this.torqued = false;
 	this.defaulted = false;
@@ -94,8 +92,8 @@ Therefore, use 'this.defaulted'
 		base = (parent.currentPos.base);
 		parent.moveMotorMX(parent.id.BASE, base);
 
-		console.log("Current: " + JSON.stringify(parent.currentPos));
-		console.log("Goal: " + JSON.stringify(parent.goalPos));
+		// console.log("Current: " + JSON.stringify(parent.currentPos));
+		// console.log("Goal: " + JSON.stringify(parent.goalPos));
 
 		/*ACTION*/
 		parent.checkAllMotors();
@@ -212,28 +210,26 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		if(typeof input["pump"] == "string"){
 			// this.invalid_input = false;
 			if(input.pump == "grip"){ //-1 = suck air out of balloon
-				this.spine.digitalWrite(this.pressurizer.pump, this.turn.OFF); //pump off first
-				this.spine.digitalWrite(this.pressurizer.valve, this.turn.OFF); //then valve
-				this.spine.digitalWrite(this.depressurizer.valve, this.turn.ON); //then other valve
-				this.spine.digitalWrite(this.depressurizer.pump, this.turn.ON); //other pump on last
+				this.spine.digitalWrite(this.pressurizer.pin, this.turn.OFF); //pump off first
+				this.spine.digitalWrite(this.depressurizer.pin, this.turn.ON); //other pump on last
 				/*Since continuous deflation poses no risk of destrution to balloon/arm, no timeout is
 				needed.*/
+				console.log("grippin'");
 			}
 			if(input.pump == "stop"){ //0 = stop all in case of emergency
-				this.spine.digitalWrite(this.pressurizer.pump, this.turn.OFF); //pump off first
-				this.spine.digitalWrite(this.depressurizer.pump, this.turn.OFF); //other pump off
-				this.spine.digitalWrite(this.pressurizer.valve, this.turn.OFF); //then valve
-				this.spine.digitalWrite(this.depressurizer.valve, this.turn.OFF); //then other valve
+				this.spine.digitalWrite(this.pressurizer.pin, this.turn.OFF); //pump off first
+				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //other pump offpin
+			
+				console.log("stoppin'");
 			}
 			if(input.pump == "drop"){ //1 = pump air into balloon
-				this.spine.digitalWrite(this.depressurizer.pump, this.turn.OFF); //pump off first
-				this.spine.digitalWrite(this.depressurizer.valve, this.turn.OFF); //then valve
-				this.spine.digitalWrite(this.pressurizer.valve, this.turn.ON); //then other valve
-				this.spine.digitalWrite(this.pressurizer.pump, this.turn.ON); //other pump on last
+				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //pump off first
+				this.spine.digitalWrite(this.pressurizer.pin, this.turn.ON); //other pump on last
 				setTimeout(function(){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
-					parent.spine.digitalWrite(parent.pressurizer.pump, parent.turn.OFF); //pump off first
-					parent.spine.digitalWrite(parent.pressurizer.valve, parent.turn.OFF); //then valve
+					parent.spine.digitalWrite(parent.pressurizer.pin, parent.turn.OFF); //pump off first
 				}, 4000); //In case of connection loss, balloon inflation will cease after x seconds
+			
+				console.log("drop it!");
 			}
 		}
 		else{
@@ -525,4 +521,5 @@ Arm.prototype.print = function(){ //For Debugging
 // }, 1000);
 
 module.exports = exports = Arm;
+
 

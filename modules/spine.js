@@ -203,7 +203,7 @@ function Spine(feedback) {
 			fs.writeFileSync(path, firmware);
 		} catch(e) {
 			console.log("DTS "+firmware+" is already loaded");
-			console.log(e);
+			//console.log(e);
 		}
 	}
 	console.log("Systems Check...");
@@ -247,7 +247,7 @@ function Spine(feedback) {
 			var path = glob.sync("/sys/devices/ocp.*/pwm_test_"+this.hardware.pwms[i]+".*/");
 			if(path.length == 0) {
 				console.log("Not all PWMs are initalized!");
-				return;
+				break;
 			}
 			this.hardware.pwms[i] = path[0];
 		};
@@ -283,6 +283,7 @@ function Spine(feedback) {
 		for(var i in pinIndex) {
 		    this.pins[pinIndex[i].key] = pinIndex[i];
 		}
+		console.log(this.pins);
 	} else {
 		console.log("Running on none Beagblebone platform.");
 	}
@@ -370,3 +371,4 @@ Spine.prototype.expose = function(_pin, direction) {
 }; 
 
 module.exports = exports = Spine;
+
