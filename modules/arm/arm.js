@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; //Working Version, mk1
 //Dynamixel Instruction Packet Format: 0xFF 0xFF ID LENGTH INSTRUCTION PARAMETER#1 ... PARAMETER#N CHECK_SUM
 /*Includes*/
 var SerialPort = require("serialport").SerialPort;
