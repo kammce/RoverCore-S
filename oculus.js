@@ -19,8 +19,10 @@ console.log("Starting Rover Oculus");
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
 GLOBAL.glob = require('glob');
+GLOBAL.os = require('os');
 // Local Includes
 var Socket = require('socket.io-client');
+var exec = require('child_process').exec;
 
 // Initializing Variables
 GLOBAL.ADDRESS = process.argv[2];
@@ -37,12 +39,28 @@ var feedback = function(directive, rsignal) {
 	}
 }
 
+var sensor_loop;
+
 var Video = require("./modules/video.js");
 var video = new Video(feedback, STREAM);
 var Audio = require("./modules/audio.js");
 var audio = new Audio(feedback, STREAM);
 
 var self_directive = 'OCULUS'+(STREAM+1);
+
+var setNTSC = function (error, stdout, stderr) {
+	if (error !== null) {
+	  feedback("OCULARSIG", {
+			status: 'warning',
+			info: 'Stream is oculus1: but count not find /dev/video-tracker, or counld not be set to NTSC.'
+	  });
+	} else {
+		feedback("OCULARSIG", {
+			status: 'info',
+			info: '/dev/video-tracker set to NTSC :: '+stdout,
+	  });
+	}
+};
 
 socket.on('connect', function () { 
 	console.log("Oculus connected to server!");
@@ -69,11 +87,31 @@ socket.on('connect', function () {
 					if(data['info']['signal'] == "RESTART") {
 						feedback("OCULUS", "Shutting down OCULUS (should be revived by forever-monitor)");
 						process.exit();
+					} else if(data['info']['signal'] == "SETNTSC") {
+						exec('v4l2-ctl -d /dev/video-tracker -s ntsc', setNTSC);
+					} else if(data['info']['signal'] == "RESTART") {
+						clearInterval(sensor_loop);
+						sensor_loop = setTimeout(function() {
+							exec('vcgencmd measure_temp', function (error, stdout, stderr) {
+								if (error !== null) {
+								  feedback("OCULARSIG", {
+										status: 'warning',
+										info: 'oculus'+STREAM+': Could not measure temperature!'
+								  });
+								  clearInterval(sensor_loop);
+								} else {
+									var cpu = stdout.replace("temp=", "").replace("'C", "");
+									feedback("SENSORS", {
+										device: 'oculus'+STREAM,
+										cputemp: parseFloat(cpu)
+									});
+								}
+							});
+						}, 1000);
 					} else {
-					feedback(data['directive'], function() {
-						console.log("empty handler for OCULUS", data["info"]);
-					});
-
+						feedback(data['directive'], function() {
+							console.log("empty handler for OCULUS", data["info"]);
+						});
 					}
 				}, 10);
 				break;
@@ -113,4 +151,24 @@ socket.on('connect', function () {
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'oculus'+STREAM, password: 'destroymit' });
+	if(os.hostname() == 'raspberrypi' || STREAM == '1') {
+		setNTSC();
+		sensor_loop = setInterval(function() {
+			exec('vcgencmd measure_temp', function (error, stdout, stderr) {
+				if (error !== null) {
+				  feedback("OCULARSIG", {
+						status: 'warning',
+						info: 'oculus'+STREAM+': Could not measure temperature!'
+				  });
+				  clearInterval(sensor_loop);
+				} else {
+					var cpu = stdout.replace("temp=", "").replace("'C\n", "");
+					feedback("SENSORS", {
+						device: 'oculus'+STREAM,
+						cputemp: parseFloat(cpu)
+					});
+				}
+			});
+		}, 1000);
+	}
 });

@@ -42,7 +42,7 @@ function Audio(feedback) {
 			source: undefined
 		}
 	];
-	this.debug = false; // process debug information
+	this.debug = true; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -141,12 +141,12 @@ Audio.prototype.activateMic = function(mic_select, stream_number) {
 		).on('error', function( err ){ console.log("ERROR: Either Oculus could not find FFMpeg or Oculus was not run as superuser!!! ",err); });
 
 		this.streams[stream_number].source.stdout.on('data', function(out) {
-			if(this.debug) {
+			if(parent.debug) {
 				console.log('stdout: ' + out);
 			}
 		});
 		this.streams[stream_number].source.stderr.on('data', function(err) {
-			if(this.debug) {
+			if(parent.debug) {
 				console.log('stderr: ' + err);	
 			}
 		});	
