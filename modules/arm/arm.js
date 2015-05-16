@@ -10,7 +10,7 @@ Arm.prototype.constructor = Arm;
 
 function Arm (model_ref, feedback, spine, debug) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
 	this.debug = debug; //boolean value to toggle console log traffic.
-	this.busy = false;//Handles signal traffic jams
+	// this.busy = false;//Handles signal traffic jams
 	this.ready = [false,false,false,false,false]; //readiness flags (when all true, send Action cmd)
 
 /*	When declaring a var inside the Arm class, i.e. here, the prototype functions cannot access them,
@@ -41,28 +41,82 @@ Therefore, use 'this.defaulted'
 	this.spine.expose(this.pressurizer.valve, "OUTPUT");
 	this.spine.expose(this.pressurizer.pump, "OUTPUT");
 
+	this.torqued = false;
 	this.defaulted = false;
 	/*Setup Action call*/
 	this.actionBuffer = new Buffer(6);
 	var index = 0; //index iterator
 	var checksum = 0xFE + 0x02 + 0x05;
-	this.actionBuffer[index++] = 0xFF; //Ã¿ Signature Byte Char
-	this.actionBuffer[index++] = 0xFF; //Ã¿ Signature Byte Char
+	this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
+	this.actionBuffer[index++] = 0xFF; //ÿ Signature Byte Char
 	this.actionBuffer[index++] = 0xFE; // ID Byte Char
 	this.actionBuffer[index++] = 0x02; //packet length
 	this.actionBuffer[index++] = 0x05; //instruction byte
 	this.actionBuffer[index++] = ~checksum & 0xFF;
+
+	this.currentPos = {
+		shoulder: 150,
+		elbow: 150,
+		wrist: 150,
+		base: 180
+	}
+	this.goalPos = {
+		shoulder: 150,
+		elbow: 150,
+		wrist: 150,
+		base: 180
+	}
+
+/*Interval Interpolation*/
+	var parent = this;
+	this.controlInterval = setInterval(function(){
+		var intGain = 0.08; //Interpolation speed
+		var shlds, base, elbow, wrist;
+	/*SHOULDERS*/
+		parent.currentPos.shoulder = Math.round((parent.goalPos.shoulder - parent.currentPos.shoulder)*intGain + parent.currentPos.shoulder);
+		shlds = (parent.currentPos.shoulder);
+		if(shlds < 45) {shlds = 45;} else if (shlds > 220){ shlds = 220;} //angle limiter
+		var newval = (shlds - 300) * (-1);
+		parent.moveMotor(parent.id.LEFTSHOULDER, newval);
+		parent.moveMotor(parent.id.RIGHTSHOULDER, shlds);
+	/*ELBOW*/
+		// parent.currentPos.elbow = Math.round((parent.goalPos.elbow - parent.currentPos.elbow)*intGain + parent.currentPos.elbow);
+		// elbow = (parent.currentPos.elbow);
+		// if(elbow < 70){elbow = 70;} else if (elbow > 220){elbow = 220;} //angle limiter
+		// parent.moveMotor(parent.id.ELBOW, elbow);
+	/*WRIST*/
+		parent.currentPos.wrist = Math.round((parent.goalPos.wrist - parent.currentPos.wrist)*intGain + parent.currentPos.wrist);
+		wrist = (parent.currentPos.wrist);
+		if(wrist < 120){wrist = 120;} else if (wrist > 240){wrist = 240;} //angle limiter
+		parent.moveMotor(parent.id.WRIST, wrist);
+	/*BASE*/
+		parent.currentPos.base = Math.round((parent.goalPos.base - parent.currentPos.base)*intGain + parent.currentPos.base);
+		base = (parent.currentPos.base);
+		parent.moveMotorMX(parent.id.BASE, base);
+
+		console.log("Current: " + JSON.stringify(parent.currentPos));
+		console.log("Goal: " + JSON.stringify(parent.goalPos));
+
+		/*ACTION*/
+		parent.checkAllMotors();
+
+		console.log("Checked all motors");
+	}, 150);
+
 	/*Setup Data Schema*/
 	this.schema = { //format for data being passed to arm.prototype.handle(data);
 		"type" : "object",
 		"properties" : {
 			"base" : "Number", //Degree value, from 0 to 360
 			//"shoulderL" : "Number", //Degree value, from 0 to 360
-			"shoulderR" : "Number", //Degree value, from 0 to 360
+			// "shoulderR" : "Number", //Degree value, from 0 to 360
+			"shoulder" : "Number", //Degree value, from 0 to 360
 			"elbow" : "Number", //Degree value, from 0 to 360
 			"wrist" : "Number", //Degree value, from 0 to 360
-			"speed" : "Number" //Value of motor RPM, expects value from 1 to 117
-			// "setID" : "Number" //For initial setup only. Used to set the ids of different servos
+			"speed" : "Number", //Value of motor RPM, expects value from 1 to 117
+			// "setID" : "Number", //For initial setup only. Used to set the ids of different servos
+			"pump" : "String",
+			"torque" : "Boolean"
 		}
 	}
 
@@ -77,18 +131,18 @@ Therefore, use 'this.defaulted'
 	this.edit = {POSITION: 0x1E, SPEED: 0x20, CCW: 0x08, CW: 0x06, TORQUE: 0x18, LED: 0x19};
 
 	/*Setup command standards (saves processing time)*/
-	this.standards = {
-		write: {instruction: this.operation.WRITE, register: this.edit.POSITION},
-		regwrite: {instruction: this.operation.REGWRITE, register: this.edit.POSITION},
-	}
+	// this.standards = {
+	// 	write: {instruction: this.operation.WRITE, register: this.edit.POSITION},
+	// 	regwrite: {instruction: this.operation.REGWRITE, register: this.edit.POSITION},
+	// }
 
 	// generate motor standard
 	this.motorStandard = new Buffer(9);
-	this.motorStandard[0] = 0xFF; // Ã¿ Signature Byte Char
-	this.motorStandard[1] = 0xFF; // Ã¿ Signature Byte Char
+	this.motorStandard[0] = 0xFF; // ÿ Signature Byte Char
+	this.motorStandard[1] = 0xFF; // ÿ Signature Byte Char
 	this.motorStandard[2] = 0x00; // ID Byte Char NEEDS TO CHANGE
 	this.motorStandard[3] = 0x05; // packet length
-	this.motorStandard[4] = 0x04; // instruction byte
+	this.motorStandard[4] = 0x04; // instruction byte (0x04 = REGWRITE)
 	this.motorStandard[5] = 0x1E; // register addr 0x05
 	this.motorStandard[6] = 0xFF; // low
 	this.motorStandard[7] = 0x01; // high
@@ -102,31 +156,51 @@ Therefore, use 'this.defaulted'
 		console.log(err);
 	});
 
-	this.invalid_input = false;
+	// this.invalid_input = false;
 }
 
 Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends action when all true
 	var parent = this; //points to function Arm (the Arm class)
-	if(this.debug){
-		console.log(this.ready);
-	}
-	if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
-		if(this.debug){
-			console.log("Getting called into action!!");
-		}
+	// if(this.debug){
+	// 	console.log(this.ready);
+	// }
+	// if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
+		// if(this.debug){
+		// 	console.log("Getting called into action!!");
+		// }
 		this.serial.write(this.actionBuffer, function() {
 			parent.ready = [false,false,false,false,false];
-			parent.busy = false;
-			if(this.debug){
+			// parent.busy = false;
+			if(parent.debug){
 				console.log("No longer busy");
 			}
 		});
-	}	
-	// for (var i = 0; i < this.ready.length; i++) {
-	// 	if(!this.ready[i]) { return; }
-	// };
-	// this.callAction(this.actionBuffer);
+	// }	
+	/*for (var i = 0; i < this.ready.length; i++) {
+		if(!this.ready[i]) { return; }
+	};
+	this.callAction(this.actionBuffer);*/
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
 	if(this.debug){
@@ -136,7 +210,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	/*Pump Control Block*/
 	if(!_.isUndefined(input["pump"])){ //If a pump command to pump in/out exists
 		if(typeof input["pump"] == "string"){
-			this.invalid_input = false;
+			// this.invalid_input = false;
 			if(input.pump == "grip"){ //-1 = suck air out of balloon
 				this.spine.digitalWrite(this.pressurizer.pump, this.turn.OFF); //pump off first
 				this.spine.digitalWrite(this.pressurizer.valve, this.turn.OFF); //then valve
@@ -168,8 +242,36 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 		}
 	}
+	/*Torque Manipulation*/
+	if(!_.isUndefined(input["torque"])){
+		if(typeof input["torque"] == "string"){
+			if(this.torqued){
+				this.writePacket({ //Enable Torque
+					instruction:this.operation.WRITE, 
+					motorID:this.id.ALL, 
+					register:this.edit.TORQUE, 
+					lowbyte:this.turn.OFF
+				});
+				this.torqued = false;
+			}
+			else{
+				this.writePacket({ //Enable Torque
+					instruction:this.operation.WRITE, 
+					motorID:this.id.ALL, 
+					register:this.edit.TORQUE, 
+					lowbyte:this.turn.ON
+				});
+				this.torqued = true;
+			}
+		}
+		else{
+			if(this.debug){
+				console.log("Invalid Torque Toggle Input!");
+			}
+		}
+	}
 	/*Arm Control Block*/
-	if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
+	// if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
 	if(this.defaulted == false) { //If defaults not yet set
 		if(this.debug){
 			console.log("Enabling Torque");
@@ -180,58 +282,84 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			register:this.edit.TORQUE, 
 			lowbyte:this.turn.ON
 		});
+		this.torqued = true;
 		this.writePacket({ //Set movement speed to 15 rpm
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL,
 			register:this.edit.SPEED, 
-			lowbyte:0x48,
+			lowbyte:0xAA,
+			highbyte:0x00
+		});
+		this.writePacket({ //Set movement speed of elbow lower
+			instruction:this.operation.WRITE, 
+			motorID:this.id.ELBOW,
+			register:this.edit.SPEED, 
+			lowbyte:0x2F,
 			highbyte:0x00
 		});
 		this.defaulted = true;
 	}
-	this.busy = true;
-	this.invalid_input = true;
+	// this.busy = true;
+	// this.invalid_input = true;
 	if(!_.isUndefined(input["shoulder"])) { //If shoulder element exists
-		this.invalid_input = false;
+		// this.invalid_input = false;
 		var pos = input.shoulder;
-		if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
-		var newval = (pos - 300) * (-1);
-		this.moveMotor(this.id.LEFTSHOULDER, newval);
-		this.moveMotor(this.id.RIGHTSHOULDER, pos);
+		// if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
+		// var newval = (pos - 300) * (-1);
+		// this.moveMotor(this.id.LEFTSHOULDER, newval);
+		// this.moveMotor(this.id.RIGHTSHOULDER, pos);
+		this.goalPos.shoulder = pos;
 		if(this.debug){
 			console.log("sholder if statement has been called");
 		}
 		// this.callAction(this.actionBuffer);
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
-		this.invalid_input = false;
+		// this.invalid_input = false;
+		var pos = input.base;
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
-		this.moveMotorMX(this.id.BASE, input.base);
+		this.goalPos.base = pos;
+		// this.moveMotorMX(this.id.BASE, input.base);
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
-		this.invalid_input = false;
+		// this.invalid_input = false;
 		var pos = input.elbow;
-		if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
-		this.moveMotor(this.id.ELBOW, pos);
+		// if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
+		this.currentPos.elbow = pos;
+
+		// parent.currentPos.elbow = Math.round((parent.goalPos.elbow - parent.currentPos.elbow)*intGain + parent.currentPos.elbow);
+		// elbow = (parent.currentPos.elbow);
+		if(this.currentPos.elbow < 70){this.currentPos.elbow = 70;} else if (this.currentPos.elbow > 220){this.currentPos.elbow = 220;} //angle limiter
+		// parent.moveMotor(parent.id.ELBOW, elbow);
+
+		this.moveMotor(this.id.ELBOW, this.currentPos.elbow);
 	}
 	if(!_.isUndefined(input["wrist"])) { //If wrist element exists
-		this.invalid_input = false;
+		// this.invalid_input = false;
 		var pos = input.wrist;
 		if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
-		this.moveMotor(this.id.WRIST, input.wrist);
+		this.goalPos.wrist = pos;
+		// this.moveMotor(this.id.WRIST, input.wrist);
 	}
-	if(this.invalid_input) {
-		this.busy = false;
+	// if(this.invalid_input) {
+		// this.busy = false;
 		if(this.debug){
 			console.log("invalid input to arm handler!");
 		}
-	}
+	// }
 	// if(this.ready.shoulderL && this.ready.shoulderR){
 	// 	this.callAction(this.actionBuffer);
 	// }
 };
+
+
+
+
+
+
+
 
 Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
 	var parent = this;
@@ -255,11 +383,10 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-	console.log(std);
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
-		parent.checkAllMotors();
-		if(this.debug){
+		// parent.checkAllMotors();
+		if(parent.debug){
 			console.log("Motor ID = "+ID+" has finished sending!");
 		}
 	});
@@ -309,11 +436,10 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-	console.log(std);
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
-		parent.checkAllMotors();
-		if(this.debug){
+		// parent.checkAllMotors();
+		if(parent.debug){
 			console.log("Motor ID = "+ID+" has finished sending!");
 		}
 	});
@@ -354,8 +480,8 @@ Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs a
 	var checksum = 0;
 	/*Put the control packet together*/
 	/*Method 2: Send all at once after compiling elements together into buffer*/
-	command[i++] = 0xFF; //Ã¿ Signature Byte Char
-	command[i++] = 0xFF; //Ã¿ Signature Byte Char
+	command[i++] = 0xFF; //ÿ Signature Byte Char
+	command[i++] = 0xFF; //ÿ Signature Byte Char
 	command[i++] = obj.motorID; // ID Byte Char
 	command[i++] = length; //packet length
 	command[i++] = obj.instruction; //instruction byte
@@ -376,8 +502,7 @@ Arm.prototype.writePacket = function(obj){ //parameters==object with motor IDs a
 
 Arm.prototype.resume = function() {};
 Arm.prototype.halt = function(data) {
-	this.busy = false;
-	this.ready = [false,false,false,false,false];
+	clearInterval(this.controlInterval);
 };
 
 Arm.prototype.print = function(){ //For Debugging
@@ -400,3 +525,4 @@ Arm.prototype.print = function(){ //For Debugging
 // }, 1000);
 
 module.exports = exports = Arm;
+
