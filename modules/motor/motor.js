@@ -87,31 +87,28 @@ Motor.prototype.halt = function() {
 };
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
+	var parent =this;
 	this.controlSpeed=speed;
 	this.controlAngle=angle;
     this.transSpeed=speed;
 	this.transAngle=angle;
 	clearInterval(this.timeout);
-	this.timeout=setInterval(this.elevationAdjust(), 100);
+	var elevationAdjust = function(){
+		var acceleroNew=parent.getaccelero();
+		if(acceleroNew < (-5) && parent.controlSpeed == 0){
+			parent.transAngle=90;
+			parent.transSpeed=acceleroNew*3.5; 
+			parent.setAllMotors(parent.transAngle, parent.transSpeed);
+		}
+		else if(acceleroNew>5 && parent.controlSpeed==0){
+			parent.transAngle=270;
+			parent.transSpeed=acceleroNew*2.8; 
+			parent.setAllMotors(this.transAngle, parent.transSpeed);
+		}
+		console.log("SMART CONTROLLER SD--" + this.transSpeed + " AG--" + this.transAngle);
+	}
+	this.timeout=setInterval(this.elevationAdjust, 100);
 };
-//===========================================Elevation Adjust=====================================
-
-Motor.prototype.elevationAdjust = function(){
-	var acceleroNew=this.getaccelero();
-	if(acceleroNew < (-5) && this.controlSpeed == 0){
-		this.transAngle=90;
-		this.transSpeed=acceleroNew*3.5; 
-	}
-	else if(acceleroNew>5 && this.controlSpeed==0){
-		this.transAngle=270;
-		this.transSpeed=acceleroNew*2.8; 
-	}
-	else{
-		this.transSpeed=this.controlSpeed
-		this.transAngle=this.controlAngle;
-	}
-	this.setAllMotorsTemp(this.transAngle, this.transSpeed);
-}
 
 
 //===========================================Straight Adjust======================================
