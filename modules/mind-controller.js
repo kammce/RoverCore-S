@@ -33,7 +33,7 @@ function MindController(feedback, simulation, debug) {
 		var Arm = require('./arm/arm.js');
 		var Tracker = require('./tracker/tracker.js');
 		var Logger = require('./logger.js');
-		//this.sensor = new Sensor(model, feedback, spine, debug);
+		this.sensor = new Sensor(model, feedback, spine, debug);
 		this.motor = new Motor(model, feedback, spine, debug);
 		this.arm = new Arm(model, feedback, spine, debug);
 		this.tracker = new Tracker(model, feedback, spine, debug);
