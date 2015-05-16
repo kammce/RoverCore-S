@@ -251,7 +251,7 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-	console.log(std);
+//	console.log(std);
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
@@ -305,7 +305,7 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-	console.log(std);
+//	console.log(std);
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
