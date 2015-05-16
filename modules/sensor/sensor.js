@@ -129,12 +129,12 @@ Sensor.prototype.handle = function(data) { // take command from user interface
     //acuator command 
 
     if (data == "MAST-UP"){
-        parent.model.acuator.sent_position = "U";
+        this.model.acuator.sent_position = "U";
         this.acuator();
     }
 
     else if (data == "MAST-DOWN"){
-        parent.model.acuator.sent_position = "D"
+        this.model.acuator.sent_position = "D"
         this.acuator();
     }    
 
@@ -466,7 +466,7 @@ Sensor.prototype.acuator = function() {
 
   var parent = this;
   var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var AcuatorPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port us$
+  var AcuatorPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
       baudRate: 9600,
       parser: SERIALPORT.parsers.readline("\r\n") // look for return and new ln
   });
@@ -496,7 +496,7 @@ Sensor.prototype.temp = function() {
 	console.log("data: " + data);
         parent.model.temperature.cpu = data/1000;
         console.log("temperature: " + parent.model.temperature.cpu  );
-	console.log("it running");  
+	 
     });
    },1000);
 };

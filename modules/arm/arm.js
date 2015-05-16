@@ -113,11 +113,13 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 			console.log("Getting called into action!!");
 		}
 		this.serial.write(this.actionBuffer, function() {
-			parent.ready = [false,false,false,false,false];
-			parent.busy = false;
-			if(parent.debug){
-				console.log("No longer busy");
-			}
+			parent.serial.write(parent.actionBuffer, function() {
+				parent.ready = [false,false,false,false,false];
+				parent.busy = false;
+				if(parent.debug){
+					console.log("No longer busy");
+				}
+			});
 		});
 	}	
 	// for (var i = 0; i < this.ready.length; i++) {
