@@ -64,7 +64,7 @@ function Video(feedback, stream, debug) {
 			source: undefined
 		}
 	];
-	this.debug = debug; // process debug information
+	this.debug = true; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -183,6 +183,7 @@ Video.prototype.genArg = function(data, port) {
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
+				'-vf', 'eq=gamma=0.75',
 				'http://'+ADDRESS+':'+port+'/destroymit/480/320'
 			];
 		} else {
@@ -190,19 +191,14 @@ Video.prototype.genArg = function(data, port) {
 			var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
 			var width 	= (_.isNumber(data['width'])) ? data['width'] : this.videos[view]['width'];
 			var height 	= (_.isNumber(data['height'])) ? data['height'] : this.videos[view]['height'];
-			var fps 	= (_.isNumber(data['fps'])) ? data['fps'] : 'ntsc';
 			this.caminfo = data;
 			return [
 				'-rtbufsize', '1000000k',
 				'-s', width+'x'+height,
-				'ntsc-',
 				'-f', 'video4linux2',
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
-				'-r', fps,
-				//'-b', 0,
-				//'-vf', 'crop=iw-mod(iw\,2):ih-mod(ih\,2)',
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
 		}
