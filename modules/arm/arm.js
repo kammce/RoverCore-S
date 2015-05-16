@@ -192,7 +192,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(!_.isUndefined(input["shoulder"])) { //If shoulder element exists
 		this.invalid_input = false;
 		var pos = input.shoulder;
-		if(pos < 45) {pos = 45;} else if (pos > 220){ pos = 220;} //angle limiter
+		if(pos < 45) {pos = 45;} else if (pos > 180){ pos = 180;} //angle limiter
 		var newval = (pos - 300) * (-1);
 		this.moveMotor(this.id.LEFTSHOULDER, newval);
 		this.moveMotor(this.id.RIGHTSHOULDER, pos);
@@ -203,22 +203,24 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	}
 	if(!_.isUndefined(input["wrist"])) { //If wrist element exists
 		this.invalid_input = false;
-		var pos = input.wrist;
-		if(pos < 120){pos = 120;} else if (pos > 240){pos = 240;} //angle limiter
-		this.moveMotor(this.id.WRIST, input.wrist);
+		var wrst = input.wrist;
+		if(wrst < 100){wrst = 100;} else if (wrst > 240){wrst = 240;} //angle limiter
+		this.moveMotor(this.id.WRIST, wrst);
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
 		this.invalid_input = false;
-		var pos = input.elbow;
-		if(pos < 70){pos = 70;} else if (pos > 220){pos = 220;} //angle limiter
-		this.moveMotor(this.id.ELBOW, pos);
+		var elb = input.elbow;
+		if(elb < 70){elb = 70;} else if (elb > 205){elb = 205;} //angle limiter
+		this.moveMotor(this.id.ELBOW, elb);
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		this.invalid_input = false;
+		var bs = input.base;
+		if(bs < 240){bs = 240;} else if (bs > 340){bs = 340;} //angle limiter
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
-		this.moveMotorMX(this.id.BASE, input.base);
+		this.moveMotorMX(this.id.BASE, bs);
 	}
 	if(this.invalid_input) {
 		this.busy = false;
