@@ -19,9 +19,10 @@ console.log("Starting Rover Oculus");
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
 GLOBAL.glob = require('glob');
+GLOBAL.os = require('os');
 // Local Includes
 var Socket = require('socket.io-client');
-var exec = require('child_process').exec,
+var exec = require('child_process').exec;
 
 // Initializing Variables
 GLOBAL.ADDRESS = process.argv[2];
@@ -152,7 +153,7 @@ socket.on('connect', function () {
 	socket.emit('REGISTER', { entity: 'oculus'+STREAM, password: 'destroymit' });
 	if(os.hostname() == 'raspberrypi' || STREAM == '1') {
 		setNTSC();
-		sensor_loop = setTimeout(function() {
+		sensor_loop = setInterval(function() {
 			exec('vcgencmd measure_temp', function (error, stdout, stderr) {
 				if (error !== null) {
 				  feedback("OCULARSIG", {
@@ -161,11 +162,10 @@ socket.on('connect', function () {
 				  });
 				  clearInterval(sensor_loop);
 				} else {
-					var cpu = stdout.replace("temp=", "");
-					cpu = cpu.replace("'C=", "");
+					var cpu = stdout.replace("temp=", "").replace("'C\n", "");
 					feedback("SENSORS", {
 						device: 'oculus'+STREAM,
-						cputemp: cpu
+						cputemp: parseFloat(cpu)
 					});
 				}
 			});
