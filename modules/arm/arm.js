@@ -142,13 +142,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.ON); //other pump on last
 				/*Since continuous deflation poses no risk of destrution to balloon/arm, no timeout is
 				needed.*/
-				console.log("grippin'");
+				if(this.debug){
+					console.log("Pump: grippin'");
+				}
 			}
 			if(input.pump == "stop"){ //0 = stop all in case of emergency
 				this.spine.digitalWrite(this.pressurizer.pin, this.turn.OFF); //pump off first
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //other pump offpin
-			
-				console.log("stoppin'");
+				if(this.debug){
+					console.log("Pump: stoppin'");
+				}
 			}
 			if(input.pump == "drop"){ //1 = pump air into balloon
 				this.spine.digitalWrite(this.depressurizer.pin, this.turn.OFF); //pump off first
@@ -156,13 +159,76 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				setTimeout(function(){ //w/o parent, "this" would refer to the most immediate function/class, aka setTimeout, which has now property 'pump'
 					parent.spine.digitalWrite(parent.pressurizer.pin, parent.turn.OFF); //pump off first
 				}, 4000); //In case of connection loss, balloon inflation will cease after x seconds
-			
-				console.log("drop it!");
+				if(this.debug){
+					console.log("Pump: drop it!");
+				}
 			}
 		}
 		else{
 			if(this.debug){
-				console.log("Invalid pump control value!");
+				console.log("Pump: Invalid Value");
+			}
+		}
+	}
+	/*Speed Control Block*/
+	if(!_.isUndefined(input["speed"])){
+		if(input.speed == "slow"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x33,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Slow");
+			}
+		}
+		else if(input.speed == "normal"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x48,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Normal");
+			}			
+		}
+		else{
+			if(this.debug){
+				console.log("Speed: Invalid Value");
+			}
+		}
+	}
+	/*Torque Control Block*/
+	if(!_.isUndefined(input["torque"])){
+		if(input.torque == "off"){ //interface is telling you to turn off torque
+			this.writePacket({ //Enable Torque
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL, 
+				register:this.edit.TORQUE, 
+				lowbyte:this.turn.OFF
+			});
+			if(this.debug){
+				console.log("Torque: Deactivating");
+			}
+		}
+		else if(input.torque == "on"){ //interface is telling you to turn on torque
+			this.writePacket({ //Enable Torque
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL, 
+				register:this.edit.TORQUE, 
+				lowbyte:this.turn.ON
+			});
+			if(this.debug){
+				console.log("Torque: Activating");
+			}
+		}
+		else{
+			if(this.debug){
+				console.log("Torque: Invalid Value");
 			}
 		}
 	}
@@ -178,7 +244,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			register:this.edit.TORQUE, 
 			lowbyte:this.turn.ON
 		});
-		this.writePacket({ //Set movement speed to 15 rpm
+		this.writePacket({
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL,
 			register:this.edit.SPEED, 
