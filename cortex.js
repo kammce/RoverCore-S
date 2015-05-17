@@ -48,9 +48,9 @@ var feedback = function(directive, rsignal) {
 	}
 }
 
-var mcu = new MindController(feedback, simulate, DEBUG);
-
+var mcu;
 socket.on('connect', function () { 
+	mcu = new MindController(feedback, simulate, DEBUG);
 	console.log("RoverCore is connected to server!");
 	if(mcu.is_halted) { mcu.resume(); }
 	if(!mcu.is_initialized) { mcu.initialize(); }

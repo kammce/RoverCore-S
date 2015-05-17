@@ -21,6 +21,12 @@ function Sensor(model_ref, feedback, debug) {
     global.XAXIS = 0;
     global.YAXIS = 1;
     global.ZAXIS = 2;
+
+     var SerialPort = SERIALPORT.SerialPort; // make a local instant
+    this.PowerPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
+      baudRate: 9600,
+      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
+  });
     
     this.fs = require('fs')
     this.buffer = new Buffer(100);
@@ -408,20 +414,15 @@ Sensor.prototype.GPS = function() {
 };
 Sensor.prototype.Serialdata = function() {
   var parent = this;
- 
-  var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var PowerPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
-      baudRate: 9600,
-      parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
-  });
 
-  PowerPort.open(function(error) {
+
+  this.PowerPort.open(function(error) {
     if (error) {
       console.log('failed to open: ' + error);
     } else {
         console.log('open');
         
-            PowerPort.on('data', function(data) {
+            parent.PowerPort.on('data', function(data) {
                 var voltage_string = [""];      //initiate a string
                 var current_string = [""];
                 var potentiometer_string = [""];                  
@@ -451,39 +452,27 @@ Sensor.prototype.Serialdata = function() {
                           }
                         }
                     }
-                    if (parent.debug == 'true') { 
+                   
                         console.log("voltage: " + parent.model.power.voltage);
                         console.log("current: " + parent.model.power.current);
                         console.log("potentiometer: " + parent.model.acuator.potentiometer);
-                    } 
+                     
             });
+
+
         
       }
    });                       
 };
 
 Sensor.prototype.acuator = function() {
-
-  var parent = this;
-  var SerialPort = SERIALPORT.SerialPort; // make a local instant
-  var AcuatorPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
-      baudRate: 9600,
-      parser: SERIALPORT.parsers.readline("\r\n") // look for return and new ln
-  });
-
-  AcuatorPort.open(function(error) {
-    if (error) {
-      console.log('failed to open: ' + error);
-        } 
-    else {
-    console.log('open');
-
-    //write command to arduino 
-    AcuatorPort.write(parent.model.acuator.sent_position, function() {
+    var parent = this;
+    //write command to arduino
+    console.log("acuator = "+this.model.acuator.sent_position); 
+    this.PowerPort.write(this.model.acuator.sent_position, function() {
         console.log("command sended");   
-        });
-      }
-   });
+    });
+    
 };
 
 Sensor.prototype.temp = function() {    
@@ -510,5 +499,6 @@ Sensor.prototype.halt = function() {};
 
 
 module.exports = exports = Sensor;
+
 
 
