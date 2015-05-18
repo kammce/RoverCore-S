@@ -8,7 +8,7 @@ Sensor.prototype.constructor = Sensor;
 function Sensor(model_ref, feedback, debug) {
     this.model = model_ref;
     this.feedback = feedback;
-    this.debug = debug;
+    this.debug = false;
 
     //interval
     this.interval_compass = 1000;
@@ -372,12 +372,7 @@ Sensor.prototype.GPS = function() {
 
     
       myPort.on('data', function(data) {
-        console.log(' '); //adds line to separate
-        console.log(data); // full unparsed data
         var piece = data.split(",", 7);
-        console.log(piece[0], piece[2]); //$GPRMC, A/V
-        console.log(piece[3], piece[4]); // LAT, dir
-        console.log(piece[5], piece[6]); // LONG, dir
         //making variables
         var lat = piece[3];
         var lat_dir = piece[4];
@@ -453,9 +448,9 @@ Sensor.prototype.Serialdata = function() {
                         }
                     }
                    
-                        console.log("voltage: " + parent.model.power.voltage);
-                        console.log("current: " + parent.model.power.current);
-                        console.log("potentiometer: " + parent.model.acuator.potentiometer);
+                        //console.log("voltage: " + parent.model.power.voltage);
+                        //console.log("current: " + parent.model.power.current);
+                        //console.log("potentiometer: " + parent.model.acuator.potentiometer);
                      
             });
 
