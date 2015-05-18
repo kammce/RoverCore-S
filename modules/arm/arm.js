@@ -177,7 +177,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 				instruction:this.operation.WRITE, 
 				motorID:this.id.ALL,
 				register:this.edit.SPEED, 
-				lowbyte:0x33,
+				lowbyte:0x28,
 				highbyte:0x00
 			});
 			if(this.debug){
@@ -185,6 +185,18 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 		}
 		else if(input.speed == "normal"){
+			this.writePacket({
+				instruction:this.operation.WRITE, 
+				motorID:this.id.ALL,
+				register:this.edit.SPEED, 
+				lowbyte:0x40,
+				highbyte:0x00
+			});
+			if(this.debug){
+				console.log("Speed: Normal");
+			}			
+		}
+		else if(input.speed == "fast"){
 			this.writePacket({
 				instruction:this.operation.WRITE, 
 				motorID:this.id.ALL,
