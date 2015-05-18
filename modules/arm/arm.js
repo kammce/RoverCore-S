@@ -260,7 +260,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			instruction:this.operation.WRITE, 
 			motorID:this.id.ALL,
 			register:this.edit.SPEED, 
-			lowbyte:0x48,
+			lowbyte:0x40,
 			highbyte:0x00
 		});
 		this.defaulted = true;
