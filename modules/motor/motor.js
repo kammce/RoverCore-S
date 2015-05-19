@@ -61,11 +61,14 @@ Motor.prototype.handle = function(data) {
 	console.log(this.module+" Recieved ", data);
 	if(data.signaltype=='man'){
 		this.setIndividualMotors(data.motor);
+		this.feedback=data;
 	}
 	if(data.signaltype=='smart'){
 		this.smartController(data.angle, data.speed);
 		this.setIndividualMotors(data.motor);
 		this.setAllMotors(data.angle, data.speed);
+		this.setIndividualMotors(data.motor);
+		this.feedback=data;
 	}
 	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
@@ -85,12 +88,17 @@ Motor.prototype.halt = function() {
 };
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
+<<<<<<< HEAD
 	var parent = this;
+=======
+	var parent =this;
+>>>>>>> 5f5530edc57b88b6f52d4adb14577d9d32c5bd69
 	this.controlSpeed=speed;
 	this.controlAngle=angle;
 	this.transSpeed=speed;
 	this.transAngle=angle;
 	clearInterval(this.timeout);
+<<<<<<< HEAD
  	var elevationAdjust = function(){
 		var acceleroNew=parent.getaccelero();
 		if(acceleroNew < (-3) && parent.controlSpeed == 0){
@@ -109,6 +117,25 @@ Motor.prototype.smartController= function(angle, speed){
 	this.timeout=setInterval(elevationAdjust, 499);
 };
 //===========================================Elevation Adjust=====================================
+=======
+	var elevationAdjust = function(){
+		var acceleroNew=parent.getaccelero();
+		if(acceleroNew < (-5) && parent.controlSpeed == 0){
+			parent.transAngle=90;
+			parent.transSpeed=acceleroNew*3.5; 
+			parent.setAllMotors(parent.transAngle, parent.transSpeed);
+		}
+		else if(acceleroNew>5 && parent.controlSpeed==0){
+			parent.transAngle=270;
+			parent.transSpeed=acceleroNew*2.8; 
+			parent.setAllMotors(this.transAngle, parent.transSpeed);
+		}
+		console.log("SMART CONTROLLER SD--" + this.transSpeed + " AG--" + this.transAngle);
+	}
+	this.timeout=setInterval(this.elevationAdjust, 100);
+};
+
+>>>>>>> 5f5530edc57b88b6f52d4adb14577d9d32c5bd69
 
 //===========================================Straight Adjust======================================
 /*Motor.prototype.smartControllerAdjust = function(){
@@ -177,37 +204,43 @@ Motor.prototype.getaccelero=function(){
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
 	if(motor.m1.state=="on"){
-		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
+		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);i
+		console.log("Motor 1 :" + motor.m1.state);
 	}
 	else{
 		this.setMotor(1, motor.m1.direction, 0);
 	}
 	if(motor.m2.state=="on"){
 		this.setMotor(2, motor.m2.direction, motor.m2.speed/100);
+		console.log("Motor 2 :" + motor.m2.state);
 	}
 	else{
 		this.setMotor(2, motor.m2.direction, 0);
 	}
 	if(motor.m3.state=="on"){
 		this.setMotor(3, motor.m3.direction, motor.m3.speed/100);
+		console.log("Motor 3 :" + motor.m3.state);
 	}
 	else{
 		this.setMotor(3, motor.m3.direction, 0);
 	}
 	if(motor.m4.state=="on"){
 		this.setMotor(4, motor.m4.direction, motor.m4.speed/100);
+		console.log("Motor 4 :" + motor.m4.state);
 	}
 	else{
 		this.setMotor(4, motor.m4.direction, 0);
 	}
 	if(motor.m5.state=="on"){
 		this.setMotor(5, motor.m5.direction, motor.m5.speed/100);
+		console.log("Motor 5 :" + motor.m5.state);
 	}
 	else{
 		this.setMotor(5, motor.m5.direction, 0);
 	}
 	if(motor.m6.state=="on"){
 		this.setMotor(6, motor.m6.direction, motor.m6.speed/100);
+		console.log("Motor 6 :" + motor.m6.state);
 	}
 	else{
 		this.setMotor(6, motor.m6.direction, 0);

@@ -6,6 +6,7 @@ Sensor.prototype = new Skeleton("SENSOR");
 Sensor.prototype.constructor = Sensor;
 
 function Sensor(model_ref, feedback, debug) {
+<<<<<<< HEAD
     this.model = model_ref;
     this.feedback = feedback;
     this.debug = false;
@@ -38,6 +39,32 @@ function Sensor(model_ref, feedback, debug) {
     this.GPS();
     this.Serialdata();    // [power,voltage,potentiometer]
     this.temp();
+=======
+	this.model = model_ref;
+	this.feedback = feedback;
+	this.debug = debug;
+
+	//interval
+	this.interval_compass = 1000;
+	this.interval_gyro = 1000;
+	this.interval_accelero = 1000;
+
+	this.interval_GPS = 5000;
+	this.interval_Serialdata = 10000;
+
+	this.XAXIS = 0;
+	this.YAXIS = 1;
+	this.ZAXIS = 2;
+		
+	this.buffer = new Buffer(100);
+
+	//initiate 
+	//this.gyro();
+	//this.accelero();
+	//this.compass();
+	//this.GPS();
+	this.Serialdata();    // [power,voltage,potentiometer]
+>>>>>>> 5f5530edc57b88b6f52d4adb14577d9d32c5bd69
 };
 
 Sensor.prototype.handle = function(data) { // take command from user interface
@@ -302,6 +329,7 @@ Sensor.prototype.gyro = function() {
 };
 
 Sensor.prototype.accelero = function() {
+<<<<<<< HEAD
     var ADXL345 = require('./ADXL345.js');
     var parent = this;
 
@@ -356,6 +384,66 @@ Sensor.prototype.accelero = function() {
             });
         }, parent.interval_accelero);
     }
+=======
+	var ADXL345 = require('./ADXL345.js');
+	var parent = this;
+
+	this.XAXIS = 0;
+	this.YAXIS = 1;
+	this.ZAXIS = 2;
+
+	var globalvar = {
+		SAMPLECOUNT: 400,
+		accelScaleFactor: [0.0, 0.0, 0.0],
+		runTimeAccelBias: [0, 0, 0],
+		accelOneG: 0.0,
+		meterPerSecSec: [0.0, 0.0, 0.0],
+		accelSample: [0, 0, 0],
+		accelSampleCount: 0
+	};
+	var accel = new ADXL345(function(err) {
+		accel.accelScaleFactor[parent.XAXIS] = 0.0371299982;
+		accel.accelScaleFactor[parent.YAXIS] = -0.0374319982;
+		accel.accelScaleFactor[parent.ZAXIS] = -0.0385979986;
+		if (!err) {
+			computeAccelBias();
+		} else {
+			console.log(err);
+		}
+	});
+
+	function computeAccelBias() {
+		accel.computeAccelBias(function() {
+			measureAccel();
+		});
+	}
+
+	function measureAccel() {
+		parent.accelero_stop = setInterval(function() {
+			accel.measureAccel(function(err) {
+				if (!err) {
+
+					//parent.model.accelero.x = (accel.meterPerSecSec[parent.XAXIS]) * (-8.85);
+					//parent.model.accelero.y = (accel.meterPerSecSec[parent.YAXIS]) * (8.17);
+
+					var x = (accel.meterPerSecSec[parent.XAXIS]) ;
+					var y = (accel.meterPerSecSec[parent.YAXIS]) ;
+					parent.model.accelero.z = accel.meterPerSecSec[parent.ZAXIS];
+
+					parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
+					parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
+
+					if (parent.debug == 'true'){ 
+					console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
+					}
+
+				} else {
+					console.log(err);
+				}
+			});
+		}, parent.interval_accelero);
+	}
+>>>>>>> 5f5530edc57b88b6f52d4adb14577d9d32c5bd69
 };
 
 Sensor.prototype.GPS = function() {
