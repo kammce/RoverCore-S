@@ -6,7 +6,7 @@ function MindController(feedback, simulation, debug) {
 		arm: 1,
 		sensor: 250,
 		tracker: 1
-	}
+	};
 
 	this.mc_connected = false;
 	this.is_halted = false;
@@ -32,11 +32,11 @@ function MindController(feedback, simulation, debug) {
 		var Arm = require('./arm/arm.js');
 		var Tracker = require('./tracker/tracker.js');
 		var Logger = require('./logger.js');
-		this.sensor = new Sensor(model, feedback, spine, debug);
-		this.motor = new Motor(model, feedback, spine, debug);
-		this.arm = new Arm(model, feedback, spine, debug);
-		this.tracker = new Tracker(model, feedback, spine, debug);
-		this.logger = new Logger(model, feedback, spine, debug);
+		this.sensor = new Sensor(model, feedback, spine, debug/*['sensor']*/);
+		this.motor = new Motor(model, feedback, spine, debug/*['motor']*/);
+		this.arm = new Arm(model, feedback, spine, debug/*['arm']*/);
+		this.tracker = new Tracker(model, feedback, spine, debug/*['tracker']*/);
+		this.logger = new Logger(model, feedback, spine, debug/*['logger']*/);
 	}
 }
 
@@ -68,7 +68,6 @@ MindController.prototype.halt = function(data) {
 			this.motor._halt();
 			this.arm._halt();
 			this.tracker._halt();
-			//this.logger._halt();
 			this.is_halted = true;
 		}
 	} else {

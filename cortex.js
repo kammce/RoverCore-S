@@ -21,12 +21,17 @@ GLOBAL.os = require('os');
 GLOBAL.async = require('async');
 GLOBAL.simulate = false;
 GLOBAL.production = false;
-GLOBAL.DEBUG = false;
+GLOBAL.DEBUG = {
+	sensor: false,
+	motor: false,
+	arm: false,
+	tracker: false,
+	logger: false
+};
 if(process.argv[3] == "--simulate") {
 	simulate = true;
 } else if(process.argv[3] == "--debug") {
 	console.log("debug mode activated!");
-	DEBUG = true;
 }
 
 if(os.hostname() == 'beaglebone') {
