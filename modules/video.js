@@ -20,7 +20,7 @@ function Video(feedback, stream, debug) {
 	// All possible video feeds
 	this.videos = {
 		navi: {
-			dev: "/dev/video-navi",
+			dev: "/dev/video0",
 			//width: "864",
 			//height: "480",
 			width: 640,
@@ -92,14 +92,26 @@ function Video(feedback, stream, debug) {
 Video.prototype.handle = function(data) {
 	var parent = this;
 	console.log("Handlin' dat!");
+	console.log(data);
 	//// Check if data exists
 	if(_.isUndefined(data["view"])) {
 		return "VIEW was not specified, no action will be taken!";
 	}
+	if(data["view"] == "killall") {
+		console.log("KILLING OFF ALL FFmpeg PROCESSES.");
+		parent.process.spawn('killall', [ 'ffmpeg' ]);
+		return "KILLING OFF ALL FFmpeg PROCESSES.";
+	}
+	if(data["view"] == "force-killall") {
+		console.log("FORCE KILLING OFF ALL FFmpeg PROCESSES!!");
+		parent.process.spawn('killall', [ '-9', 'ffmpeg' ]);
+		return "FORCE KILLING OFF ALL FFmpeg PROCESSES!!";
+	}
 	if(data["view"] == "off") {
-		if(_.isNumber(data["stream"]) && 
-			data["stream"] >= 0 && 
-			data["stream"] < this.streams.length) {
+		if(_.isNumber(data["stream"])) {
+			// && 
+			// data["stream"] >= 0 && 
+			// data["stream"] < this.streams.length
 			if(!_.isUndefined(this.streams[data["stream"]].source)) {
 				// Kill camera feed processes
 				try {
@@ -114,10 +126,6 @@ Video.prototype.handle = function(data) {
 			}
 			return "STREAM "+data["stream"]+" IS NOT ON or HAS BEEN TURNED OFF";
 		}
-	}
-	if(data["view"] == "killall") {
-		parent.process.spawn('killall', [ 'ffmpeg' ]);
-		return "KILLING OFF ALL FFmpeg PROCESSES.";
 	}
 	// for (var i = this.streams.length - 1; i >= 0; i--) {
 	// 	if(this.streams[i].cams.indexOf(data["view"]) != -1) {
@@ -199,6 +207,8 @@ Video.prototype.genArg = function(data, port) {
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
+				'-r', '30'
+				'-vf', "drawtext=fontcolor=white: fontsize=16:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=50:y=20:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
 		}
@@ -255,7 +265,8 @@ Video.prototype.resume = function() {
 };
 Video.prototype.halt = function() {
 	//// Do not halt anything
-
+	this.process.spawn('killall', [ 'ffmpeg' ]);
+	this.process.spawn('killall', [ 'ffmpeg' ]);
 	// Kill camera feed processes
 	// if(!_.isUndefined(this.mspawn)) {
 	// 	// Kill camera feed processes
