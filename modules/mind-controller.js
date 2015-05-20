@@ -27,6 +27,14 @@ function MindController(feedback, simulation, debug) {
 		this.logger = new Skeleton("LOGGER");
 	} else {
 		var spine = new SPINE();
+		//Turning on Arduinos
+		spine.expose("P9_23", "OUTPUT");
+		spine.expose("P9_25", "OUTPUT");
+		spine.digitalWrite("P9_23", 0);
+		spine.digitalWrite("P9_25", 0);
+		spine.digitalWrite("P9_23", 1);
+		spine.digitalWrite("P9_25", 1);
+		// Initializing Modules
 		var Sensor = require('./sensor/sensor.js');
 		var Motor = require('./motor/motor.js');
 		var Arm = require('./arm/arm.js');
