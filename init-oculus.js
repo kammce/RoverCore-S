@@ -17,13 +17,13 @@ if(process.argv[3] < 0 || process.argv[3] > 1) {
 var forever = require('forever-monitor');
 
 var child = new (forever.Monitor)('oculus.js', {
-	max: 20,
+	max: 50,
 	silent: false,
 	args: [process.argv[2], process.argv[3]]
 });
 
 child.on('exit', function () {
-	console.log('oculus.js has exited after 3 restarts');
+	console.log('oculus.js has exited after 50 restarts');
 });
 
 child.start();
