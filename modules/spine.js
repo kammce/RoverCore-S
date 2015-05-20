@@ -283,7 +283,6 @@ function Spine(feedback) {
 		for(var i in pinIndex) {
 		    this.pins[pinIndex[i].key] = pinIndex[i];
 		}
-		console.log(this.pins);
 	} else {
 		console.log("Running on none Beagblebone platform.");
 	}

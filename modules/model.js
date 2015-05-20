@@ -1,29 +1,24 @@
 "use strict";
 
 var Model = {
-	
 	tracker: {
 		pitch:0,
 		yaw:0,
 		zoom: 1
 	},
-	
 	gyro : {
 		x:0,					
 		y:0,
 		z:0
 	},
-
 	accelero: { 
 		x:0,			
 		y:0,
 		z:0
 	},
-
 	compass: {
 		heading:0
 	}, 
- 	
  	GPS: {
 		longitude:0,      
 		latitude:0, 
@@ -40,6 +35,10 @@ var Model = {
 	},
 	temperature: { 
 		cpu:0
+	},
+	signal: {
+		strength: -1,
+		bars: 0
 	}
 }
 
