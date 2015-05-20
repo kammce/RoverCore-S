@@ -20,7 +20,7 @@ function Video(feedback, stream, debug) {
 	// All possible video feeds
 	this.videos = {
 		navi: {
-			dev: "/dev/video0",
+			dev: "/dev/video-navi",
 			//width: "864",
 			//height: "480",
 			width: 640,
@@ -64,7 +64,7 @@ function Video(feedback, stream, debug) {
 			source: undefined
 		}
 	];
-	this.debug = true; // process debug information
+	this.debug = false; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
