@@ -17,14 +17,14 @@ function Sensor(model_ref, feedback, debug) {
 			gyro: undefined,
 			accelero: undefined,
 			temp: undefined,
-			signal: undefined,
+			signal: undefined
 		},
 		periods: {
 			compass: 250,
 			gyro: 250,
 			accelero: 250,
 			temp: 1000,
-			signal: 1000,
+			signal: 3000
 		}
 	}
 
@@ -109,6 +109,7 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 			return "MAST GOING DOWN";
 		default:
 			return "INVALID SENSORS COMMAND GIVEN: " + data;
+	}
 };
 
 
@@ -187,7 +188,7 @@ Sensor.prototype.initGYRO = function() {
    clearInterval(this.intervals.queues.gyro);
    try { 
 		var address_gyroscope = 0x68; //address of gyroscope
-		var wire = new I2C(address_compass, {
+		var wire = new I2C(address_gyroscope, {
 			device: '/dev/i2c-2'
 		});
 	} catch(err){
@@ -258,40 +259,31 @@ Sensor.prototype.initACCELEROMETER = function() {
 		accel.accelScaleFactor[YAXIS] = -0.0374319982;
 		accel.accelScaleFactor[ZAXIS] = -0.0385979986;
 		if (!err) {
-			computeAccelBias();
+			parent.intervals.queues.accelerometer = setInterval(function() {
+				accel.measureAccel(function(err) {
+					if (!err) {
+						//parent.model.accelero.x = (accel.meterPerSecSec[parent.XAXIS]) * (-8.85);
+						//parent.model.accelero.y = (accel.meterPerSecSec[parent.YAXIS]) * (8.17);
+
+						var x = (accel.meterPerSecSec[XAXIS]) ;
+						var y = (accel.meterPerSecSec[YAXIS]) ;
+						parent.model.accelero.z = accel.meterPerSecSec[ZAXIS];
+
+						parent.model.accelero.y = -0.0583*y*y*y - 0.0471*y*y - 1.9784*y + 0.2597; 
+						parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205; 
+
+						if (parent.debug){ 
+							console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
+						}
+					} else {
+						console.log(err);
+					}
+				});
+			}, parent.intervals.periods.accelerometer);
 		} else {
 			console.log(err);
 		}
 	});
-
-	// function computeAccelBias() {
-	// 	accel.computeAccelBias(function() {
-	// 		measureAccel();
-	// 	});
-	// }
-	accel.computeAccelBias(function() {
-	 	parent.intervals.queues.accelerometer = setInterval(function() {
-			accel.measureAccel(function(err) {
-				if (!err) {
-					//parent.model.accelero.x = (accel.meterPerSecSec[parent.XAXIS]) * (-8.85);
-					//parent.model.accelero.y = (accel.meterPerSecSec[parent.YAXIS]) * (8.17);
-
-					var x = (accel.meterPerSecSec[XAXIS]) ;
-					var y = (accel.meterPerSecSec[YAXIS]) ;
-					parent.model.accelero.z = accel.meterPerSecSec[ZAXIS];
-
-					parent.model.accelero.y = -0.0583*y*y*y - 0.0471*y*y - 1.9784*y + 0.2597; 
-					parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205; 
-
-					if (parent.debug){ 
-						console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
-					}
-				} else {
-					console.log(err);
-				}
-			});
-		}, parent.intervals.periods.accelerometer);
-	});	
 };
 
 Sensor.prototype.initGPS = function() {
@@ -305,13 +297,13 @@ Sensor.prototype.initGPS = function() {
 		});
 	}
 	this.gpsPort.on('open', function() {
-		console.log('[GPS] Port Open. Data Rate: ' + this.gpsPort.options.baudRate);
+		console.log('[GPS] Port Open. Data Rate: ' + parent.gpsPort.options.baudRate);
 		console.log("[GPS] begin initialization"); //begin initialization
-		this.gpsPort.write("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n");
-		this.gpsPort.write("$PMTK220,200*2C\r\n"); //5hz update
-		this.gpsPort.write("$PMTK300,200,0,0,0,0*2F\r\n"); //    //5hz
+		parent.gpsPort.write("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n");
+		parent.gpsPort.write("$PMTK220,200*2C\r\n"); //5hz update
+		parent.gpsPort.write("$PMTK300,200,0,0,0,0*2F\r\n"); //    //5hz
 		console.log("[GPS] initialization complete!"); //print out to terminal
-		feedback.log("[GPS] initialization complete!"); //print out to terminal
+		parent.feedback(parent.module,"[GPS] initialization complete!"); //print out to terminal
 	});
 	this.gpsPort.on('close', function() {
 		console.log('port closed.');
@@ -353,7 +345,7 @@ Sensor.prototype.initAUXPORT = function() {
 			parent.feedback(this.module, "AUXILLARY ARDUINO PORT FAILED TO OPENED!");
 		} else {
 			console.log("AUXILLARY ARDUINO PORT HAS BEEN OPENED");
-			parent.feedback(this.module, "AUXILLARY ARDUINO PORT HAS BEEN OPENED!");
+			parent.feedback(parent.module, "AUXILLARY ARDUINO PORT HAS BEEN OPENED!");
 			parent.AuxillaryPort.on('data', function(data) {
 				var voltage_string = [""];      //initiate a string
 				var current_string = [""];
@@ -378,17 +370,16 @@ Sensor.prototype.initAUXPORT = function() {
 					}
 					//acuator evaluation 
 					if (parent.buffer[i] == 'P') {
-						  while (parent.buffer[++i] <= end_bit) {
+						while (parent.buffer[++i] <= end_bit) {
 							potentiometer_string += parent.buffer[i];  // populate string
 							parent.model.acuator.potentiometer = parseFloat(potentiometer_string); // change string into float 
-						  }
 						}
 					}
-					if(parent.debug) {
-						console.log("voltage: " + parent.model.power.voltage);
-						console.log("current: " + parent.model.power.current);
-						console.log("potentiometer: " + parent.model.acuator.potentiometer);
-					}
+				}
+				if(parent.debug) {
+					console.log("voltage: " + parent.model.power.voltage);
+					console.log("current: " + parent.model.power.current);
+					console.log("potentiometer: " + parent.model.acuator.potentiometer);
 				}
 			});
 		}
@@ -406,40 +397,40 @@ Sensor.prototype.acuator = function() {
 Sensor.prototype.initTemp = function() {    
   var parent = this;
   this.intervals.queues.temp = setInterval(function(){
-	parent.fs.readFile('/sys/class/hwmon/hwmon0/device/temp1_input', 'utf8', function (err,data) {
+	fs.readFile('/sys/class/hwmon/hwmon0/device/temp1_input', 'utf8', function (err,data) {
 		if (err) { return console.log(err); }
 		parent.model.temperature.cpu = data/1000;
 		if(parent.debug) {
 			console.log("temperature: " + parent.model.temperature.cpu  );	
 		}
 	});
-   },this.intervals.periods.temp);
+   }, this.intervals.periods.temp);
 };
 
 Sensor.prototype.initSignalTracker = function() {
 	var parent = this;
 	clearInterval(this.intervals.queues.signal);
-
+	console.log("INIT SIGNAL TRACKER!!");
 	this.intervals.queues.signal = setInterval(function() {
 		http.get("http://verizonbrv/srv/status?_="+Math.random(), function(res) {
+			//console.log("RES status = "+res.statusCode);
 			res.on("data", function(chunk) {
 				try {
-					status = JSON.parse(chunk);
-					//console.log(status);
-					console.log("RSSI = "+status["statusData"]["statusBarRSSI"]+"dBm");
-					console.log("BARS = "+status["statusData"]["statusBarSignalBars"]);
+					var status = JSON.parse(chunk);
+					parent.model.signal.strength = parseInt(status["statusData"]["statusBarRSSI"]);
+					parent.model.signal.bars = parseInt(status["statusData"]["statusBarSignalBars"]);
+					// console.log("RSSI = "+status["statusData"]["statusBarRSSI"]+"dBm");
+					// console.log("BARS = "+status["statusData"]["statusBarSignalBars"]);
 				} catch(e) {
-					RSRP = -1
-					RSRQ = -1
-					RSSI = -1
+					console.log("chunk error: ",e);
+					parent.model.signal.strength = -1;
+					parent.model.signal.bars = -1;
 				}
 				//console.log("BODY: " + chunk);
 			});
-		}).on('error', function(e) {});
+		});
 	}, this.intervals.periods.signal);
 };
-
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
-
 module.exports = exports = Sensor;

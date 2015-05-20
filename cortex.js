@@ -16,18 +16,13 @@ console.log("Starting Rover Cortex");
 // GLOBAL Includes
 GLOBAL._ = require("underscore");
 GLOBAL.fs = require("fs");
+GLOBAL.http = require("http");
 GLOBAL.glob = require('glob');
 GLOBAL.os = require('os');
 GLOBAL.async = require('async');
 GLOBAL.simulate = false;
 GLOBAL.production = false;
-GLOBAL.DEBUG = {
-	sensor: false,
-	motor: false,
-	arm: false,
-	tracker: false,
-	logger: false
-};
+GLOBAL.DEBUG = false;
 if(process.argv[3] == "--simulate") {
 	simulate = true;
 } else if(process.argv[3] == "--debug") {
@@ -134,3 +129,4 @@ socket.on('connect', function () {
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'cortex', password: 'destroymit' });
 });
+
