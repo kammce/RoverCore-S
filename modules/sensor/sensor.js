@@ -114,8 +114,8 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 
 
 Sensor.prototype.initCOMPASS = function() { // degrees refer to North
-   clearInterval(this.intervals.queues.compass);
-   try { 
+	clearInterval(this.intervals.queues.compass);
+	try { 
 		var address_compass = 0x1e; //address of compass
 		var wire = new I2C(address_compass, {
 			device: '/dev/i2c-2'
@@ -143,7 +143,9 @@ Sensor.prototype.initCOMPASS = function() { // degrees refer to North
 				z = new Int16Array([res[2] << 8 | res[3]])[0];
 				y = new Int16Array([res[4] << 8 | res[5]])[0];
 			} else {
-				console.log("Erro" + JSON.stringify(err));
+				console.log("Compass Error ::: " + JSON.stringify(err));
+				parent.feedback(parent.module, "COMPASS ERROR, STOPPING COMPASS!");
+				clearInterval(parent.intervals.queues.compass);
 			}
 			var declinationAngle = 0.226; //use in compass functions, value needed checking with sensor
 			var pi = 3.14;
@@ -210,7 +212,9 @@ Sensor.prototype.initGYRO = function() {
 				z = new Int16Array([res[2] << 8 | res[3]])[0];
 				y = new Int16Array([res[4] << 8 | res[5]])[0];
 			} else {
-				console.log("Error" + JSON.stringify(err));
+				parent.feedback(parent.module, "GYRO ERROR, STOPPING GYRO!");
+				clearInterval(parent.intervals.queues.gyro);
+				console.log("Gyro Error ::: " + JSON.stringify(err));
 			}
 			parent.model.gyro.x = parent.model.gyro.x + ((x) / 14.375) * .1; //to get degrees 
 			parent.model.gyro.y = parent.model.gyro.y + ((y) / 14.375) * .1; //
@@ -281,7 +285,9 @@ Sensor.prototype.initACCELEROMETER = function() {
 				});
 			}, parent.intervals.periods.accelerometer);
 		} else {
-			console.log(err);
+			clearInterval(parent.intervals.queues.accelero);
+                        parent.feedback(parent.module , "ACCELEROMETER ERROR, STOPPING ACCELEROMETER!");
+                        console.log("ACCELEROMETER ERROR, STOPPING ACCELEROMETER!");
 		}
 	});
 };
@@ -428,6 +434,10 @@ Sensor.prototype.initSignalTracker = function() {
 				}
 				//console.log("BODY: " + chunk);
 			});
+		}).on('error', function (err) {
+			clearInterval(parent.intervals.queues.signal);
+			parent.feedback(this.module, "COULD NOT FIND VERIZON ROUTER, STOPPING SIGNAL STRENGTH MONITOR!");
+			console.log("COULD NOT FIND VERIZON ROUTER, STOPPING SIGNAL STRENGTH MONITOR!");
 		});
 	}, this.intervals.periods.signal);
 };
