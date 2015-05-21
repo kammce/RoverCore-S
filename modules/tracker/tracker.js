@@ -6,7 +6,7 @@ Tracker.prototype.constructor = Tracker;
 
 function Tracker(model_ref, feedback, debug) {
 
-	this.debug = debug;
+	this.debug = true;
 	this.model = model_ref;
 	this.feedback = feedback;
 	this.zoom = 1;
@@ -30,15 +30,17 @@ function Tracker(model_ref, feedback, debug) {
 		parse : serialport.parsers.readline("\r\n")
 	});
 	this.serialport.on("open", function(error) {
-		if(error) {
+		if(error) { 
 			console.log(err);
-		} else {console.log("TRACKER: Ready for serial communication")};
+			parent.feedback(parent.module, "COULD NOT OPEN SERIAL PORT TTYO4!");
+			return;
+		}
 		parent.serialport.write("p\r\n");
-		
 	});
 	
 	var tempVal = "";
 	this.serialport.on("data", function(data) {
+		console.log("tracker serialport data = ",data);
 		if(this.serOpen) {
 			if(this.debug) {
 				console.log("Length of data: " + data.toString().length);
@@ -52,22 +54,30 @@ function Tracker(model_ref, feedback, debug) {
 			} else {
 				tempVal += str.substring(0, str.indexOf("Q"));
 				var range = parseFloat(tempVal);
-				if(range < 0) {
+				if(range > 0) {
+					if(parent.debug) { console.log("LIDAR RANGE AQUIRED "+range); } 
 					parent.model.tracker.range = parseFloat(tempVal);
+				} else {
+					if(parent.debug) { console.log("LIDAR READING FAILED! "+range); }
+					parent.feedback(parent.module, "LIDAR READING FAILED... MAY NOT BE CONNECTED!");
 				}
 				tempVal = "";
 				parent.serialport.flush();
 			}
-		} 
-		else {
+		} else {
 			if(this.debug) {
-				console.log("Received data: " data.toString()+"\n");
+				console.log("Received data: ",data);
 			}
-			if(data.toString() == "p") {
+			if(data.toString() == "p\r\n") {
+				console.log("TRACKER: Ready for serial communication")
 				this.serOpen = true;
+				parent.serialport.flush();
 			}
 		}
 	});
+	setTimeout(function() {
+		parent.serialport.write("p\r\n");
+	}, 5000);
 }
 
 Tracker.prototype.handle = function(data) {
