@@ -20,10 +20,10 @@ function Sensor(model_ref, feedback, debug) {
 			signal: undefined
 		},
 		periods: {
-			compass: 250,
-			gyro: 250,
-			accelero: 250,
-			temp: 1000,
+			compass: 500,
+			gyro: 500,
+			accelero: 500,
+			temp: 2000,
 			signal: 3000
 		}
 	}
@@ -33,13 +33,13 @@ function Sensor(model_ref, feedback, debug) {
 	global.ZAXIS = 2;
 
 	var SerialPort = SERIALPORT.SerialPort; // make a local instant
-	this.AuxillaryPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
-		baudRate: 9600,
-		parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
-	});
 	this.gpsPort = new SerialPort("/dev/ttyO1", { // <--Then you open the port using new() like so
 			baudRate: 9600,
 			parser: SERIALPORT.parsers.readline("\r\n") // look for return and newline at the end of each data packet
+	});
+	this.AuxillaryPort = new SerialPort("/dev/ttyO2", { // <--Then you open the port us$
+		baudRate: 9600,
+		parser: SERIALPORT.parsers.readline("\r\n") // look for return and newl$
 	});
 	this.buffer = new Buffer(100);
 	//initiate
@@ -49,8 +49,8 @@ function Sensor(model_ref, feedback, debug) {
 	this.initGPS();
 	// [power,voltage,potentiometer]
 	this.initAUXPORT();    
-	this.initSignalTracker();
 	this.initTemp();
+	this.initSignalTracker();
 };
 
 Sensor.prototype.handle = function(data) { // take command from user interface

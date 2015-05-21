@@ -19,6 +19,11 @@ function MindController(feedback, simulation, debug) {
 	
 	this.model = model;
 
+	this.RST = {
+		TRACKER: "P9_23",
+		AUX: "P9_25"
+	};
+
 	if(simulation == true) {
 		this.sensor = new Skeleton("SENSOR");
 		this.motor = new Skeleton("MOTOR");
@@ -28,12 +33,16 @@ function MindController(feedback, simulation, debug) {
 	} else {
 		var spine = new SPINE();
 		//Turning on Arduinos
-		spine.expose("P9_23", "OUTPUT");
-		spine.expose("P9_25", "OUTPUT");
-		spine.digitalWrite("P9_23", 0);
-		spine.digitalWrite("P9_25", 0);
-		spine.digitalWrite("P9_23", 1);
-		spine.digitalWrite("P9_25", 1);
+		// P9_23 = RST ttyO4 = Tracker
+		// P9_25 = RST ttyO2 = AUX
+		spine.expose(this.RST.Tracker, "OUTPUT");
+		spine.expose(this.RST.AUX, "OUTPUT");
+		spine.digitalWrite(this.RST.Tracker, 0);
+		spine.digitalWrite(this.RST.AUX, 0);
+		setTimeout(function()) {
+			spine.digitalWrite(this.RST.Tracker, 1);
+			spine.digitalWrite(this.RST.AUX, 1);
+		}, 500);
 		// Initializing Modules
 		var Sensor = require('./sensor/sensor.js');
 		var Motor = require('./motor/motor.js');
@@ -62,6 +71,18 @@ MindController.prototype.handle = function(data) {
 			this.halt();
 			this.feedback("CORTEX", "Shutting down CORTEX (should be revived by forever-monitor)");
 			process.exit();
+		case "RESTART-AUX":
+			spine.digitalWrite(this.RST.AUX, 0);
+			setTimeout(function()) {
+				spine.digitalWrite(this.RST.AUX, 1);
+			}, 500);
+			this.feedback("CORTEX", "RESTARTING AUX");
+		case "RESTART-TRACKER":
+			spine.digitalWrite(this.RST.Tracker, 0);
+			setTimeout(function()) {
+				spine.digitalWrite(this.RST.Tracker, 1);
+			}, 500);
+			this.feedback("CORTEX", "RESTARTING TRACKER");
 		default:
 			console.log("MindController does not have a handler for", data);
 			break;
