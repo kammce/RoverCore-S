@@ -64,7 +64,7 @@ function Video(feedback, stream, debug) {
 			source: undefined
 		}
 	];
-	this.debug = false; // process debug information
+	this.debug = true; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -208,7 +208,7 @@ Video.prototype.genArg = function(data, port) {
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
 				'-r', '30',
-				'-vf', "drawtext=fontcolor=white: fontsize=16:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=50:y=20:timecode='00\\:01\\:00\\;02':rate=30000/1001",
+				'-vf', "drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=50:y=20:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
 		}

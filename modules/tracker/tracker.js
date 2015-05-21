@@ -18,6 +18,7 @@ function Tracker(model_ref, feedback, debug) {
 	this.deltaDegrees = [this.ranges[0]/254, this.ranges[1]/254, this.ranges[2]/254];
 	this.PWMs = [254,127,127];
 	this.curDegrees = [0,0,0];
+	this.serOpen = false;
 
 	var parent = this;
 	var serialport = require("serialport")
@@ -32,12 +33,13 @@ function Tracker(model_ref, feedback, debug) {
 		if(error) {
 			console.log(err);
 		} else {console.log("TRACKER: Ready for serial communication")};
-
+		parent.serialport.write("p\r\n");
 		
 	});
 	
 	var tempVal = "";
 	this.serialport.on("data", function(data) {
+		if(this.serOpen) {
 			if(this.debug) {
 				console.log("Length of data: " + data.toString().length);
 				console.log("Received data: " + data.toString() +"\n");
@@ -49,10 +51,22 @@ function Tracker(model_ref, feedback, debug) {
 				tempVal += str;
 			} else {
 				tempVal += str.substring(0, str.indexOf("Q"));
-				parent.model.tracker.range = parseFloat(tempVal);
+				var range = parseFloat(tempVal);
+				if(range < 0) {
+					parent.model.tracker.range = parseFloat(tempVal);
+				}
 				tempVal = "";
 				parent.serialport.flush();
 			}
+		} 
+		else {
+			if(this.debug) {
+				console.log("Received data: " data.toString()+"\n");
+			}
+			if(data.toString() == "p") {
+				this.serOpen = true;
+			}
+		}
 	});
 }
 
