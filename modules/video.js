@@ -207,7 +207,7 @@ Video.prototype.genArg = function(data, port) {
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
-				'-r', '30'
+				'-r', '30',
 				'-vf', "drawtext=fontcolor=white: fontsize=16:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=50:y=20:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
