@@ -283,6 +283,7 @@ function Spine(feedback) {
 		for(var i in pinIndex) {
 		    this.pins[pinIndex[i].key] = pinIndex[i];
 		}
+		console.log(this.pins);
 	} else {
 		console.log("Running on none Beagblebone platform.");
 	}
@@ -344,7 +345,8 @@ Spine.prototype.digitalRead = function(_pin) {
 }; 
 Spine.prototype.expose = function(_pin, direction) {
 	if(typeof this.pins[_pin] == "undefined") {
-		console.log("Invalid pin");
+		console.log("Invalid pin "+_pin);
+		console.log(this.pins[_pin]);
 		return false;
 	}
 
@@ -370,4 +372,5 @@ Spine.prototype.expose = function(_pin, direction) {
 }; 
 
 module.exports = exports = Spine;
+
 

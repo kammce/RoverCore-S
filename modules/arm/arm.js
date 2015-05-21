@@ -246,13 +246,13 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	}
 	/*Torque Reset Block*/
 	if(!_.isUndefined(input["reset"])){ //should changed max torque back to max when arm overtorques
-		this.writePacket(
+		this.writePacket({
 			instruction: this.operation.WRITE,
 			motorID: this.id.ALL,
 			register: this.edit.MAXTORQUE,
 			lowbyte: 0xFF,
 			highbyte: 0x03
-		);
+		});
 	}
 	/*Arm Control Block*/
 	if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
