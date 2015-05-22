@@ -113,13 +113,15 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 			console.log("Getting called into action!!");
 		}
 		this.serial.write(this.actionBuffer, function() {
-			parent.serial.write(parent.actionBuffer, function() {
-				parent.ready = [false,false,false,false,false];
-				parent.busy = false;
-				if(parent.debug){
-					console.log("No longer busy");
-				}
-			});
+			setTimeout(function() {
+				parent.serial.write(parent.actionBuffer, function() {
+					parent.ready = [false,false,false,false,false];
+					parent.busy = false;
+					if(parent.debug){
+						console.log("No longer busy");
+					}
+				});
+			}, 5);
 		});
 	}	
 	// for (var i = 0; i < this.ready.length; i++) {
@@ -352,11 +354,15 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 	std[8] = (~sum) & 0xFF;
 //	console.log(std);
 	this.serial.write(std, function() {
-		parent.ready[ID] = true;
-		parent.checkAllMotors();
-		if(parent.debug){
-			console.log("Motor ID = "+ID+" has finished sending!");
-		}
+		setTimeout(function() {
+			parent.serial.write(std, function() {
+				parent.ready[ID] = true;
+				parent.checkAllMotors();
+				if(parent.debug){
+					console.log("Motor ID = "+ID+" has finished sending!");
+				}
+			});
+		}, 2);
 	});
 };
 
@@ -404,7 +410,18 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-
+	this.serial.write(std, function() {
+		setTimeout(function() {
+			parent.serial.write(std, function() {
+				parent.ready[ID] = true;
+				parent.checkAllMotors();
+				if(parent.debug){
+					console.log("Motor ID = "+ID+" has finished sending!");
+				}
+			});
+		}, 2);
+	});
+	/*
 	this.serial.write(std, function() {
 		parent.ready[ID] = true;
 		parent.checkAllMotors();
@@ -412,7 +429,7 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 			console.log("Motor ID = "+ID+" has finished sending!");
 		}
 	});
-
+	*/
 };
 
 Arm.prototype.setSpeed = function(ID, number) { //Info is an object, with members outlined when sending control signals via arm interface html
