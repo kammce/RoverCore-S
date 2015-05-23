@@ -9,7 +9,7 @@ Arm.prototype = new Skeleton("Arm");
 Arm.prototype.constructor = Arm;
 
 function Arm (model_ref, feedback, spine, debug) { //model_ref, a feedback variable that allows arm to return stuff to the interfaces globally, and a global spint var that allows global access to the spine (bbb pinouts)
-	this.armParent = this;
+	var parent = this;
 	this.debug = debug; //boolean value to toggle console log traffic.
 	this.busy = false;//Handles signal traffic jams
 	this.ready = [false,false,false,false,false]; //readiness flags (when all true, send Action cmd)
@@ -106,25 +106,28 @@ Therefore, use 'this.defaulted'
 		shoulderL: 150,
 		shoulderR: 150,
 		elbow: 150,
-		wrist: 150;
+		wrist: 150,
 		base: 285
 	}
-	this.setposition = setInterval(function(){
+	this.setposition = function(){
+		console.log("setting position");
 		//copy posBuffer positions into separate vars to prevent changes to positions while calculations are being done (this will mess up motors)
-		var sdL = armParent.posBuffer.shoulderL;
-		var sdR = armParent.posBuffer.shoulderR;
-		var wMtr = armParent.posBuffer.wrist;
-		var eMtr = armParent.posBuffer.elbow;
-		var bMtr = armParent.posBuffer.base;
+		var sdL = parent.posBuffer.shoulderL;
+		var sdR = parent.posBuffer.shoulderR;
+		var wMtr = parent.posBuffer.wrist;
+		var eMtr = parent.posBuffer.elbow;
+		var bMtr = parent.posBuffer.base;
 		if(sdL != (sdR - 300) * (-1)){ //check if left servo is synced with the right servo
 			sdL = (sdR - 300) * (-1);
 		}
-		armParent.moveMotor(armParent.id.LEFTSHOULDER, sdL);
-		armParent.moveMotor(armParent.id.RIGHTSHOULDER, sdR);
-		armParent.moveMotor(armParent.id.WRIST, wMtr);
-		armParent.moveMotor(armParent.id.ELBOW, eMtr);
-		armParent.moveMotorMX(armParent.id.BASE, bMtr);
-	}, 100);
+		parent.moveMotor(parent.id.LEFTSHOULDER, sdL);
+		parent.moveMotor(parent.id.RIGHTSHOULDER, sdR);
+		parent.moveMotor(parent.id.WRIST, wMtr);
+		parent.moveMotor(parent.id.ELBOW, eMtr);
+		parent.moveMotorMX(parent.id.BASE, bMtr);
+	}
+	//this.respondTimer = setInterval(this.setposition, 100);
+	this.respondTimer;
 }
 
 Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends action when all true
@@ -140,7 +143,7 @@ Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends
 			setTimeout(function() {
 				parent.serial.write(parent.actionBuffer, function() {
 					parent.ready = [false,false,false,false,false];
-					parent.busy = false;
+					//parent.busy = false;
 					if(parent.debug){
 						console.log("No longer busy");
 					}
@@ -240,20 +243,34 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}
 		}
 	}
+	/* Block*/
+	if(!_.isUndefined(input["line"])){
+		if(input["line"] == "online") {
+			clearInterval(this.respondTimer);
+			this.respondTimer = setInterval(this.setposition, 100);
+		}
+		if(input["line"] == "offline") {
+			clearInterval(this.respondTimer);
+		}
+	}
 	/*Torque Control Block*/
 	if(!_.isUndefined(input["torque"])){
 		if(input.torque == "off"){ //interface is telling you to turn off torque
-			this.writePacket({ //Enable Torque
-				instruction:this.operation.WRITE, 
-				motorID:this.id.ALL, 
-				register:this.edit.TORQUE, 
-				lowbyte:this.turn.OFF
-			});
-			if(this.debug){
-				console.log("Torque: Deactivating");
-			}
+			clearInterval(this.respondTimer);
+			setTimeout(function() {
+				parent.writePacket({ //Enable Torque
+					instruction:parent.operation.WRITE, 
+					motorID:parent.id.ALL, 
+					register:parent.edit.TORQUE, 
+					lowbyte:parent.turn.OFF
+				});
+				if(parent.debug){
+					console.log("Torque: Deactivating");
+				}
+			}, 50);
 		}
 		else if(input.torque == "on"){ //interface is telling you to turn on torque
+			clearInterval(this.respondTimer);
 			this.writePacket({ //Enable Torque
 				instruction:this.operation.WRITE, 
 				motorID:this.id.ALL, 
@@ -288,7 +305,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}), 500);
 	}
 	/*Arm Control Block*/
-	if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
+	//if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
 	if(this.defaulted == false) { //If defaults not yet set
 		if(this.debug){
 			console.log("Enabling Torque");
@@ -308,10 +325,10 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		});
 		this.defaulted = true;
 	}
-	this.busy = true;
-	this.invalid_input = true;
+	//this.busy = true;
+	//this.invalid_input = true;
 	if(!_.isUndefined(input["shoulder"])) { //If shoulder element exists
-		this.invalid_input = false;
+		//this.invalid_input = false;
 		var pos = input.shoulder;
 		if(pos < 45) {pos = 45;} else if (pos > 180){ pos = 180;} //angle limiter
 		var newval = (pos - 300) * (-1);
@@ -325,21 +342,21 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		// this.callAction(this.actionBuffer);
 	}
 	if(!_.isUndefined(input["wrist"])) { //If wrist element exists
-		this.invalid_input = false;
+		//this.invalid_input = false;
 		var wrst = input.wrist;
 		if(wrst < 100){wrst = 100;} else if (wrst > 240){wrst = 240;} //angle limiter
 		// this.moveMotor(this.id.WRIST, wrst);
 		this.posBuffer.wrist = wrst;
 	}
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
-		this.invalid_input = false;
+		//this.invalid_input = false;
 		var elb = input.elbow;
 		if(elb < 70){elb = 70;} else if (elb > 205){elb = 205;} //angle limiter
 		// this.moveMotor(this.id.ELBOW, elb);
 		this.posBuffer.elbow = elb;
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
-		this.invalid_input = false;
+		//this.invalid_input = false;
 		var bs = input.base;
 		if(bs < 240){bs = 240;} else if (bs > 340){bs = 340;} //angle limiter
 		if(this.debug){
@@ -348,12 +365,14 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 		// this.moveMotorMX(this.id.BASE, bs);
 		this.posBuffer.base = bs;
 	}
+	/*
 	if(this.invalid_input) {
 		this.busy = false;
 		if(this.debug){
 			console.log("invalid input to arm handler!");
 		}
 	}
+	*/
 	// if(this.ready.shoulderL && this.ready.shoulderR){
 	// 	this.callAction(this.actionBuffer);
 	// }
