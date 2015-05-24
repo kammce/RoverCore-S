@@ -42,7 +42,7 @@ function Audio(feedback) {
 			source: undefined
 		}
 	];
-	this.debug = true; // process debug information
+	this.debug = false; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
