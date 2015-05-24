@@ -1,6 +1,6 @@
 "use strict";
 //make feedback optional
-
+//
 
 
 var Skeleton = require("../skeleton.js");
@@ -23,30 +23,33 @@ function Motor(model_ref, feedback, spine, debug) {
 	this.compOld;
 	this.acceleroOld;
 	//For pin sets
+	
+	
+
 	this.motors={
 		m1: { //Left Side
-			pwmPin:'P8_36', // doesnt work
-			dirPin:'P8_39',
-		},
-		m2: { //Left Side
-			pwmPin:'P9_28',
-			dirPin:'P8_40',
-		},
-		m3: { //Left Side
-			pwmPin:'P9_29',
+			pwmPin:'P8_34',
 			dirPin:'P8_41',
 		},
-		m4: { //Right Side
+		m2: { //Left Side
 			pwmPin:'P8_13',
+			dirPin:'P8_39',
+		},
+		m3: { //Left Side
+			pwmPin:'P8_19',
+			dirPin:'P8_40',
+		},
+		m4: { //Right Side
+			pwmPin:'P8_36', 
 			dirPin:'P8_42',
 		},
 		m5: { //Right Side
-			pwmPin:'P8_19',// doesnt work
-			dirPin:'P8_43',
+			pwmPin:'P9_29',
+			dirPin:'P8_44',
 		},
 		m6: { // Right Side
-			pwmPin:'P8_34',// doesnt work
-			dirPin:'P8_44',
+			pwmPin:'P9_28',
+			dirPin:'P8_43',
 		}
 	}
 	this.spine.expose(this.motors.m1.dirPin, "OUTPUT");
@@ -61,15 +64,19 @@ Motor.prototype.handle = function(data) {
 	console.log(this.module+" Recieved ", data);
 	if(data.signaltype=='man'){
 		this.setIndividualMotors(data.motor);
+		this.feedback=data;
 	}
 	if(data.signaltype=='smart'){
 		this.smartController(data.angle, data.speed);
-		this.setIndividualMotors(data.motor);
 		this.setAllMotors(data.angle, data.speed);
+		this.setIndividualMotors(data.motor);
+		this.setAllMotorsDirectionOnly(data.angle);
+		this.feedback=data;
 	}
 	if(data.signaltype=='auto'){
 		this.setAllMotors(data.angle, data.speed);
 		this.setIndividualMotors(data.motor);
+		this.setAllMotorsDirectionOnly(data.angle);
 		this.feedback=data;
 	}
 	if(data.signaltype=='temp'){
@@ -85,33 +92,32 @@ Motor.prototype.halt = function() {
 };
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(angle, speed){
-	var parent = this;
+	var parent =this;
 	this.controlSpeed=speed;
 	this.controlAngle=angle;
-	this.transSpeed=speed;
+    this.transSpeed=speed;
 	this.transAngle=angle;
 	clearInterval(this.timeout);
- 	var elevationAdjust = function(){
+	var elevationAdjust = function(){
 		var acceleroNew=parent.getaccelero();
-		if(acceleroNew < (-3) && parent.controlSpeed == 0){
+		if(acceleroNew < (-5) && parent.controlSpeed == 0){
 			parent.transAngle=90;
-			parent.transSpeed=acceleroNew*0.8351*(-1); 
+			parent.transSpeed=acceleroNew*3.5; 
 			parent.setAllMotors(parent.transAngle, parent.transSpeed);
-			console.log("SMART CONTROLLER SD (" + parent.transSpeed + ") AG (" + parent.transAngle + ") ACCELEROMETER--" + acceleroNew);
 		}
-		else if(acceleroNew>3 && parent.controlSpeed==0){
+		else if(acceleroNew>5 && parent.controlSpeed==0){
 			parent.transAngle=270;
-			parent.transSpeed=acceleroNew*0.8351;
-			parent.setAllMotors(parent.transAngle, parent.transSpeed);
-			console.log("SMART CONTROLLER SD (" + parent.transSpeed + ") AG (" + parent.transAngle + ") ACCELEROMETER--" + acceleroNew);
+			parent.transSpeed=acceleroNew*2.8; 
+			parent.setAllMotors(this.transAngle, parent.transSpeed);
 		}
+		console.log("SMART CONTROLLER SD--" + this.transSpeed + " AG--" + this.transAngle);
 	}
-	this.timeout=setInterval(elevationAdjust, 499);
+	this.timeout=setInterval(this.elevationAdjust, 100);
 };
-//===========================================Elevation Adjust=====================================
+
 
 //===========================================Straight Adjust======================================
-/*Motor.prototype.smartControllerAdjust = function(){
+Motor.prototype.smartControllerAdjust = function(){
 	var compNew=this.getComp();
 	var compRate=compNew-this.compOld;
         if(limitCount<this.limit && limitCount>(-1*this.limit)){  //checks if incrementation is below limit
@@ -164,7 +170,6 @@ Motor.prototype.createRate=function(controlAngle, controlSpeed, interval){
 	}
 	return (output*(controlSpeed/100)*(interval/100000));
 };
-*/
 Motor.prototype.calibrate=function(){
         
 }
@@ -172,45 +177,33 @@ Motor.prototype.getComp=function(){
 
 };
 Motor.prototype.getaccelero=function(){
-	return this.model.accelero.y;
+	return this.model.accelero.x;
 };
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
-	if(motor.m1.state=="on"){
+	if(motor.m1.state=="ON"){
 		this.setMotor(1, motor.m1.direction, motor.m1.speed/100);
+		console.log("Motor 1 :" + motor.m1.state);
 	}
-	else{
-		this.setMotor(1, motor.m1.direction, 0);
-	}
-	if(motor.m2.state=="on"){
+	if(motor.m2.state=="ON"){
 		this.setMotor(2, motor.m2.direction, motor.m2.speed/100);
+		console.log("Motor 2 :" + motor.m2.state);
 	}
-	else{
-		this.setMotor(2, motor.m2.direction, 0);
-	}
-	if(motor.m3.state=="on"){
+	if(motor.m3.state=="ON"){
 		this.setMotor(3, motor.m3.direction, motor.m3.speed/100);
+		console.log("Motor 3 :" + motor.m3.state);
 	}
-	else{
-		this.setMotor(3, motor.m3.direction, 0);
-	}
-	if(motor.m4.state=="on"){
+	if(motor.m4.state=="ON"){
 		this.setMotor(4, motor.m4.direction, motor.m4.speed/100);
+		console.log("Motor 4 :" + motor.m4.state);
 	}
-	else{
-		this.setMotor(4, motor.m4.direction, 0);
-	}
-	if(motor.m5.state=="on"){
+	if(motor.m5.state=="ON"){
 		this.setMotor(5, motor.m5.direction, motor.m5.speed/100);
+		console.log("Motor 5 :" + motor.m5.state);
 	}
-	else{
-		this.setMotor(5, motor.m5.direction, 0);
-	}
-	if(motor.m6.state=="on"){
+	if(motor.m6.state=="ON"){
 		this.setMotor(6, motor.m6.direction, motor.m6.speed/100);
-	}
-	else{
-		this.setMotor(6, motor.m6.direction, 0);
+		console.log("Motor 6 :" + motor.m6.state);
 	}
 	this.feedback=motor;
 }
@@ -312,6 +305,35 @@ Motor.prototype.setAllMotors=function(angle, speed){
 		this.feedback = "Could Not Interpret Command, Rover was STOPPED";
 	}
 }
+Motor.prototype.setAllMotorsDirectionOnly=function(angle){
+	if(angle==0 || angle==360){ // checks for angle 0
+		this.setAllDirection(1,1);
+	}
+	else if(angle<=90 && angle>0){ // checks for angles 1-90
+		this.setAllDirection( 1, 1);
+	}
+	else if(angle>90 && angle<180){ // checks for angles 91-179
+		this.setAllDirection( 1, 1);
+	}
+	else if(angle==180){ // checks for angle 180
+		this.setAllDirection(1, 1);
+	}
+	else if (angle>180 && angle <=270){
+		this.setAllDirection( -1, -1);
+	}
+	else if (angle>270 && angle <360){
+		this.setAllDirection( -1, -1);
+	}
+	else if (angle==361){
+		this.setAllDirection( 1,-1);
+	}
+	else if (angle==362){
+		this.setAllDirection( -1,1);
+	}
+	else{
+		this.feedback = "Could Not Interpret Command, Rover was STOPPED";
+	}
+}
 Motor.prototype.setAllMotorsTemp=function(angle, speed){
 	if(angle==0 || angle==360){ // checks for angle 0
 		this.setAllSpeed(speed,0);
@@ -362,24 +384,24 @@ Motor.prototype.setAllSpeed=function(Left, Right){
 }
 Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or Directon 
 	if(left==(1)) {
-		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
-		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
-	}
-	else if(left==(-1)){
 		this.spine.digitalWrite(this.motors.m1.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m2.dirPin, 1);
 		this.spine.digitalWrite(this.motors.m3.dirPin, 1);
 	}
+	else if(left==(-1)){
+		this.spine.digitalWrite(this.motors.m1.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m2.dirPin, 0);
+		this.spine.digitalWrite(this.motors.m3.dirPin, 0);
+	}
 	if(Right==(1)){
-		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
-		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
-		}
-	else if(Right==(-1)){
 		this.spine.digitalWrite(this.motors.m4.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m5.dirPin, 0);
 		this.spine.digitalWrite(this.motors.m6.dirPin, 0);
+		}
+	else if(Right==(-1)){
+		this.spine.digitalWrite(this.motors.m4.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m5.dirPin, 1);
+		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
 	}
 }
 //========================direction control for aruinos=====================================

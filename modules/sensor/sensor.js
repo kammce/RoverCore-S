@@ -27,6 +27,11 @@ function Sensor(model_ref, feedback, debug) {
 			signal: 3000
 		}
 	}
+	this.I2C = {
+		compass: undefined,
+		gryo: undefined,
+		accelerometer: undefined
+	};
 
 	global.XAXIS = 0;
 	global.YAXIS = 1;
@@ -114,26 +119,28 @@ Sensor.prototype.handle = function(data) { // take command from user interface
 
 
 Sensor.prototype.initCOMPASS = function() { // degrees refer to North
-	clearInterval(this.intervals.queues.compass);
-	try { 
-		var address_compass = 0x1e; //address of compass
-		var wire = new I2C(address_compass, {
-			device: '/dev/i2c-2'
-		});
-	} catch(err){
-		console.log("error", err);
-		this.feedback(this.module, "COMPASS FAILED TO INITIALIZE!");
-		return;
-	}
 	var parent = this;
-
-	wire.writeBytes(0x00, [0x70], function(err) {});
-	wire.writeBytes(0x01, [0xA0], function(err) {});
+	clearInterval(this.intervals.queues.compass);
+	
+	if(_.isUndefined(this.I2C.compass)) {
+		try { 
+			var address_compass = 0x1e; //address of compass
+			this.I2C.compass = new I2C(address_compass, {
+				device: '/dev/i2c-2'
+			});
+		} catch(err){
+			console.log("error", err);
+			this.feedback(this.module, "COMPASS FAILED TO INITIALIZE!");
+			return;
+		}	
+	}
+	this.I2C.compass.writeBytes(0x00, [0x70], function(err) {});
+	this.I2C.compass.writeBytes(0x01, [0xA0], function(err) {});
 	//countinuous read mode
-	wire.writeBytes(0x02, [0x00], function(err) {}); 
+	this.I2C.compass.writeBytes(0x02, [0x00], function(err) {}); 
 
 	this.intervals.queues.compass = setInterval(function() {
-		wire.readBytes(0x03, 6, function(err, res) {
+		parent.I2C.compass.readBytes(0x03, 6, function(err, res) {
 			var x = 0;
 			var y = 0;
 			var z = 0;
@@ -187,25 +194,27 @@ Sensor.prototype.initCOMPASS = function() { // degrees refer to North
 };
 
 Sensor.prototype.initGYRO = function() {
-   clearInterval(this.intervals.queues.gyro);
-   try { 
-		var address_gyroscope = 0x68; //address of gyroscope
-		var wire = new I2C(address_gyroscope, {
-			device: '/dev/i2c-2'
-		});
-	} catch(err){
-		console.log("error", err);
-		this.feedback(this.module, "GYRO FAILED TO INITIALIZE!");
-		return;
+	clearInterval(this.intervals.queues.gyro);
+	if(_.isUndefined(this.I2C.gyro)) {
+		try { 
+			var address_gyroscope = 0x68; //address of gyroscope
+			this.I2C.gryo = new I2C(address_gyroscope, {
+				device: '/dev/i2c-2'
+			});
+		} catch(err){
+			console.log("error", err);
+			this.feedback(this.module, "GYRO FAILED TO INITIALIZE!");
+			return;
+		}
 	}
 	var x, y, z;
 	var parent = this;
 
-	wire.writeBytes(0x16, [1 << 3 | 1 << 4 | 1 << 0], function(err) {}); // set rate 2000
-	wire.writeBytes(0x15, [0x09], function(err) {}); // set sample rate to 100hz
+	this.I2C.gryo.writeBytes(0x16, [1 << 3 | 1 << 4 | 1 << 0], function(err) {}); // set rate 2000
+	this.I2C.gryo.writeBytes(0x15, [0x09], function(err) {}); // set sample rate to 100hz
 
 	this.intervals.queues.gyro = setInterval(function() {
-		wire.readBytes(0x1D, 6, function(err, res) {
+		parent.I2C.gryo.readBytes(0x1D, 6, function(err, res) {
 			if (!err) {
 				// convert binary to signed decimal 
 				x = new Int16Array([res[0] << 8 | res[1]])[0]; //put binary into an array and called back the first number
@@ -245,51 +254,62 @@ Sensor.prototype.initGYRO = function() {
 };
 
 Sensor.prototype.initACCELEROMETER = function() {
-	clearInterval(this.intervals.queues.accelerometer);
-	var ADXL345 = require('./ADXL345.js');
-	var parent = this;
-		
-	var globalvar = {
-		SAMPLECOUNT: 400,
-		accelScaleFactor: [0.0, 0.0, 0.0],
-		runTimeAccelBias: [0, 0, 0],
-		accelOneG: 0.0,
-		meterPerSecSec: [0.0, 0.0, 0.0],
-		accelSample: [0, 0, 0],
-		accelSampleCount: 0
-	};
-	var accel = new ADXL345(function(err) {
-		accel.accelScaleFactor[XAXIS] = 0.0371299982;
-		accel.accelScaleFactor[YAXIS] = -0.0374319982;
-		accel.accelScaleFactor[ZAXIS] = -0.0385979986;
-		if (!err) {
-			parent.intervals.queues.accelerometer = setInterval(function() {
-				accel.measureAccel(function(err) {
-					if (!err) {
-						//parent.model.accelero.x = (accel.meterPerSecSec[parent.XAXIS]) * (-8.85);
-						//parent.model.accelero.y = (accel.meterPerSecSec[parent.YAXIS]) * (8.17);
+    var ADXL345 = require('./ADXL345.js');
+    var parent = this;
 
-						var x = (accel.meterPerSecSec[XAXIS]) ;
-						var y = (accel.meterPerSecSec[YAXIS]) ;
-						parent.model.accelero.z = accel.meterPerSecSec[ZAXIS];
+    global.XAXIS = 0;
+    global.YAXIS = 1;
+    global.ZAXIS = 2;
 
-						parent.model.accelero.y = -0.0583*y*y*y - 0.0471*y*y - 1.9784*y + 0.2597; 
-						parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205; 
+    var globalvar = {
+        SAMPLECOUNT: 400,
+        accelScaleFactor: [0.0, 0.0, 0.0],
+        runTimeAccelBias: [0, 0, 0],
+        accelOneG: 0.0,
+        meterPerSecSec: [0.0, 0.0, 0.0],
+        accelSample: [0, 0, 0],
+        accelSampleCount: 0
+    };
+    var accel = new ADXL345(function(err) {
+        accel.accelScaleFactor[XAXIS] = 0.0371299982;
+        accel.accelScaleFactor[YAXIS] = -0.0374319982;
+        accel.accelScaleFactor[ZAXIS] = -0.0385979986;
+        if (!err) {
+            computeAccelBias();
+        } else {
+            console.log(err);
+        }
+    });
 
-						if (parent.debug){ 
-							console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
-						}
-					} else {
-						console.log(err);
-					}
-				});
-			}, parent.intervals.periods.accelerometer);
-		} else {
-			clearInterval(parent.intervals.queues.accelero);
-                        parent.feedback(parent.module , "ACCELEROMETER ERROR, STOPPING ACCELEROMETER!");
-                        console.log("ACCELEROMETER ERROR, STOPPING ACCELEROMETER!");
-		}
-	});
+    function computeAccelBias() {
+        accel.computeAccelBias(function() {
+            measureAccel();
+        });
+    }
+
+    function measureAccel() {
+        parent.intervals.queues.accelero = setInterval(function() {
+            accel.measureAccel(function(err) {
+                if (!err) {
+
+                    //parent.model.accelero.x = (accel.meterPerSecSec[global.XAXIS]) * (-8.85);
+                    //parent.model.accelero.y = (accel.meterPerSecSec[global.YAXIS]) * (8.17);
+
+                    var x = (accel.meterPerSecSec[global.XAXIS]) ;
+                    var y = (accel.meterPerSecSec[global.YAXIS]) ;
+                    parent.model.accelero.z = accel.meterPerSecSec[global.ZAXIS];
+
+                    parent.model.accelero.y = -0.0583*x*x*x - 0.0471*x*x - 1.9784*x + 0.2597 
+                    parent.model.accelero.x =  0.0475*x*x*x + 0.1038*x*x + 3.4858*x + 0.1205 
+
+
+                    console.log("Roll: " + parent.model.accelero.x + " Pitch : " + parent.model.accelero.y + " Yaw : " + parent.model.accelero.z);
+                } else {
+                    console.log(err);
+                }
+            });
+        }, parent.intervals.periods.accelero);
+    }
 };
 
 Sensor.prototype.initGPS = function() {
@@ -319,7 +339,7 @@ Sensor.prototype.initGPS = function() {
 	});
 	this.gpsPort.on('data', function(data) {
 		var piece = data.split(",", 7);
-		//making variables
+		
 		var lat = piece[3];
 		var lat_dir = piece[4];
 		var lng = piece[5];
@@ -329,7 +349,8 @@ Sensor.prototype.initGPS = function() {
 		parent.model.GPS.latitude = lat;
 		parent.model.GPS.longitude_dir = lng_dir;
 		parent.model.GPS.latitude_dir = lat_dir;
-		if (parent.debug){ 
+		
+		if(parent.debug) {
 			console.log("lat: " + parent.model.GPS.latitude + " long: " + parent.model.GPS.longitude);
 		}
 	});
@@ -348,7 +369,7 @@ Sensor.prototype.initAUXPORT = function() {
 	this.AuxillaryPort.open(function(error) {
 		if (error) {
 			console.log("AUXILLARY ARDUINO PORT FAILED TO OPENED!");
-			parent.feedback(this.module, "AUXILLARY ARDUINO PORT FAILED TO OPENED!");
+			parent.feedback(parent.module, "AUXILLARY ARDUINO PORT FAILED TO OPENED!");
 		} else {
 			console.log("AUXILLARY ARDUINO PORT HAS BEEN OPENED");
 			parent.feedback(parent.module, "AUXILLARY ARDUINO PORT HAS BEEN OPENED!");
@@ -396,7 +417,7 @@ Sensor.prototype.acuator = function() {
 	var parent = this;
 	//write command to arduino
 	this.AuxillaryPort.write(this.model.acuator.sent_position, function() {
-		parent.feedback(this.module, "ACUATOR HAS BEEN SENT COMMAND"+this.model.acuator.sent_position);
+		parent.feedback(parent.module, "ACUATOR HAS BEEN SENT COMMAND"+parent.model.acuator.sent_position);
 	});
 };
 
@@ -436,7 +457,7 @@ Sensor.prototype.initSignalTracker = function() {
 			});
 		}).on('error', function (err) {
 			clearInterval(parent.intervals.queues.signal);
-			parent.feedback(this.module, "COULD NOT FIND VERIZON ROUTER, STOPPING SIGNAL STRENGTH MONITOR!");
+			parent.feedback(parent.module, "COULD NOT FIND VERIZON ROUTER, STOPPING SIGNAL STRENGTH MONITOR!");
 			console.log("COULD NOT FIND VERIZON ROUTER, STOPPING SIGNAL STRENGTH MONITOR!");
 		});
 	}, this.intervals.periods.signal);
@@ -444,3 +465,4 @@ Sensor.prototype.initSignalTracker = function() {
 Sensor.prototype.resume = function() {};
 Sensor.prototype.halt = function() {};
 module.exports = exports = Sensor;
+
