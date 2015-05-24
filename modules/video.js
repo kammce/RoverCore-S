@@ -64,7 +64,7 @@ function Video(feedback, stream, debug) {
 			source: undefined
 		}
 	];
-	this.debug = true; // process debug information
+	this.debug = false; // process debug information
 	this.schema = {
 		"type" : "object",
 		"properties" : {
@@ -178,7 +178,7 @@ Video.prototype.handle = function(data) {
 };
 Video.prototype.genArg = function(data, port) {
 	if(_.isObject(data)) {
-		var view	= data["view"];
+		var view = data["view"];
 		if(view == "tracker") {
 			var dev		= this.videos[view]['dev'];
 			var res 	= (_.isNumber(data['res'])) ? data['res'] : this.videos[view]['res'];
@@ -186,13 +186,15 @@ Video.prototype.genArg = function(data, port) {
 			return [
 				'-rtbufsize', '1000000k',
 				'-threads', '2',
-				'-s', '480x320',
+				//'-s', '480x320',
+				'-s', '300x240',
 				'-f', 'video4linux2',
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
-				'-vf', 'eq=gamma=0.75',
-				'http://'+ADDRESS+':'+port+'/destroymit/480/320'
+				'-vf', "eq=gamma=0.75,yadif=2,drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
+				//'http://'+ADDRESS+':'+port+'/destroymit/480/320'
+				'http://'+ADDRESS+':'+port+'/destroymit/300/240'
 			];
 		} else {
 			var dev		= this.videos[view]['dev'];
@@ -208,7 +210,7 @@ Video.prototype.genArg = function(data, port) {
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
 				'-r', '30',
-				'-vf', "drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=50:y=20:timecode='00\\:01\\:00\\;02':rate=30000/1001",
+				'-vf', "drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
 		}
