@@ -120,41 +120,60 @@ Therefore, use 'this.defaulted'
 		if(sdL != (sdR - 300) * (-1)){ //check if left servo is synced with the right servo
 			sdL = (sdR - 300) * (-1);
 		}
-		parent.moveMotor(parent.id.LEFTSHOULDER, sdL);
-		parent.moveMotor(parent.id.RIGHTSHOULDER, sdR);
-		parent.moveMotor(parent.id.WRIST, wMtr);
-		parent.moveMotor(parent.id.ELBOW, eMtr);
-		parent.moveMotorMX(parent.id.BASE, bMtr);
-	}
+
+		setTimeout(function() {
+			parent.moveMotor(parent.id.LEFTSHOULDER, sdL);
+			setTimeout(function() {
+				parent.moveMotor(parent.id.RIGHTSHOULDER, sdR);
+				setTimeout(function() {
+					parent.moveMotor(parent.id.WRIST, wMtr);
+					setTimeout(function() {
+						parent.moveMotor(parent.id.ELBOW, eMtr);
+						setTimeout(function() {
+							parent.moveMotorMX(parent.id.BASE, bMtr);
+							setTimeout(function() {
+								parent.checkAllMotors();
+							},5);
+						},5);
+					},5);
+				},5);
+			},5);
+		},5);
+	};
 	//this.respondTimer = setInterval(this.setposition, 200);
 	this.respondTimer;
 }
 
-Arm.prototype.checkAllMotors = function(first_argument) { //checks flags & sends action when all true
+Arm.prototype.checkAllMotors = function() { //checks flags & sends action when all true
 	var parent = this; //points to function Arm (the Arm class)
+	//if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
 	if(this.debug){
-		console.log(this.ready);
+		console.log("Getting called into action!!");
 	}
-	if(this.ready[0] && this.ready[1] && this.ready[2] && this.ready[3] && this.ready[4]) {
-		if(this.debug){
-			console.log("Getting called into action!!");
-		}
-		this.serial.write(this.actionBuffer, function() {
-			setTimeout(function() {
-				parent.serial.write(parent.actionBuffer, function() {
-					parent.ready = [false,false,false,false,false];
-					//parent.busy = false;
-					if(parent.debug){
-						console.log("No longer busy");
-					}
-				});
-			}, 20);
-		});
-	}	
+	this.serial.write(this.actionBuffer, function() {
+		setTimeout(function() {
+			parent.serial.write(parent.actionBuffer, function() {
+				//parent.ready = [false,false,false,false,false];
+				//parent.busy = false;
+				if(parent.debug){
+					console.log("2X Action commands sent");
+				}
+			});
+		}, 10);
+	});
+	//}	
 	// for (var i = 0; i < this.ready.length; i++) {
 	// 	if(!this.ready[i]) { return; }
 	// };
 	// this.callAction(this.actionBuffer);
+};
+
+Arm.prototype.online = function() { //checks flags & sends action when all true
+	clearInterval(this.respondTimer);
+	this.respondTimer = setInterval(this.setposition, 70);	
+};
+Arm.prototype.offline = function() { //checks flags & sends action when all true
+	clearInterval(this.respondTimer);
 };
 
 Arm.prototype.handle = function(input){ //Input is an object, with members outlined when sending control signals via mission-control-test.html
@@ -246,17 +265,17 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	/* Block*/
 	if(!_.isUndefined(input["line"])){
 		if(input["line"] == "online") {
-			clearInterval(this.respondTimer);
-			this.respondTimer = setInterval(this.setposition, 100);
+			this.online();
 		}
 		if(input["line"] == "offline") {
-			clearInterval(this.respondTimer);
+			this.offline();
 		}
 	}
 	/*Torque Control Block*/
 	if(!_.isUndefined(input["torque"])){
+		this.offline();
 		if(input.torque == "off"){ //interface is telling you to turn off torque
-			clearInterval(this.respondTimer);
+			this.offline();
 			setTimeout(function() {
 				parent.writePacket({ //Enable Torque
 					instruction:parent.operation.WRITE, 
@@ -270,7 +289,6 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			}, 50);
 		}
 		else if(input.torque == "on"){ //interface is telling you to turn on torque
-			clearInterval(this.respondTimer);
 			this.writePacket({ //Enable Torque
 				instruction:this.operation.WRITE, 
 				motorID:this.id.ALL, 
@@ -280,7 +298,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			if(this.debug){
 				console.log("Torque: Activating");
 			}
-		}
+		} 
 		else{
 			if(this.debug){
 				console.log("Torque: Invalid Value");
@@ -296,16 +314,16 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 			lowbyte: 0xFF,
 			highbyte: 0x03
 		});
+		/*
 		setTimeout(function() {
-			/*
 			this.writePacket({
 				instruction: this.operation.WRITE,
 				motorID: this.id.ALL,
 				register: this.edit.ALARMSHUTDOWN,
 				lowbyte: 0x24
 			})
-			*/
 		}, 500);
+		*/
 	}
 	/*Arm Control Block*/
 	//if(this.busy) { return "ARM IS BUSY!"; } //If busy, return msg to interface, do nothing, else:
@@ -403,17 +421,13 @@ Arm.prototype.moveMotor = function(ID, number) { //Info is an object, with membe
 		sum += std[i];
 	};
 	std[8] = (~sum) & 0xFF;
-//	console.log(std);
+	//	console.log(std);
 	this.serial.write(std, function() {
-		setTimeout(function() {
-			parent.serial.write(std, function() {
-				parent.ready[ID] = true;
-				parent.checkAllMotors();
-				if(parent.debug){
-					console.log("Motor ID = "+ID+" has finished sending!");
-				}
-			});
-		}, 20);
+		//parent.ready[ID] = true;
+		//parent.checkAllMotors();
+		if(parent.debug){
+			console.log("Motor ID = "+ID+" has finished sending!");
+		}
 	});
 };
 
@@ -462,15 +476,11 @@ Arm.prototype.moveMotorMX = function(ID, number) { //Info is an object, with mem
 	};
 	std[8] = (~sum) & 0xFF;
 	this.serial.write(std, function() {
-		setTimeout(function() {
-			parent.serial.write(std, function() {
-				parent.ready[ID] = true;
-				parent.checkAllMotors();
-				if(parent.debug){
-					console.log("Motor ID = "+ID+" has finished sending!");
-				}
-			});
-		}, 20);
+		//parent.ready[ID] = true;
+		//parent.checkAllMotors();
+		if(parent.debug){
+			console.log("Motor ID = "+ID+" has finished sending!");
+		}
 	});
 	/*
 	this.serial.write(std, function() {
