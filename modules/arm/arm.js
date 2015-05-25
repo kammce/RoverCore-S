@@ -378,7 +378,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		//this.invalid_input = false;
 		var bs = input.base;
-		if(bs < 130){bs = 130;} else if (bs > 230){bs = 230;} //angle limiter
+		if(bs < 100){bs = 100;} else if (bs > 200){bs = 200;} //angle limiter
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
