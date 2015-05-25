@@ -51,13 +51,13 @@ var self_directive = 'OCULUS'+(STREAM+1);
 var setNTSC = function (error, stdout, stderr) {
 	if (error !== null) {
 	  feedback("OCULARSIG", {
-			status: 'warning',
-			info: 'Stream is oculus1: but count not find /dev/video-tracker, or counld not be set to NTSC.'
+		status: 'warning',
+		info: 'Stream is oculus1: but count not find /dev/video-tracker, or counld not be set to NTSC.'
 	  });
 	} else {
-		feedback("OCULARSIG", {
-			status: 'info',
-			info: '/dev/video-tracker set to NTSC :: '+stdout,
+	feedback("OCULARSIG", {
+		status: 'info',
+		info: '/dev/video-tracker set to NTSC :: '+stdout,
 	  });
 	}
 };
@@ -153,8 +153,11 @@ socket.on('connect', function () {
 	});
 	// =========== SEND INITIAL REGISTRATION INFORMATION =========== //
 	socket.emit('REGISTER', { entity: 'oculus'+STREAM, password: 'destroymit' });
-	if(os.hostname() == 'raspberrypi' || STREAM == '1') {
-		setNTSC();
+
+	console.log("host = "+os.hostname()+" STREAM = "+STREAM);
+
+	if(os.hostname() == 'raspberrypi' && STREAM == 1) {
+		exec('v4l2-ctl -d /dev/video-tracker -s ntsc', setNTSC);
 		sensor_loop = setInterval(function() {
 			exec('vcgencmd measure_temp', function (error, stdout, stderr) {
 				if (error !== null) {

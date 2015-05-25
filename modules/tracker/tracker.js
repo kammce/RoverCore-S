@@ -40,7 +40,7 @@ function Tracker(model_ref, feedback, debug) {
 	
 	var tempVal = "";
 	this.serialport.on("data", function(data) {
-		console.log("tracker serialport data = ",data);
+		console.log("tracker serialport data = ",data, data.toString());
 		if(this.serOpen) {
 			if(this.debug) {
 				console.log("Length of data: " + data.toString().length);
@@ -81,7 +81,7 @@ function Tracker(model_ref, feedback, debug) {
 }
 
 Tracker.prototype.handle = function(data) {
-	console.log(this.module+" Recieved ", data);
+	//console.log(this.module+" Recieved ", data);
 	if(data["req"] == "Set Rotations") {
 		this.setRotations(data);
 	} else if (data["req"] == "Set Zoom") {
@@ -89,6 +89,8 @@ Tracker.prototype.handle = function(data) {
 	} else if(data["req"] == "Get Range") {
 		this.getRange();
 	} else if(data["req"] == "Reset") {
+		this.PWMs = [254, 127, 127];
+		this.curDegrees = [0, 0, 0];
 		this.serialport.write("r\r\n");
 	}
 };
