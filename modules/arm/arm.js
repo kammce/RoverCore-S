@@ -127,9 +127,9 @@ Therefore, use 'this.defaulted'
 				setTimeout(function() {
 					parent.moveMotor(parent.id.WRIST, wMtr);
 					setTimeout(function() {
-						parent.moveMotor(parent.id.ELBOW, eMtr);
+						parent.moveMotorMX(parent.id.ELBOW, eMtr);
 						setTimeout(function() {
-							parent.moveMotorMX(parent.id.BASE, bMtr);
+							parent.moveMotor(parent.id.BASE, bMtr);
 							setTimeout(function() {
 								parent.checkAllMotors();
 							},5);
