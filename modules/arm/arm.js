@@ -104,9 +104,9 @@ Therefore, use 'this.defaulted'
 	this.posBuffer = {
 		shoulderL: 150,
 		shoulderR: 150,
-		elbow: 150,
+		elbow: 180, //MX
 		wrist: 150,
-		base: 285
+		base: 150 //RX
 	}
 	this.setposition = function(){
 		// console.log("setting position");
@@ -371,14 +371,14 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(!_.isUndefined(input["elbow"])) { //If elbow element exists
 		//this.invalid_input = false;
 		var elb = input.elbow;
-		if(elb < 70){elb = 70;} else if (elb > 205){elb = 205;} //angle limiter
+		if(elb < 100){elb = 100;} else if (elb > 235){elb = 235;} //angle limiter
 		// this.moveMotor(this.id.ELBOW, elb);
 		this.posBuffer.elbow = elb;
 	}
 	if(!_.isUndefined(input["base"])) { //If base element exists
 		//this.invalid_input = false;
 		var bs = input.base;
-		if(bs < 240){bs = 240;} else if (bs > 340){bs = 340;} //angle limiter
+		if(bs < 130){bs = 130;} else if (bs > 230){bs = 230;} //angle limiter
 		if(this.debug){
 			console.log("base if statement has been called");
 		}
