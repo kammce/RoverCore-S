@@ -104,11 +104,7 @@ Motor.prototype.handle = function(data) {
 		this.motors.allMotors.controlSpeed=data.speed;
 		this.motors.allMotors.controlAngle=data.angle;
 	}
-<<<<<<< HEAD
 	if(signaltype=="man" || signaltype=="smart"){
-=======
-	if(signaltype=="man"){
->>>>>>> 91a43807ed45692a4445cca7ab3229b07f9e0d27
 	this.motors.m1.state= data.motor.m1.state;
 	this.motors.m2.state= data.motor.m2.state;
 	this.motors.m3.state= data.motor.m3.state;
@@ -410,8 +406,4 @@ Motor.prototype.setAllDirection=function(left, Right){ //Sets Motors Forward or 
 		this.spine.digitalWrite(this.motors.m6.dirPin, 1);
 	}
 };
-<<<<<<< HEAD
 module.exports = exports = Motor;
-=======
-module.exports = exports = Motor;
->>>>>>> 91a43807ed45692a4445cca7ab3229b07f9e0d27
