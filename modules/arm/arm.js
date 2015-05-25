@@ -364,7 +364,7 @@ Arm.prototype.handle = function(input){ //Input is an object, with members outli
 	if(!_.isUndefined(input["wrist"])) { //If wrist element exists
 		//this.invalid_input = false;
 		var wrst = input.wrist;
-		if(wrst < 100){wrst = 100;} else if (wrst > 240){wrst = 240;} //angle limiter
+		if(wrst < 100){wrst = 100;} else if (wrst > 225){wrst = 225;} //angle limiter
 		// this.moveMotor(this.id.WRIST, wrst);
 		this.posBuffer.wrist = wrst;
 	}
