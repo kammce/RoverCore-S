@@ -104,7 +104,7 @@ Motor.prototype.handle = function(data) {
 		this.motors.allMotors.controlSpeed=data.speed;
 		this.motors.allMotors.controlAngle=data.angle;
 	}
-	if(signaltype=="man"){
+	if(signaltype=="man" || signaltype=="smart"){
 	this.motors.m1.state= data.motor.m1.state;
 	this.motors.m2.state= data.motor.m2.state;
 	this.motors.m3.state= data.motor.m3.state;
