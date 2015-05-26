@@ -17,6 +17,7 @@ function Motor(model_ref, feedback, spine, debug) {
 	this.motors={
 		control: {
 			signaltype: 'auto',
+			smartControl: 'ON',
 			motorDebug: 'OFF',
 		},
 		allMotors: {
@@ -79,13 +80,10 @@ function Motor(model_ref, feedback, spine, debug) {
 		var signaltype = parent.motors.control.signaltype;
 		if(signaltype=='auto'){
 			parent.setAllMotors();
+			parent.smartController();
 		}
 		else if(signaltype=='man'){
-			parent.setAllMotors();
-			parent.setIndividualMotors();
-		}
-		else if(signaltype=='smart'){
-			parent.setAllMotors();
+			this.motors.allMotors.controlSpeed=0;
 			parent.setIndividualMotors();
 			parent.smartController();
 		}
@@ -99,12 +97,13 @@ function Motor(model_ref, feedback, spine, debug) {
 Motor.prototype.handle = function(data) {
 	this.motors.control.signaltype=data.signaltype;
 	this.motors.control.motorDebug=data.motorDebug;
+	this.motors.control.smartController = data.smartController;
 	var signaltype =this.motors.control.signaltype;
-	if(signaltype=="auto" || signaltype=="smart"){
+	if(signaltype=="auto"){
 		this.motors.allMotors.controlSpeed=data.speed;
 		this.motors.allMotors.controlAngle=data.angle;
 	}
-	if(signaltype=="man" || signaltype=="smart"){
+	if(signaltype=="man"){
 	this.motors.m1.state= data.motor.m1.state;
 	this.motors.m2.state= data.motor.m2.state;
 	this.motors.m3.state= data.motor.m3.state;
@@ -131,7 +130,8 @@ Motor.prototype.handle = function(data) {
 	}
 	else return 0;
 };
-
+  
+  
 Motor.prototype.resume = function() {
 	this.setAllMotors(90, 0);
 	var parent = this;
@@ -139,12 +139,10 @@ Motor.prototype.resume = function() {
 		var signaltype = parent.motors.control.signaltype;
 		if(signaltype=='auto'){
 			parent.setAllMotors();
+			parent.smartController();
 		}
 		else if(signaltype=='man'){
 			parent.setIndividualMotors();
-		}
-		else if(signaltype=='smart'){
-			parent.setAllMotors();
 			parent.smartController();
 		}
 		else {
@@ -161,25 +159,29 @@ Motor.prototype.halt = function() {
 
 // =========================Smart Controller==========================
 Motor.prototype.smartController= function(){
-		var motorDebug = this.motors.control.motorDebug;
-		var controlAngle = this.motors.allMotors.controlAngle;
-		var controlSpeed = this.motors.allMotors.controlSpeed;
-		var transAngle = this.motors.allMotors.transAngle;
-		var transSpeed = this.motors.allMotors.transSpeed;
-		var acceleroNew=this.model.accelero.x;
-		if(acceleroNew < (-3) && controlSpeed == 0){
-			transAngle=90;
-			transSpeed=acceleroNew*3.5; 
-			this.setAllMotors(transAngle, transSpeed);
+		var smartController = this.motors.control.smartController;
+		if(smartController == "ON"){
+			var motorDebug = this.motors.control.motorDebug;
+			var controlAngle = this.motors.allMotors.controlAngle;
+			var controlSpeed = this.motors.allMotors.controlSpeed;
+			var transAngle = this.motors.allMotors.transAngle;
+			var transSpeed = this.motors.allMotors.transSpeed;
+			var acceleroNew=this.model.accelero.x;
+			if(acceleroNew < (-3) && controlSpeed == 0){
+				transAngle=90;
+				transSpeed=acceleroNew*3.5; 
+				this.setAllMotors(transAngle, transSpeed);
+			}
+			else if(acceleroNew>3 && controlSpeed == 0){
+				transAngle=270;
+				transSpeed=acceleroNew*2.8; 
+				this.setAllMotors(transAngle, transSpeed);
+			}
+			if(motorDebug=='ON'){
+				console.log("SMART CONTROLLER SD--" + transSpeed + " AG--" + transAngle);
+			}
 		}
-		else if(acceleroNew>3 && controlSpeed == 0){
-			transAngle=270;
-			transSpeed=acceleroNew*2.8; 
-			this.setAllMotors(transAngle, transSpeed);
-		}
-		if(motorDebug=='ON'){
-			console.log("SMART CONTROLLER SD--" + transSpeed + " AG--" + transAngle);
-		}
+		
 };
 //==========================Individual motor controller==================================
 Motor.prototype.setIndividualMotors=function(motor){
