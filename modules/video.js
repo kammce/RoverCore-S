@@ -20,7 +20,7 @@ function Video(feedback, stream, debug) {
 	// All possible video feeds
 	this.videos = {
 		navi: {
-			dev: "/dev/video-navi",
+			dev: "/dev/video0",
 			//width: "864",
 			//height: "480",
 			width: 640,
@@ -40,7 +40,7 @@ function Video(feedback, stream, debug) {
 			res: 400
 		},
 		tracker: {
-			dev: "/dev/video-tracker",
+			dev: "/dev/video1",
 			res: 1000
 		},
 		off: { dev: "" }
@@ -192,7 +192,7 @@ Video.prototype.genArg = function(data, port) {
 				'-i', dev,
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
-				'-vf', "eq=gamma=0.75,yadif=2,drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
+				//'-vf', "eq=gamma=0.75,yadif=2,drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				//'http://'+ADDRESS+':'+port+'/destroymit/480/320'
 				'http://'+ADDRESS+':'+port+'/destroymit/300/240'
 			];
@@ -210,7 +210,7 @@ Video.prototype.genArg = function(data, port) {
 				'-f', 'mpeg1video',
 				'-b:v', res+'k',
 				'-r', '30',
-				'-vf', "drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
+				//'-vf', "drawtext=fontcolor=white:fontsize=16:fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf:box=1:boxcolor=black@0.3:x=15:y=15:timecode='00\\:01\\:00\\;02':rate=30000/1001",
 				'http://'+ADDRESS+':'+port+'/destroymit/'+width+'/'+height
 			];
 		}
