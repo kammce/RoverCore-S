@@ -1,2 +1,0 @@
-Tightened some holes in the system where stream 1 could not work properly
-Added forever-monitor into package.json
