@@ -2,18 +2,6 @@
 
 var Neuron = require('../../../modules/Neuron');
 
-
-describe('Neuron Class Construction', function () {
-	it('should fail to construct and return empty object without initial parameters', function () {
-		var test_unit = new Neuron();
-		assert.equal(Object.keys(test_unit).length, 0);
-	});
-	it('should construct with initial parameters', function () {
-		var test_unit = new Neuron("unit_test", function feedback() {}, function color_log() {}, 1000);
-		assert.ok(test_unit);
-	});
-});
-
 describe('Testing Neuron Class', function () {
 	var test_unit = new Neuron("unit_test", function feedback() {}, function color_log() {}, 1000);
 	describe('Testing _halt() Method', function () {
