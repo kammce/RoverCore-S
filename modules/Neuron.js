@@ -1,6 +1,5 @@
 "use strict";
 class Neuron {
-
 	constructor(name, feedback, color_log, idle_timeout) {
 		if( typeof name !== "string" || 
 			typeof feedback !== "function" || 
@@ -13,11 +12,6 @@ class Neuron {
 		if (typeof idle_timeout === 'undefined') {
 			this.idle_timeout = 1000;
 		} else { this.idle_timeout = idle_timeout; }
-		
-		this.halt = undefined;
-		this.resume = undefined;
-		this.react = undefined;
-		this.idle = undefined;
 		this.state = "CONSTRUCTING";
 	}
 	
@@ -51,12 +45,11 @@ class Neuron {
 		} else if(typeof input === "undefined" || input === null) {
 			return "NO-ACTION";
 		} else if(this.state === "HALTED") {
-			console.log("testing");
-			this.log(`${this.name} is ${this.state}`);
+			this.log.output(`${this.name} is ${this.state}`);
 			this.feedback(`${this.name} is ${this.state}`);
 			return "NO-ACTION";
 		} else {
-			console.log("testing2");
+			this.state = "RUNNING";
 			return this.react(input);
 		}
 	}
@@ -65,13 +58,21 @@ class Neuron {
 			return "UNDEF";
 		} else {
 			// run resume function and store return value 
-			var was_idle_successful = this.idle();
-			if(was_idle_successful) {
+			if(this.state !== "IDLING") {
+				var was_idle_successful = this.idle();
 				this.state = "IDLING";
+				// TODO: Remove this soon! Not needed!
+				if(was_idle_successful) {}
+				return was_idle_successful;
 			}
-			return was_idle_successful;
+			return false;
 		}
 	}
 }
+
+Neuron.prototype.halt = undefined;
+Neuron.prototype.resume = undefined;
+Neuron.prototype.react = undefined;
+Neuron.prototype.idle = undefined;
 
 module.exports = Neuron;

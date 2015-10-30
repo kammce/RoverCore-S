@@ -30,7 +30,7 @@ describe('Testing Brainstem Class', function () {
 		return true;
 	}
 
-	describe('Testing write()', function () {
+	describe('#write()', function () {
 		it('After a successful write command, Brainstem.queue should have packet.', function () {
 			Brainstem.queue = [];
 			
@@ -52,7 +52,7 @@ describe('Testing Brainstem Class', function () {
 		});
 	});
 
-	describe('Testing read()', function () {
+	describe('#read()', function () {
 		it('After a successful write command, Brainstem.queue should have packet.', function () {
 			Brainstem.queue = [];
 			

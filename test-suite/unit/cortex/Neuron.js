@@ -3,8 +3,10 @@
 var Neuron = require('../../../modules/Neuron');
 
 describe('Testing Neuron Class', function () {
-	var test_unit = new Neuron("unit_test", function feedback() {}, function color_log() {}, 1000);
-	describe('Testing _halt() Method', function () {
+	var color_log = function() {}
+	color_log.output = function() {}; 
+	var test_unit = new Neuron("unit_test", function feedback() {}, color_log, 1000);
+	describe('#_halt()', function () {
 		it('Assert that function will return "UNDEF" if halt is undefined.', function () {
 			test_unit.halt = undefined;
 			assert.equal(test_unit._halt(), "UNDEF");
@@ -15,7 +17,7 @@ describe('Testing Neuron Class', function () {
 			assert.equal(test_unit.state, "HALTED");
 		});
 	});
-	describe('Testing _resume() Method', function () {
+	describe('#_resume()', function () {
 		it('Assert that function will return "UNDEF" if resume is undefined.', function () {
 			test_unit.resume = undefined;
 			assert.equal(test_unit._resume(), "UNDEF");
@@ -26,7 +28,7 @@ describe('Testing Neuron Class', function () {
 			assert.equal(test_unit.state, "RUNNING");
 		});
 	});
-	describe('Testing _idle() Method', function () {
+	describe('#_idle()', function () {
 		it('Assert that function will return "UNDEF" if idle is undefined.', function () {
 			test_unit.idle = undefined;
 			assert.equal(test_unit._idle(), "UNDEF");
@@ -42,7 +44,7 @@ describe('Testing Neuron Class', function () {
 			assert.equal(test_unit.state, "IDLING");
 		});
 	});
-	describe('Testing _react() Method', function () {
+	describe('#_react()', function () {
 		it('Assert that method will return "UNDEF" if react is undefined.', function () {
 			test_unit.react = undefined;
 			// Inserted parameter to prove that UNDEF 

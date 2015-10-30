@@ -52,12 +52,12 @@ Brainstem.queuePacket = function(param) {
 		throw new Error("Invalid buffer type");
 	}
 	// Place into Queue
-	if(param['priority'] == 0x0) {
+	if(param['priority'] === 0x0) {
 		Brainstem.queue.unshift(param);
 	} else {
 		Brainstem.queue.push(param);
 	}
-}
+};
 /*
 {
 	net_addr: hex(0-7), 

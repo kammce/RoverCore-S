@@ -8,8 +8,14 @@
     "grunt-contrib-jshint": "",
     "grunt-mocha-test": "",
     "jshint-stylish": "",
-    "mocha": "",
-    "colors": ""
+    "mocha": ""
   },
-  "dependencies": {}
+  "dependencies": {
+    "colors": "",
+    "colorspace": "",
+    "forever-monitor": "",
+    "i2c-bus": "",
+    "primus": "^4.0.1",
+    "ws": "^0.8.0"
+  }
 }

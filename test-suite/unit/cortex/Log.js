@@ -18,7 +18,7 @@ describe('Testing Log Class', function () {
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
 				} else {
-					output += arguments[i]+"\n";
+					output += arguments[i];
 				}
 			};
 		};
@@ -29,12 +29,12 @@ describe('Testing Log Class', function () {
 		process.stdout.write = write;
 		console.log = log;
 	});
-
-	describe('Testing log()', function () {
+	/* TODO: Make create test to check if that Log statically creates only one log per require("Log") */
+	describe('#output()', function () {
 		it('Expect function to output to stdout when given a string', function () {
 			var test_unit = new Log("test_unit0", "cyan");
 			//fs.writeFileSync(test_unit.output_file, "");
-			test_unit.log("hello world");
+			test_unit.output("hello world");
 			// Should find hello world in log
 			expect(output).to.contain("hello world");
 			// Should find module name in log
@@ -45,7 +45,7 @@ describe('Testing Log Class', function () {
 		it('Expect function to output to stdout when given an structure', function () {
 			var test_unit = new Log("test_unit1", "cyan");
 			//fs.writeFileSync(test_unit.output_file, "");
-			test_unit.log({"a":1,"b":2});
+			test_unit.output({"a":1,"b":2});
 			expect(output).to.contain('{"a":1,"b":2}');
 			// Check that log file contains output value
 			//expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain('{"a":1,"b":2}', "Output was not written to file.");
@@ -53,7 +53,7 @@ describe('Testing Log Class', function () {
 		it('Expect function to output to stdout when given both a string and structure', function () {
 			var test_unit = new Log("test_unit2", "cyan");
 			//fs.writeFileSync(test_unit.output_file, "");
-			test_unit.log("hello world", {"a":1,"b":2});
+			test_unit.output("hello world", {"a":1,"b":2});
 			expect(output).to.contain('{"a":1,"b":2}');
 			expect(output).to.contain("hello world");
 			// Check that log file contains output value
@@ -66,22 +66,22 @@ describe('Testing Log Class', function () {
 			process.stdout.write = write;
 			console.log = log;
 			var test_unit0 = new Log("visual_test_unit_0", "cyan");
-			test_unit0.log("THIS SHOULD COME OUT THE COLOR CYAN!!");
+			test_unit0.output("THIS SHOULD COME OUT THE COLOR CYAN!!");
 			var test_unit1 = new Log("visual_test_unit_1", "yellow");
-			test_unit1.log("THIS SHOULD COME OUT THE COLOR YELLOW!!");
+			test_unit1.output("THIS SHOULD COME OUT THE COLOR YELLOW!!");
 			var test_unit2 = new Log("visual_test_unit_2", "green");
-			test_unit2.log("THIS SHOULD COME OUT THE COLOR GREEN!!");
+			test_unit2.output("THIS SHOULD COME OUT THE COLOR GREEN!!");
 		});
 	});
-	describe('Testing mute() & unmute() methods', function () {
+	describe('#mute(), #unmute()', function () {
 		it('Mute one log, expect only one log can output. Unmute logs, expect both to output', 
 			function () {
 			// Create two Logs
 			var test_unit0 = new Log("test_unit4", "cyan");
 			var test_unit1 = new Log("test_unit5", "green");
 			// Expect that they both can output
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.contain("Test0");
 			expect(output).to.contain("Test1");
 			// Flush output
@@ -89,8 +89,8 @@ describe('Testing Log Class', function () {
 			// Mute one 
 			test_unit0.mute();
 			//Attempt to log both, expect only log two to output.
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.not.contain("Test0");
 			expect(output).to.contain("Test1");
 			// Flush output
@@ -98,21 +98,21 @@ describe('Testing Log Class', function () {
 			//Unmute one.
 			test_unit0.unmute();
 			//Attempt to log both, expect both logs to output.
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.contain("Test0");
 			expect(output).to.contain("Test1");
 		});
 	});
 
-	describe('Testing static mute() & unmute() methods', function () {
+	describe('static #mute(), static #unmute()', function () {
 		it('Mute one log, expect only one log can output. Unmute logs, expect both to output', function () {
 			// Create two Logs
 			var test_unit0 = new Log("test_unit6", "cyan");
 			var test_unit1 = new Log("test_unit7", "green");
 			// Expect that they both can output
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.contain("Test0");
 			expect(output).to.contain("Test1");
 			// Flush output
@@ -121,8 +121,8 @@ describe('Testing Log Class', function () {
 			expect(Log.mute("test_unit6")).to.be.true;
 			log(Log._mutes);
 			//Attempt to log both, expect only log two to output.
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.not.contain("Test0");
 			expect(output).to.contain("Test1");
 			// Flush output
@@ -130,8 +130,8 @@ describe('Testing Log Class', function () {
 			//Unmute one.
 			expect(Log.unmute("test_unit6")).to.be.true;
 			//Attempt to log both, expect both logs to output.
-			test_unit0.log("Test0");
-			test_unit1.log("Test1");
+			test_unit0.output("Test0");
+			test_unit1.output("Test1");
 			expect(output).to.contain("Test0");
 			expect(output).to.contain("Test1");
 		});
