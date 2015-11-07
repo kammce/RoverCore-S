@@ -11,7 +11,6 @@ var primus = new Primus(server, {
 primus.on('connection', function connection(spark) {
 	console.log('connection was made from', spark.address);
 	console.log('connection id', spark.id);
-	spark.write("Herro Client, I am Server");
 	var send_protolobe;
 	spark.on('data', function(data) {
 		console.log('PRINTED FROM SERVER:', data);

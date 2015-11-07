@@ -59,39 +59,6 @@ class Log {
 		if(!this.constructor._mutes[this.module]) {
 			console.log.apply(this, console_args);
 		}
-		/*
-		if(this.constructor.color_in_file) {
-			this.constructor.journal.log(this.color(`[${Date().slice(0,-15)}][${this.module}] ::`));
-		} else {
-			this.constructor.journal.log(`[${Date().slice(0,-15)}][${this.module}] ::`);
-		}
-		console.log(this.color(`[${Date().slice(0,-15)}][${this.module}] ::`));
-		for (var i = 0; i < arguments.length; i++) {
-			this.constructor.journal.log(arguments[i]);
-			if(!this.constructor._mutes[this.module]) {
-				console.log(arguments[i]);
-			}
-		}
-		*/
-
-
-		/*if (arguments.length > 1 && level in this) {
-			this.constructor.journal.log.apply(this, arguments);
-			if(!this.constructor._mutes[this.module]) {
-				console.log.apply(this, arguments);
-			}
-		} else {
-			var args = Array.prototype.slice.call(arguments);
-			args.unshift(
-				this.color(
-					`[${Date().slice(0,-15)}][${this.module}] ::`
-				)
-			);
-			this.constructor.journal.log.apply(this, args);
-			if(!this.constructor._mutes[this.module]) {
-				console.log.apply(this, args);
-			}
-		}*/
 	}
 	// Mute this module
 	mute() {
