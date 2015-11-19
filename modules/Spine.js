@@ -24,7 +24,7 @@ class Spine {
 			    this.constructor.pins[this.constructor.pinIndex[i].key] = this.constructor.pinIndex[i];
 			}
 		} else {
-			console.log("Running on none Beagblebone platform.");
+			console.log("Running on none Odroid platform.");
 		}
 	}
 }

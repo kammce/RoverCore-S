@@ -10,8 +10,9 @@ class Model {
 			...
 		}
 	*/
-	constructor() {
+	constructor(feedback) {
 		// unit is milliseconds
+		this.feedback = feedback;
 		this.epoch = (new Date()).getTime();
 		this.database = {};
 	}
@@ -31,6 +32,11 @@ class Model {
 				timestamp: this.currentTime(),
 				value: value
 			};
+			// create realtime reply
+			var realtime_reply = { };
+			// add key word to realtime reply
+			realtime_reply[key] = this.database[key];
+			this.feedback("MODEL", realtime_reply);
 			return true;
 		} else {
 			return false;

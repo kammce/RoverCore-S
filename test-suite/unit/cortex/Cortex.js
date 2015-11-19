@@ -19,22 +19,30 @@ describe('End-to-End Cortex', function () {
 		it('Initializating Cortex should connect to dummy server on reserved port 9999', function (done) {
 			primus.on('connection', function connection(spark) {
 				spark.on('data', function(data) {
-					console.log("testing");
-					expect(data).to.eql({
-						intent: 'REGISTER', 
-						info: { 
-							entity: 'cortex', 
-							password: 'destroyeveryone' 
-						}
-					});
-					done();
+					// Skip the phase where Cortex IDLES all of the modules
+					if(!data.hasOwnProperty("lobe")){
+						expect(data).to.eql({
+							intent: 'REGISTER', 
+							info: { 
+								entity: 'cortex', 
+								password: 'destroyeveryone' 
+							}
+						});
+						done();
+					}
 				});
 			});
 			
 			var Socket = new Primus.createSocket();
 			var Cortex = require('../../../modules/Cortex');
 
-			var connection = Socket('http://localhost:9999');
+			var connection = Socket('http://localhost:9999', {
+				reconnect: {
+					max: 2000, // Number: The max delay before we try to reconnect.
+					min: 500, // Number: The minimum delay before we try reconnect.
+					retries: Infinity // Number: How many times we shoult try to reconnect.
+				}
+			});
 			var cortex = new Cortex(connection);
 		});
 	});

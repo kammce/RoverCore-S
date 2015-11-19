@@ -3,13 +3,25 @@
 var Model = require('../../../modules/Model');
 
 describe('Testing Model Class', function () {
-	var test_unit = new Model();
-	describe('Testing Methods', function () {
+	// Loading Libraries
+	var Primus = require('primus');
+	var http = require('http');
+	var server = http.createServer();
 
-		it('#registerMemory("TEST_UNIT") should have key "TEST_UNIT" in database', 
-		function (done) {
+	var primus = new Primus(server, { 
+		transformer: 'websockets' 
+	});
+
+	server.listen(9998);
+
+	var feedback = function() {};
+
+	var test_unit = new Model(feedback);
+
+	describe('Testing Methods', function () {
+		it('#registerMemory("TEST_UNIT") should have key "TEST_UNIT" in database', function (done) {
+			test_unit.registerMemory("TEST_UNIT");
 			setTimeout(function() {
-				test_unit.registerMemory("TEST_UNIT");
 				expect(test_unit.database['TEST_UNIT']).to.be.ok;
 				expect(test_unit.database['TEST_UNIT']['timestamp']).to.be.a('number');
 				expect(test_unit.database['TEST_UNIT']['timestamp']).to.be.above(test_unit.epoch);
@@ -127,6 +139,68 @@ describe('Testing Model Class', function () {
 					value: 'SET_TEST_VALUE0'
 				}
 			});
+		});
+	});
+
+	// @param {Number} timestamp parameter tells getMemory() to return all
+	//		registered data values that have been changed after that value.
+	describe('Testing Realtime feedback', function () {
+		it('#set() should send message to server', function (done) {
+			var real_feedback = function(lobe_name) {
+				var output = "";
+				for (var i = 1; i < arguments.length; i++) {
+					if(typeof arguments[i] === "object") {
+						output += JSON.stringify(arguments[i])+"\n";
+					} else {
+						output += arguments[i]+"\n";
+					}
+				}
+				connection.write({
+					lobe: lobe_name,
+					message: output
+				});
+			};
+
+			// setup primus connection
+			primus.on('connection', function connection(spark) {
+				spark.on('data', function(data) {
+					// FORCE set timestamp to 0 for consistancy
+					data['message'] = JSON.parse(data['message']);
+					data['message']['TEST_UNIT0']['timestamp'] = 0;		
+					data['message'] = JSON.stringify(data['message']);
+					expect(data).to.eql({
+						lobe: "MODEL",
+						message: JSON.stringify({ 
+							"TEST_UNIT0": {
+								timestamp: 0,
+								value: 'SET_TEST_VALUE0'
+							}
+						})
+					});
+					done();
+				});
+			});
+
+			var Socket = new Primus.createSocket();
+
+			var connection = Socket('http://localhost:9998', {
+				reconnect: {
+					max: 2000, // Number: The max delay before we try to reconnect.
+					min: 500, // Number: The minimum delay before we try reconnect.
+					retries: Infinity // Number: How many times we shoult try to reconnect.
+				}
+			});
+
+			var test_unit0 = new Model(real_feedback);
+			// Flush database
+			test_unit0.database = {};
+			// Register Memory two items into memory
+			test_unit0.registerMemory("TEST_UNIT0");
+			// Values to be set
+			test_unit0.set("TEST_UNIT0", 'SET_TEST_VALUE0');
+			// Force timestamp to 0 (otherwise timestamp is not determinate)
+			test_unit0.database['TEST_UNIT0']['timestamp'] = 0;
+			
 		});
 	});
 });

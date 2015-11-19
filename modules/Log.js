@@ -69,6 +69,7 @@ class Log {
 		this.constructor._mutes[this.module] = false;
 	}
 }
+
 /**** Static Field ****/
 Log.color_in_file = false;
 // Name of stdout file

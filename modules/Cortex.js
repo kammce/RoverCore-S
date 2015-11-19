@@ -4,23 +4,7 @@ class Cortex {
 	constructor(connection) {
 		console.log("Starting Rover's Cortex");
 		var parent = this;
-		// Loading Cortex Modules
-		this.LOG = require('./Log');
-		this.MODEL = require('./Model');
-		this.BRAINSTEM = require('./Brainstem');
-		this.SYNAPSE = require('./Log');
-		this.SPINE = require('./Spine');
-
-		// Store Singleton version of Classes
-		this.log = new this.LOG("Cortex", "white");
-		this.Model = new this.MODEL();
-		this.Brainstem = new this.BRAINSTEM();
-		this.Synapse = new this.SYNAPSE();
-		this.Spine = new this.SPINE();
-
-		/** Standard feedback method **/
-		// Have a s feedback method that all modules
-		// can use to transmit data back to server
+		/** Standard feedback method back to Server **/
 		this.feedback = function(lobe_name) {
 			var output = "";
 			for (var i = 1; i < arguments.length; i++) {
@@ -35,6 +19,18 @@ class Cortex {
 				message: output
 			});
 		};
+
+		// Loading Cortex Modules
+		this.LOG = require('./Log');
+		this.MODEL = require('./Model');
+		this.SPINE = require('./Spine');
+		var I2C_BUS = require('i2c-bus');
+		this.I2C = I2C_BUS.openSync(3);
+
+		// Store Singleton version of Classes
+		this.log = new this.LOG("Cortex", "white");
+		this.Model = new this.MODEL(this.feedback);
+		this.Spine = new this.SPINE();
 
 		/** Load All Modules in Module Folder **/
 		this.lobe_map = {};
@@ -165,9 +161,10 @@ class Cortex {
 				// Add Lobe to Lobe Map with key being the lobe_name
 				this.lobe_map[lobe_config_files[i]['lobe_name']] = new Lobe(
 					lobe_config_files[i]['lobe_name'], 
-					this.feedback, 
-					lobe_log, 
-					lobe_config_files[i]['idle_time']
+					this.feedback,
+					lobe_log,
+					lobe_config_files[i]['idle_time'],
+					this.I2C
 				);
 				this.time_since_last_command[lobe_config_files[i]['lobe_name']] = 0;
 				// Log that a Lobe was loaded correctly
