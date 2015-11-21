@@ -46,7 +46,7 @@ class Cortex {
 		connection.on('open', function open() {
 			connection.write({
 				intent: 'REGISTER', 
-				info: { 
+				info: {
 					entity: 'cortex', 
 					password: 'destroyeveryone' 
 				}
@@ -164,7 +164,8 @@ class Cortex {
 					this.feedback,
 					lobe_log,
 					lobe_config_files[i]['idle_time'],
-					this.I2C
+					this.I2C,
+					this.Model
 				);
 				this.time_since_last_command[lobe_config_files[i]['lobe_name']] = 0;
 				// Log that a Lobe was loaded correctly

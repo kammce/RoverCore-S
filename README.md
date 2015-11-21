@@ -1,5 +1,5 @@
-RoverCoreV2: The Mind of the Mars Rover
-===================
+# **RoverCoreV2: The Mind of the Mars Rover**
+-----
 RoverCore is meant to run on an embedded Linux platform such as Odroid, BeagleBone, and Raspberry Pi . 
 
 # **Development Libraries and Tools**

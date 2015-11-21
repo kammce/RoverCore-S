@@ -3,13 +3,14 @@
 var Neuron = require('../Neuron');
 
 class ProtoLobe extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c) {
+    constructor(name, feedback, color_log, idle_timeout, i2c, model) {
         super(name, feedback, color_log, idle_timeout);
         this.name = name;
         this.feedback = feedback;
         this.log = color_log;
         this.idle_time = idle_timeout;
         this.i2c = i2c;
+        this.model = model;
         // Construct Class here
     }
     react(input) {
