@@ -61,6 +61,7 @@ class Cortex {
 		});
 		connection.on('reconnect', function (/* opts */) {
 			parent.log.output('RECONNECTION attempt started!');
+			parent.
 		});
 		connection.on('reconnect scheduled', function (opts) {
 			parent.log.output(`Reconnecting in ${opts.scheduled} ms`);
