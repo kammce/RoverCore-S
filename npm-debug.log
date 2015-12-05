@@ -13812,6 +13812,8 @@
 13447 error There is likely additional logging output above.
 13448 verbose exit [ 1, true ]
 =======
+=======
+>>>>>>> Debug log when installing libraries into my machine
 0 info it worked if it ends with ok
 1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
 2 info using npm@1.4.28
