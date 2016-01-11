@@ -12,37 +12,11 @@ class Arm extends Neuron {
         this.i2c = i2c;
         this.model = model;
         // Construct Class here
-
+        
     }
-    react(input) {
-        /*
-        The input is to be an object with the following definition:
-            var ArmObject = {
-                cmdtype: [String],
-                cmdval: [Object]
-            }
-        Notes:
-            1.> (String) cmdtype
-                "The string containing the command type"
-                    Options:
-                    "Moves": Specifies a movement command
-                    "Tools": Specifies an endeffector tool command
-                    "Power": Specifies an Arm power on/off command (Q: Is this needed?)
-            2.> (Object) cmdval
-                "The object containing the parameters for the cmdtype specified; parameters vary depending on command type"
-                    a.> cmdtype "Moves"
-                        Members:
-                        (int) x: Specifies the x-coordinate of the target in reference to the rover
-                        (int) y: Specifies the y-coordinate of the target in reference to the rover
-                        (int) z: Specifies the z-coordinate of the target in reference to the rover
-                    b.> cmdtype "Tools"
-                        Members:
-                        (String) tsc: Specifies which Tool System Command is to be run
-                            Options:
-                            "Switch": Specifies a tool switch command
+    react(input) {  //put arm control logic here
+        
 
-
-        */
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
