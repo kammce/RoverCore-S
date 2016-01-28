@@ -13,6 +13,7 @@ console.log(i2c3.i2cFuncsSync());
 cmd = [ 0xFF ];
 console.log(cmd.length);
 i2c3.sendByteSync(MUX_ADDR, 0xFF);
+
 cmd = [ 0x03, 0x00 ];
 i2c3.writeByteSync(IO_EXPANDER_ADDR, cmd[0], cmd[1]);
 
@@ -66,5 +67,13 @@ if(deter) {
 		}
 		i2c3.writeByteSync(IO_EXPANDER_ADDR, 0x01, cmd, function() {});
 		which = !which;
+	}
+}
+
+
+
+function hello(world, dotcom, callback) {
+	if(typeof callback == "function") {
+		callback()
 	}
 }
