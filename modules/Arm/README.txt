@@ -3,7 +3,7 @@ Arm System README
 =================
 
 Description:
-    The input is to be a JSON object with the following definition:
+    The input from the interface is to be a JSON object with the following definition:
         var Arm_Object = {
             system: [String],
             val: [Object]
@@ -34,8 +34,12 @@ Notes:
         Getting input/sending output to the arm motors will be done via i2c. One need only send the pin num of the output channel to a "sender" chip (will have a certain i2c address) that is connected to the desired motor, and you can read output data by receiving input from a "receiver" chip (an analog-to-digital converter (ADC), will have a certain i2c address) which should output its data from the corresponding pin number (as was done with sending data).
 
     Motor Count
-        Arm: 2x Linear Actuators (shoulder, elbow), 1x Servo (base)
-        End-Effector: 2x Servos (Khalil's Wrist joint designe (left and right servo)), ?x Servo (Brian's Claw??)
+        By Part
+            Arm: 2x Linear Actuators (shoulder, elbow), 1x Servo (base)
+            End-Effector: 2x Servos (Khalil's Wrist joint design (left and right servo)), 1x Servo (Brian's Claw)
+        By Total Number
+            2x Linear Actuators
+            4x Servos
 
     Arm Angular Restrictions (information from John Han (Arm ME))
         - Arm will not go back on itself; its max will be ~180 degrees straight up in the air
