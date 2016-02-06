@@ -10,6 +10,7 @@ The input is to be a JSON object with the following definition
 #List of commands
 
 Points camera at desired angle, using rover as reference frame
+
 		{
 		command: "moveAngleLocal",
 		val: {
@@ -19,6 +20,7 @@ Points camera at desired angle, using rover as reference frame
 		}
 		
 Moves camera by specified amount
+
 		{
 		command: "moveInterval",
 		val: {
@@ -29,6 +31,7 @@ Moves camera by specified amount
 			}
 		}
 Sets default position of camera
+
 		{ 
 		command: "defaultConfig",
 		val: {
@@ -37,10 +40,12 @@ Sets default position of camera
 			}
 		}
 Moves to default position
+
 		{
 		command: "recalibrate"
 		}
 Reads data from LIDAR
+
 		{
 		command: "getDistance"
 		}
