@@ -2,7 +2,7 @@
 
 class Cortex {
 	constructor(connection) {
-		console.log("Starting Rover's Cortex");
+		console.log("STARTING Rover Core!");
 		var parent = this;
 		/** Standard feedback method back to Server **/
 		this.feedback = function(lobe_name) {
@@ -15,7 +15,7 @@ class Cortex {
 				}
 			}
 			connection.write({
-				lobe: lobe_name,
+				target: lobe_name,
 				message: output
 			});
 		};

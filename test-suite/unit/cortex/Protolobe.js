@@ -15,8 +15,9 @@ describe('Testing Protolobe Class', function () {
 			} else {
 				expected_log += arguments[i];
 			}
-		} 
+		}
 	};
+
 	var feedback = function(input) { 
 		expected_feedback = "";
 		for (var i = 0; i < arguments.length; i++) {
@@ -27,6 +28,7 @@ describe('Testing Protolobe Class', function () {
 			}
 		} 
 	};
+
 	var test_lobe = new Protolobe("Protolobe", feedback, log, 500);
 
 	describe('Testing Protolobe Methods', function () {
