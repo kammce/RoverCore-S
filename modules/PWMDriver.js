@@ -31,16 +31,16 @@ class PWMDriver {
 		this.i2c = i2c;
 		this.freq = freq;
 		this.dev_addr = address;
-		var mode = 0x00;
-		var prescale = Math.floor((((25000000 / 4096) / freq) - 1) + 0.5);
-		var freq = freq * 0.9;
-		i2c.writeByteSync(address, mode, 0x00);
-		var oldmode = i2c.readByteSync(address, mode); 
+		const MODE = 0x00;
+		const PRESCALE = 0xFE;
+		var prescale = Math.floor((((25000000 / 4096) / (freq* 0.9)) - 1) + 0.5);
+		//i2c.writeByteSync(address, mode, 0x00);
+		var oldmode = i2c.readByteSync(address, MODE); 
 		var newmode = parseInt((oldmode & 0x7F) | 0x10);
-		i2c.writeByteSync(address, mode, newmode);
-		i2c.writeByteSync(address, mode, prescale);
-		i2c.writeByteSync(address, mode, oldmode);
-		setTimeout(function(){i2c.writeByteSync(address, mode, (oldmode | 0xa1))}, 5,
+		i2c.writeByteSync(address, MODE, newmode);
+		i2c.writeByteSync(address, PRESCALE, prescale);
+		i2c.writeByteSync(address, MODE, oldmode);
+		setTimeout(function(){i2c.writeByteSync(address, MODE, (oldmode | 0xa1))}, 5,
 			function(err) {console.log("HERE");if (err){throw err;}}
 		);
 	}
