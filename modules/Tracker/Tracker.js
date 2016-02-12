@@ -89,9 +89,6 @@ class Tracker extends Neuron {
         			servoWrite(output);        			
         		} else if(i.command === "getDistance") {        			
         			
-        		} else if(i.command === "shutDown") {
-        			pwm.setDUTY(0, 100);
-        			pwm.setDUTY(1, 100);        			
         		}
         		parent.updateModel();
         		resolve(1);
@@ -115,11 +112,12 @@ class Tracker extends Neuron {
         		pitch : -90
         	}
         });
-        /*
-        setTimeout(this.parseCommand({
-        	command : "shutDown"
+        
+        setTimeout(function {
+        	pwm.setDUTY(0, 100);
+        	pwm.setDUTY(1, 100); 
         }), 3000);
-*/
+
     }
     resume() {
         this.log.output(`RESUMING ${this.name}`);
@@ -148,7 +146,7 @@ class Tracker extends Neuron {
     		return true;
     	}
     }
-    
+
     moveAngleLocal(value, position) {
     	var targetAngle = [0,0];
 
