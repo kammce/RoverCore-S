@@ -25,11 +25,16 @@ This will install the development libraries which allow Mocha, Chai, Grunt etc t
 
 To run RoverCore
 
-	node RoverCore.js
+    node RoverCore.js 
+
+RoverCore can also be set to simulation mode which helps when debugging it from the interface. Simulation mode will set all modules found in the modules folder to Protolobe. Protolobe will automatically write data sent to it via the React function to stdout and back to the server
+To run RoverCore in simulation mode
+
+    node RoverCore.js --simulation
 
 To run a local dummy server
 
-	node Server.js
+	node server-integration-test.js
 
 
 #### Installation instructions for Odroid, BeagleBone, RaspPi etc:
