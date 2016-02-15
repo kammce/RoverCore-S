@@ -15,17 +15,6 @@ module.exports = function(grunt) {
 				src: ['test-suite/unit/**/*.js']
 			}
 		},
-		mochaIntegrationTest: {
-			test: {
-				options: {
-					reporter: 'spec',
-					require: [
-						'test-suite/assist/config_chai.js'
-					]
-				},
-				src: ['test-suite/integration/**/*.js']
-			}
-		},
 		jshint: {
 			options: {
 				reporter: require('jshint-stylish'),
@@ -48,12 +37,10 @@ module.exports = function(grunt) {
 					"module": true
 				}
 			},
-		    target: ['Gruntfile.js', 'Cortex.js', 'InitializeCortex.js', 'modules/**/*.js']
+		    target: ['Gruntfile.js', 'modules/Cortex.js', 'modules/**/*.js']
 		}
 	});
 	grunt.registerTask('default', ['jshint','mochaTest']);
-	grunt.registerTask('full', ['jshint','mochaTest', 'mochaIntegrationTest']);
 	grunt.registerTask('unittest', ['mochaUnitTest']);
-	grunt.registerTask('integration', ['mochaIntegrationTest']);
 	grunt.registerTask('lint', ['jshint']);	
 };
