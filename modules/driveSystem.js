@@ -20,9 +20,16 @@ class DriveSystem extends Neuron {
         this.i2c = i2c;
         this.model = model;
         this.port = port;
+        ////////////////
         this.speed = 0;
+        this.speedOld = 0;
         this.angle = 90;
+        this.angleOld = 90;
+        this.limit = 50;
+        this.limitOld = 50;
         this.mode = 'c';
+        this.modeOld = 'c'
+        //////////////////
         this.interval = setInterval(this.sendState(), 100);
         this.cur=['a','b','c','d','e','f'];
         this.rpm=['a','b','c','d','e','f'];
@@ -49,10 +56,30 @@ class DriveSystem extends Neuron {
         });
         // Construct Class here
     }
+    sendState(){
+
+
+        
+        if(this.mode != this.modeOld){
+            port.write('M' + this.mode + "\n");
+            this.modeOld = this.mode;
+        }
+        if((this.speed != this.speedOld) || (this.angle != this.angleOld)){
+            port.write('S' + this.speed + ',' + this.angle +"\n");
+            this.speedOld = this.speed;
+            this.angleOld = this.angle;
+        }
+        if(this.limit != this.limitOld){
+            port.write('L' + this.limit + "\n");
+            this.limitOld = this.limit;
+        }
+        //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
+    }
     react(input) {
         this.speed = input.speed;
         this.angle = input.angle;
         this.mode = input.mode;
+        this.limit = input.limit;
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -69,9 +96,6 @@ class DriveSystem extends Neuron {
     idle() {
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
-    }
-    sendState(){
-        port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
     }
 }
 
