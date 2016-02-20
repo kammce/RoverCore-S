@@ -1,22 +1,129 @@
 'use strict';
-var i2c_bus = require('i2c-bus');
-var PWMDriver = require('./PWMDriver')
-var i2c = i2c_bus.open(2, function (err) { 
-			if (err) {throw err;}
-   			console.log("Opened PWM");
-    		resolve(freq);
-   			});
+describe('Testing PWMDriver', function(){
+	var PWMDriver = require('../../modules/PWMDriver');
+	var dev_addr1 =[], dev_addr2 =[];
+	var register1 =[], register2 =[];
+	var command1 =[], command2 =[];
+	class i2c_bus{
+		constructor(something1, something2, something3) {
+			
+		}
+		writeByteSync(dev_addr, register, command){
+			dev_addr1.push(dev_addr);
+			register1.push(register);
+			command1.push(command);
+			
+		}
+		readByteSync(dev_addr, register){
 
-var PWM = new PWMDriver(0x50, 100, i2c);
-//PWM.setPWM(2, 0, 0, 4095);
-PWM.setDUTY(2, 0, 0);
-setTimeout(function(){PWM.setDUTY(2, 1, 10)}, 20);
-setTimeout(function(){PWM.setDUTY(2, 2, 20)}, 40);
-setTimeout(function(){PWM.setDUTY(2, 3, 30)}, 60);
-setTimeout(function(){PWM.setDUTY(2, 4, 40)}, 80);
-setTimeout(function(){PWM.setDUTY(2, 5, 50)}, 100);
-setTimeout(function(){PWM.setDUTY(2, 6, 60)}, 120);
-setTimeout(function(){PWM.setDUTY(2, 7, 70)}, 140);
-setTimeout(function(){PWM.setDUTY(2, 8, 80)}, 160);
-setTimeout(function(){PWM.setDUTY(2, 9, 90)}, 180);
-setTimeout(function(){PWM.setDUTY(2, 10, 100)}, 200);
+		}
+		writeByte(dev_addr, register, command, cb){
+			dev_addr2.push(dev_addr);
+			register2.push(register);
+			command2.push(command);
+		}
+		readByte(dev_addr, register, cb){
+
+		}
+		reset(){
+			dev_addr1 =[], dev_addr2 =[];
+			register1 =[], register2 =[];
+			command1 =[], command2 =[];
+		}
+	};
+	module.exports = i2c_bus;
+	var i2c = new i2c_bus();
+	var test_unit = new PWMDriver(50,100,i2c);
+	
+
+	describe('Testing all functions for propper returns', function(){
+		it('Set Duty', function(){
+			expect(test_unit.setDUTY(3, 50)).to.eql(true);
+			expect(test_unit.setDUTY(3, 500)).to.eql(false);
+			expect(test_unit.setDUTY(3, '50')).to.eql(false);
+		});
+		it('Set PWM', function(){
+			expect(test_unit.setPWM(3, 0, 4095)).to.eql(true);
+			expect(test_unit.setPWM(3, 0, 4999)).to.eql(false);
+			expect(test_unit.setPWM(3, 4999, 0)).to.eql(false);
+			expect(test_unit.setPWM(3, 0, '4040')).to.eql(false);
+		});
+		it('Set Micro', function(){
+			expect(test_unit.setDUTY(3, 1000000)).to.eql(false);
+			expect(test_unit.setDUTY(3, 100)).to.eql(true);
+			expect(test_unit.setDUTY(3, '50')).to.eql(false);
+		});
+	});
+	describe('Testing setDuty', function(){
+		before(function() {
+    		test_unit.setDUTY(3, 50);
+  		});
+  		after(function() {
+   			i2c.reset();
+ 		});
+		it('checking sendpwmRegOnL inputs to sm-bus', function(){
+			expect(register2[0]).to.eql(0x12);
+			expect(command2[0]).to.eql(0x00);
+		});
+		it('checking sendpwmRegOnH inputs to sm-bus', function(){
+			expect(register2[1]).to.eql(0x13);
+			expect(command2[1]).to.eql(0x00);
+		});
+		it('checking sendpwmRegOffL inputs to sm-bus', function(){
+			expect(register2[2]).to.eql(0x14);
+			expect(command2[2]).to.eql(0xFF);
+		});
+		it('checking sendpwmRegOffH inputs to sm-bus', function(){
+			expect(register2[3]).to.eql(0x15);
+			expect(command2[3]).to.eql(0x07);
+		});
+	});
+	describe('Testing setPWM', function(){
+		before(function() {
+    		test_unit.setPWM(3, 200, 2000);
+  		});
+  		after(function() {
+   			i2c.reset();
+ 		});		
+		it('checking sendpwmRegOnL inputs to sm-bus', function(){
+			expect(register2[0]).to.eql(0x12);
+			expect(command2[0]).to.eql(0xc8);
+		});
+		it('checking sendpwmRegOnH inputs to sm-bus', function(){
+			expect(register2[1]).to.eql(0x13);
+			expect(command2[1]).to.eql(0x00);
+		});
+		it('checking sendpwmRegOffL inputs to sm-bus', function(){
+			expect(register2[2]).to.eql(0x14);
+			expect(command2[2]).to.eql(0xD0);
+		});
+		it('checking sendpwmRegOffH inputs to sm-bus', function(){
+			expect(register2[3]).to.eql(0x15);
+			expect(command2[3]).to.eql(0x07);
+		});
+	});
+	describe('Testing setMicro', function(){
+		before(function() {
+			test_unit.setMICRO(3, 100);
+			});
+  		after(function() {
+   			i2c.reset();
+ 		});		
+		it('checking sendpwmRegOnL inputs to sm-bus', function(){
+			expect(register2[0]).to.eql(0x12);
+			expect(command2[0]).to.eql(0x00);
+		});
+		it('checking sendpwmRegOnH inputs to sm-bus', function(){
+			expect(register2[1]).to.eql(0x13);
+			expect(command2[1]).to.eql(0x00);
+		});
+		it('checking sendpwmRegOffL inputs to sm-bus', function(){
+			expect(register2[2]).to.eql(0x14);
+			expect(command2[2]).to.eql(0x28);
+		});
+		it('checking sendpwmRegOffH inputs to sm-bus', function(){
+			expect(register2[3]).to.eql(0x15);
+			expect(command2[3]).to.eql(0x00);
+		});
+	});
+});
