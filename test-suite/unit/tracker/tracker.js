@@ -5,7 +5,7 @@ var Tracker = require('../../../modules/Tracker/Tracker');
 describe('Testing Tracker Class', function() {
 	var expected_log;
 	var expected_feedback;
-	var log = function() { }
+	var log = function() { };
 	log.output = function(input) { 
 		expected_log = "";
 		for (var i = 0; i < arguments.length; i++) {
@@ -19,20 +19,169 @@ describe('Testing Tracker Class', function() {
 		} 
 	};
 	var MODEL = require('../../../modules/Model');
+	//var PWMDriver = require('../../../modules/PWMDriver');
 	var model = new MODEL(feedback);
 	// var I2C_BUS = require('i2c-bus');
 	// var i2c = I2C_BUS.openSync(3);
 	console.log(model.get);
-	function i2c() {}
-	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model);
+	
+	class i2c_class{
+		constructor(){
+			
+			
+		}
+	}
+	var dutyPin = [], microPin = [];
+	var dutyValue = [], microValue = [];
+	class PWMDriver{
+		constructor(address, freq, i2c) {
 
-	describe('Testing Tracker Methods', function() {
+		}
+		setDUTY(pin, duty) {
+			dutyPin.push(pin);
+			dutyValue.push(duty);
+		}
+		setMICRO(pin, micro) {
+			microPin.push(pin);
+			microValue.push(micro);
+		}
+	}
+	var i2c = new i2c_class();
+	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
+
+
+	describe('#react moveAngleLocal', function(){
+			before(function(done){
+				test_lobe.gimbalPosition = [0,0];
+				test_lobe.react({
+					command : "moveAngleLocal",
+					value : {
+						yaw : 4,
+						pitch : 5
+					}
+				});
+				done();
+			});
+
+			it('#react moveAngleLocal should correctly modify gimbalPosition', function(){			
+				expect(test_lobe.gimbalPosition).is.eql([4,5]);
+			});
+			it('#react moveAngleLocal should send correct signal to servo',function() {
+				expect(test_lobe.pwm.microValue.pop()).to.eql(1556);
+				expect(test_lobe.pwm.microValue.pop()).to.eql(1506);
+			});
+		});
+
+	describe('#react moveInterval', function(){
+		before(function(done){
+			test_lobe.gimbalPosition = [0,0];
+			test_lobe.react({
+				command : "moveInterval",
+				value : {
+					yaw : 5,
+					pitch : 6,
+					stabilizeYaw : false,
+					stabilizePitch :false
+				}
+			});
+			done();
+		});
+		it('#moveInterval should correctly modify gimbalPosition', function() {		
+			
+			expect(test_lobe.gimbalPosition).is.eql([5,6]);
+		});
+	});
+
+	describe('#react defaultConfig', function(){
+		before(function(done){
+			test_lobe.react({
+				command : "defaultConfig",
+				value : {
+					yaw : 1,
+					pitch : 2
+				}
+			});
+			done();
+		});
+		it('# defaultConfig should correctly set default servo position', function(){
+			expect(test_lobe.defaultPosition).is.eql([1,2]);
+		});
+	});
+	describe('#react recalibrate', function(){
+		before(function(done){
+			test_lobe.react({
+				command : "recalibrate"
+			});
+			done();
+		});
+		it('#recalibrate should return to default position', function(){
+			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+		});
+	});
+
+	describe('#resume', function(){
+		before(function(done){
+			test_lobe.resume();
+			done();
+		});
+		it('#resume should return to default position', function(){
+			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+		});		
+	});
+
+	describe('#idle', function(){
+		before(function(done){
+			test_lobe.idle();
+			done();
+		});
+		it('#idle should return to default position', function(){
+			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+		});
+	});
+	
+	describe('#halt', function(){
+		before(function(done){
+			test_lobe.halt();
+			setTimeout(function(){ done(); }, 1200);
+		});
+		it('#halt should move gimbal to shutdown position', function(){
+			expect(test_lobe.gimbalPosition).is.eql([0,-90]);
+		});
+		it('#halt should set servo duty cycle to 100', function(){
+			expect(test_lobe.pwm.dutyValue.pop()).to.eql(100);
+			expect(test_lobe.pwm.dutyValue.pop()).to.eql(100);
+		});
+	});
+
+	describe('#updateModel', function(){
+		before(function(done){
+			test_lobe.react(
+				{
+				command : "moveAngleLocal",
+				value : {
+					yaw : 90,
+					pitch : 90
+					}
+				});
+			setTimeout(done(),100);
+		});
+		it('#model should be updated when react is called', function(){
+			expect(model.database['CAMERA GIMBAL']['value']).to.eql({
+					yaw: 90,
+					pitch: 90
+			});
+		});
+		//Test lidar
+	});
+
+	describe('#testing standard class functions', function(){
 		it('#moveAngleLocal', function() {
 			expect(test_lobe.moveAngleLocal([180, 90], [0,0])).to.eql([180, 90]);
 			expect(test_lobe.moveAngleLocal([90, 0], [360, 0])).to.eql([450, 0]);
 			expect(test_lobe.moveAngleLocal([200, 0], [540, 0])).to.eql([200, 0]);
 			expect(test_lobe.moveAngleLocal([0, 100], [0, 0])).to.eql([0, 90]);
 		});
+		
 		it('#moveInterval', function() {
 			expect(test_lobe.moveInterval([10,10], [20, 20], [0, 0, 0], 
 				[false, false])).to.eql([30, 30]);
@@ -51,124 +200,18 @@ describe('Testing Tracker Class', function() {
 		it('#recalibrate', function(){
 			test_lobe.defaultConfig([90, 90]);
 			expect(test_lobe.recalibrate()).to.eql([90, 90]);
-		});
+		});	
 		/*
-		it('#getGimbalPosition', function(){
-			test_lobe.moveAngleLocal([90, 90]);
-			expect(test_lobe.getGimbalPosition()).to.eql([90,90]);
-		});
-*/
-		it('#react moveAngleLocal', function(done){
-			test_lobe.moveAngleLocal = function (value) {				
-				expect(value).be.eql([0,0]);
-				done();
-			};
-			test_lobe.react({
-				command : "moveAngleLocal",
-				value : {
-					yaw : 0,
-					pitch : 0
-				}
-			});
-		});
-		it('#react moveInterval', function(done) {
-			test_lobe.moveInterval = function (value, currentPosition, 
-				roverOrientation, stabilize) {
-				expect(value).to.eql([0,0]);
-				done();
-				return [0,0];			
-
-			};
-			test_lobe.react({
-				command : "moveInterval",
-				value : {
-					yaw : 0,
-					pitch : 0,
-					stabilizeYaw : false,
-					stabilizePitch :false
-				}
-			});
-		});
-		it('#react defaultConfig', function(done) {
-			test_lobe.defaultConfig = function(value) {
-				expect(value).to.eql([0,0]);
-				done();
-			};
-			test_lobe.react({
-				command : "defaultConfig",
-				value : {
-					yaw : 0,
-					pitch : 0
-				}
-			});
-		});
-		it('#react recalibrate', function(done) {
-			test_lobe.recalibrate = function() {
-				expect(true).to.be.true;				
-				done();
-			};
-			test_lobe.react({
-				command : "recalibrate"
-			});
-		});
-
-		it('#halt move to position', function(done){
-			test_lobe.moveAngleLocal = function(value) {
-				expect(value).to.eql([0, -90]);
-				done();								
-			};
-			test_lobe.halt();
-		});
-		
-		it('#halt turn servo off', function(done) {
-			test_lobe.servoWrite = function() {
-				done();
-			}
-			//test_lobe.halt();
-		});
-
-		it('#resume', function(done){
-			test_lobe.recalibrate = function() {
-				expect(true).to.be.true;
-				done();				
-				return test_lobe.defaultPosition;
-							
-			};
-			test_lobe.resume();
-
-		});
-		it('#idle', function(){
-			test_lobe.recalibrate = function() {
-				expect(true).to.be.true;
-				done();				
-				return test_lobe.defaultPosition;
-							
-			};
-			test_lobe.idle();
-		});
 		it('#getDistance', function(){
 			expect(test_lobe.getDistance()).to.be.not.empty;
-		});
-		it('#servoWrite', function(){
-			expect(false).to.be.true;
-		});
-		it('#updateModel', function() {
-			
-			test_lobe.react(
-				{
-				command : "moveAngleLocal",
-				value : {
-					yaw : 90,
-					pitch : 90
-					}
-				});		
-					
-			expect(model.database['CAMERA GIMBAL']['value']).to.eql({
-				yaw: 90,
-				pitch: 90
-			});
-			//test for LIDAR
+		});	
+		*/
+	});		
 
-		});
-	});
+		
+
+		
+
+		
+	
 });
