@@ -9,14 +9,14 @@ class MPU6050{
         //need this because i2c is created in rovercore
         this.i2c = i2c;
 
-        this.xposH;
-        this.xposL;
-        this.yposH;
-        this.yposL;
-        this.zposH;
-        this.zposL;
-        this.tempH;
-        this.tempL;
+        this.xposL = "";
+        this.yposH = "";
+        this.xposH = "";
+        this.yposL = "";
+        this.zposH = "";
+        this.zposL = "";
+        this.tempH = "";
+        this.tempL = "";
         this.xpos = "";
         this.ypos = "";
         this.zpos = "";
