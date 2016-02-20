@@ -84,7 +84,7 @@ class Cortex {
 			parent.log.output('Connection closed');
 		});
 		// Handle Idling Lobes that have not gotten a command  
-		this.loop = setInterval(function() {
+		this.idling_loop = setInterval(function() {
 			parent.handleIdleStatus();
 		}, 100);
 	}
