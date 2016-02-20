@@ -21,6 +21,12 @@ primus.on('connection', function connection(spark) {
 			command: 'test_data'
 		});
 	}, 2000);
+	send_protolobe = setInterval(function() {
+		spark.write({
+			target: 'Simulation',
+			command: 'test_data_simulation'
+		});
+	}, 2000);
 	spark.on('end', function(data) {
 		console.log('disconnect from', spark.address);
 		console.log('disconnect id', spark.id);

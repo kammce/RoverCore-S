@@ -15,8 +15,9 @@ describe('Testing Protolobe Class', function () {
 			} else {
 				expected_log += arguments[i];
 			}
-		} 
+		}
 	};
+
 	var feedback = function(input) { 
 		expected_feedback = "";
 		for (var i = 0; i < arguments.length; i++) {
@@ -27,7 +28,10 @@ describe('Testing Protolobe Class', function () {
 			}
 		} 
 	};
-	var test_lobe = new Protolobe("Protolobe", feedback, log, 500);
+	var i2c = function() {}; // filler i2c object (not used in test)
+	var model = function() {}; // filler model object (not used in test)
+
+	var test_lobe = new Protolobe("Protolobe", feedback, log, 500, i2c, model);
 
 	describe('Testing Protolobe Methods', function () {
 		it('#react() should be called', function () {
