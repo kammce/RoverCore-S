@@ -28,7 +28,7 @@ const YAW_PIN = 0;
 const PITCH_PIN = 1;
 
 class Tracker extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model) {
+    constructor(name, feedback, color_log, idle_timeout, i2c, model, debug) {
         super(name, feedback, color_log, idle_timeout);
         this.name = name;
         this.feedback = feedback;
@@ -36,7 +36,29 @@ class Tracker extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c;
         this.model = model;
-        this.pwm = new PWMDriver(0x40, 200, i2c);
+        if(debug === true) {
+        	this.dutyPin = [];
+        	this.microPin = [];
+			this.dutyValue = [];
+			this.microValue = [];
+        	class PWMDriverDummy{
+				constructor(address, freq, i2c) {
+
+				}
+				setDUTY(pin, duty) {
+					dutyPin.push(pin);
+					dutyValue.push(duty);
+				}
+				setMICRO(pin, micro) {
+					microPin.push(pin);
+					microValue.push(micro);
+				}
+			}
+			this.pwm = new PWMDriverDummy(0x40, 200, i2c);
+        } else {
+        	this.pwm = new PWMDriver(0x40, 200, i2c);
+        }
+        
         // Construct Class here
 
 		this.gimbalPosition = [0,0];
@@ -48,6 +70,8 @@ class Tracker extends Neuron {
     }
     parseCommand(input) {
     	var parent = this;
+    	//console.log("gimbalPosition");
+		//console.log(parent.gimbalPosition);   
     	var promiseGetData = function(i) {
         	return new Promise(function(resolve,reject)
         	{
@@ -63,43 +87,45 @@ class Tracker extends Neuron {
 
         var promiseInterpretCommand = function(i) {
         	return new Promise(function(resolve, reject)
-        	{         		
+        	{      
+        	//console.log(i);   		
         		var output;
-        		var gimbalPosition;      		
-        		if(i.command === "moveAngleLocal") {       			
-        			//Determines angle to move servos        			
-        			gimbalPosition = parent.moveAngleLocal([i.value.yaw, i.value.pitch], parent.gimbalPosition);        			
-        			parent.gimbalPosition = gimbalPosition;        			
-        			//Converts output angle to PWM pulse length
-        			output = parent.angleToPwm(gimbalPosition);
+        		var gimbal;      		
+        		if(i.command == 'moveAngleLocal') { 
+        			//Determines angle to move servos         			     			
+        			gimbal = parent.moveAngleLocal([i.value.yaw, i.value.pitch], parent.gimbalPosition);         			
+        			parent.gimbalPosition = gimbal;         			      			
+        			//Converts output angle to PWM pulse length        			
+        			output = parent.angleToPWM(gimbal);
         			//Writes to servo
-        			servoWrite(output);       			
-        		} else if(i.command === "moveInterval") {        			       			
-        			gimbalPosition = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition, [0,0,0], [i.value.stabilizeYaw, i.value.stabilizePitch]);
-        			parent.gimbalPosition = gimbalPosition;        			
-        			output = parent.angleToPwm(gimbalPosition);
-        			servoWrite(output);       			
-        		} else if(i.command === "defaultConfig") {
+        			//servoWrite(output);        				
+        		} else if(i.command == "moveInterval") {        			       			
+        			gimbal = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition, [0,0,0], [i.value.stabilizeYaw, i.value.stabilizePitch]);
+        			parent.gimbalPosition = gimbal;        			
+        			output = parent.angleToPWM(gimbal);
+        			servoWrite(output);        			       			
+        		} else if(i.command == "defaultConfig") {
         			//Updates the default position       			
-        			parent.defaultConfig([i.value.yaw, i.value.pitch]);
-        		} else if(i.command === "recalibrate" ) {         			     			
-        			gimbalPosition = parent.recalibrate();        			
-        			parent.gimbalPosition = gimbalPosition;        			
-        			output = parent.angleToPwm(gimbalPosition);
-        			servoWrite(output);        			
-        		} else if(i.command === "getDistance") {        			
-        			
+        			parent.defaultConfig([i.value.yaw, i.value.pitch]);        			
+        		} else if(i.command == "recalibrate" ) {         			     			
+        			gimbal = parent.recalibrate();        			
+        			parent.gimbalPosition = gimbal;        			
+        			output = parent.angleToPWM(gimbal);
+        			servoWrite(output);         			       			
+        		} else if(i.command == "getDistance") { 
         		}
         		parent.updateModel();
-        		resolve(1);
+    			resolve(1);
+        		
         	});
         };
 
  		promiseGetData(input).then(promiseInterpretCommand);
+
     }
     react(input) {
-        this.log.output(`REACTING ${this.name}: `, input);
-        this.feedback(`REACTING ${this.name}: `, input);
+        //this.log.output(`REACTING ${this.name}: `, input);
+        //this.feedback(`REACTING ${this.name}: `, input);
         this.parseCommand(input);       
 	}
     halt() {
@@ -113,21 +139,21 @@ class Tracker extends Neuron {
         	}
         });
         
-        setTimeout(function {
-        	pwm.setDUTY(0, 100);
-        	pwm.setDUTY(1, 100); 
-        }), 3000);
+        setTimeout(function() {
+        	this.pwm.setDUTY(0, 100);
+        	this.pwm.setDUTY(1, 100); 
+        }, 1000);
 
     }
     resume() {
-        this.log.output(`RESUMING ${this.name}`);
+       // this.log.output(`RESUMING ${this.name}`);
         this.feedback(`RESUMING ${this.name}`);
         this.parseCommand({
         	command : "recalibrate"
         });        
     }
     idle() {
-        this.log.output(`IDLING ${this.name}`);
+       // this.log.output(`IDLING ${this.name}`);
         this.feedback(`IDLING ${this.name}`);
         this.parseCommand({
         	command : "recalibrate"
@@ -206,12 +232,9 @@ class Tracker extends Neuron {
     }
 
 	angleToPWM(value) {
-    	
-    	var yaw = (((value[0] - YAW_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_MAX - YAW_MIN)) + PWM_YAW_MIN;
-    	var pitch = (((value[1] - PITCH_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_MAX - PITCH_MIN)) + PWM_PITCH_MIN;
-
+    	var yaw = Math.round((((value[0] - YAW_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_MAX - YAW_MIN)) + PWM_YAW_MIN);
+    	var pitch = Math.round((((value[1] - PITCH_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_MAX - PITCH_MIN)) + PWM_PITCH_MIN);
     	return [yaw, pitch];
-
     }
     servoWrite(value) {
     	pwm.setMICRO(0, value[0]);
@@ -221,12 +244,14 @@ class Tracker extends Neuron {
     getDistance() {
 
     }
-    updateModel() {    	
+    updateModel() {   
+
     	this.model.set('LIDAR' , this.lidarMeasurement);
     	this.model.set('CAMERA GIMBAL' , {
     		yaw: this.gimbalPosition[0],
     		pitch: this.gimbalPosition[1]
     	});
+    	
 
     }
 }
