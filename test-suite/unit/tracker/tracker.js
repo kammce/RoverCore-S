@@ -67,8 +67,8 @@ describe('Testing Tracker Class', function() {
 				expect(test_lobe.gimbalPosition).is.eql([4,5]);
 			});
 			it('#react moveAngleLocal should send correct signal to servo',function() {
-				expect(test_lobe.microValue.pop()).to.eql(1556);
-				expect(test_lobe.microValue.pop()).to.eql(1506);
+				expect(test_lobe.pwm.microValue.pop()).to.eql(1556);
+				expect(test_lobe.pwm.microValue.pop()).to.eql(1506);
 			});
 		});
 
@@ -142,14 +142,14 @@ describe('Testing Tracker Class', function() {
 	describe('#halt', function(){
 		before(function(done){
 			test_lobe.halt();
-			setTimeout(done(), 1200);
+			setTimeout(function(){ done(); }, 1200);
 		});
 		it('#halt should move gimbal to shutdown position', function(){
 			expect(test_lobe.gimbalPosition).is.eql([0,-90]);
 		});
 		it('#halt should set servo duty cycle to 100', function(){
-			expect(test_lobe.dutyValue.pop()).to.eql(100);
-			expect(test_lobe.dutyValue.pop()).to.eql(100);
+			expect(test_lobe.pwm.dutyValue.pop()).to.eql(100);
+			expect(test_lobe.pwm.dutyValue.pop()).to.eql(100);
 		});
 	});
 
@@ -163,7 +163,7 @@ describe('Testing Tracker Class', function() {
 					pitch : 90
 					}
 				});
-			done();
+			setTimeout(done(),100);
 		});
 		it('#model should be updated when react is called', function(){
 			expect(model.database['CAMERA GIMBAL']['value']).to.eql({
@@ -201,16 +201,14 @@ describe('Testing Tracker Class', function() {
 			test_lobe.defaultConfig([90, 90]);
 			expect(test_lobe.recalibrate()).to.eql([90, 90]);
 		});	
+		/*
 		it('#getDistance', function(){
 			expect(test_lobe.getDistance()).to.be.not.empty;
 		});	
+		*/
 	});		
 
-		/*
-		it('#servoWrite', function(){
-			expect(false).to.be.true;
-		});
-*/
+		
 
 		
 
