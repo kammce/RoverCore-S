@@ -1,9 +1,6 @@
 'use strict';
-var chai = require('../node_modules/chai/chai.js');
-// tests.js
-describe('Testing I2C_to_PWM', function(){
-	var expect = chai.expect;
-	var PWMDriver = require('./PWMDriver');
+describe('Testing PWMDriver', function(){
+	var PWMDriver = require('../../modules/PWMDriver');
 	var dev_addr1 =[], dev_addr2 =[];
 	var register1 =[], register2 =[];
 	var command1 =[], command2 =[];
@@ -12,7 +9,6 @@ describe('Testing I2C_to_PWM', function(){
 			
 		}
 		writeByteSync(dev_addr, register, command){
-			//console.log(dev_addr);console.log(register);console.log(command);
 			dev_addr1.push(dev_addr);
 			register1.push(register);
 			command1.push(command);
@@ -53,7 +49,9 @@ describe('Testing I2C_to_PWM', function(){
 			expect(test_unit.setPWM(3, 0, '4040')).to.eql(false);
 		});
 		it('Set Micro', function(){
-			
+			expect(test_unit.setDUTY(3, 1000000)).to.eql(false);
+			expect(test_unit.setDUTY(3, 100)).to.eql(true);
+			expect(test_unit.setDUTY(3, '50')).to.eql(false);
 		});
 	});
 	describe('Testing setDuty', function(){
