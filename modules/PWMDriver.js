@@ -12,6 +12,7 @@
 //  cmd -  command code
 //  byte - data byte
 //  cb -   completion callback
+
 //	dev_addr      	 = 0x40;
 //	SUBADR1       	 = 0x02;
 //	SUBADR2       	 = 0x03;
@@ -27,21 +28,21 @@
 //	ALLLED_OFF_L 	 = 0xFC;
 //	ALLLED_OFF_H 	 = 0xFD;
 class PWMDriver {
-	constructor(address, freq, i2c){
+	constructor(address, freq, i2c, log){
 		this.i2c = i2c;
 		this.freq = freq;
 		this.dev_addr = address;
+		this.log = log;
 		const MODE = 0x00;
 		const PRESCALE = 0xFE;
 		var prescale = Math.floor((((25000000 / 4096) / (freq* 0.9)) - 1) + 0.5);
-		//i2c.writeByteSync(address, mode, 0x00);
 		var oldmode = i2c.readByteSync(address, MODE); 
 		var newmode = parseInt((oldmode & 0x7F) | 0x10);
 		i2c.writeByteSync(address, MODE, newmode);
 		i2c.writeByteSync(address, PRESCALE, prescale);
 		i2c.writeByteSync(address, MODE, oldmode);
-		setTimeout(function(){i2c.writeByteSync(address, MODE, (oldmode | 0xa1))}, 5,
-			function(err) {console.log("HERE");if (err){throw err;}}
+		setTimeout(function(){i2c.writeByteSync(address, MODE, (oldmode | 0xa1));}, 5,
+			function(err) {if (err){this.log.output("Error in PWMDriver constructor setTimeout");this.log.output(err);}}
 		);
 	}
 	setDUTY(pin, duty){
@@ -51,59 +52,76 @@ class PWMDriver {
 		const LED0_ON_H 	 = 0x07;
 		const LED0_OFF_L	 = 0x08;
 		const LED0_OFF_H 	 = 0x09;
-		var sendpwmRegOnL = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
-					if (err){console.log("error is here");throw err;}resolve(1);});
-			 });
+		var isNumber = function (o) {
+		    if(typeof o === "number" || (typeof o === "object" && o.constructor === Number)){
+		    	return true;
+		    }
+		    else {return false;}
 		};
-		var sendpwmRegOnH = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
-					if (err){throw err;}resolve(1);});
-			 });
-		};
-		var sendpwmRegOffL = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
-		};
-		var sendpwmRegOffH = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
-		};
+
 		var genByteH = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteH");
-				throw "Invalid Data Type in genByteH";
+				this.log.output("Invalid Data Type in genByteH of setDUTY of PWMDriver");
 			}
 			var MSB = input >> 8;
-			if(input==4096){
+			if(input===4096){
 				MSB = 16;
 			}
 			return MSB;
 		};
 		var genByteL = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteL");
-				throw "Invalid Data Type in genByteL";
+				this.log.output("Invalid Data Type in genByteL of setDUTYof PWMDriver");
 			}
 			var LSB = input & 0x0FF;
-			if(input==4096){
+			if(input===4096){
 				LSB = 0;
 			}
 			return LSB;
 		};
-		var isNumber = function (o) {
-		    if(typeof o == "number" || (typeof o == "object" && o.constructor === Number)){
-		    	return true;
-		    }
-		    else return false;
+		var sendpwmRegOnL = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnL of setDuty of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOnH = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnH of setDuty of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOffL = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffL of setDuty of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});	
+			 });
+		};
+		var sendpwmRegOffH = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffH of setDuty of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});	
+			 });
 		};
 		if(isNumber(duty) && duty<=100 && duty>=0){
 			sendpwmRegOnL(pin, 0)
@@ -113,7 +131,6 @@ class PWMDriver {
 			return true;
 		}
 		else{
-			//console.log("input parameter in function <setDuty> is inccorect value or wrong type.");
 			return false;
 		}
 	}
@@ -127,60 +144,76 @@ class PWMDriver {
 		const LED0_ON_H 	 = 0x07;
 		const LED0_OFF_L	 = 0x08;
 		const LED0_OFF_H 	 = 0x09;
-		var sendpwmRegOnL = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
-					if (err){throw err;}resolve(1);});
-			 });
-		};
-		var sendpwmRegOnH = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
-					if (err){throw err;}resolve(1);});
-			 });
-			
-		};
-		var sendpwmRegOffL = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
-		};
-		var sendpwmRegOffH = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
+		var isNumber = function (o) {
+		    if(typeof o === "number" || (typeof o === "object" && o.constructor === Number)){
+		    	return true;
+		    }
+		    else {return false;}
 		};
 		var genByteH = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteH");
-				throw "Invalid Data Type in genByteH";
+				this.log.output("Invalid Data Type in genByteH of seMICRO of PWMDriver");
 			}
 			var MSB = input >> 8;
-			if(input==4096){
+			if(input===4096){
 				MSB = 16;
 			}
 			return MSB;
 		};
 		var genByteL = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteL");
-				throw "Invalid Data Type in genByteL";
+				this.log.output("Invalid Data Type in genByteL of seMICRO of PWMDriver");
 			}
 			var LSB = input & 0x0FF;
-			if(input==4096){
+			if(input===4096){
 				LSB = 0;
 			}
 			return LSB;
 		};
-		var isNumber = function (o) {
-		    if(typeof o == "number" || (typeof o == "object" && o.constructor === Number)){
-		    	return true;
-		    }
-		    else return false;
+		var sendpwmRegOnL = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnL of setMICRO of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOnH = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnH of setMICRO of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOffL = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffL of setMICRO of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+				
+			 });
+		};
+		var sendpwmRegOffH = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffH of setMICRO of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
 		};
 		if(isNumber(micro) && tick>1  && tick<4096){
 			sendpwmRegOnL(pin, 0)
@@ -190,7 +223,6 @@ class PWMDriver {
 			return true;
 		}
 		else {
-			console.log("<setMicro> micro is not an integer or frequency|resolution is not supported")
 			return false;
 		}
 	}
@@ -201,60 +233,76 @@ class PWMDriver {
 		const LED0_ON_H 	 = 0x07;
 		const LED0_OFF_L	 = 0x08;
 		const LED0_OFF_H 	 = 0x09;
-		var sendpwmRegOnL = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
-					if (err){throw err;}resolve(1);});
-			 });
-		};
-		var sendpwmRegOnH = function(num, on){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
-					if (err){throw err;}resolve(1);});
-			 });
-			
-		};
-		var sendpwmRegOffL = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
-		};
-		var sendpwmRegOffH = function(num, off){
-			return new Promise(function(resolve, reject) {
-				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
-					if (err){throw err;}resolve(1);});
-				
-			 });
+		var isNumber = function (o) {
+		    if(typeof o === "number" || (typeof o === "object" && o.constructor === Number)){
+		    	return true;
+		    }
+		    else {return false;}
 		};
 		var genByteH = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteH");
-				throw "Invalid Data Type in genByteH";
+				this.log.output("Invalid Data Type in genByteH of setPWM of PWMDriver");
 			}
 			var MSB = input >> 8;
-			if(input==4096){
+			if(input===4096){
 				MSB = 16;
 			}
 			return MSB;
 		};
 		var genByteL = function (input){
 			if(!isNumber(input)){
-				console.log("Invalid Data Type in genByteL");
-				throw "Invalid Data Type in genByteL";
+				this.log.output("Invalid Data Type in genByteL of setPWM of PWMDriver");
 			}
 			var LSB = input & 0x0FF;
-			if(input==4096){
+			if(input===4096){
 				LSB = 0;
 			}
 			return LSB;
 		};
-		var isNumber = function (o) {
-		    if(typeof o == "number" || (typeof o == "object" && o.constructor === Number)){
-		    	return true;
-		    }
-		    else return false;
+		var sendpwmRegOnL = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_L+4*num, genByteL(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnL of setPWM of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOnH = function(num, on){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_ON_H+(4*num), genByteH(on), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOnH of setPWM of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+			
+		};
+		var sendpwmRegOffL = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_L+(4*num), genByteL(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffL of setPWM of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
+		};
+		var sendpwmRegOffH = function(num, off){
+			return new Promise(function(resolve) {
+				i2c.writeByte(dev_addr, LED0_OFF_H+(4*num), genByteH(off), function(err){ 
+					if (err){
+						this.log.output("writeByte error in sendpwmRegOffH of setPWM of PWMDriver");
+						this.log.output(err);
+					}
+					resolve(1);
+				});
+			 });
 		};
 		if(isNumber(on) && isNumber(off) && on<4096 && on>=0 && off<4096 && off>=0){
 			sendpwmRegOnL(pin, on)
@@ -267,5 +315,5 @@ class PWMDriver {
 			return false;
 		}
 	}
-};
+}
 module.exports = PWMDriver;
