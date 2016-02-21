@@ -21,19 +21,23 @@ class DriveSystem extends Neuron {
         this.model = model;
         this.port = port;
         ////////////////
+        this.state = 'react';
         this.speed = 0;
-        this.speedOld = 0;
+        this.speedOld = 1;
         this.angle = 90;
-        this.angleOld = 90;
+        this.angleOld = 91;
         this.limit = 50;
-        this.limitOld = 50;
+        this.limitOld = 51;
+        this.PIDState = 'on';
+        this.PIDStateOld = 'off';
         this.mode = 'c';
-        this.modeOld = 'c'
+        this.modeOld = 'k'
         //////////////////
         this.interval = setInterval(this.sendState(), 100);
         this.cur=['a','b','c','d','e','f'];
         this.rpm=['a','b','c','d','e','f'];
         this.port.on('data', function (data){
+            
             if(arr[0] == 'r' && str.includes('\n')){
                 rpm.a = parseInt(['0x' + arr[1]]);
                 rpm.b = parseInt(['0x' + arr[2]]);
@@ -57,9 +61,6 @@ class DriveSystem extends Neuron {
         // Construct Class here
     }
     sendState(){
-
-
-        
         if(this.mode != this.modeOld){
             port.write('M' + this.mode + "\n");
             this.modeOld = this.mode;
@@ -73,27 +74,42 @@ class DriveSystem extends Neuron {
             port.write('L' + this.limit + "\n");
             this.limitOld = this.limit;
         }
+        if(this.PIDState != this.PIDStateOld){
+            port.write('P' + this.PIDState + "\n");
+            this.PIDStateOld = this.PIDState;
+        }
         //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
     }
     react(input) {
-        this.speed = input.speed;
-        this.angle = input.angle;
-        this.mode = input.mode;
-        this.limit = input.limit;
-        this.log.output(`REACTING ${this.name}: `, input);
-        this.feedback(this.name ,`REACTING ${this.name}: `, input);
+        if(this.state == 'react'){
+            this.speed = input.speed;
+            this.angle = input.angle;
+            this.mode = input.mode;
+            this.limit = input.limit;
+            this.PIDState = input.PIDState;
+            this.log.output(`REACTING ${this.name}: `, input);
+            this.feedback(this.name ,`REACTING ${this.name}: `, input);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
     halt() {
+        this.state = 'halt';
         clearInterval(this.interval);
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name ,`HALTING ${this.name}`);
     }
     resume() {
+        this.state = 'react';
         this.interval = setInterval(this.sendState(), 100);
         this.log.output(`RESUMING ${this.name}`);
         this.feedback(this.name ,`RESUMING ${this.name}`);
     }
     idle() {
+        this.state = 'idle';
+        clearInterval(this.interval);
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
     }
