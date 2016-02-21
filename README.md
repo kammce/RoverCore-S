@@ -76,6 +76,7 @@ When designing software for mission critical system, the software must be fast, 
 The solution is T.est D.riven D.esign (TDD), which is a methodology of creating tests for your code. When you have a suite of tests that do the work of testing your code for you, the tests will test the code the same way each time and will never miss a step. The tests never get sleepy, drunk, hungry, or sick and they will do all the work of testing your code to confirm that it is behaving properly. Their existence also allows the developer to determine when a change in the design somewhere else breaks a feature in another location.
 
 There are four types of test we will use for this project:
+
 1. Unit
 2. Integration
 3. End-to-End
@@ -85,6 +86,7 @@ End-to-End and Mission Control testing are the two that must be done manually. T
 
 ## Approach & Methodology
 Our approach to TDD is the following:
+
 1. Create a class design document with the following:
     1. Design Requirements/Specification
     2. System Diagram
