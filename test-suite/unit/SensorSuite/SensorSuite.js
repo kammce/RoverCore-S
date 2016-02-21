@@ -33,11 +33,13 @@ describe('Testing SensorSuite Class', function () {
 
 
 
-	var dev_addr1 =[], dev_addr2 =[];
-	var register1 =[], register2 =[];
-	var command1 =[], command2 =[];
+	var awake = 0;
 	class i2c_bus{
 		constructor(something1, something2, something3) {
+
+		}
+		writeByteSync(dev_addr, register, command){
+			awake = command;
 
 		}
 		readByteSync(dev_addr, register){
@@ -95,32 +97,29 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: wakeUp()', function() {
 			it('expected data read to start', function () {   //wakeUp()
 				test_lobe.mpu.wakeUp();
-				expect(test_lobe.awake).to.equal(1);
+				expect(awake).to.equal(1);
 			});
 		});
 		describe('Function: readData()', function() {
 			it('expected data to be read in', function () {
 				test_lobe.mpu.readData();
-				expect(test_lobe.mpu.xposH).to.equal(test_lobe.mpu.r0x3B);
-/*				expect(test_lobe.mpu.xposL).to.equal(test_lobe.mpu.r0x3C);
-				expect(test_lobe.mpu.yposH).to.equal(test_lobe.mpu.r0x3D);
-				expect(test_lobe.mpu.yposL).to.equal(test_lobe.mpu.r0x3E);
-				expect(test_lobe.mpu.xposH).to.equal(test_lobe.mpu.r0x3F);
-				expect(test_lobe.mpu.xposL).to.equal(test_lobe.mpu.r0x40);
-				expect(test_lobe.mpu.tempH).to.equal(test_lobe.mpu.r0x41);
-				expect(test_lobe.mpu.tempL).to.equal(test_lobe.mpu.r0x42);
-				*/
+				expect(test_lobe.mpu.xpos).to.equal(-19276);
+				expect(test_lobe.mpu.ypos).to.equal(-19276);
+				expect(test_lobe.mpu.zpos).to.equal(-19276);
+				expect(test_lobe.mpu.temp).to.equal(-19276);
 			});
 		});
 		describe('Function: convertPosition()', function() {
 			it('expected position value to be converted to angles', function () {
-				expect(test_lobe.mpu.xangle).to.equal();//
-				expect(test_lobe.mpu.yangle).to.equal();//
+				test_lobe.mpu.convertPosition();
+				expect(test_lobe.mpu.xangle).to.equal(-35.26390990826984);//
+				expect(test_lobe.mpu.yangle).to.equal(-35.26390990826984);//
 			});
 		});
 		describe('Function: convertTemp()', function() {
 			it('expected temperature value to be converted to celsius', function () {
-				expect(test_lobe.mpu.temp).to.equal();//
+				test_lobe.mpu.convertTemp();
+				expect(test_lobe.mpu.celsius).to.equal(-20.164117647058823);//
 			});
 		});
 		describe('Function: log()', function() {
@@ -132,7 +131,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: sleep()', function() {
 			it('expected data read to stop', function () {
 				test_lobe.mpu.sleep();
-				expect(test_lobe.mpu.awake).to.equal(0);
+				expect(awake).to.equal(0);
 			});
 		});
 	});

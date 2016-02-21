@@ -23,15 +23,19 @@ class MPU6050{
         this.yangle = 0;
         this.celsius = 0;
 
-        this.awake = 0;
-        this.r0x3B = "10110100";
-        this.r0x3C = "10110100";
-        this.r0x3D = "10110100";
-        this.r0x3E = "10110100";
-        this.r0x3F = "10110100";
-        this.r0x40 = "10110100";
-        this.r0x41 = "10110100";
-        this.r0x42 = "10110100";
+        this.r0x3B = "180";
+        this.r0x3C = "180";
+        this.r0x3D = "180";
+        this.r0x3E = "180";
+        this.r0x3F = "180";
+        this.r0x40 = "180";
+        this.r0x41 = "180";
+        this.r0x42 = "180";
+    }
+
+    wakeUp() {
+        var i2c = this.i2c;
+        i2c.writeByteSync(0x68, 0x6B, 1);
     }
 
     readData() {
@@ -108,10 +112,15 @@ class MPU6050{
         this.celsius = parseFloat(this.temp)/340 + 36.53;
     }
 
+    sleep() {
+        var i2c = this.i2c;
+        i2c.writeByteSync(0x68, 0x6B, 0);
+    }
+
     log() {
-        var log = this.log;
+
 //        log.output("x-angle:" + this.xangle + "y-angle:" + this.yangle + "temperature:" + this.temp);
-        log.output("hello");
+        this.log.output("hello");
     }
 }
 
