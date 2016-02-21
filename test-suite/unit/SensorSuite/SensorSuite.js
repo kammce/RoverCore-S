@@ -1,6 +1,7 @@
 "use strict";
 
 var SensorSuite = require('../../../modules/SensorSuite/SensorSuite');
+var expect = require('chai').expect;
 
 describe('Testing SensorSuite Class', function () {
 	var expected_log;
@@ -28,55 +29,110 @@ describe('Testing SensorSuite Class', function () {
 			}
 		}
 	};
-	var i2c = function() {}; // filler i2c object (not used in test)
+
+
+
+
+	var dev_addr1 =[], dev_addr2 =[];
+	var register1 =[], register2 =[];
+	var command1 =[], command2 =[];
+	class i2c_bus{
+		constructor(something1, something2, something3) {
+
+		}
+		readByteSync(dev_addr, register){
+			return register;
+		}
+		readByte(dev_addr, register, cb){
+			return register;
+		}
+		reset(){
+			dev_addr1 =[], dev_addr2 =[];
+			register1 =[], register2 =[];
+			command1 =[], command2 =[];
+		}
+	};
+	module.exports = i2c_bus;
+	var i2c = new i2c_bus();
+
+
+
+
+//	var i2c = function() {}; // filler i2c object (not used in test)
 	var model = function() {}; // filler model object (not used in test)
 
 	var test_lobe = new SensorSuite("SensorSuite", feedback, log, 500, i2c, model);
 
 	describe('Testing SensorSuite Methods', function () {
+		describe('Function: react(input)', function () {
+			it('#react() should be called', function () {
+				test_lobe.react("TESTING");
+				expect(expected_log).to.equal(`REACTING ${test_lobe.name}: TESTING`);
+				expect(expected_feedback).to.equal(`SensorSuiteREACTING ${test_lobe.name}: TESTING`);
+			});
+		});
+		describe('Function: halt()', function() {
+			it('#halt() should be called', function () {
+				test_lobe.halt();
+				expect(expected_log).to.equal(`HALTING ${test_lobe.name}`);
+				expect(expected_feedback).to.equal(`SensorSuiteHALTING ${test_lobe.name}`);
+			});
+		});
+		describe('Function: resume()', function() {
+			it('#resume() should be called', function () {
+				test_lobe.resume();
+				expect(expected_log).to.equal(`RESUMING ${test_lobe.name}`);
+				expect(expected_feedback).to.equal(`SensorSuiteRESUMING ${test_lobe.name}`);
+			});
+		});
+		describe('Function: idle()', function() {
+			it('#idle() should be called', function () {
+				test_lobe.idle();
+				expect(expected_log).to.equal(`IDLING ${test_lobe.name}`);
+				expect(expected_feedback).to.equal(`SensorSuiteIDLING ${test_lobe.name}`);
+			});
+		});
 		describe('Function: wakeUp()', function() {
 			it('expected data read to start', function () {   //wakeUp()
-				test_lobe.wakeUp();
-//				test_lobe.readData();
+				test_lobe.mpu.wakeUp();
 				expect(test_lobe.awake).to.equal(1);
-//				expect(expected_log).to.equal(`REACTING ${test_lobe.name}: TESTING`);
-//				expect(expected_feedback).to.equal(`SensorSuiteREACTING ${test_lobe.name}: TESTING`);
 			});
 		});
 		describe('Function: readData()', function() {
 			it('expected data to be read in', function () {
-				expect();
-//				expect(expected_log).to.equal(`HALTING ${test_lobe.name}`);
-//				expect(expected_feedback).to.equal(`SensorSuiteHALTING ${test_lobe.name}`);
+				test_lobe.mpu.readData();
+				expect(test_lobe.mpu.xposH).to.equal(test_lobe.mpu.r0x3B);
+/*				expect(test_lobe.mpu.xposL).to.equal(test_lobe.mpu.r0x3C);
+				expect(test_lobe.mpu.yposH).to.equal(test_lobe.mpu.r0x3D);
+				expect(test_lobe.mpu.yposL).to.equal(test_lobe.mpu.r0x3E);
+				expect(test_lobe.mpu.xposH).to.equal(test_lobe.mpu.r0x3F);
+				expect(test_lobe.mpu.xposL).to.equal(test_lobe.mpu.r0x40);
+				expect(test_lobe.mpu.tempH).to.equal(test_lobe.mpu.r0x41);
+				expect(test_lobe.mpu.tempL).to.equal(test_lobe.mpu.r0x42);
+				*/
 			});
 		});
 		describe('Function: convertPosition()', function() {
 			it('expected position value to be converted to angles', function () {
-				expect(test_lobe.xangle).to.equal();
-				expect(test_lobe.yangle).to.equal();
-//				expect(expected_log).to.equal(`RESUMING ${test_lobe.name}`);
-//				expect(expected_feedback).to.equal(`SensorSuiteRESUMING ${test_lobe.name}`);
+				expect(test_lobe.mpu.xangle).to.equal();//
+				expect(test_lobe.mpu.yangle).to.equal();//
 			});
 		});
 		describe('Function: convertTemp()', function() {
 			it('expected temperature value to be converted to celsius', function () {
-				expect(test_lobe.temp).to.equal();
-//				expect(expected_log).to.equal(`IDLING ${test_lobe.name}`);
-//				expect(expected_feedback).to.equal(`SensorSuiteIDLING ${test_lobe.name}`);
+				expect(test_lobe.mpu.temp).to.equal();//
 			});
 		});
 		describe('Function: log()', function() {
 			it('expected data to be logged', function () {
-				expect(expected_log).to.equal(`IDLING ${test_lobe.name}`);
-//				expect(expected_feedback).to.equal(`SensorSuiteIDLING ${test_lobe.name}`);
+				test_lobe.mpu.log();
+				expect(expected_log).to.equal("hello");
 			});
 		});
 		describe('Function: sleep()', function() {
 			it('expected data read to stop', function () {
-				test_lobe.sleep();
-				expect(test_lobe.awake).to.equal(0);
-//				expect(expected_log).to.equal(`IDLING ${test_lobe.name}`);
-//				expect(expected_feedback).to.equal(`SensorSuiteIDLING ${test_lobe.name}`);
+				test_lobe.mpu.sleep();
+				expect(test_lobe.mpu.awake).to.equal(0);
 			});
 		});
 	});

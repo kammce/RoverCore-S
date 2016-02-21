@@ -1,14 +1,11 @@
 "use strict";
 
-var logg = require('./Log.js');
-var log = new logg('MPU6050', 'blue');
-
 class MPU6050{
     constructor(i2c, log) {
         // Construct Class here
         //need this because i2c is created in rovercore
         this.i2c = i2c;
-
+        this.log = log;
         this.xposL = "";
         this.yposH = "";
         this.xposH = "";
@@ -22,23 +19,33 @@ class MPU6050{
         this.zpos = "";
         this.temp = "";
 
-        this.xangle;
-        this.yangle;
-        this.celsius;
+        this.xangle = 0;
+        this.yangle = 0;
+        this.celsius = 0;
+
+        this.awake = 0;
+        this.r0x3B = "10110100";
+        this.r0x3C = "10110100";
+        this.r0x3D = "10110100";
+        this.r0x3E = "10110100";
+        this.r0x3F = "10110100";
+        this.r0x40 = "10110100";
+        this.r0x41 = "10110100";
+        this.r0x42 = "10110100";
     }
 
     readData() {
 
         var i2c = this.i2c;
 
-        this.xposH = i2c.readByteSync(0x68, 0x3B),  //read byte from data register
-        this.xposL = i2c.readByteSync(0x68, 0x3C),  //read byte from data register
-        this.yposH = i2c.readByteSync(0x68, 0x3D),  //read byte from data register
-        this.yposL = i2c.readByteSync(0x68, 0x3E),  //read byte from data register
-        this.zposH = i2c.readByteSync(0x68, 0x3F),  //read byte from data register
-        this.zposL = i2c.readByteSync(0x68, 0x40),  //read byte from data register
-        this.tempH = i2c.readByteSync(0x68, 0x41),  //read byte from data register
-        this.tempL = i2c.readByteSync(0x68, 0x42),  //read byte from data register
+        this.xposH = i2c.readByteSync(0x68, this.r0x3B);  //read byte from data register
+        this.xposL = i2c.readByteSync(0x68, this.r0x3C);  //read byte from data register
+        this.yposH = i2c.readByteSync(0x68, this.r0x3D);  //read byte from data register
+        this.yposL = i2c.readByteSync(0x68, this.r0x3E);  //read byte from data register
+        this.zposH = i2c.readByteSync(0x68, this.r0x3F);  //read byte from data register
+        this.zposL = i2c.readByteSync(0x68, this.r0x40);  //read byte from data register
+        this.tempH = i2c.readByteSync(0x68, this.r0x41);  //read byte from data register
+        this.tempL = i2c.readByteSync(0x68, this.r0x42);  //read byte from data register
 
         this.xposL = Number(this.xposL).toString(2);  //convert to binary string
         this.yposH = Number(this.yposH).toString(2);  //convert to binary string
@@ -101,8 +108,10 @@ class MPU6050{
         this.celsius = parseFloat(this.temp)/340 + 36.53;
     }
 
-    Display() {
-        log.output("x-angle:" + this.xangle + "y-angle:" + this.yangle + "temperature:" + this.temp);
+    log() {
+        var log = this.log;
+//        log.output("x-angle:" + this.xangle + "y-angle:" + this.yangle + "temperature:" + this.temp);
+        log.output("hello");
     }
 }
 

@@ -1,6 +1,7 @@
 "use strict";
 
 var Neuron = require('../Neuron');
+var mpu6050 = require('./MPU6050.js');
 
 class SensorSuite extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, i2c, model) {
@@ -12,6 +13,7 @@ class SensorSuite extends Neuron {
         this.i2c = i2c;
         this.model = model;
         // Construct Class here
+        this.mpu = new mpu6050(this.i2c, this.log);
     }
     react(input) {
         this.log.output(`REACTING ${this.name}: `, input);
