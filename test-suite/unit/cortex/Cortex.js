@@ -48,10 +48,9 @@ describe('Testing Cortex Class', function () {
 					retries: Infinity // Number: How many times we shoult try to reconnect.
 				}
 			});
-			cortex = new Cortex(connection, false);
+			cortex = new Cortex(connection, true);
 		});
 		it('#loadLobes should load modules found in modules folder', function() {
-			cortex = new Cortex(connection, false);
 			// Load protolobe config file
 			var config = JSON.parse(fs.readFileSync(`./modules/Protolobe/config.json`));
 			// Check if protolobe is in the lobe_map
