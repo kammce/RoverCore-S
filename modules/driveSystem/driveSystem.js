@@ -31,57 +31,58 @@ class DriveSystem extends Neuron {
         this.PIDState = 'on';
         this.PIDStateOld = 'off';
         this.mode = 'c';
-        this.modeOld = 'k'
+        this.modeOld = 'k';
         //////////////////
         this.interval = setInterval(this.sendState(), 100);
         this.cur=['a','b','c','d','e','f'];
         this.rpm=['a','b','c','d','e','f'];
         this.port.on('data', function (data){
-            
-            if(arr[0] == 'r' && str.includes('\n')){
-                rpm.a = parseInt(['0x' + arr[1]]);
-                rpm.b = parseInt(['0x' + arr[2]]);
-                rpm.c = parseInt(['0x' + arr[3]]);
-                rpm.d = parseInt(['0x' + arr[4]]);
-                rpm.e = parseInt(['0x' + arr[5]]);
-                rpm.f = parseInt(['0x' + arr[6]]);
+            var dataSplit;
+            if(data[0] === 'r' && data.includes('\n')){
+                dataSplit = data.split(",");
+                 this.rpm.a = parseInt(['0x' + dataSplit[1]]);
+                 this.rpm.b = parseInt(['0x' + dataSplit[2]]);
+                 this.rpm.c = parseInt(['0x' + dataSplit[3]]);
+                 this.rpm.d = parseInt(['0x' + dataSplit[4]]);
+                 this.rpm.e = parseInt(['0x' + dataSplit[5]]);
+                 this.rpm.f = parseInt(['0x' + dataSplit[6]]);
             }
-            else if(arr[0] == 'c' && str.includes('\n')){
-                cur.a = parseInt(['0x' + arr[1]])/100;
-                cur.b = parseInt(['0x' + arr[2]])/100;
-                cur.c = parseInt(['0x' + arr[3]])/100;
-                cur.d = parseInt(['0x' + arr[4]])/100;
-                cur.e = parseInt(['0x' + arr[5]])/100;
-                cur.f = parseInt(['0x' + arr[6]])/100;
+            else if(data[0] === 'c' && data.includes('\n')){
+                 dataSplit = data.split(",");
+                 this.cur.a = parseInt(['0x' + dataSplit[1]])/100;
+                 this.cur.b = parseInt(['0x' + dataSplit[2]])/100;
+                 this.cur.c = parseInt(['0x' + dataSplit[3]])/100;
+                 this.cur.d = parseInt(['0x' + dataSplit[4]])/100;
+                 this.cur.e = parseInt(['0x' + dataSplit[5]])/100;
+                 this.cur.f = parseInt(['0x' + dataSplit[6]])/100;
             }
             else {
-                console.log("Data Error!")
+                console.log("Data Error!");
             }
         });
-        // Construct Class here
     }
     sendState(){
-        if(this.mode != this.modeOld){
-            port.write('M' + this.mode + "\n");
+        if(this.mode !== this.modeOld){
+            this.port.write('M' + this.mode + "\n");
             this.modeOld = this.mode;
         }
-        if((this.speed != this.speedOld) || (this.angle != this.angleOld)){
-            port.write('S' + this.speed + ',' + this.angle +"\n");
+        if((this.speed !== this.speedOld) || (this.angle !== this.angleOld)){
+            this.port.write('S' + this.speed + ',' + this.angle +"\n");
             this.speedOld = this.speed;
             this.angleOld = this.angle;
         }
-        if(this.limit != this.limitOld){
-            port.write('L' + this.limit + "\n");
+        if(this.limit !== this.limitOld){
+            this.port.write('L' + this.limit + "\n");
             this.limitOld = this.limit;
         }
-        if(this.PIDState != this.PIDStateOld){
-            port.write('P' + this.PIDState + "\n");
+        if(this.PIDState !== this.PIDStateOld){
+            this.port.write('P' + this.PIDState + "\n");
             this.PIDStateOld = this.PIDState;
         }
         //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
     }
     react(input) {
-        if(this.state == 'react'){
+        if(this.state === 'react'){
             this.speed = input.speed;
             this.angle = input.angle;
             this.mode = input.mode;
@@ -116,4 +117,4 @@ class DriveSystem extends Neuron {
 }
 
 
-module.exports = ProtoLobe;
+module.exports = DriveSystem;
