@@ -1,9 +1,10 @@
 'use strict';
 
 class Cortex {
-	constructor(connection) {
-		console.log("Starting Rover's Cortex");
+	constructor(connection, simulate) {
+		console.log("STARTING Rover Core!");
 		var parent = this;
+		this.simulate = simulate;
 		/** Standard feedback method back to Server **/
 		this.feedback = function(lobe_name) {
 			var output = "";
@@ -15,7 +16,7 @@ class Cortex {
 				}
 			}
 			connection.write({
-				lobe: lobe_name,
+				target: lobe_name,
 				message: output
 			});
 		};
@@ -24,14 +25,18 @@ class Cortex {
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
 		this.SPINE = require('./Spine');
-		var I2C_BUS = require('i2c-bus');
-		this.I2C = I2C_BUS.openSync(3);
+		this.I2C = function () {};
+		if(!this.simulate) {
+			var I2C_BUS = require('i2c-bus');
+			this.I2C = I2C_BUS.openSync(3);
+		}
 
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
 		this.Model = new this.MODEL(this.feedback);
-		this.Spine = new this.SPINE();
-
+		if(!this.simulate) {
+			this.Spine = new this.SPINE();
+		}
 		/** Load All Modules in Module Folder **/
 		this.lobe_map = {};
 		this.time_since_last_command = {};
@@ -61,7 +66,6 @@ class Cortex {
 		});
 		connection.on('reconnect', function (/* opts */) {
 			parent.log.output('RECONNECTION attempt started!');
-			//parent.
 		});
 		connection.on('reconnect scheduled', function (opts) {
 			parent.log.output(`Reconnecting in ${opts.scheduled} ms`);
@@ -114,8 +118,8 @@ class Cortex {
 		}
 	}
 	loadLobes() {
-		var fs = require('fs'),
-	    path = require('path');
+		var fs = require('fs');
+	    var path = require('path');
 
 		function getDirectories(srcpath) {
 			return fs.readdirSync(srcpath).filter(function(file) {
@@ -158,7 +162,12 @@ class Cortex {
 			);
 			// Require the selected Lobe
 			try {
-				var Lobe = require(lobe_config_files[i]['source_path']);
+				var Lobe;
+				if(this.simulate) {
+					Lobe = require("./Protolobe/Protolobe.js");
+				} else {
+					Lobe = require(lobe_config_files[i]['source_path']);
+				}
 				// Add Lobe to Lobe Map with key being the lobe_name
 				this.lobe_map[lobe_config_files[i]['lobe_name']] = new Lobe(
 					lobe_config_files[i]['lobe_name'], 

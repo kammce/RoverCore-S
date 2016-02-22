@@ -1,6 +1,7 @@
 {
   "name": "RoverCore",
-  "version": "2.0.0",
+  "version": "2.0.1",
+  "engine": "node >= 4.0.0",
   "devDependencies": {
     "chai": "",
     "chai-spies": "",
@@ -14,8 +15,8 @@
     "colors": "",
     "colorspace": "",
     "forever-monitor": "",
-    "i2c-bus": "",
     "primus": "^4.0.1",
-    "ws": "^0.8.0"
+    "ws": "^0.8.0",
+    "i2c-bus": ""
   }
 }

@@ -19,8 +19,8 @@ describe('End-to-End Cortex', function () {
 		it('Initializating Cortex should connect to dummy server on reserved port 9999', function (done) {
 			primus.on('connection', function connection(spark) {
 				spark.on('data', function(data) {
-					// Skip the phase where Cortex IDLES all of the modules
-					if(!data.hasOwnProperty("lobe")){
+					// Skip the messages about Cortex modules IDLEing themselves. Look just for ones with "info" attributes
+					if(data.hasOwnProperty("info")){
 						expect(data).to.eql({
 							intent: 'REGISTER', 
 							info: { 
@@ -43,7 +43,7 @@ describe('End-to-End Cortex', function () {
 					retries: Infinity // Number: How many times we shoult try to reconnect.
 				}
 			});
-			var cortex = new Cortex(connection);
+			var cortex = new Cortex(connection, true);
 		});
 	});
 	// TODO: create test for handleIdleStatus()
