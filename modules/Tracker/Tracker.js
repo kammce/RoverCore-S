@@ -1,8 +1,8 @@
 "use strict";
 
 var Neuron = require('../Neuron');
-var Model = require('../Model');
 var PWMDriver = require('../PWMDriver');
+var PWMDriverTest = require('./PWMDriverTest');
 
 //Absolute constraint for yaw servo
 const YAW_MIN = -630;
@@ -24,23 +24,7 @@ const PWM_PITCH_MAX = 2500;
 const YAW_PIN = 0;
 const PITCH_PIN = 1;
 
-class PWMDriverDummy{
-				
-				constructor() {
-					this.dutyPin = [];
-	        		this.microPin = [];
-					this.dutyValue = [];
-					this.microValue = [];
-				}
-				setDUTY(pin, duty) {					
-					this.dutyPin.push(pin);
-					this.dutyValue.push(duty);
-				}
-				setMICRO(pin, micro) {					
-					this.microPin.push(pin);
-					this.microValue.push(micro);
-				}
-}
+
 
 class Tracker extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, i2c, model, debug) {
@@ -52,7 +36,7 @@ class Tracker extends Neuron {
         this.i2c = i2c;
         this.model = model;
         if(debug === true) {        	
-			this.pwm = new PWMDriverDummy(0x40, 200, i2c);
+			this.pwm = new PWMDriverTest();
         } else {
         	this.pwm = new PWMDriver(0x40, 200, i2c);
         }               
@@ -94,7 +78,7 @@ class Tracker extends Neuron {
         			//Writes to servo
         			parent.servoWrite(output);        				
         		} else if(i.command === "moveInterval") {        			       			
-        			gimbal = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition, [0,0,0], [i.value.stabilizeYaw, i.value.stabilizePitch]);
+        			gimbal = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition);
         			parent.gimbalPosition = gimbal;        			
         			output = parent.angleToPWM(gimbal);
         			parent.servoWrite(output);        			       			
@@ -192,8 +176,9 @@ class Tracker extends Neuron {
     	return targetAngle;
     	
     }
-    moveInterval(value, position, orientation, groundReferenceFrame){
+    moveInterval(value, position){
     	var targetAngle = [0,0];
+    	
     	if((position[0] + value[0]) <= YAW_MAX && (position[0] + value[0]) >= YAW_MIN) {
     		targetAngle[0] = position[0] + value[0];
     		if(targetAngle[0] >= YAW_MAX_IDEAL || targetAngle[0] <= YAW_MIN_IDEAL) {
