@@ -73,6 +73,7 @@ describe('Testing Cortex Class', function () {
 		it('Lobe should receive target data from server', function (done) {
 			cortex.lobe_map["Protolobe"]._react = function(data) {
 				expect(data).to.equal("coldfustion");
+				console.log("Got this!");
 				done();
 			}
 			spark.write({
