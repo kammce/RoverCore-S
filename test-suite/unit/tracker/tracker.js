@@ -28,24 +28,10 @@ describe('Testing Tracker Class', function() {
 	class i2c_class{
 		constructor(){
 			
-			
 		}
 	}
 	var dutyPin = [], microPin = [];
-	var dutyValue = [], microValue = [];
-	class PWMDriver{
-		constructor(address, freq, i2c) {
-
-		}
-		setDUTY(pin, duty) {
-			dutyPin.push(pin);
-			dutyValue.push(duty);
-		}
-		setMICRO(pin, micro) {
-			microPin.push(pin);
-			microValue.push(micro);
-		}
-	}
+	var dutyValue = [], microValue = [];	
 	var i2c = new i2c_class();
 	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
 
