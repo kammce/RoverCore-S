@@ -5,26 +5,29 @@ var PWMDriver = require('../PWMDriver');
 var PWMDriverTest = require('./PWMDriverTest');
 
 //Absolute constraint for yaw servo
-const YAW_MIN = -630;
-const YAW_MAX = 630;
+const YAW_MIN                   = -630;
+const YAW_MAX                   = 630;
 //Safe constraint for yaw servo
-const YAW_MIN_IDEAL = -540;        
-const YAW_MAX_IDEAL = 540;
+const YAW_MIN_IDEAL             = -540;        
+const YAW_MAX_IDEAL             = 540;
 //Absolute constraint for pitch servo
-const PITCH_MIN = -90;
-const PITCH_MAX = 90;
-
+const PITCH_MIN                 = -90;
+const PITCH_MAX                 = 90;
 //Length of pulse in uSeconds
 const PWM_YAW_MIN = 600;
 const PWM_YAW_MAX = 2400;
 const PWM_PITCH_MIN = 500;
 const PWM_PITCH_MAX = 2500;
-
+//Lidar-I2C-Address
+const Lidar_Address             = 0x62;
+const Lidar_Control             = 0x00;
+const Lidar_Status              = 0x01;
+//const Lidar_Velocity            = 0x09;
+const Lidar_Distance_HighByte   = 0x0f;
+const Lidar_Distance_LowByte    = 0x10;
 //Servo pins
 const YAW_PIN = 0;
 const PITCH_PIN = 1;
-
-
 
 class Tracker extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, i2c, model, debug) {
@@ -35,19 +38,22 @@ class Tracker extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c;
         this.model = model;
+
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
         } else {
         	this.pwm = new PWMDriver(0x40, 200, i2c);
         }               
 
-		this.gimbalPosition = [0,0];
-		this.defaultPosition = [0,0];
-		this.lidarMeasurement = 0;
+	    this.gimbalPosition = [0,0];
+	    this.defaultPosition = [0,0];        
+	    this.lidarMeasurement = 0;
+	    this.lidarHealth = true;
 
         this.model.registerMemory('LIDAR');
         this.model.registerMemory('CAMERA GIMBAL');
     }
+
     parseCommand(input) {
     	var parent = this;    	  
     	var promiseGetData = function(i) {
@@ -91,6 +97,13 @@ class Tracker extends Neuron {
         			output = parent.angleToPWM(gimbal);
         			parent.servoWrite(output);         			       			
         		} else if(i.command === "getDistance") { 
+        			parent.lidarMeasurement = parent.getDistance();
+        			this.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
+        			this.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
+        		} else if(i.command === "lidarHealth") {
+        			parent.lidarHealth = parent.checkLidarHealth();
+        			this.log.output("LIDAR HEALTH: ", parent.lidarHealth);
+        			this.feedback("LIDAR HEALTH: ", parent.lidarHealth);
         		}
         		parent.updateModel();
     			resolve(1);        		
@@ -102,6 +115,7 @@ class Tracker extends Neuron {
         //this.log.output(`REACTING ${this.name}: `, input);
         //this.feedback(`REACTING ${this.name}: `, input);
         this.parseCommand(input);       
+
 	}
     halt() {
       //  this.log.output(`HALTING ${this.name}`);
@@ -113,12 +127,12 @@ class Tracker extends Neuron {
         		pitch : -90
         	}
         });
+
         var parent = this;
         setTimeout(function() {        	
         	parent.pwm.setDUTY(YAW_PIN, 100);
         	parent.pwm.setDUTY(PITCH_PIN, 100); 
         }, 1000);
-
     }
     resume() {
        // this.log.output(`RESUMING ${this.name}`);
@@ -128,11 +142,13 @@ class Tracker extends Neuron {
         });        
     }
     idle() {
+
        // this.log.output(`IDLING ${this.name}`);
        //this.feedback(`IDLING ${this.name}`);
         this.parseCommand({
         	command : "recalibrate"
         });
+
     }
     recalibrate() {
     	//this.feedback("Moving gimbal to default position");      	
@@ -207,6 +223,8 @@ class Tracker extends Neuron {
     	return targetAngle;
     }
 
+
+
 	angleToPWM(value) {
     	var yaw = Math.round((((value[0] - YAW_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_MAX - YAW_MIN)) + PWM_YAW_MIN);
     	var pitch = Math.round((((value[1] - PITCH_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_MAX - PITCH_MIN)) + PWM_PITCH_MIN);
@@ -218,9 +236,7 @@ class Tracker extends Neuron {
     	this.pwm.setMICRO(PITCH_PIN, value[1]);
 
     }
-    getDistance() {
-
-    }
+    
     updateModel() {   
 
     	this.model.set('LIDAR' , this.lidarMeasurement);
@@ -228,9 +244,37 @@ class Tracker extends Neuron {
     		yaw: this.gimbalPosition[0],
     		pitch: this.gimbalPosition[1]
     	});
-    	
 
     }
+    
+    
+    getDistance(){
+        var Byte = new Uint8Array(2);
+        var parent = this;
+        var Distance = 0;
+        this.i2c.writeByteSync(Lidar_Address,Lidar_Control,0x04);
+        setTimeout(function(){
+            Byte[0] = parent.i2c.readByteSync(Lidar_Address,Lidar_Distance_HighByte);
+            Byte[1] = parent.i2c.readByteSync(Lidar_Address,Lidar_Distance_LowByte);
+            Distance = new Int16Array([Byte[0] << 8 | Byte[1]])[0]; 
+            //parent.log.output("Distance: "+Distance+" cm");
+           // parent.lidarMeasurement = Distance
+            return Distance;
+        }, 20);        
+    }
+    checkLidarHealth(){
+        var Byte = new Uint8Array(1);
+        var Health = false;
+        Byte[0] = this.i2c.readByteSync(Lidar_Address,Lidar_Status);
+        Byte[0] = Byte[0] << 7;
+        if (Byte[0] === 128){
+            Health = true;
+        }else{
+            Health = false;
+        }
+        return Health;
+    }
+    
 }
 
 module.exports = Tracker;
