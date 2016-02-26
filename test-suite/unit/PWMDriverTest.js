@@ -31,9 +31,32 @@ describe('Testing PWMDriver', function(){
 			command1 =[], command2 =[];
 		}
 	};
+
+	var log = function() { }
+	log.output = function(input) { 
+		expected_log = "";
+		for (var i = 0; i < arguments.length; i++) {
+			if(typeof arguments[i] === "object") {
+				expected_log += JSON.stringify(arguments[i])+"\n";
+			} else {
+				expected_log += arguments[i];
+			}
+		}
+	};
+
+	var feedback = function(input) { 
+		expected_feedback = "";
+		for (var i = 0; i < arguments.length; i++) {
+			if(typeof arguments[i] === "object") {
+				expected_feedback += JSON.stringify(arguments[i])+"\n";
+			} else {
+				expected_feedback += arguments[i];
+			}
+		} 
+	};
 	module.exports = i2c_bus;
 	var i2c = new i2c_bus();
-	var test_unit = new PWMDriver(50,100,i2c);
+	var test_unit = new PWMDriver(50,100,i2c, log);
 	
 
 	describe('Testing all functions for propper returns', function(){
