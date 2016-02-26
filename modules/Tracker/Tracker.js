@@ -82,30 +82,40 @@ class Tracker extends Neuron {
         			//Converts output angle to PWM pulse length        			
         			output = parent.angleToPWM(gimbal);
         			//Writes to servo
-        			parent.servoWrite(output);        				
+        			parent.servoWrite(output);
+        			parent.updateModel();        				
         		} else if(i.command === "moveInterval") {        			       			
         			gimbal = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition);
         			parent.gimbalPosition = gimbal;        			
         			output = parent.angleToPWM(gimbal);
-        			parent.servoWrite(output);        			       			
+        			parent.servoWrite(output);
+        			parent.updateModel();        			       			
         		} else if(i.command === "defaultConfig") {
         			//Updates the default position       			
-        			parent.defaultConfig([i.value.yaw, i.value.pitch]);        			
+        			parent.defaultConfig([i.value.yaw, i.value.pitch]);        			        			
         		} else if(i.command === "recalibrate" ) {         			     			
         			gimbal = parent.recalibrate();        			
         			parent.gimbalPosition = gimbal;        			
         			output = parent.angleToPWM(gimbal);
-        			parent.servoWrite(output);         			       			
+        			parent.servoWrite(output);
+        			parent.updateModel();         			       			
         		} else if(i.command === "getDistance") { 
-        			parent.lidarMeasurement = parent.getDistance();
-        			this.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
-        			this.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
+        			//parent.lidarMeasurement = parent.getDistance();
+        			parent.getDistance();        			
+        			setTimeout(function(){
+        				parent.updateModel();
+        				//parent.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
+        				parent.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
+        			}, 40);
         		} else if(i.command === "lidarHealth") {
-        			parent.lidarHealth = parent.checkLidarHealth();
-        			this.log.output("LIDAR HEALTH: ", parent.lidarHealth);
-        			this.feedback("LIDAR HEALTH: ", parent.lidarHealth);
+        			parent.checkLidarHealth();
+        			setTimeout(function(){
+        				//parent.log.output("LIDAR HEALTH: ", parent.lidarHealth);
+        				parent.feedback("LIDAR HEALTH: ", parent.lidarHealth);
+        			}, 10);
+        			
         		}
-        		parent.updateModel();
+        		
     			resolve(1);        		
         	});
         };
@@ -253,13 +263,14 @@ class Tracker extends Neuron {
         var parent = this;
         var Distance = 0;
         this.i2c.writeByteSync(Lidar_Address,Lidar_Control,0x04);
+
         setTimeout(function(){
             Byte[0] = parent.i2c.readByteSync(Lidar_Address,Lidar_Distance_HighByte);
             Byte[1] = parent.i2c.readByteSync(Lidar_Address,Lidar_Distance_LowByte);
             Distance = new Int16Array([Byte[0] << 8 | Byte[1]])[0]; 
             //parent.log.output("Distance: "+Distance+" cm");
-           // parent.lidarMeasurement = Distance
-            return Distance;
+            parent.lidarMeasurement = Distance;            
+           //return Distance;
         }, 20);        
     }
     checkLidarHealth(){
@@ -272,7 +283,7 @@ class Tracker extends Neuron {
         }else{
             Health = false;
         }
-        return Health;
+        this.lidarHealth = Health;
     }
     
 }

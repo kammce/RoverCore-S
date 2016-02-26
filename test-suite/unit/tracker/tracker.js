@@ -1,6 +1,7 @@
 "use strict";
 
 var Tracker = require('../../../modules/Tracker/Tracker');
+var I2CTest = require('../../../modules/Tracker/I2CTest');
 
 describe('Testing Tracker Class', function() {
 	var expected_log;
@@ -23,16 +24,11 @@ describe('Testing Tracker Class', function() {
 	var model = new MODEL(feedback);
 	// var I2C_BUS = require('i2c-bus');
 	// var i2c = I2C_BUS.openSync(3);
-	console.log(model.get);
+	console.log(model.get);	
 	
-	class i2c_class{
-		constructor(){
-			
-		}
-	}
 	var dutyPin = [], microPin = [];
 	var dutyValue = [], microValue = [];	
-	var i2c = new i2c_class();
+	var i2c = new I2CTest();
 	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
 
 
@@ -192,12 +188,31 @@ describe('Testing Tracker Class', function() {
 			expect(test_lobe.getDistance()).to.be.not.empty;
 		});	
 		*/
+	});	
+
+	describe('#lidar getDistance', function(){
+		
+		before(function(done) {
+			test_lobe.react({
+				command: "getDistance"
+			});
+			setTimeout(function(){done();}, 50);
+		});
+		it('#getDistance should return correct distance', function(){
+			expect(test_lobe.lidarMeasurement).to.eql(271);
+		});
+	});
+
+	describe('#lidar checkLidarHealth', function(){
+		before(function(done){
+			test_lobe.react({
+				command: "lidarHealth"
+			});
+			setTimeout(function(){done();}, 20);
+		});
+		it('#checkLidarHealth should return true', function(){
+			expect(test_lobe.lidarHealth).to.be.true;
+		});
 	});		
-
-		
-
-		
-
-		
 	
 });
