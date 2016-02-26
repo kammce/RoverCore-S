@@ -1,5 +1,6 @@
 {
 	"lobe_name": "Protolobe",
 	"log_color": "red",
-	"idle_time": 4000
+	"idle_time": 4000,
+	"mission_controller": "ProtolobeUser"
 }
