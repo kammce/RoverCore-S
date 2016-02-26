@@ -124,8 +124,8 @@ describe('Testing SensorSuite Class', function () {
 		});
 		describe('Function: log()', function() {
 			it('expected data to be logged', function () {
-				test_lobe.mpu.log();
-				expect(expected_log).to.equal("hello");
+				test_lobe.mpu.Log();
+				expect(expected_log).to.equal("x-angle: -35.26390990826984 y-angle: -35.26390990826984 temperature: -20.164117647058823");
 			});
 		});
 		describe('Function: sleep()', function() {

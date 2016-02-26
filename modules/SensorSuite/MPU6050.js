@@ -22,7 +22,7 @@ class MPU6050{
         this.xangle = 0;
         this.yangle = 0;
         this.celsius = 0;
-
+/*
         this.r0x3B = "180";
         this.r0x3C = "180";
         this.r0x3D = "180";
@@ -31,6 +31,7 @@ class MPU6050{
         this.r0x40 = "180";
         this.r0x41 = "180";
         this.r0x42 = "180";
+*/
     }
 
     wakeUp() {
@@ -42,6 +43,8 @@ class MPU6050{
 
         var i2c = this.i2c;
 
+/*
+        //this is input for test, won't input actual data
         this.xposH = i2c.readByteSync(0x68, this.r0x3B);  //read byte from data register
         this.xposL = i2c.readByteSync(0x68, this.r0x3C);  //read byte from data register
         this.yposH = i2c.readByteSync(0x68, this.r0x3D);  //read byte from data register
@@ -50,6 +53,17 @@ class MPU6050{
         this.zposL = i2c.readByteSync(0x68, this.r0x40);  //read byte from data register
         this.tempH = i2c.readByteSync(0x68, this.r0x41);  //read byte from data register
         this.tempL = i2c.readByteSync(0x68, this.r0x42);  //read byte from data register
+*/
+
+        this.xposH = i2c.readByteSync(0x68, 0x3B);  //read byte from data register
+        this.xposL = i2c.readByteSync(0x68, 0x3C);  //read byte from data register
+        this.yposH = i2c.readByteSync(0x68, 0x3D);  //read byte from data register
+        this.yposL = i2c.readByteSync(0x68, 0x3E);  //read byte from data register
+        this.zposH = i2c.readByteSync(0x68, 0x3F);  //read byte from data register
+        this.zposL = i2c.readByteSync(0x68, 0x40);  //read byte from data register
+        this.tempH = i2c.readByteSync(0x68, 0x41);  //read byte from data register
+        this.tempL = i2c.readByteSync(0x68, 0x42);  //read byte from data register
+
 
         this.xposL = Number(this.xposL).toString(2);  //convert to binary string
         this.yposH = Number(this.yposH).toString(2);  //convert to binary string
@@ -103,7 +117,7 @@ class MPU6050{
         }
     }
 
-    convertPosition() {     //converts to Angles
+    convertPosition() {     //converts x- and y-angles
       this.xangle = 57.295*Math.atan(parseFloat(this.ypos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.xpos),2)));
       this.yangle = 57.295*Math.atan(parseFloat(this.xpos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.ypos),2)));
     }
@@ -117,10 +131,9 @@ class MPU6050{
         i2c.writeByteSync(0x68, 0x6B, 0);
     }
 
-    log() {
+    Log() {
 
-//        log.output("x-angle:" + this.xangle + "y-angle:" + this.yangle + "temperature:" + this.temp);
-        this.log.output("hello");
+        this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
     }
 }
 
