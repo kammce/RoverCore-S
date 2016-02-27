@@ -8,7 +8,7 @@ var devAddr = 0x8; // LTC2309's i2c device address is 0001000 = 8 = 0x08
 var mre = 0x01; //FOR TESTING PURPOSES: Assume the MRE's device address is 0x01
 
 class Arm extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model, tool=0) {
+    constructor(name, feedback, color_log, idle_timeout, i2c, model) {
         super(name, feedback, color_log, idle_timeout);
         this.name = name;
         this.feedback = feedback;
@@ -16,7 +16,7 @@ class Arm extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c; // holds link to a Bus object returned by i2c-bus.open(); will use to grab data off of motor-reading adc
         this.model = model;
-        this.tool = tool; //tool currently being held
+        this.tool = 0; //tool currently being held
 
         // Construct Class here
         // Angular Bounds (Index convention: 0:wrist, 1:elbow, 2:base, 3:shoulder)
@@ -54,41 +54,41 @@ class Arm extends Neuron {
         };
         //must change idleposition vals
         this.idleposition = {       // This variable is a preset "safe" position for use with switchTool()
-            base: 0,
-            shoulder: 0,
-            elbow: 0,
-            wrist: 0,
-            wrist_r: 0,     //may not need wrist or claw
-            wrist_l: 0,
-            claw: 0
+            base: 5,
+            shoulder: 5,
+            elbow: 5,
+            wrist: 5,
+            wrist_r: 5,     //may not need wrist or claw
+            wrist_l: 5,
+            claw: 5
         };
         //tool positions subject to change
         this.toolposition1 = {      //This variable is a preset position for tool #1
-          base: 0,
-          shoulder: 0,
-          elbow: 0,
-          wrist: 0,
-          wrist_r: 0,
-          wrist_l: 0,
-          claw: 0
+          base: 11,
+          shoulder:11,
+          elbow: 11,
+          wrist: 11,
+          wrist_r: 11,
+          wrist_l: 11,
+          claw: 11
       };
       this.toolposition2 = {        //This variable is a preset position for tool #2
-          base: 0,
-          shoulder: 0,
-          elbow: 0,
-          wrist: 0,
-          wrist_r: 0,
-          wrist_l: 0,
-          claw: 0
+          base: 22,
+          shoulder: 22,
+          elbow: 22,
+          wrist: 22,
+          wrist_r: 22,
+          wrist_l: 22,
+          claw: 22
       };
       this.toolposition3 = {        //This variable is a preset position for tool #3
-          base: 0,
-          shoulder: 0,
-          elbow: 0,
-          wrist: 0,
-          wrist_r: 0,
-          wrist_l: 0,
-          claw: 0
+          base: 33,
+          shoulder: 33,
+          elbow: 33,
+          wrist: 33,
+          wrist_r: 33,
+          wrist_l: 33,
+          claw: 33
       };
 
       this.isSafe = function(angles){

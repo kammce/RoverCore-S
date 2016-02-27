@@ -143,4 +143,55 @@ describe("Testing class Arm:", function(){
 	// 	});
 	// });
 	/*  End Wyatt & Austin's claw functions  */
+	describe("function grab()", function(){
+		var claw_old = testunit.position;
+		var claw_new = 54;
+		var output = testunit.grab(claw_new);
+
+		it("Expected grab() to have changed target.claw after moving claw to the specified angle", function(){
+			expect(testunit.target.claw).to.not.equal(claw_old);
+		});
+
+	});
+
+	describe("function switchTool()", function(){
+		var tool_old = testunit.tool;
+		var tool_new = 1;
+		var tool_new2=3;
+		//var output = testunit.switchTool(tool_new);
+		
+		before(function(tool_new){
+			it("Expected switchTool(1) to change tool to be 1",function(){
+				expect(testunit.tool).to.not.equal(tool_old);
+				expect(testunit.tool).to.equal(tool_new);
+			});
+			/*it("Expected switchTool() to change shoulder and elbow positions to safe positions",function(){
+				expect(testunit.target.shoulder).to.equal(testunit.idleposition.shoulder);
+				expect(testunit.target.elbow).to.equal(testunit.idleposition.elbow);
+			});*/
+		});
+		
+		var tool_old2 = tool_new;
+
+		before(function(tool_new2){
+			it("Expected switchTool() to change tool to from 1 to 3",function(){
+			expect(testunit.tool).to.not.equal(tool_old2);
+			expect(testunit.tool).to.equal(tool_new2);
+		});
+		it("Expected switchTool() to change shoulder and elbow positions to safe positions",function(){
+			expect(testunit.target.shoulder).to.equal(testunit.idleposition.shoulder);
+			expect(testunit.target.elbow).to.equal(testunit.idleposition.elbow);
+		});
+	});
+
+		var tool_new3 = 9;
+		//var output3 = testunit.switchTool(tool_new3);
+		before(function(tool_new3){
+			var  output3 = testunit.switchTool(tool_new3);
+		it("Expected switchTool() to fail",function(){
+			expect(output3).to.equal("FAIL_switchTool()");
+		});
+	});
+		
+	});
 });
