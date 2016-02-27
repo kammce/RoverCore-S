@@ -116,9 +116,11 @@ class Cortex {
 						break;
 					case "connected":
 						for(let lobe in this.lobe_map) {
-							if(this.lobe_map[lobe]['mission_controller'] === data['target']) {
-								this.lobe_map[lobe]._resume();
-								return;
+							if(typeof this.lobe_map[lobe]['mission_controller'] === "string") {
+								if(this.lobe_map[lobe]['mission_controller'] === data['target']) {
+									this.lobe_map[lobe]._resume();
+									return;
+								}
 							}
 						}
 						break;
@@ -164,8 +166,8 @@ class Cortex {
 					config.hasOwnProperty('idle_time')) {
 					if(typeof config['lobe_name'] === "string" && 
 						typeof config['log_color'] === "string" && 
-						typeof config['idle_time'] === "number" &&
-						typeof config['mission_controller'] === "string") {
+						typeof config['idle_time'] === "number") {
+						// typeof config['mission_controller'] === "string" :: Not required!!
 						// adding source code path to config object
 						config['source_path'] = `./${lobes_directories[i]}/${config['lobe_name']}`;
 						// pushing config object to the end of list
@@ -173,7 +175,7 @@ class Cortex {
 						continue; // removes the need for multiple else statements
 					}
 				}
-				throw new Error("Failed to load configuration file for ${ lobes_directories[i] }");
+				throw new Error(`Failed to load configuration file for ${ lobes_directories[i] }`);
 			} catch(e) {
 				this.log.output(e);
 			}
@@ -205,7 +207,9 @@ class Cortex {
 				// Give lobe property mission_controller. 
 				// If mission_controller disconnects or reconnects, 
 				// the lobe will halt or resume respectively.
-				this.lobe_map[lobe_config_files[i]['lobe_name']].mission_controller = lobe_config_files[i]['mission_controller'];
+				if(typeof lobe_config_files[i]['mission_controller'] === "string") {
+					this.lobe_map[lobe_config_files[i]['lobe_name']].mission_controller = lobe_config_files[i]['mission_controller'];
+				}
 				// Set time since last command to zero to IDLE all lobes in the beginning
 				this.time_since_last_command[lobe_config_files[i]['lobe_name']] = 0;
 				// Log that a Lobe was loaded correctly
