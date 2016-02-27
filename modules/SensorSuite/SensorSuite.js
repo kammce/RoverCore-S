@@ -13,7 +13,9 @@ class SensorSuite extends Neuron {
         this.i2c = i2c;
         this.model = model;
         // Construct Class here
+            //mpu6050 class initialization
         this.mpu = new mpu6050(this.i2c, this.log);
+        var groundTemp = 0;
     }
     react(input) {
         this.log.output(`REACTING ${this.name}: `, input);
@@ -30,6 +32,12 @@ class SensorSuite extends Neuron {
     idle() {
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
+    }
+    groundTemp() {
+
+    }
+    humidity() {
+
     }
 }
 

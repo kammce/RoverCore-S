@@ -57,7 +57,7 @@ describe('Testing SensorSuite Class', function () {
 	module.exports = i2c_bus;
 	var i2c = new i2c_bus();
 
-
+	var dummyTemp = 176;
 
 
 //	var i2c = function() {}; // filler i2c object (not used in test)
@@ -132,6 +132,17 @@ describe('Testing SensorSuite Class', function () {
 			it('expected data read to stop', function () {
 				test_lobe.mpu.sleep();
 				expect(awake).to.equal(0);
+			});
+		});
+		describe('Function: groundTemp()', function() {
+			it('expected temperature conversion to celsius', function () {
+				test_lobe.lm35.groundTemp();
+				expect(test_lobe.groundTemp()).to.equal(85.9375);
+			});
+		describe('Function: humidity()', function() {
+			it('expected temperature conversion to percentage', function () {
+				test_lobe.humidity();
+				expect(test_lobe.humidity()).to.equal(??????);
 			});
 		});
 	});

@@ -134,6 +134,7 @@ class MPU6050{
     Log() {
 
         this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
+//        console.log("x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}");
     }
 }
 
