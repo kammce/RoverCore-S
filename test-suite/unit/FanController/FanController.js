@@ -210,48 +210,52 @@ var log = function() { }
         } 
     };
 var unittest = new file("Fan Controller", feedback,log,4000,i2c,model);
+var UPPER_TEMP = 128;
+var LOWER_TEMP = 0;
+var CMD_ADDR;
+var value;
 
 describe('Fan Controller Class',function(){
     describe('readTemp();', function(){
         unittest.readTemp();
         it('should recieve byte information for temperature',function(){
-            expect(unittest.TEMP[0]).to.be.a(175);
+            expect(unittest.TEMP[0]).to.be.equal(25);
         });
         it('should have 10 values in the array',function(){
-            expect(readTemp()).to.have.length(11);
+            expect(unittest.readTemp()).to.have.length(11);
         });
     });
     describe('decodeTEMP(temp);', function(){
         it('should properly convert byte temp to Celius form',function(){
-            temp = '0x7F';
-            expect(decodeTEMP(temp)).to.be.equal('175');
+            temp = '0x7D';
+            expect(unittest.decodeTEMP(temp)).to.be.equal(125);
         });
         it('should properly convert byte temp to Celius form',function(){
-            temp = '0x22';
-            expect(decodeTEMP(temp)).to.be.equal('25');
+            temp = '0x19';
+            expect(unittest.decodeTEMP(temp)).to.be.equal(25);
         });
         it('should properly convert byte temp to Celius form',function(){
             temp = '0x00';
-            expect(decodeTEMP(temp)).to.be.equal('0');
+            expect(unittest.decodeTEMP(temp)).to.be.equal(0);
         });
         it('should properly convert byte temp to Celius form',function(){
             temp = '0xFF';
-            expect(decodeTEMP(temp)).to.be.equal('-1');
+            expect(unittest.decodeTEMP(temp)).to.be.equal(-1);
         });
         it('should properly conver btye temp to Celius form', function(){
             temp = '0x80';
-            expect(decodeTEMP(temp)).to.be.equal('-128');
+            expect(unittest.decodeTEMP(temp)).to.be.equal(-128);
         });
     });
     describe('wrtieTempLimits(UPPER_TEMP, LOWER_TEMP',function(){
         it('should send data as a byte',function(){
-            expect(wrtieTempLimits(UPPER_TEMP,LOWER_TEMP)).to.be.a('array');
+            expect(unittest.writeeTempLimits(UPPER_TEMP,LOWER_TEMP)).to.be.a('array');
         });
         it('should return an array of lenth 20',function(){
-            expect(wrtieTempLimits(UPPER_TEMP,LOWER_TEMP)).to.have.length(20);
+            expect(unittest.writeTempLimits(UPPER_TEMP,LOWER_TEMP)).to.have.length(20);
         });
         it('values 0-9 should be equal to UPPER_TEMP',function(){
-            var TEMPLIMITS = wrtieTempLimits(UPPER_TEMP,LOWER_TEMP);
+            var TEMPLIMITS = unittest.writeTempLimits(UPPER_TEMP,LOWER_TEMP);
             var foo = true;
             for(i=0;i<10;i++){
                 if(TEMPLIMITS[i]!==UPPER_TEMP){
@@ -261,7 +265,7 @@ describe('Fan Controller Class',function(){
             expect(foo).to.be.true;
         });
         it('values 10-19 should be equal to LOWER_TEMP',function(){
-            var TEMPLIMITS = wrtieTempLimits(UPPER_TEMP,LOWER_TEMP);
+            var TEMPLIMITS = unittest.writeTempLimits(UPPER_TEMP,LOWER_TEMP);
             var foo = true;
             for(i=10;i<20;i++){
                 if(TEMPLIMITS[i]!==LOWER_TEMP){
@@ -274,41 +278,45 @@ describe('Fan Controller Class',function(){
     describe('codeTemp(value)',function(){
         it('should properly convert Celius to a byte', function(){
             temp = 0;
-            expect(codeTemp(value)).to.be.equal(0x00)
+            expect(unittest.codeTemp(temp)).to.be.a(byte);
+        });
+        it('should properly convert byte temp to Celius form',function(){
+            temp = 0;
+            expect(unittest.codeTEMP(temp)).to.be.equal(0x00);
         });
         it('should properly convert byte temp to Celius form',function(){
             temp = 25;
-            expect(decodeTEMP(temp)).to.be.equal(0x22);
+            expect(unittest.codeTEMP(temp)).to.be.equal(0x19);
         });
         it('should properly convert byte temp to Celius form',function(){
-            temp = 175;
-            expect(decodeTEMP(temp)).to.be.equal(0x7F);
+            temp = 125;
+            expect(unittest.codeTEMP(temp)).to.be.equal(0x7D);
         });
         it('should properly convert byte temp to Celius form',function(){
-            temp = -1;
-            expect(decodeTEMP(temp)).to.be.equal(0xFF);
+            temp = -10;
+            expect(unittest.codeTEMP(temp)).to.be.equal(0xF6);
         });
         it('should properly conver btye temp to Celius form', function(){
             temp = -128;
-            expect(decodeTEMP(temp)).to.be.equal(0x80);
+            expect(unittest.codeTEMP(temp)).to.be.equal(0x80);
         });
     });
     describe('setRegister()',function(){
         it('should return an array',function(){
-            expect(setRegister()).to.be.a('array');
+            expect(unittest.setRegister()).to.be.a('array');
         });
         it('array should be length _____',function(){
-            expect(setRegister()).to.have.length(1); // I dont know the length yet
+            expect(unittest.setRegister()).to.have.length(1); // I dont know the length yet
         });
     });
     describe('editRegister(CMD_ADDR,value)',function(){
         it('should ',function(){
-            expect(editRegister(value)).to.be.a('byte');
+            expect(unittest.editRegister(value)).to.be.a('byte');
         });
     });
     describe('readRegister(CMD_ADDR)',function(){
         it('should read a byte value', function(){
-            expect(readRegister(CMD_ADDR)).to.be.a('byte');
+            expect(unittest.readRegister(CMD_ADDR)).to.be.a('byte');
         });
     });
 });

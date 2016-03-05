@@ -135,17 +135,17 @@ class FanController extends Neuron {
         this.TEMP = [];
         this.TEMPLIMIT = [];
         //Dummy vars just for testing purposes
-        this.r0x20 = 0x7F;
-        this.r0x21 = 0x7F;
-        this.r0x22 = 0x7F;
-        this.r0x23 = 0x7F;
-        this.r0x24 = 0x7F;
-        this.r0x25 = 0x7F;
-        this.r0x26 = 0x7F;
-        this.r0x27 = 0x7F;
-        this.r0x28 = 0x7F;
-        this.r0x29 = 0x7F;
-        this.r0x78 = 0x7F;
+        this.r0x20 = 0x22;
+        this.r0x21 = 0x22;
+        this.r0x22 = 0x22;
+        this.r0x23 = 0x22;
+        this.r0x24 = 0x22;
+        this.r0x25 = 0x22;
+        this.r0x26 = 0x22;
+        this.r0x27 = 0x22;
+        this.r0x28 = 0x22;
+        this.r0x29 = 0x22;
+        this.r0x78 = 0x22;
         // Construct Class here
     }
     react(input) {
@@ -173,10 +173,10 @@ class FanController extends Neuron {
         }
     }
     codeTEMP(value){
-        if(value>0){
-            return value.toString(16);
+        if(value<0){
+            return parseInt((value+256).toString(16),16);
         } else{
-            return (value+256).toString(16);
+            return parseInt(value.toString(16),16);
         }
     }
     readTemp() {
@@ -194,7 +194,7 @@ class FanController extends Neuron {
         this.TEMP.push(decodeTEMP(i2c.readByte(0x2C,0x29)));
         this.TEMP.push(decodeTEMP(i2c.readByte(0x2C,0x78)));
         */
-        this.TEMP.push(this.decodeTEMP(0x80));
+        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,this.r0x20)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,this.r0x21)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,this.r0x22)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,this.r0x23)));
