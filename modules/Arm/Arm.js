@@ -54,10 +54,10 @@ class Arm extends Neuron {
         };
         //must change idleposition vals
         this.idleposition = {       // This variable is a preset "safe" position for use with switchTool()
-            base: 5,
-            shoulder: 5,
-            elbow: 5,
-            wrist: 5,
+        base: 5,
+        shoulder: 5,
+        elbow: 5,
+        wrist: 5,
             wrist_r: 5,     //may not need wrist or claw
             wrist_l: 5,
             claw: 5
@@ -406,226 +406,215 @@ class Arm extends Neuron {
         };
         this.switchTool = function(toolNumber)
         {
-            var currentTool = this.tool;    //refer to newly added tool param in Arm constructor
             var clawdetachangle = 0;            //some angle for claw that detaches a tool???
-            switch(toolNumber)
-            {
-                case 0:{
-                    if(currentTool===1){
+            
+            //end if toolNumber is already attached
+            if(toolNumber == this.tool){
+                return "Tool already selected";
+            }
+            //end if toolNumber is out of bounds
+            if(toolNumber<0 || this.tool>3){
+                return "Invalid tool";
+            }
+
+            //EMPTIES THE CLAW 
+            if(this.tool>0){
+
+                //set target position for dropping tool
+                switch(this.tool){
+                    case 1:{
                         this.savedposition = this.position;             //not used
                         this.target = this.toolposition1;               //makes tool position the target
 
-                        //moving arm to a safe location
-                        //*******************************************
-                        this.moveServo("base",this.idleposition.base);              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
-
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time       
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",clawdetachangle);             //detaches tool
-                        //delay
-
-                        //moving arm back to a safe location
-                        //*******************************************
-                        this.moveActuator("shoulder",this.idleposition.shoulder);
-                        this.moveActuator("elbow",this.idleposition.elbow);
-
-                        this.tool = 0;
-
                         break;
                     }
-                    else if(currentTool===2){
+                    case 2:{
                         this.savedposition = this.position;             //not used
-                        this.target = this.toolposition2;               //makes tool position the target
-
-                        //moving arm to a safe location
-                        //*******************************************
-                        this.moveServo("base",this.idleposition.base);              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
-
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time       
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",clawdetachangle);             //detaches tool
-                        //delay
-
-                        //moving arm back to a safe location
-                        //*******************************************
-                        this.moveActuator("shoulder",this.idleposition.shoulder);
-                        this.moveActuator("elbow",this.idleposition.elbow);
-
-                        this.tool = 0;
+                        this.target = this.toolposition1;               //makes tool position the target
 
                         break;
                     }
-                    else if(currentTool===3){
+                    case 3:{
                         this.savedposition = this.position;             //not used
-                        this.target = this.toolposition3;               //makes tool position the target
-
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
-
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time       
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",clawdetachangle);             //detaches tool
-                        //delay
-
-                        //moving arm back to a safe location
-                        //*******************************************
-                        this.moveActuator("shoulder",this.idleposition.shoulder);
-                        this.moveActuator("elbow",this.idleposition.elbow);
-
-                        this.tool = 0;
+                        this.target = this.toolposition1;               //makes tool position the target
 
                         break;
                     }
-                    else break;
-                }
-                case 1:{
-                    if(currentTool===0){
-                        this.savedposition = this.position;
-                        this.target = this.toolposition1;
-
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
-
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time  
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",this.target.claw);        //attaches tool
-                        //delay
-                        
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-
-                        this.tool = toolNumber;
-
-                        break;
-                    }
-                    else{                       //detaches current tool then attaches desired tool
-                        this.switchTool(0);
-                        this.switchTool(1);
+                    default:{
                         break;
                     }
                 }
-                case 2:{
-                    if(currentTool===0){
-                        this.savedposition = this.position;
-                        this.target = this.toolposition2;
 
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
+                //moving arm to a safe location
+                //*******************************************
+                this.moveServo("base",this.idleposition.base);              
+                this.moveActuator("shoulder",this.idleposition.shoulder);        
+                this.moveActuator("elbow",this.idleposition.elbow);
+                //Insert delay
+                while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+                {
 
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time  
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",this.target.claw);        //attaches tool
-                        //delay
-                        
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
+                    this.position = this.readadc(devAddr);
 
-                        this.tool = toolNumber;
-
-                        break;
+                    if(this.position.shoulder == this.idleposition.shoulder)
+                    {
+                        this.moveActuator("shoulder", "stop");
                     }
-                    else{                       //detaches current tool then attaches desired tool
-                        this.switchTool(0);
-                        this.switchTool(2);
-                        break;
+                    if(this.position.elbow == this.idleposition.elbow)
+                    {
+                        this.moveActuator("elbow", "stop");
                     }
                 }
-                case 3:{
-                    if(currentTool===0){
-                        this.savedposition = this.position;
-                        this.target = this.toolposition3;
 
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-                        //Insert delay
+                //moving arm to drop location
+                //*******************************************
+                this.moveServo("wrist_r",this.target.wrist_r);        
+                this.moveServo("base",this.target.base);
+                this.moveServo("wrist_l",this.target.wrist_l); 
+                //Possibly insert delay function so every single joint doesnt moveat the same time 
+                while(this.position.wrist_r != this.target.wrist_r && this.position.wrist_l != this.target.wrist_l)
+                {
+                    this.position = this.readadc(devAddr);
 
-                        //moving arm to tool location
-                        //*******************************************
-                        this.moveServo("base",this.target.base);
-                        this.moveServo("wrist_r",this.target.wrist_r);        
-                        this.moveServo("wrist_l",this.target.wrist_l); 
-                        //Possibly insert delay function so every single joint doesnt moveat the same time  
-                        this.moveActuator("shoulder",this.target.shoulder);        
-                        this.moveActuator("elbow",this.target.elbow);
-                        //delay
-                        this.moveServo("claw",this.target.claw);        //attaches tool
-                        //delay
-                        
-                        //moving arm to a safe location
-                        //*******************************************              
-                        this.moveActuator("shoulder",this.idleposition.shoulder);        
-                        this.moveActuator("elbow",this.idleposition.elbow);
-
-                        this.tool = toolNumber;
-
-                        break;
+                    if(this.position.wrist_r == this.target.wrist_r)
+                    {
+                        this.moveActuator("wrist_r", "stop");
                     }
-                    else{                       //detaches current tool then attaches desired tool
-                        this.switchTool(0);
-                        this.switchTool(3);
-                        break;
+                    if(this.position.wrist_l == this.target.wrist_l)
+                    {
+                        this.moveActuator("wrist_l", "stop");
                     }
                 }
-                default:
-                return "FAIL_switchTool()";
+
+                this.moveActuator("shoulder",this.target.shoulder);        
+                this.moveActuator("elbow",this.target.elbow);
+                //delay
+                while(this.position.shoulder != this.target.shoulder && this.position.elbow != this.target.elbow)
+                {
+                    this.position = this.readadc(devAddr);
+
+                    if(this.position.shoulder == this.target.shoulder)
+                    {
+                        this.moveActuator("shoulder", "stop");
+                    }
+                    if(this.position.elbow == this.target.elbow)
+                    {
+                        this.moveActuator("elbow", "stop");
+                    }
+                }
+
+                // TEST MUST DECIDE IF THE ARM IS IN POSITION SO IT CAN DROP THE TOOL AND PROCEED
+                //drops tool
+                this.moveServo("claw",clawdetachangle);             //detaches tool
+                setTimeout(function(){  }, 2000);    //TEMPORARY TIME FOR ATTACH/DETACH
+                this.tool = 0;
+                //delay
             }
 
+            //now we assume the claw has been successfully emptied 
+            switch(toolNumber){
+                case 0: {
+                    //nothing because tool should be empty
+                    return;
+                }
+                case 1: {
+                    this.savedposition = this.position;
+                    this.target = this.toolposition1;
+
+                    break;
+
+                }
+                case 2: {
+                    this.savedposition = this.position;
+                    this.target = this.toolposition2;
+
+                    break;
+                }
+                case 3: {
+                    this.savedposition = this.position;
+                    this.target = this.toolposition3;
+
+                    break;
+                }
+            }
+            //moving arm to tool area location
+            //*******************************************              
+            this.moveActuator("shoulder",this.idleposition.shoulder);        
+            this.moveActuator("elbow",this.idleposition.elbow);
+            //Insert delay
+            while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+                {
+                    this.position = this.readadc(devAddr);
+
+                    if(this.position.shoulder == this.idleposition.shoulder)
+                    {
+                        this.moveActuator("shoulder", "stop");
+                    }
+                    if(this.position.elbow == this.idleposition.elbow)
+                    {
+                        this.moveActuator("elbow", "stop");
+                    }
+                }
+
+            //moving arm to tool location
+            //*******************************************
+            this.moveServo("base",this.target.base);
+            this.moveServo("wrist_r",this.target.wrist_r);        
+            this.moveServo("wrist_l",this.target.wrist_l); 
+            //Possibly insert delay function so every single joint doesnt moveat the same time
+            while(this.position.wrist_r != this.target.wrist_r && this.position.wrist_l != this.target.wrist_l)
+                {
+                    this.position = this.readadc(devAddr);
+
+                    if(this.position.wrist_r == this.target.wrist_r)
+                    {
+                        this.moveActuator("wrist_r", "stop");
+                    }
+                    if(this.position.wrist_l == this.target.wrist_l)
+                    {
+                        this.moveActuator("wrist_l", "stop");
+                    }
+                }
+
+            this.moveActuator("shoulder",this.target.shoulder);        
+            this.moveActuator("elbow",this.target.elbow);
+            //delay
+            while(this.position.shoulder != this.target.shoulder && this.position.elbow != this.target.elbow)
+                {
+                    this.position = this.readadc(devAddr);
+
+                    if(this.position.shoulder == this.target.shoulder)
+                    {
+                        this.moveActuator("shoulder", "stop");
+                    }
+                    if(this.position.elbow == this.target.elbow)
+                    {
+                        this.moveActuator("elbow", "stop");
+                    }
+                }
+
+            this.moveServo("claw",this.target.claw);        //attaches tool
+            setTimeout(function(){  }, 2000);    //TEMPORARY TIME FOR ATTACH/DETACH
+            this.tool = toolNumber;
+
+            //moving arm to a safe location
+            //*******************************************              
+            this.moveActuator("shoulder",this.idleposition.shoulder);        
+            this.moveActuator("elbow",this.idleposition.elbow);
+            //moving shoulder and elbow
+            while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+                {
+                    this.position = this.readadc(devAddr);
+
+                    if(this.position.shoulder == this.idleposition.shoulder)
+                    {
+                        this.moveActuator("shoulder", "stop");
+                    }
+                    if(this.position.elbow == this.idleposition.elbow)
+                    {
+                        this.moveActuator("elbow", "stop");
+                    }
+                }
         };
 
     }
