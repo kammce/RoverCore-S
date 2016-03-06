@@ -2,7 +2,6 @@
 
 class MPU6050{
     constructor(i2c, log) {
-        // Construct Class here
         //need this because i2c is created in rovercore
         this.i2c = i2c;
         this.log = log;
@@ -23,6 +22,7 @@ class MPU6050{
         this.yangle = 0;
         this.celsius = 0;
 /*
+        //test input
         this.r0x3B = "180";
         this.r0x3C = "180";
         this.r0x3D = "180";
@@ -34,13 +34,12 @@ class MPU6050{
 */
     }
 
-    wakeUp() {
+    wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
         i2c.writeByteSync(0x68, 0x6B, 1);
     }
 
-    readData() {
-
+    readData() {        //read temp and accelerometer data from chip
         var i2c = this.i2c;
 
 /*
@@ -73,15 +72,17 @@ class MPU6050{
         this.zposL = Number(this.zposL).toString(2);  //convert to binary string
         this.tempH = Number(this.tempH).toString(2);  //convert to binary string
         this.tempL = Number(this.tempL).toString(2);  //convert to binary string
+        //above function does not store leading 0's
 
-        this.xposH = "00000000".substr(this.xposH.length) + this.xposH; //fill in missing zeros
-        this.xposL = "00000000".substr(this.xposL.length) + this.xposL; //fill in missing zeros
-        this.yposH = "00000000".substr(this.yposH.length) + this.yposH; //fill in missing zeros
-        this.yposL = "00000000".substr(this.yposL.length) + this.yposL; //fill in missing zeros
-        this.zposH = "00000000".substr(this.zposH.length) + this.zposH; //fill in missing zeros
-        this.zposL = "00000000".substr(this.zposL.length) + this.zposL; //fill in missing zeros
-        this.tempH = "00000000".substr(this.tempH.length) + this.tempH; //fill in missing zeros
-        this.tempL = "00000000".substr(this.tempL.length) + this.tempL; //fill in missing zeros
+        //fills in leading 0's
+        this.xposH = "00000000".substr(this.xposH.length) + this.xposH;  //fill in missing zeros
+        this.xposL = "00000000".substr(this.xposL.length) + this.xposL;  //fill in missing zeros
+        this.yposH = "00000000".substr(this.yposH.length) + this.yposH;  //fill in missing zeros
+        this.yposL = "00000000".substr(this.yposL.length) + this.yposL;  //fill in missing zeros
+        this.zposH = "00000000".substr(this.zposH.length) + this.zposH;  //fill in missing zeros
+        this.zposL = "00000000".substr(this.zposL.length) + this.zposL;  //fill in missing zeros
+        this.tempH = "00000000".substr(this.tempH.length) + this.tempH;  //fill in missing zeros
+        this.tempL = "00000000".substr(this.tempL.length) + this.tempL;  //fill in missing zeros
 
         this.xpos = this.xposH + this.xposL;  //combines both strings for 16 bits
         this.ypos = this.yposH + this.yposL;  //combines both strings for 16 bits
@@ -126,15 +127,13 @@ class MPU6050{
         this.celsius = parseFloat(this.temp)/340 + 36.53;
     }
 
-    sleep() {
+    sleep() {       //put chip in sleep mode
         var i2c = this.i2c;
         i2c.writeByteSync(0x68, 0x6B, 0);
     }
 
-    Log() {
-
+    Log() {     //log data measured by chip
         this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
-//        console.log("x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}");
     }
 }
 
