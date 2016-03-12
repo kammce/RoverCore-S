@@ -102,7 +102,6 @@ describe("Testing class Arm:", function(){
 			expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
 			expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
 		});
-
 		
 		
 	});
