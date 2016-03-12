@@ -59,7 +59,54 @@ describe("Testing class Arm:", function(){
 		// });
 	});
 
-	// Utility functions (use the base functions)
+	describe("function switchTool()", function(){
+		var tooltest = new Arm("Arm", feedback, color_log, 4000, i2c, model);
+		var tool_old = tooltest.tool;
+
+		// var output = tooltest.switchTool(tool_new);
+		it("Expected switchTool(1) to have went to and grabbed tool 1 from toolposition1",function(){
+			tooltest.switchTool(1);
+			expect(tooltest.target.claw).to.equal(tooltest.toolposition1.claw);
+			expect(tooltest.target.wrist_r).to.equal(tooltest.toolposition1.wrist_r);
+			expect(tooltest.target.wrist_l).to.equal(tooltest.toolposition1.wrist_l);	
+			expect(tooltest.tool).to.not.equal(tool_old);
+			expect(tooltest.tool).to.equal(1);		
+		});
+		it("Expected Arm to be in a safe position after switching to tool 1",function(){
+			expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
+			expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
+		});
+
+		it("Expected switchTool(2) to have went to and grabbed tool 2 from toolposition2",function(){
+			tool_old = tooltest.tool;
+			expect(tooltest.tool).to.equal(tool_old);
+			tooltest.switchTool(2);
+			expect(tooltest.target.claw).to.equal(tooltest.toolposition2.claw);
+			expect(tooltest.target.wrist_r).to.equal(tooltest.toolposition2.wrist_r);
+			expect(tooltest.target.wrist_l).to.equal(tooltest.toolposition2.wrist_l);	
+			expect(tooltest.tool).to.not.equal(tool_old);
+			expect(tooltest.tool).to.equal(2);		
+		});
+		it("Expected Arm to be in a safe position after switching to tool 2",function(){
+			expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
+			expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
+		});
+
+		it("Expected switchTool(0) to have emptied the claw",function(){
+			tool_old = tooltest.tool;
+			tooltest.switchTool(0);
+			expect(tooltest.target.claw).to.not.equal(tooltest.toolposition2.claw);
+			expect(tooltest.tool).to.equal(0);						
+		});
+		it("Expected Arm to be in a safe position after switching to tool 2",function(){
+			expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
+			expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
+		});
+
+		
+		
+	});
+
 	describe("function moveServo():", function(){
 		var base_old = testunit.target.base;
 		var base_new = 54;
@@ -105,6 +152,17 @@ describe("Testing class Arm:", function(){
 		});
 	});
 
+	describe("function grab()", function(){
+		var claw_old = testunit.position;
+		var claw_new = 54;
+		var output = testunit.grab(claw_new);
+
+		it("Expected grab() to have changed target.claw after moving claw to the specified angle", function(){
+			expect(testunit.target.claw).to.not.equal(claw_old);
+		});
+
+	});
+
 	describe("function react():", function(){
 		var old_target = testunit.target;
 		it("Expected react() to have changed target when given the command to move to a new position", function(){
@@ -143,55 +201,4 @@ describe("Testing class Arm:", function(){
 	// 	});
 	// });
 	/*  End Wyatt & Austin's claw functions  */
-	describe("function grab()", function(){
-		var claw_old = testunit.position;
-		var claw_new = 54;
-		var output = testunit.grab(claw_new);
-
-		it("Expected grab() to have changed target.claw after moving claw to the specified angle", function(){
-			expect(testunit.target.claw).to.not.equal(claw_old);
-		});
-
-	});
-
-	describe("function switchTool()", function(){
-		var tool_old = testunit.tool;
-		var tool_new = 1;
-		var tool_new2=3;
-		//var output = testunit.switchTool(tool_new);
-		
-		before(function(tool_new){
-			it("Expected switchTool(1) to change tool to be 1",function(){
-				expect(testunit.tool).to.not.equal(tool_old);
-				expect(testunit.tool).to.equal(tool_new);
-			});
-			/*it("Expected switchTool() to change shoulder and elbow positions to safe positions",function(){
-				expect(testunit.target.shoulder).to.equal(testunit.idleposition.shoulder);
-				expect(testunit.target.elbow).to.equal(testunit.idleposition.elbow);
-			});*/
-		});
-		
-		var tool_old2 = tool_new;
-
-		before(function(tool_new2){
-			it("Expected switchTool() to change tool to from 1 to 3",function(){
-			expect(testunit.tool).to.not.equal(tool_old2);
-			expect(testunit.tool).to.equal(tool_new2);
-		});
-		it("Expected switchTool() to change shoulder and elbow positions to safe positions",function(){
-			expect(testunit.target.shoulder).to.equal(testunit.idleposition.shoulder);
-			expect(testunit.target.elbow).to.equal(testunit.idleposition.elbow);
-		});
-	});
-
-		var tool_new3 = 9;
-		//var output3 = testunit.switchTool(tool_new3);
-		before(function(tool_new3){
-			var  output3 = testunit.switchTool(tool_new3);
-		it("Expected switchTool() to fail",function(){
-			expect(output3).to.equal("FAIL_switchTool()");
-		});
-	});
-		
-	});
 });
