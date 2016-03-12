@@ -133,7 +133,8 @@ class MPU6050{
     }
 
     Log() {     //log data measured by chip
-        this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
+        console.log("x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}")
+//        this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
     }
 }
 
