@@ -25,7 +25,7 @@ class MPU6050{
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(0x68, 0x6B, 0xFF);
+        i2c.writeByteSync(0x68, 0x6B, 1);
     }
 
     readData() {        //read temp and accelerometer data from chip

@@ -33,7 +33,7 @@ describe('Testing SensorSuite Class', function () {
 
 
 
-	var awake = 0x00;
+	var awake = 0;
 	class i2c_bus{
 		constructor(something1, something2, something3) {
 
@@ -97,7 +97,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: wakeUp()', function() {
 			it('expected data read to start', function () {   //wakeUp()
 				test_lobe.mpu.wakeUp();
-				expect(awake).to.equal(0xFF);
+				expect(awake).to.equal(1);
 			});
 		});
 		describe('Function: readData()', function() {
@@ -131,7 +131,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: sleep()', function() {
 			it('expected data read to stop', function () {
 				test_lobe.mpu.sleep();
-				expect(awake).to.equal(0x00);
+				expect(awake).to.equal(0);
 			});
 		});
 	// 	describe('Function: groundTemp()', function() {
