@@ -21,38 +21,15 @@ class MPU6050{
         this.xangle = 0;
         this.yangle = 0;
         this.celsius = 0;
-/*
-        //test input
-        this.r0x3B = "180";
-        this.r0x3C = "180";
-        this.r0x3D = "180";
-        this.r0x3E = "180";
-        this.r0x3F = "180";
-        this.r0x40 = "180";
-        this.r0x41 = "180";
-        this.r0x42 = "180";
-*/
     }
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(0x68, 0x6B, 1);
+        i2c.writeByteSync(0x68, 0x6B, 0xFF);
     }
 
     readData() {        //read temp and accelerometer data from chip
         var i2c = this.i2c;
-
-/*
-        //this is input for test, won't input actual data
-        this.xposH = i2c.readByteSync(0x68, this.r0x3B);  //read byte from data register
-        this.xposL = i2c.readByteSync(0x68, this.r0x3C);  //read byte from data register
-        this.yposH = i2c.readByteSync(0x68, this.r0x3D);  //read byte from data register
-        this.yposL = i2c.readByteSync(0x68, this.r0x3E);  //read byte from data register
-        this.zposH = i2c.readByteSync(0x68, this.r0x3F);  //read byte from data register
-        this.zposL = i2c.readByteSync(0x68, this.r0x40);  //read byte from data register
-        this.tempH = i2c.readByteSync(0x68, this.r0x41);  //read byte from data register
-        this.tempL = i2c.readByteSync(0x68, this.r0x42);  //read byte from data register
-*/
 
         this.xposH = i2c.readByteSync(0x68, 0x3B);  //read byte from data register
         this.xposL = i2c.readByteSync(0x68, 0x3C);  //read byte from data register
@@ -133,8 +110,8 @@ class MPU6050{
     }
 
     Log() {     //log data measured by chip
-        console.log("x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}")
-//        this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
+        // console.log("x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}");
+        this.log.output(`x-angle: ${this.xangle} y-angle: ${this.yangle} temperature: ${this.celsius}`);
     }
 }
 

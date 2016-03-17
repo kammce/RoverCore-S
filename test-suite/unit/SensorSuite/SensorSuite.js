@@ -33,20 +33,27 @@ describe('Testing SensorSuite Class', function () {
 
 
 
-	var awake = 0;
+	var awake = 0x00;
 	class i2c_bus{
 		constructor(something1, something2, something3) {
-
+			// this.r0x3B = "180";
+			// this.r0x3C = "180";
+			// this.r0x3D = "180";
+			// this.r0x3E = "180";
+			// this.r0x3F = "180";
+			// this.r0x40 = "180";
+			// this.r0x41 = "180";
+			// this.r0x42 = "180";
 		}
 		writeByteSync(dev_addr, register, command){
 			awake = command;
 
 		}
 		readByteSync(dev_addr, register){
-			return register;
+			return "180";
 		}
 		readByte(dev_addr, register, cb){
-			return register;
+			return "180";
 		}
 		reset(){
 			dev_addr1 =[], dev_addr2 =[];
@@ -97,7 +104,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: wakeUp()', function() {
 			it('expected data read to start', function () {   //wakeUp()
 				test_lobe.mpu.wakeUp();
-				expect(awake).to.equal(1);
+				expect(awake).to.equal(0xFF);
 			});
 		});
 		describe('Function: readData()', function() {
@@ -131,19 +138,19 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: sleep()', function() {
 			it('expected data read to stop', function () {
 				test_lobe.mpu.sleep();
-				expect(awake).to.equal(0);
+				expect(awake).to.equal(0x00);
 			});
 		});
-		describe('Function: groundTemp()', function() {
-			it('expected temperature conversion to celsius', function () {
-				test_lobe.lm35.groundTemp();
-				expect(test_lobe.groundTemp()).to.equal(85.9375);
-			});
-		describe('Function: humidity()', function() {
-			it('expected temperature conversion to percentage', function () {
-				test_lobe.humidity();
-				expect(test_lobe.humidity()).to.equal(??????);
-			});
-		});
-	});
+	// 	describe('Function: groundTemp()', function() {
+	// 		it('expected temperature conversion to celsius', function () {
+	// 			test_lobe.lm35.groundTemp();
+	// 			expect(test_lobe.groundTemp()).to.equal(85.9375);
+	// 		});
+	// 	describe('Function: humidity()', function() {
+	// 		it('expected temperature conversion to percentage', function () {
+	// 			test_lobe.humidity();
+	// 			expect(test_lobe.humidity()).to.equal(??????);
+	// 		});
+	// 	});
+	 });
 });
