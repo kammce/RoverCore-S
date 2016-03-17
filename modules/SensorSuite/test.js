@@ -5,8 +5,10 @@ var log = function() {};
 var i2c = i2c_bus.openSync(1);
 var mpu = new mpu6050(i2c, log);
 mpu.wakeUp();
-mpu.readData();
-mpu.convertPosition();
-mpu.convettTemp();
-mpu.Log();
+var interval = setInterval(function () {
+  mpu.readData();
+  mpu.convertPosition();
+  mpu.convettTemp();
+  mpu.Log();
+}, 1500);
 mpu.sleep();

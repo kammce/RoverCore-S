@@ -36,14 +36,7 @@ describe('Testing SensorSuite Class', function () {
 	var awake = 0x00;
 	class i2c_bus{
 		constructor(something1, something2, something3) {
-			// this.r0x3B = "180";
-			// this.r0x3C = "180";
-			// this.r0x3D = "180";
-			// this.r0x3E = "180";
-			// this.r0x3F = "180";
-			// this.r0x40 = "180";
-			// this.r0x41 = "180";
-			// this.r0x42 = "180";
+
 		}
 		writeByteSync(dev_addr, register, command){
 			awake = command;

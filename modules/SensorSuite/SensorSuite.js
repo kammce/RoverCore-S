@@ -33,12 +33,12 @@ class SensorSuite extends Neuron {
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
     }
-    groundTemp() {
+    // groundTemp() {
 
-    }
-    humidity() {
+    // }
+    // humidity() {
 
-    }
+    // }
 }
 
 module.exports = SensorSuite;
