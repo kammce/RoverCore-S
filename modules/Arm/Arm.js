@@ -16,6 +16,7 @@ class Arm extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c; // holds link to a Bus object returned by i2c-bus.open(); will use to grab data off of motor-reading adc
         this.model = model;
+        this.tool = 0; //tool currently being held
 
         // Construct Class here
         // Angular Bounds (Index convention: 0:wrist, 1:elbow, 2:base, 3:shoulder)
@@ -51,8 +52,47 @@ class Arm extends Neuron {
             wrist_l: 0,
             claw: 0
         };
-        this.isSafe = function(angles){
-            var goal = [ angles.wrist, angles.elbow, angles.base, angles.shoulder ];
+        //must change idleposition vals
+        this.idleposition = {       // This variable is a preset "safe" position for use with switchTool()
+        base: 5,
+        shoulder: 5,
+        elbow: 5,
+        wrist: 5,
+            wrist_r: 5,     //may not need wrist or claw
+            wrist_l: 5,
+            claw: 5
+        };
+        //tool positions subject to change
+        this.toolposition1 = {      //This variable is a preset position for tool #1
+            base: 11,
+            shoulder:11,
+            elbow: 11,
+            wrist: 11,
+            wrist_r: 11,
+            wrist_l: 11,
+            claw: 11
+        };
+      this.toolposition2 = {        //This variable is a preset position for tool #2
+        base: 22,
+        shoulder: 22,
+        elbow: 22,
+        wrist: 22,
+        wrist_r: 22,
+        wrist_l: 22,
+        claw: 22
+    };
+      this.toolposition3 = {        //This variable is a preset position for tool #3
+        base: 33,
+        shoulder: 33,
+        elbow: 33,
+        wrist: 33,
+        wrist_r: 33,
+        wrist_l: 33,
+        claw: 33
+    };
+
+    this.isSafe = function(angles){
+        var goal = [ angles.wrist, angles.elbow, angles.base, angles.shoulder ];
             // If any one of the angles is out-of-bounds, return false;
             for(var i = 0; i < 4; i++){
                 if(goal[i] > high[i] || goal[i] < low[i]){
@@ -80,8 +120,8 @@ class Arm extends Neuron {
                     Format:    [1]       [x]     [y]   [z]         [1]        [0]        [0]       [0]
                     Def:    [S/D bit] [O/S bit] [S_1] [S_0]     [Uni bit] [Sleep bit] [Garbage] [Garbage]
                     Note: x,y, and z vary depending on selected channel (see LTC2309 datasheet p.11 table 1)
-                */
-                var write_byte = new Buffer(1);
+                    */
+                    var write_byte = new Buffer(1);
                 // Data Byte stores the received data (16 bits) from the ADC
                 var data_byte = new Buffer(2);
 
@@ -110,7 +150,7 @@ class Arm extends Neuron {
                     case 7:     //servo city driver Fault indicator
                         write_byte[0] = 0x3E << 2;    // (111110 = 62) << 2 = 1111 1000
                         break;
-                }
+                    }
 
                 // This should tell the adc-to-i2c chip (LTC2309) to switch channels to the desired motor feedback line
                 if(!this.i2c.i2cWriteSync(device_address, 1, write_byte)){
@@ -139,7 +179,7 @@ class Arm extends Neuron {
                         
                         // positions.bpos = the resulting angle;
                         break;
-                    case 1: /*claw motor channel:*/
+                        case 1: /*claw motor channel:*/
                         // Type of input data: digital voltage reading
                         // --> I need to map servo's voltage ranges to angles
                         
@@ -148,7 +188,7 @@ class Arm extends Neuron {
                         
                         // positions.cpos = the resulting angle;
                         break;
-                    case 2: /*elbow motor channel:*/
+                        case 2: /*elbow motor channel:*/
                         // Type of input data: digital voltage reading
                         // --> I need to map actuators' voltage ranges to distances, then actuation distances to angles
                         
@@ -157,7 +197,7 @@ class Arm extends Neuron {
 
                         // positions.bpos = the resulting angle;
                         break;
-                    case 3: /*shoulder motor channel:*/
+                        case 3: /*shoulder motor channel:*/
                         // Type of input data: digital voltage reading
                         // --> I need to map actuators' voltage ranges to distances, then actuation distances to angles
                         
@@ -166,16 +206,16 @@ class Arm extends Neuron {
 
                         // positions.bpos = the resulting angle;
                         break;
-                    default:
+                        default:
+                    }
                 }
-            }
 
-            return positions;
-        };
-        this.readMRE = function(device_address){
-            /*Code to get angle data "wpos_l" and "wpos_r" from magnetic encoders*/
-        };
-        this.moveServo = function(motor, angle){
+                return positions;
+            };
+            this.readMRE = function(device_address){
+                /*Code to get angle data "wpos_l" and "wpos_r" from magnetic encoders*/
+            };
+            this.moveServo = function(motor, angle){
             // This function only controls servos (i.e. the base and wrist joints)
             //FOR TESTING PURPOSES: Let 4095 = clockwise, 0 = counter clockwise (h bridge control FOR servo direction)
             //FOR TESTING PURPOSES: Let 4095 = full speed, 0 = stop  (servo speed control)
@@ -204,7 +244,7 @@ class Arm extends Neuron {
                     break;
                 }
                 default:
-                    return "FAIL_moveServo()";
+                return "FAIL_moveServo()";
             }
 
             if(angle === "stop"){   //only applies to wrist servos
@@ -257,7 +297,7 @@ class Arm extends Neuron {
                     break;
                 }
                 default:
-                    return "FAIL_moveServo()";
+                return "FAIL_moveServo()";
             }
 
             // Move servos (for continuous servos, clockwise < 1500 < counterclockwise?)
@@ -291,7 +331,7 @@ class Arm extends Neuron {
                     break;
                 }
                 default:
-                    return "FAIL_moveActuator()";
+                return "FAIL_moveActuator()";
             }
 
             if(angle === "stop"){
@@ -327,7 +367,7 @@ class Arm extends Neuron {
                     break;
                 }
                 default:
-                    return "FAIL_moveActuator()";
+                return "FAIL_moveActuator()";
             }
 
             // Command actuators
@@ -360,9 +400,231 @@ class Arm extends Neuron {
                 dir: direction
             };
         };
-        // this.claw = function(){};
-        // this.switchTool = function(){};
-        // this.tool = function(){};
+        this.grab = function(angle)
+        {
+            this.moveServo("claw", angle);
+        };
+        this.switchTool = function(toolNumber)
+        {
+            var clawdetachangle = 0;            //some angle for claw that detaches a tool???
+            var temptarget = {
+                base: 0,
+                shoulder: 0,
+                elbow: 0,
+                wrist: 0,
+                wrist_r: 0,
+                wrist_l: 0,
+                claw: 0
+            };
+
+            //end if toolNumber is already attached
+            if(toolNumber == this.tool){
+                return "Tool already selected";
+            }
+            //end if toolNumber is out of bounds
+            if(toolNumber<0 || this.tool>3){
+                return "Invalid tool";
+            }
+
+            //EMPTIES THE CLAW 
+            if(this.tool>0){
+
+                //set temptarget position for dropping tool
+                switch(this.tool){
+                    case 1:{
+                        this.savedposition = this.position;             //not used
+                        temptarget = this.toolposition1;               //makes tool position the target
+
+                        break;
+                    }
+                    case 2:{
+                        this.savedposition = this.position;             //not used
+                        temptarget = this.toolposition2;               //makes tool position the target
+
+                        break;
+                    }
+                    case 3:{
+                        this.savedposition = this.position;             //not used
+                        temptarget = this.toolposition3;               //makes tool position the target
+
+                        break;
+                    }
+                    default:{
+                        return;
+                    }
+                }
+
+                //moving arm to a safe location
+                //*******************************************
+                this.moveServo("base",this.idleposition.base);              
+                this.moveActuator("shoulder",this.idleposition.shoulder);        
+                this.moveActuator("elbow",this.idleposition.elbow);
+                //Insert delay
+                // while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+                // {
+
+                //     this.position = this.readadc(devAddr);
+
+                //     if(this.position.shoulder == this.idleposition.shoulder)
+                //     {
+                //         this.moveActuator("shoulder", "stop");
+                //     }
+                //     if(this.position.elbow == this.idleposition.elbow)
+                //     {
+                //         this.moveActuator("elbow", "stop");
+                //     }
+                // }
+
+                //moving arm to drop location
+                //*******************************************
+                this.moveServo("base",temptarget.base);
+                this.moveServo("wrist_r",temptarget.wrist_r);        
+                this.moveServo("wrist_l",temptarget.wrist_l); 
+                //Possibly insert delay function so every single joint doesnt moveat the same time 
+                // while(this.position.wrist_r != this.target.wrist_r && this.position.wrist_l != this.target.wrist_l)
+                // {
+                //     this.position = this.readadc(devAddr);
+
+                //     if(this.position.wrist_r == this.target.wrist_r)
+                //     {
+                //         this.moveServo("wrist_r", "stop");
+                //     }
+                //     if(this.position.wrist_l == this.target.wrist_l)
+                //     {
+                //         this.moveServo("wrist_l", "stop");
+                //     }
+                // }
+
+                this.moveActuator("shoulder",temptarget.shoulder);        
+                this.moveActuator("elbow",temptarget.elbow);
+                //delay
+                // while(this.position.shoulder != this.target.shoulder && this.position.elbow != this.target.elbow)
+                // {
+                //     this.position = this.readadc(devAddr);
+
+                //     if(this.position.shoulder == this.target.shoulder)
+                //     {
+                //         this.moveActuator("shoulder", "stop");
+                //     }
+                //     if(this.position.elbow == this.target.elbow)
+                //     {
+                //         this.moveActuator("elbow", "stop");
+                //     }
+                // }
+
+                // TEST MUST DECIDE IF THE ARM IS IN POSITION SO IT CAN DROP THE TOOL AND PROCEED
+                //drops tool
+                this.moveServo("claw",clawdetachangle);             //detaches tool
+                setTimeout(function(){  }, 2000);    //TEMPORARY TIME FOR ATTACH/DETACH
+                this.tool = 0;
+                //moving arm to tool area location
+                //*******************************************              
+                this.moveActuator("shoulder",this.idleposition.shoulder);        
+                this.moveActuator("elbow",this.idleposition.elbow);
+            //Insert delay
+            // while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+            // {
+            //     this.position = this.readadc(devAddr);
+
+            //     if(this.position.shoulder == this.idleposition.shoulder)
+            //     {
+            //         this.moveActuator("shoulder", "stop");
+            //     }
+            //     if(this.position.elbow == this.idleposition.elbow)
+            //     {
+            //         this.moveActuator("elbow", "stop");
+            //     }
+            // }
+        }
+
+            //now we assume the claw has been successfully emptied 
+            switch(toolNumber){
+                case 0: {
+                    //nothing because tool should be empty
+                    return;
+                }
+                case 1: {
+                    this.savedposition = this.position;
+                    temptarget = this.toolposition1;
+
+                    break;
+
+                }
+                case 2: {
+                    this.savedposition = this.position;
+                    temptarget = this.toolposition2;
+
+                    break;
+                }
+                case 3: {
+                    this.savedposition = this.position;
+                    temptarget = this.toolposition3;
+
+                    break;
+                }
+            }
+
+            //moving arm to tool location
+            //*******************************************
+            this.moveServo("base",temptarget.base);
+            this.moveServo("wrist_r",temptarget.wrist_r);        
+            this.moveServo("wrist_l",temptarget.wrist_l); 
+            //Possibly insert delay function so every single joint doesnt moveat the same time
+            // while(this.position.wrist_r != this.target.wrist_r && this.position.wrist_l != this.target.wrist_l)
+            // {
+            //     this.position = this.readadc(devAddr);
+
+            //     if(this.position.wrist_r == this.target.wrist_r)
+            //     {
+            //         this.moveServo("wrist_r", "stop");
+            //     }
+            //     if(this.position.wrist_l == this.target.wrist_l)
+            //     {
+            //         this.moveServo("wrist_l", "stop");
+            //     }
+            // }
+
+            this.moveActuator("shoulder",temptarget.shoulder);        
+            this.moveActuator("elbow",temptarget.elbow);
+            //delay
+            // while(this.position.shoulder != this.target.shoulder && this.position.elbow != this.target.elbow)
+            // {
+            //     this.position = this.readadc(devAddr);
+
+            //     if(this.position.shoulder == this.target.shoulder)
+            //     {
+            //         this.moveActuator("shoulder", "stop");
+            //     }
+            //     if(this.position.elbow == this.target.elbow)
+            //     {
+            //         this.moveActuator("elbow", "stop");
+            //     }
+            // }
+
+            this.moveServo("claw",temptarget.claw);        //attaches tool
+            setTimeout(function(){  }, 2000);    //TEMPORARY TIME FOR ATTACH/DETACH
+            this.tool = toolNumber;
+
+            //moving arm to a safe location
+            //*******************************************              
+            this.moveActuator("shoulder",this.idleposition.shoulder);        
+            this.moveActuator("elbow",this.idleposition.elbow);
+            //moving shoulder and elbow
+            // while(this.position.shoulder != this.idleposition.shoulder && this.position.elbow != this.idleposition.elbow)
+            // {
+            //     this.position = this.readadc(devAddr);
+
+            //     if(this.position.shoulder == this.idleposition.shoulder)
+            //     {
+            //         this.moveActuator("shoulder", "stop");
+            //     }
+            //     if(this.position.elbow == this.idleposition.elbow)
+            //     {
+            //         this.moveActuator("elbow", "stop");
+            //     }
+            // }
+        };
+
     }
     react(input) {  //put arm control logic here
         var name = input.name;
@@ -388,7 +650,7 @@ class Arm extends Neuron {
                 break;
             }
             default:
-                this.log.output(`REACTING ${this.name}: `, "Invalid Input");
+            this.log.output(`REACTING ${this.name}: `, "Invalid Input");
         }
 
         // Check a flag if the motors have reached their target position; if not, continue to compare the positions with the target, and shutdown each motor as they reach their goal
