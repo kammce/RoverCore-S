@@ -1,3 +1,5 @@
+"use strict";
+
 var mpu6050 = require('./MPU6050.js');
 var i2c_bus = require('i2c-bus');
 //var config = require('./config.json');
