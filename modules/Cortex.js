@@ -28,7 +28,7 @@ class Cortex {
 		this.I2C = function () {};
 		if(!this.simulate) {
 			var I2C_BUS = require('i2c-bus');
-			this.I2C = I2C_BUS.openSync(3);
+			this.I2C = I2C_BUS.openSync(1);
 		}
 
 		// Store Singleton version of Classes
@@ -46,14 +46,14 @@ class Cortex {
 		// Send Model to Signal Relay on update
 
 		/** Connect to Signal Relay **/
-		// Cortex should act as a client and connect to Signal 
+		// Cortex should act as a client and connect to Signal
 		// Relayusing primus.js and websockets as the transport.
 		connection.on('open', function open() {
 			connection.write({
-				intent: 'REGISTER', 
+				intent: 'REGISTER',
 				info: {
-					entity: 'cortex', 
-					password: 'destroyeveryone' 
+					entity: 'cortex',
+					password: 'destroyeveryone'
 				}
 			});
 			parent.log.output("CONNECTED! I AM HERE!");
@@ -83,7 +83,7 @@ class Cortex {
 		connection.on('end', function () {
 			parent.log.output('Connection closed');
 		});
-		// Handle Idling Lobes that have not gotten a command  
+		// Handle Idling Lobes that have not gotten a command
 		this.idling_loop = setInterval(function() {
 			parent.handleIdleStatus();
 		}, 100);
@@ -93,7 +93,7 @@ class Cortex {
 		// Log any data coming in
 		this.log.output(`INCOMING: `, data);
 		try {
-			if(data.hasOwnProperty('target') && 
+			if(data.hasOwnProperty('target') &&
 				data.hasOwnProperty('command')) {
 				if(this.lobe_map.hasOwnProperty(data['target'])) {
 					setImmediate(function() {
@@ -103,7 +103,7 @@ class Cortex {
 					return;
 				}
 				throw new Error(`Target ${data['target']} does not exist in lobe_map.`);
-			} else if(data.hasOwnProperty('target') && 
+			} else if(data.hasOwnProperty('target') &&
 				data.hasOwnProperty('connection')) {
 				switch(data['connection']) {
 					case "disconnected":
@@ -161,11 +161,11 @@ class Cortex {
 				// Read config.json file, parse it, and return config object
 				var config = JSON.parse(fs.readFileSync(`./modules/${lobes_directories[i]}/config.json`));
 				// check if config object has the right properties
-				if(config.hasOwnProperty('lobe_name') && 
-					config.hasOwnProperty('log_color') && 
+				if(config.hasOwnProperty('lobe_name') &&
+					config.hasOwnProperty('log_color') &&
 					config.hasOwnProperty('idle_time')) {
-					if(typeof config['lobe_name'] === "string" && 
-						typeof config['log_color'] === "string" && 
+					if(typeof config['lobe_name'] === "string" &&
+						typeof config['log_color'] === "string" &&
 						typeof config['idle_time'] === "number") {
 						// typeof config['mission_controller'] === "string" :: Not required!!
 						// adding source code path to config object
@@ -182,9 +182,9 @@ class Cortex {
 		}
 		// Each module will have a unique logger based on their configuration file
 		for (i = 0; i < lobe_config_files.length; i++) {
-			// Generate Logger 
+			// Generate Logger
 			var lobe_log = new this.LOG(
-				lobe_config_files[i]['lobe_name'], 
+				lobe_config_files[i]['lobe_name'],
 				lobe_config_files[i]['log_color']
 			);
 			// Require the selected Lobe
@@ -197,15 +197,15 @@ class Cortex {
 				}
 				// Add Lobe to Lobe Map with key being the lobe_name
 				this.lobe_map[lobe_config_files[i]['lobe_name']] = new Lobe(
-					lobe_config_files[i]['lobe_name'], 
+					lobe_config_files[i]['lobe_name'],
 					this.feedback,
 					lobe_log,
 					lobe_config_files[i]['idle_time'],
 					this.I2C,
 					this.Model
 				);
-				// Give lobe property mission_controller. 
-				// If mission_controller disconnects or reconnects, 
+				// Give lobe property mission_controller.
+				// If mission_controller disconnects or reconnects,
 				// the lobe will halt or resume respectively.
 				if(typeof lobe_config_files[i]['mission_controller'] === "string") {
 					this.lobe_map[lobe_config_files[i]['lobe_name']].mission_controller = lobe_config_files[i]['mission_controller'];

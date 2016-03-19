@@ -10,7 +10,7 @@ mpu.wakeUp();
 var interval = setInterval(function () {
   mpu.readData();
   mpu.convertPosition();
-  mpu.convettTemp();
+  mpu.convertTemp();
   mpu.Log();
 }, 1500);
 mpu.sleep();

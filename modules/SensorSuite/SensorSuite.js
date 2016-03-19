@@ -15,22 +15,41 @@ class SensorSuite extends Neuron {
         // Construct Class here
             //mpu6050 class initialization
         this.mpu = new mpu6050(this.i2c, this.log);
+            this.mpu.wakeUp();
+        var parent = this;
+        setInterval(function() {
+             parent.mpu.readData();
+             parent.mpu.convertPosition();
+            parent.mpu.Log();
+        }, 200) ;
     }
     react(input) {
+        var mpu = this.mpu;
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
+        // mpu.wakeUp();
+        // var interval = setInterval(function() {
+        //     mpu.readData();
+        //     mpu.convertPosition();
+        //     mpu.convertTemp();
+        //     mpu.Log();
+        // }, 1500);
     }
     halt() {
+        var mpu = this.mpu;
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name ,`HALTING ${this.name}`);
+       // mpu.sleep();
     }
     resume() {
         this.log.output(`RESUMING ${this.name}`);
         this.feedback(this.name ,`RESUMING ${this.name}`);
     }
     idle() {
+        var mpu = this.mpu;
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
+       // mpu.sleep();
     }
     // groundTemp() {
 
