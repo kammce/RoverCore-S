@@ -61,6 +61,12 @@ Member Descriptions:
 
 
 Notes:
+    Testing the whole package:
+        Open up 3 terminals;
+        On one, goto /var/www/html/sjsu-robotics/middleman and run "node index.js"
+        On another, goto /var/www/html/sjsu-robotics/mission-control-2 and run "grunt server"
+        On the last one, goto /var/www/html/sjsu-robotics/rovercore-v2 and run "node RoverCore.js"
+
     Using I2C to interact with the motors (using chip designed by Sean Setterfield (Arm EE)):
         Getting input/sending output to the arm motors will be done via i2c. One need only send the pin num of the output channel to a "sender" chip (will have a certain i2c address) that is connected to the desired motor, and you can read output data by receiving input from a "receiver" chip (an analog-to-digital converter (ADC), will have a certain i2c address) which should output its data from the corresponding pin number (as was done with sending data).
 
@@ -147,12 +153,20 @@ Notes:
                 1500us = middle;
                 1430us = 90* ccw;
                 1570us = 90* cw;
+            HiTec HS-7950th (claw) Microsecond mapping:
+                                       ^
+                                       | middle
+                                       |
+                    90* ccw  <---------o---------> 90* cw
+
+                ?us = middle;
+                ?us = 90* ccw;
+                ?us = 90* cw;
+
         Linear Actuator Digital to Angle Mapping (comes from drivers):
             Firgelli p16:
 
             ServoCity HD A4:
-
-
 
 
     Arm Angular Restrictions (information from John Han (Arm ME))

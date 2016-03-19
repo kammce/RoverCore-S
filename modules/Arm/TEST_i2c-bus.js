@@ -4,6 +4,17 @@ class i2c_lib {		// Dummy class resembling an instance of object Bus from the i2
 	constructor(){
 		// Dummy variables used in the emulation of i2c device communication
 		this.channel = 0;	// channel 0 of 8
+		this.current_val = {	//emulates the values coming from the motor feedback
+			"0":parseInt("0000000000110000", 2),
+			"1":parseInt("0000000000110000", 2),
+			"2":parseInt("0000000000110000", 2),
+			"3":parseInt("0000000000110000", 2),
+			"4":parseInt("0000000000110000", 2),
+			"5":parseInt("0000000000110000", 2),
+			"6":parseInt("0000000000110000", 2),
+			"7":parseInt("0000000000110000", 2)
+		}
+
 		// Dummy functions
 		this.readI2cBlockSync = function (addr, cmd, len, buf, callback){
 			var registerNum = cmd;
@@ -22,6 +33,7 @@ class i2c_lib {		// Dummy class resembling an instance of object Bus from the i2
 			return 0xFFF0; // emulates the output of the adc (i.e. positional values): x x x x  x x x x  x x x x  0 0 0 0
 		};
 		this.i2cWriteSync = function(addr, len, buffer){
+			var length_written = len;
 			switch(buffer){
 				case parseInt("10001000", 2):
 					this.channel = 0;
@@ -47,8 +59,10 @@ class i2c_lib {		// Dummy class resembling an instance of object Bus from the i2
 				case parseInt("11111000", 2):
 					this.channel = 7;
 					break;
+				default:
+					length_written = 0;
 			}
-			return len;	//returns # of bytes written
+			return length_written;	//returns # of bytes written
 		};
 		this.i2cReadSync = function(addr, len, buffer){
 			if(len != buffer.length)
