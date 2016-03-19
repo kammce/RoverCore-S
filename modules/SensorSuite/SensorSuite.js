@@ -19,6 +19,9 @@ class SensorSuite extends Neuron {
         var parent = this;
         setInterval(function() {
              parent.mpu.readData();
+             parent.mpu.convertPosition();
+             parent.mpu.convertTemp();
+             parent.mpu.Log();
         }, 200) ;
     }
     react(input) {

@@ -93,9 +93,9 @@ class MPU6050{
         else{
           this.temp = parseInt(this.temp,2);
         }
-        convertPosition();
-        convertTemp();
-        Log();
+        // this.convertPosition();
+        // this.convertTemp();
+        // this.Log();
     }
 
     convertPosition() {     //converts x- and y-angles
