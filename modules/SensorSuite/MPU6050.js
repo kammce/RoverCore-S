@@ -23,9 +23,8 @@ class MPU6050{
         this.celsius = 0;
     }
 
-    wakeUp() {
+    wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        //tell chip to exit sleep mode
         i2c.writeByteSync(0x68, 0x6B, 0xFF);
     }
 
@@ -40,6 +39,7 @@ class MPU6050{
         this.zposL = i2c.readByteSync(0x68, 0x40);  //read byte from data register
         this.tempH = i2c.readByteSync(0x68, 0x41);  //read byte from data register
         this.tempL = i2c.readByteSync(0x68, 0x42);  //read byte from data register
+
 
         this.xposL = Number(this.xposL).toString(2);  //convert to binary string
         this.yposH = Number(this.yposH).toString(2);  //convert to binary string
@@ -93,17 +93,18 @@ class MPU6050{
         else{
           this.temp = parseInt(this.temp,2);
         }
+        convertPosition();
+        convertTemp();
+        Log();
+    }
 
+    convertPosition() {     //converts x- and y-angles
+      this.xangle = 57.295*Math.atan(parseFloat(this.ypos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.xpos),2)));
+      this.yangle = 57.295*Math.atan(parseFloat(this.xpos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.ypos),2)));
+    }
 
-        //converts x- and y-angles
-        this.xangle = 57.295*Math.atan(parseFloat(this.ypos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.xpos),2)));
-        this.yangle = 57.295*Math.atan(parseFloat(this.xpos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.ypos),2)));
-
-        //converts temp to Celsius
+    convertTemp() {     //converts to Celsius
         this.celsius = parseFloat(this.temp)/340 + 36.53;
-
-        //log data measured by chip
-        this.log.output(`x-angle: ${this.xangle.toFixed(3)} y-angle: ${this.yangle.toFixed(3)} temperature: ${this.celsius.toFixed(3)}`);
     }
 
     sleep() {       //put chip in sleep mode
@@ -111,7 +112,10 @@ class MPU6050{
         i2c.writeByteSync(0x68, 0x6B, 0x00);
     }
 
-
+    Log() {     //log data measured by chip
+        //console.log("x-angle: " + this.xangle.toFixed(3) + ", y-angle: " + this.yangle.toFixed(3) + ", temperature: " + this.celsius.toFixed(3));
+        this.log.output(`x-angle: ${this.xangle.toFixed(3)} y-angle: ${this.yangle.toFixed(3)} temperature: ${this.celsius.toFixed(3)}`);
+    }
 }
 
 module.exports = MPU6050;
