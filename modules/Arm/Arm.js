@@ -771,67 +771,64 @@ class Arm extends Neuron {
         };
     }
     
-    react(input) { //put arm control logic here
+    react(input){  //put arm control logic here
         var name = input.name;
         var data = input.data;
+        this.log.output(`REACTING ${this.name} \n `, "name=" + name + " data=" + data );
 
         // Interpret the command
-        switch (name) {
-            case "move":
-                {
-                    if (this.isSafe(data)) {
-                        // this.moveServo("base", data.base);
-                        // this.moveServo("wrist", data.wrist);
-                        // this.moveActuator("elbow", data.elbow);
-                        // this.moveActuator("shoulder", data.shoulder);
+        switch(name){
+            case "move":{
+                if(this.isSafe(data)){
+                    // this.reaction.base = this.moveServo("base", data.base);   //base not yet operational
+                    // this.reaction.wrist this.moveServo("wrist", data.wrist); //wrist not operational for pitch yet
+                    /*Pseudocode
+                        wrist_l_angle = f(wrist_r_angle);   //given parameter data.wrist, gives wrist motors diff. angles to go to so that the wrist motors spin opposite directions and cause a pitch rise/fall
+                    */
+                    //below: moves servos the same direction; serves a dummy movement for now
+                    this.reaction.wrist_r = this.moveServo("wrist_r", data.wrist);//wrist_r_angle);
+                    this.reaction.wrist_l = this.moveServo("wrist_l", data.wrist);//wrist_l_angle);
+                    this.reaction.elbow = this.moveActuator("elbow", data.elbow);
+                    this.reaction.shoulder = this.moveActuator("shoulder", data.shoulder);
+                    this.log.output(`REACTING ${this.name}`, "moving motors");
+                }
+
+                // Check a flag showing if you're already checking that the motors have reached their target position; if not, set to true and continue to compare the positions with the target, and shutdown each motor as they reach their goal
+                switch(this.check_cycle_started){
+                    case false:{
+                        var parent = this;
+                        var ltc_addr = devAddr;
+
+                        parent.check_cycle_started = true;
+                        this.log.output(`REACTING ${this.name}: `, "position check timeout has started");
+                        setTimeout(parent.check_pos(parent, ltc_addr), 100);
+                        break;
                     }
-                    break;
+                    case true:{
+                        /*Do nothing*/
+                        break;
+                    }
+                    default:
+                        this.log.output(`REACTING ${this.name}: `, "Invalid check_cycle_started");
                 }
-            case "tool":
-                {
+                
+                break;
+            }
+            case "tool":{
 
-                    break;
-                }
-            case "claw":
-                {
+                break;
+            }
+            case "claw":{
 
-                    break;
-                }
+                break;
+            }
             default:
                 this.log.output(`REACTING ${this.name}: `, "Invalid Input");
+                this.log.output(`REACTING ${this.name}`, "invalid input");
         }
 
-        // Check a flag if the motors have reached their target position; if not, continue to compare the positions with the target, and shutdown each motor as they reach their goal
-        var reached = this.reached;
-        var parent = this;
-        var ltc_addr = devAddr;
-        setTimeout(function(parent, ltc_addr) {
-            // Read all positional data from motors and update the arm's current position
-            var temp = parent.readadc(ltc_addr);
-            parent.position.base = temp.bpos;
-            parent.position.shoulder = temp.spos;
-            parent.position.elbow = temp.epos;
-            parent.position.wrist_l = temp.wpos_l;
-            parent.position.wrist_r = temp.wpos_r;
-            /*Determine wrist yaw angle*/
-            // parent.position.wrist = 
-
-            // if(/*a motor has reached its target and not all motors have reached their targets*/){
-            //     // Stop the said motor
-
-            //     return;
-            // }
-            // else if(/*a motor has */){
-
-            // }
-            // else {
-            //     /*invoke readadc again!!!*/
-            // }
-
-        }, 50);
-
         this.log.output(`REACTING ${this.name}: `, input);
-        this.feedback(this.name, `REACTING ${this.name}: `, input);
+        this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
     halt() {
         this.log.output(`HALTING ${this.name}`);
