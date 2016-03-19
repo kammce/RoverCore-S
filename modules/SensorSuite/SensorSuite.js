@@ -19,8 +19,6 @@ class SensorSuite extends Neuron {
         var parent = this;
         setInterval(function() {
              parent.mpu.readData();
-             parent.mpu.convertPosition();
-            parent.mpu.Log();
         }, 200) ;
     }
     react(input) {
@@ -30,9 +28,6 @@ class SensorSuite extends Neuron {
         // mpu.wakeUp();
         // var interval = setInterval(function() {
         //     mpu.readData();
-        //     mpu.convertPosition();
-        //     mpu.convertTemp();
-        //     mpu.Log();
         // }, 1500);
     }
     halt() {
