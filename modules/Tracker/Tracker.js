@@ -42,7 +42,7 @@ class Tracker extends Neuron {
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
         } else {
-        	this.pwm = new PWMDriver(0x40, 200, i2c);
+        	this.pwm = new PWMDriver(0x5c, 200, i2c);
         }               
 
 	    this.gimbalPosition = [0,0];
