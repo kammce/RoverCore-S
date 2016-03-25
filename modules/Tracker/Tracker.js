@@ -37,12 +37,12 @@ class Tracker extends Neuron {
         this.log = color_log;
         this.idle_time = idle_timeout;
         this.i2c = i2c;
-        this.model = model;
+        this.model = model;        
 
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
         } else {
-        	this.pwm = new PWMDriver(0x5c, 200, i2c);
+        	this.pwm = new PWMDriver(0x5c, 200, i2c);            
         }               
 
 	    this.gimbalPosition = [0,0];
@@ -54,76 +54,54 @@ class Tracker extends Neuron {
         this.model.registerMemory('CAMERA GIMBAL');
     }
 
-    parseCommand(input) {
-    	var parent = this;    	  
-    	var promiseGetData = function(i) {
-        	return new Promise(function(resolve)
-        	{
-        		//Check if command needs sensor data, then retrieve sensor data
-        		if(i.command === "moveInterval") {
-        			//get data from sensors
-        			i.data = {};
-        			i.data.orientation = [0,0,0];
-        		}
-        		resolve(i);
-        	});
-        };
-
-        var promiseInterpretCommand = function(i) {
-        	return new Promise(function(resolve)
-        	{      
-        	//console.log(i);   		
-        		var output;
-        		var gimbal;      		
-        		if(i.command === 'moveAngleLocal') { 
-        			//Determines angle to move servos         			     			
-        			gimbal = parent.moveAngleLocal([i.value.yaw, i.value.pitch], parent.gimbalPosition);         			
-        			parent.gimbalPosition = gimbal;         			      			
-        			//Converts output angle to PWM pulse length        			
-        			output = parent.angleToPWM(gimbal);
-        			//Writes to servo
-        			parent.servoWrite(output);
-        			parent.updateModel();        				
-        		} else if(i.command === "moveInterval") {        			       			
-        			gimbal = parent.moveInterval([i.value.yaw, i.value.pitch], parent.gimbalPosition);
-        			parent.gimbalPosition = gimbal;        			
-        			output = parent.angleToPWM(gimbal);
-        			parent.servoWrite(output);
-        			parent.updateModel();        			       			
-        		} else if(i.command === "defaultConfig") {
-        			//Updates the default position       			
-        			parent.defaultConfig([i.value.yaw, i.value.pitch]);        			        			
-        		} else if(i.command === "recalibrate" ) {         			     			
-        			gimbal = parent.recalibrate();        			
-        			parent.gimbalPosition = gimbal;        			
-        			output = parent.angleToPWM(gimbal);
-        			parent.servoWrite(output);
-        			parent.updateModel();         			       			
-        		} else if(i.command === "getDistance") { 
-        			//parent.lidarMeasurement = parent.getDistance();
-        			parent.getDistance();        			
-        			setTimeout(function(){
-        				parent.updateModel();
-        				//parent.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
-        				parent.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
-        			}, 40);
-        		} else if(i.command === "lidarHealth") {
-        			parent.checkLidarHealth();
-        			setTimeout(function(){
-        				//parent.log.output("LIDAR HEALTH: ", parent.lidarHealth);
-        				parent.feedback("LIDAR HEALTH: ", parent.lidarHealth);
-        			}, 10);
-        			
-        		}
-        		
-    			resolve(1);        		
-        	});
-        };
- 		promiseGetData(input).then(promiseInterpretCommand);
+    parseCommand(i) {    	  	  
+    	var output;
+        var gimbal;             
+        if(i.mode === 'moveAngleLocal') { 
+            //Determines angle to move servos                                   
+            gimbal = this.moveAngleLocal([i.yaw, i.pitch], this.gimbalPosition);                    
+            this.gimbalPosition = gimbal;                                     
+            //Converts output angle to PWM pulse length                 
+            output = this.angleToPWM(gimbal);
+            //Writes to servo
+            this.servoWrite(output);
+            this.updateModel();                       
+        } else if(i.mode === "moveInterval") {                                  
+            gimbal = this.moveInterval([i.yaw, i.pitch], this.gimbalPosition);
+            this.gimbalPosition = gimbal;                 
+            output = this.angleToPWM(gimbal);
+            this.servoWrite(output);
+            this.updateModel();                                   
+        } else if(i.mode === "defaultConfig") {
+            //Updates the default position                  
+            this.defaultConfig([i.yaw, i.pitch]);                                     
+        } else if(i.mode === "recalibrate" ) {                                  
+            gimbal = this.recalibrate();                  
+            this.gimbalPosition = gimbal;                 
+            output = this.angleToPWM(gimbal);
+            this.servoWrite(output);
+            this.updateModel();                                   
+        } else if(i.mode === "getDistance") { 
+            //this.lidarMeasurement = this.getDistance();
+            this.getDistance();                   
+            setTimeout(function(){
+                this.updateModel();
+                //this.log.output("LIDAR Measurement: ", this.lidarMeasurement);
+                this.feedback("LIDAR Measurement: ", this.lidarMeasurement);
+            }, 40);
+        } else if(i.mode === "lidarHealth") {
+            this.checkLidarHealth();
+            setTimeout(function(){
+                //this.log.output("LIDAR HEALTH: ", this.lidarHealth);
+                this.feedback("LIDAR HEALTH: ", this.lidarHealth);
+            }, 10);
+            
+        }
     }
     react(input) {
         //this.log.output(`REACTING ${this.name}: `, input);
-        //this.feedback(`REACTING ${this.name}: `, input);
+        //this.feedback(`REACTING ${this.name}: `, input); 
+        console.log(input);
         this.parseCommand(input);       
 
 	}
@@ -131,11 +109,10 @@ class Tracker extends Neuron {
       //  this.log.output(`HALTING ${this.name}`);
        // this.feedback(`HALTING ${this.name}`);
         this.parseCommand({
-        	command : "moveAngleLocal",
-        	value : {
-        		yaw : 0,
-        		pitch : -90
-        	}
+        	mode : "moveAngleLocal",
+        	yaw : 0,
+        	pitch : -90
+        	
         });
 
         var parent = this;
@@ -148,7 +125,7 @@ class Tracker extends Neuron {
        // this.log.output(`RESUMING ${this.name}`);
        // this.feedback(`RESUMING ${this.name}`);
         this.parseCommand({
-        	command : "recalibrate"
+        	mode : "recalibrate"
         });        
     }
     idle() {
@@ -156,7 +133,7 @@ class Tracker extends Neuron {
        // this.log.output(`IDLING ${this.name}`);
        //this.feedback(`IDLING ${this.name}`);
         this.parseCommand({
-        	command : "recalibrate"
+        	mode : "recalibrate"
         });
 
     }
@@ -241,7 +218,7 @@ class Tracker extends Neuron {
     	return [yaw, pitch];
     }
     servoWrite(value) {
-    	
+    	console.log(value);
     	this.pwm.setMICRO(YAW_PIN, value[0]);
     	this.pwm.setMICRO(PITCH_PIN, value[1]);
 
