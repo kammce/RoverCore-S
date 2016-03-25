@@ -72,17 +72,24 @@ class Log {
 
 /**** Static Field ****/
 Log.color_in_file = false;
-// Name of stdout file
-Log.output_file = `./logs/stdout-${Date().slice(0,-15)}.log`;
-// Name of stderr file
-Log.error_file = `./logs/stderr-${Date().slice(0,-15)}.log`;
-// Generate the output file along with a write stream to it
-Log.writeOutput = fs.createWriteStream(Log.output_file);
-// Generate the error file along with a write stream to it
-Log.writeError = fs.createWriteStream(Log.error_file);
-// Create a custom console with file write streams as destinations for information
-Log.journal = new Console(Log.writeOutput, Log.writeError);
 
+Log.initialize = function() {
+	var dir = './logs';
+	if (!fs.existsSync(dir)) { fs.mkdirSync(dir); }
+	// Name of stdout file
+	Log.output_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, '-');
+	// Name of stderr file
+	Log.error_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, '-');
+	// Generate the output file along with a write stream to it
+	Log.writeOutput = fs.createWriteStream(Log.output_file);
+	// Generate the error file along with a write stream to it
+	Log.writeError = fs.createWriteStream(Log.error_file);
+	// Create a custom console with file write streams as destinations for information
+	Log.journal = new Console(Log.writeOutput, Log.writeError);
+};
+
+// Initialize Log write streams and console outputs
+Log.initialize();
 // Map of modules that can be muted
 Log._mutes = {};
 // Static method to mute a log
