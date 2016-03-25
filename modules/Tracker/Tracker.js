@@ -56,7 +56,8 @@ class Tracker extends Neuron {
 
     parseCommand(i) {    	  	  
     	var output;
-        var gimbal;             
+        var gimbal;   
+        var parent = this;           
         if(i.mode === 'moveAngleLocal') { 
             //Determines angle to move servos                                   
             gimbal = this.moveAngleLocal([i.yaw, i.pitch], this.gimbalPosition);                    
@@ -83,16 +84,14 @@ class Tracker extends Neuron {
             this.updateModel();                                   
         } else if(i.mode === "getDistance") { 
             //this.lidarMeasurement = this.getDistance();
-            this.getDistance(); 
-            var parent = this;                  
+            this.getDistance();                              
             setTimeout(function(){
                 parent.updateModel();
                 //parent.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
                 parent.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
             }, 40);
         } else if(i.mode === "lidarHealth") {
-            this.checkLidarHealth();
-            var parent = this;
+            this.checkLidarHealth();            
             setTimeout(function(){
                 //this.log.output("LIDAR HEALTH: ", this.lidarHealth);
                 parent.feedback("LIDAR HEALTH: ", parent.lidarHealth);
@@ -103,7 +102,7 @@ class Tracker extends Neuron {
     react(input) {
         //this.log.output(`REACTING ${this.name}: `, input);
         //this.feedback(`REACTING ${this.name}: `, input); 
-        console.log(input);
+        
         this.parseCommand(input);       
 
 	}
@@ -178,9 +177,8 @@ class Tracker extends Neuron {
     		targetAngle[0] = targetAngle[0] + 360;
     	} else if(targetAngle[0] >= YAW_MAX_IDEAL) {
     		targetAngle[0] = targetAngle[0] - 360;
-    	}    	
-
-        console.log(targetAngle);
+    	}    
+        
     	return targetAngle;
     	
     }
@@ -222,8 +220,7 @@ class Tracker extends Neuron {
     	var pitch = Math.round((((value[1] - PITCH_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_MAX - PITCH_MIN)) + PWM_PITCH_MIN);
     	return [yaw, pitch];
     }
-    servoWrite(value) {
-    	console.log(value);
+    servoWrite(value) {    	
     	this.pwm.setMICRO(YAW_PIN, value[0]);
     	this.pwm.setMICRO(PITCH_PIN, value[1]);
 
