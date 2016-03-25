@@ -25,7 +25,7 @@ class MPU6050{
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(0x68, 0x6B, 0xFF);
+        i2c.writeByteSync(0x68, 0x6B, 1);
     }
 
     readData() {        //read temp and accelerometer data from chip
@@ -93,9 +93,9 @@ class MPU6050{
         else{
           this.temp = parseInt(this.temp,2);
         }
-        // this.convertPosition();
-        // this.convertTemp();
-        // this.Log();
+        this.convertPosition();
+        this.convertTemp();
+        this.Log();
     }
 
     convertPosition() {     //converts x- and y-angles
@@ -109,7 +109,7 @@ class MPU6050{
 
     sleep() {       //put chip in sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(0x68, 0x6B, 0x00);
+        i2c.writeByteSync(0x68, 0x6B, 0);
     }
 
     Log() {     //log data measured by chip

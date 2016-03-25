@@ -110,7 +110,7 @@ describe('Testing SensorSuite Class', function () {
 			});
 		});
 		describe('Function: convertPosition()', function() {
-			it('expected position value to be converted to angles', function () {
+			it('expected position values to be converted to angles', function () {
 				test_lobe.mpu.convertPosition();
 				expect(test_lobe.mpu.xangle).to.equal(-35.26390990826984);//
 				expect(test_lobe.mpu.yangle).to.equal(-35.26390990826984);//
@@ -125,7 +125,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: log()', function() {
 			it('expected data to be logged', function () {
 				test_lobe.mpu.Log();
-				expect(expected_log).to.equal("x-angle: -35.26390990826984 y-angle: -35.26390990826984 temperature: -20.164117647058823");
+				expect(expected_log).to.equal("x-angle: -35.264 y-angle: -35.264 temperature: -20.164");
 			});
 		});
 		describe('Function: sleep()', function() {
