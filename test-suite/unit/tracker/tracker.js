@@ -35,12 +35,10 @@ describe('Testing Tracker Class', function() {
 	describe('#react moveAngleLocal', function(){
 			before(function(done){
 				test_lobe.gimbalPosition = [0,0];
-				test_lobe.react({
-					command : "moveAngleLocal",
-					value : {
-						yaw : 4,
-						pitch : 5
-					}
+				test_lobe.react({					
+					mode: "moveAngleLocal",
+					yaw: 4, 
+					pitch: 5					
 				});
 				done();
 			});
@@ -58,13 +56,9 @@ describe('Testing Tracker Class', function() {
 		before(function(done){
 			test_lobe.gimbalPosition = [0,0];
 			test_lobe.react({
-				command : "moveInterval",
-				value : {
-					yaw : 5,
-					pitch : 6,
-					stabilizeYaw : false,
-					stabilizePitch :false
-				}
+				mode: "moveInterval",
+					yaw: 5, 
+					pitch: 6
 			});
 			done();
 		});
@@ -77,11 +71,9 @@ describe('Testing Tracker Class', function() {
 	describe('#react defaultConfig', function(){
 		before(function(done){
 			test_lobe.react({
-				command : "defaultConfig",
-				value : {
-					yaw : 1,
-					pitch : 2
-				}
+				mode: "defaultConfig",
+				yaw: 1,
+				pitch: 2
 			});
 			done();
 		});
@@ -92,7 +84,7 @@ describe('Testing Tracker Class', function() {
 	describe('#react recalibrate', function(){
 		before(function(done){
 			test_lobe.react({
-				command : "recalibrate"
+				mode : "recalibrate"
 			});
 			done();
 		});
@@ -139,11 +131,9 @@ describe('Testing Tracker Class', function() {
 		before(function(done){
 			test_lobe.react(
 				{
-				command : "moveAngleLocal",
-				value : {
-					yaw : 90,
-					pitch : 90
-					}
+				mode : "moveAngleLocal",				
+				yaw : 90,
+				pitch : 90						
 				});
 			setTimeout(done(),100);
 		});
@@ -194,7 +184,7 @@ describe('Testing Tracker Class', function() {
 		
 		before(function(done) {
 			test_lobe.react({
-				command: "getDistance"
+				mode: "getDistance"
 			});
 			setTimeout(function(){done();}, 50);
 		});
@@ -206,7 +196,7 @@ describe('Testing Tracker Class', function() {
 	describe('#lidar checkLidarHealth', function(){
 		before(function(done){
 			test_lobe.react({
-				command: "lidarHealth"
+				mode: "lidarHealth"
 			});
 			setTimeout(function(){done();}, 20);
 		});

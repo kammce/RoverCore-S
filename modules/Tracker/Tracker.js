@@ -38,7 +38,7 @@ class Tracker extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c;
         this.model = model;        
-
+        //debug = true;
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
         } else {
@@ -83,17 +83,19 @@ class Tracker extends Neuron {
             this.updateModel();                                   
         } else if(i.mode === "getDistance") { 
             //this.lidarMeasurement = this.getDistance();
-            this.getDistance();                   
+            this.getDistance(); 
+            var parent = this;                  
             setTimeout(function(){
-                this.updateModel();
-                //this.log.output("LIDAR Measurement: ", this.lidarMeasurement);
-                this.feedback("LIDAR Measurement: ", this.lidarMeasurement);
+                parent.updateModel();
+                //parent.log.output("LIDAR Measurement: ", parent.lidarMeasurement);
+                parent.feedback("LIDAR Measurement: ", parent.lidarMeasurement);
             }, 40);
         } else if(i.mode === "lidarHealth") {
             this.checkLidarHealth();
+            var parent = this;
             setTimeout(function(){
                 //this.log.output("LIDAR HEALTH: ", this.lidarHealth);
-                this.feedback("LIDAR HEALTH: ", this.lidarHealth);
+                parent.feedback("LIDAR HEALTH: ", parent.lidarHealth);
             }, 10);
             
         }
@@ -153,6 +155,8 @@ class Tracker extends Neuron {
 
     moveAngleLocal(value, position) {
     	var targetAngle = [0,0];
+        value[0] = value[0] % 360;
+
 
     	//Constrains Pitch to bounds
     	if(value[1]>PITCH_MAX) {
@@ -176,6 +180,7 @@ class Tracker extends Neuron {
     		targetAngle[0] = targetAngle[0] - 360;
     	}    	
 
+        console.log(targetAngle);
     	return targetAngle;
     	
     }
