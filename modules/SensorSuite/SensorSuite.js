@@ -1,3 +1,6 @@
+//
+//
+//
 "use strict";
 
 var Neuron = require('../Neuron');
@@ -12,26 +15,23 @@ class SensorSuite extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c;
         this.model = model;
+
+        this.model.registerMemory('MPU');
+
         // Construct Class here
             //mpu6050 class initialization
         this.mpu = new mpu6050(this.i2c, this.log);
-            this.mpu.wakeUp();
+        this.mpu.wakeUp();
         var parent = this;
         setInterval(function() {
              parent.mpu.readData();
-             // parent.mpu.convertPosition();
-             // parent.mpu.convertTemp();
-             // parent.mpu.Log();
+             parent.updateModel();
         }, 1500) ;
     }
     react(input) {
         var mpu = this.mpu;
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
-        // mpu.wakeUp();
-        // var interval = setInterval(function() {
-        //     mpu.readData();
-        // }, 1500);
     }
     halt() {
         var mpu = this.mpu;
@@ -49,12 +49,14 @@ class SensorSuite extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
        // mpu.sleep();
     }
-    // groundTemp() {
-
-    // }
-    // humidity() {
-
-    // }
+    updateModel() {
+        var mpu = this.mpu;
+        this.model.set('MPU', {
+            xAngle: mpu.xangle,
+            yAngle: mpu.yangle,
+            temperature: mpu.temp
+        });
+    }
 }
 
 module.exports = SensorSuite;
