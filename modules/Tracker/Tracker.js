@@ -58,7 +58,7 @@ class Tracker extends Neuron {
     	var output;
         var gimbal;   
         var parent = this;           
-        if(i.mode === 'moveAngleLocal') { 
+        if(i.mode === 'moveAngle') { 
             //Determines angle to move servos                                   
             gimbal = this.moveAngleLocal([i.yaw, i.pitch], this.gimbalPosition);                    
             this.gimbalPosition = gimbal;                                     
@@ -73,10 +73,10 @@ class Tracker extends Neuron {
             output = this.angleToPWM(gimbal);
             this.servoWrite(output);
             this.updateModel();                                   
-        } else if(i.mode === "defaultConfig") {
+        } else if(i.mode === "setHome") {
             //Updates the default position                  
             this.defaultConfig([i.yaw, i.pitch]);                                     
-        } else if(i.mode === "recalibrate" ) {                                  
+        } else if(i.mode === "moveHome" ) {                                  
             gimbal = this.recalibrate();                  
             this.gimbalPosition = gimbal;                 
             output = this.angleToPWM(gimbal);
@@ -110,7 +110,7 @@ class Tracker extends Neuron {
       //  this.log.output(`HALTING ${this.name}`);
        // this.feedback(`HALTING ${this.name}`);
         this.parseCommand({
-        	mode : "moveAngleLocal",
+        	mode : "moveAngle",
         	yaw : 0,
         	pitch : -90
         	
@@ -126,7 +126,7 @@ class Tracker extends Neuron {
        // this.log.output(`RESUMING ${this.name}`);
        // this.feedback(`RESUMING ${this.name}`);
         this.parseCommand({
-        	mode : "recalibrate"
+        	mode : "moveHome"
         });        
     }
     idle() {
@@ -134,7 +134,7 @@ class Tracker extends Neuron {
        // this.log.output(`IDLING ${this.name}`);
        //this.feedback(`IDLING ${this.name}`);
         this.parseCommand({
-        	mode : "recalibrate"
+        	mode : "moveHome"
         });
 
     }

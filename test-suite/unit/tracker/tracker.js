@@ -32,21 +32,21 @@ describe('Testing Tracker Class', function() {
 	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
 
 
-	describe('#react moveAngleLocal', function(){
+	describe('#react moveAngle', function(){
 			before(function(done){
 				test_lobe.gimbalPosition = [0,0];
 				test_lobe.react({					
-					mode: "moveAngleLocal",
+					mode: "moveAngle",
 					yaw: 4, 
 					pitch: 5					
 				});
 				done();
 			});
 
-			it('#react moveAngleLocal should correctly modify gimbalPosition', function(){			
+			it('#react moveAngle should correctly modify gimbalPosition', function(){			
 				expect(test_lobe.gimbalPosition).is.eql([4,5]);
 			});
-			it('#react moveAngleLocal should send correct signal to servo',function() {
+			it('#react moveAngle should send correct signal to servo',function() {
 				expect(test_lobe.pwm.microValue.pop()).to.eql(1556);
 				expect(test_lobe.pwm.microValue.pop()).to.eql(1506);
 			});
@@ -71,7 +71,7 @@ describe('Testing Tracker Class', function() {
 	describe('#react defaultConfig', function(){
 		before(function(done){
 			test_lobe.react({
-				mode: "defaultConfig",
+				mode: "setHome",
 				yaw: 1,
 				pitch: 2
 			});
@@ -84,7 +84,7 @@ describe('Testing Tracker Class', function() {
 	describe('#react recalibrate', function(){
 		before(function(done){
 			test_lobe.react({
-				mode : "recalibrate"
+				mode : "moveHome"
 			});
 			done();
 		});
@@ -131,7 +131,7 @@ describe('Testing Tracker Class', function() {
 		before(function(done){
 			test_lobe.react(
 				{
-				mode : "moveAngleLocal",				
+				mode : "moveAngle",				
 				yaw : 90,
 				pitch : 90						
 				});
@@ -147,7 +147,7 @@ describe('Testing Tracker Class', function() {
 	});
 
 	describe('#testing standard class functions', function(){
-		it('#moveAngleLocal', function() {
+		it('#moveAngle', function() {
 			expect(test_lobe.moveAngleLocal([180, 90], [0,0])).to.eql([180, 90]);
 			expect(test_lobe.moveAngleLocal([90, 0], [360, 0])).to.eql([450, 0]);
 			expect(test_lobe.moveAngleLocal([200, 0], [540, 0])).to.eql([200, 0]);
