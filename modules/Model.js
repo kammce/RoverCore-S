@@ -36,7 +36,7 @@ class Model {
 			var realtime_reply = { };
 			// add key word to realtime reply
 			realtime_reply[key] = this.database[key];
-			this.feedback("Model", realtime_reply);
+			this.feedback("model", realtime_reply);
 			return true;
 		} else {
 			return false;
