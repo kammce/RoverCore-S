@@ -14,10 +14,10 @@ const YAW_MAX_IDEAL             = 540;
 const PITCH_MIN                 = -90;
 const PITCH_MAX                 = 90;
 //Length of pulse in uSeconds
-const PWM_YAW_MIN = 600;
-const PWM_YAW_MAX = 2400;
-const PWM_PITCH_MIN = 500;
-const PWM_PITCH_MAX = 2500;
+const PWM_YAW_MIN = 1100;
+const PWM_YAW_MAX = 1900;
+const PWM_PITCH_MIN = 900;
+const PWM_PITCH_MAX = 2100;
 //Lidar-I2C-Address
 const Lidar_Address             = 0x62;
 const Lidar_Control             = 0x00;
