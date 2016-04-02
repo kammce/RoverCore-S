@@ -22,7 +22,6 @@ module.exports = function(grunt) {
 				curly: true, // Requires curly braces around blocks and loops
 				freeze: true, // Prohibits overwriting prototypes of native objects such as Array, Date
 				latedef: true, // Prohibits the use of a variable before it was defined
-				maxdepth: 4, // Allows up to 4 deep nested blocks/loops
 				nonew: true, // Does not allow new MyConstructor(); without returning to variable
 				undef: true, // Prohibits the use of explicitly undeclared variables
 				unused: true, // Warns when you define and never use your variables
