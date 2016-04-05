@@ -62,8 +62,8 @@ When working on a part of the project make sure to:
 - DO NOT create a PR if your module does not pass its tests.
 - DO NOT create a PR if your module does not pass its the JSHint linting process. 
 - ALWAYS squash commits before merging to MASTER. This will allow us to manage commits better on MASTER.
-- ALWAYS rebase from latest MASTER before merging to MASTER.
-- ALWAYS rebase from latest MASTER before working on branch.
+- ALWAYS merge the latest MASTER into your branch creating a PR for MASTER. You can use the bitbucket branch sync button as well.
+- ALWAYS merge the latest MASTER into your branch before working on branch. You can use the bitbucket branch sync button as well.
 - ALWAYS get approval from at least one person before merging into MASTER.
 
 Following these guidelines will allow us to catch merge conflicts and reduce the amount of work we do when trying to resolve errors when merging into MASTER.
