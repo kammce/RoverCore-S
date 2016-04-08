@@ -23,6 +23,7 @@ class MPU6050{
 
         this.xangle = 0;
         this.yangle = 0;
+        this.zangle = 0;
         this.celsius = 0;
     }
 
@@ -98,12 +99,13 @@ class MPU6050{
         }
         this.convertPosition();
         this.convertTemp();
-        this.Log();
+        //this.Log();
     }
 
     convertPosition() {     //converts x- and y-angles
       this.xangle = 57.295*Math.atan(parseFloat(this.ypos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.xpos),2)));
       this.yangle = 57.295*Math.atan(parseFloat(this.xpos)/ Math.sqrt(Math.pow(parseFloat(this.zpos),2)+Math.pow(parseFloat(this.ypos),2)));
+      // this.zangle = 57.295*Math.atan(parseFloat(this.zpos)/ Math.sqrt(Math.pow(parseFloat(this.xpos),2)+Math.pow(parseFloat(this.ypos),2)));
     }
 
     convertTemp() {     //converts to Celsius
@@ -117,7 +119,7 @@ class MPU6050{
 
     Log() {     //log data measured by chip
         //console.log("x-angle: " + this.xangle.toFixed(3) + ", y-angle: " + this.yangle.toFixed(3) + ", temperature: " + this.celsius.toFixed(3));
-        this.log.output(`x-angle: ${this.xangle.toFixed(3)} y-angle: ${this.yangle.toFixed(3)} temperature: ${this.celsius.toFixed(3)}`);
+        this.log.output(`x-angle: ${this.xangle.toFixed(3)} y-angle: ${this.yangle.toFixed(3)} z-angle: ${this.zangle.toFixed(3)} temperature: ${this.celsius.toFixed(3)}`);
     }
 }
 

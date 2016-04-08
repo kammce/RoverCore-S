@@ -16,8 +16,6 @@ class SensorSuite extends Neuron {
         this.i2c = i2c;
         this.model = model;
 
-        this.model.registerMemory('MPU');
-
         // Construct Class here
             //mpu6050 class initialization
         this.mpu = new mpu6050(this.i2c, this.log);
@@ -26,10 +24,19 @@ class SensorSuite extends Neuron {
         setInterval(function() {
              parent.mpu.readData();
              parent.updateModel();
-        }, 1500) ;
+        }, 500);
     }
     react(input) {
         var mpu = this.mpu;
+        var name = input.name;
+
+        switch(name){
+
+            case "log":
+                mpu.Log();
+                break;
+
+        }
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -54,6 +61,7 @@ class SensorSuite extends Neuron {
         this.model.set('MPU', {
             xAngle: mpu.xangle,
             yAngle: mpu.yangle,
+            zAngle: mpu.zangle,
             temperature: mpu.temp
         });
     }
