@@ -44,9 +44,15 @@ class FanController extends Neuron {
             }
             case "readRegister": {
                 this.readRegister(data.register);
+                break;
             }
             case "setRegister": {
                 this.setRegister();
+                break;
+            }
+            case "readFanSpeed": {
+                this.readFanSpeed();
+                break;
             }
         }
 
@@ -246,7 +252,7 @@ class FanController extends Neuron {
         this.tach3 = tach3high + tach3low;  
         this.tach4 = tach4high + tach4low;  
 
-        //conver to decimal
+        //convert to decimal
         if(this.tach1 > "1000000000000000"){   
           this.tach1 = parseInt(this.tach1,2) - Math.pow(2,16);
         }
@@ -271,6 +277,13 @@ class FanController extends Neuron {
         else{
           this.tach4 = parseInt(this.tach4,2);
         }
+        //tach1-4 reading complete set to model
+        this.model.set('Fan Speed', {
+            Fan1: this.tach1,
+            Fan2: this.tach2,
+            Fan3: this.tach3,
+            Fan4: this.tach4
+        });
      }
 }
 
