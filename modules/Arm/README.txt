@@ -171,3 +171,20 @@ Notes:
 
     Arm Angular Restrictions (information from John Han (Arm ME))
         - Arm will not go back on itself; its max will be ~180 degrees straight up in the air
+
+
+    4/8/16=====================================================================================================================================
+	New communication protocol between my Arm lobe (software in the ODROID) and Matt's software (library(?) that handles communication to the SAMD21
+	(i.e. I create the control, Matt receives it, translates it into a desired command for action, then tells that command to the SAMD21)
+
+	Guidelines
+        a.> Data path:
+                Control of the arm motors goes to Matt's software
+                    - I will take interface input, translate that into appropriate control signals (pwm for servos, 1/0 for h-bridge control, etc.), and send them in a packet (which follows my and MATT's communication protocol) to Matt's software, which will then control the motors accordingly
+                Current sensing feedback comes from Matt's software
+                    - Matt will probably be sending me the current sensor feedback in a packet
+                Positional Feedback
+                    - Positional feedback for the shoulder DC motor will be received from the SAMD21. I'll have to use Serial communication to get that data
+                    - Positional feedback for the Firgelli will be taken from the SAMD21's internal ADC, so I'll have to use Serial communication to get that data
+                    - Positional feedback for the wrist pitch/roll (MPU/MRE respectively) will be received from the SAMD21. The MRE and MPU shall be connected to the SAMD21, so I'll have to use Serial communication to get that data
+		b.> All SAMD21 <-> Arm.js communication will be done through USB Serial (UART?)
