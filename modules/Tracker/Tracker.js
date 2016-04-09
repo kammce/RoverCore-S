@@ -4,20 +4,23 @@ var Neuron = require('../Neuron');
 var PWMDriver = require('../PWMDriver');
 var PWMDriverTest = require('./PWMDriverTest');
 
-//Absolute constraint for yaw servo
-const YAW_MIN                   = -630;
-const YAW_MAX                   = 630;
+//Range of yaw servo
+const YAW_SERVO_MIN                   = -630;
+const YAW_SERVO_MAX                   = 630;
 //Safe constraint for yaw servo
-const YAW_MIN_IDEAL             = -540;        
-const YAW_MAX_IDEAL             = 540;
-//Absolute constraint for pitch servo
-const PITCH_MIN                 = -90;
-const PITCH_MAX                 = 90;
+const YAW_MIN             = -540;        
+const YAW_MAX             = 540;
+//Range of yaw servo
+const PITCH_SERVO_MIN                 = -90;
+const PITCH_SERVO_MAX                 = 90;
+//Constraint of yaw servo
+const PITCH_MIN = -90;
+const PITCH_MAX = 85;
 //Length of pulse in uSeconds
-const PWM_YAW_MIN = 1100;
-const PWM_YAW_MAX = 1900;
-const PWM_PITCH_MIN = 900;
-const PWM_PITCH_MAX = 2100;
+const PWM_YAW_MIN = 600;
+const PWM_YAW_MAX = 2400;
+const PWM_PITCH_MIN = 500;
+const PWM_PITCH_MAX = 2500;
 //Lidar-I2C-Address
 const Lidar_Address             = 0x62;
 const Lidar_Control             = 0x00;
@@ -143,8 +146,8 @@ class Tracker extends Neuron {
     	return this.defaultPosition;
     }
     defaultConfig(value) {
-    	if(value[0] > YAW_MAX_IDEAL || value[0] < YAW_MIN_IDEAL || 
-    		value[1] > PITCH_MAX || value[1] < PITCH_MIN) {
+    	if(value[0] > YAW_MAX || value[0] < YAW_MIN || 
+    		value[1] > PITCH_SERVO_MAX || value[1] < PITCH_SERVO_MIN) {
     		return false;
     	} else {
     		this.defaultPosition = value;
@@ -173,9 +176,9 @@ class Tracker extends Neuron {
     	}
 
     	//Prevents gimbal from exceeding the ideal bounds
-    	if(targetAngle[0] <= YAW_MIN_IDEAL ) {
+    	if(targetAngle[0] <= YAW_MIN ) {
     		targetAngle[0] = targetAngle[0] + 360;
-    	} else if(targetAngle[0] >= YAW_MAX_IDEAL) {
+    	} else if(targetAngle[0] >= YAW_MAX) {
     		targetAngle[0] = targetAngle[0] - 360;
     	}    
         
@@ -185,28 +188,28 @@ class Tracker extends Neuron {
     moveInterval(value, position){
     	var targetAngle = [0,0];
     	
-    	if((position[0] + value[0]) <= YAW_MAX && (position[0] + value[0]) >= YAW_MIN) {
+    	if((position[0] + value[0]) <= YAW_SERVO_MAX && (position[0] + value[0]) >= YAW_SERVO_MIN) {
     		targetAngle[0] = position[0] + value[0];
-    		if(targetAngle[0] >= YAW_MAX_IDEAL || targetAngle[0] <= YAW_MIN_IDEAL) {
+    		if(targetAngle[0] >= YAW_MAX || targetAngle[0] <= YAW_MIN) {
     			this.feedback("WARNING: Tracker YAW is exceeding safe limits");
     		}
     	} else {    		
     		this.feedback("WARNING: Tracker YAW has exceeded limits");
-    		if((position[0] + value[0]) > YAW_MAX) {
-    			targetAngle[0] = YAW_MAX;
+    		if((position[0] + value[0]) > YAW_SERVO_MAX) {
+    			targetAngle[0] = YAW_SERVO_MAX;
     		} else {
-    			targetAngle[0] = YAW_MIN;
+    			targetAngle[0] = YAW_SERVO_MIN;
     		}
     	}
 
-    	if((position[1] + value[1]) <= PITCH_MAX && (position[1] + value[1]) >= PITCH_MIN) {
+    	if((position[1] + value[1]) <= PITCH_SERVO_MAX && (position[1] + value[1]) >= PITCH_SERVO_MIN) {
     		targetAngle[1] = position[1] + value[1];
     	} else {
     		this.feedback("WARNING: Tracker PITCH has exceeded limits");
-    		if((position[1] + value[1]) > PITCH_MAX) {
-    			targetAngle[1] = PITCH_MAX;
+    		if((position[1] + value[1]) > PITCH_SERVO_MAX) {
+    			targetAngle[1] = PITCH_SERVO_MAX;
     		} else {
-    			targetAngle[1] = PITCH_MIN;
+    			targetAngle[1] = PITCH_SERVO_MIN;
     		}
     	}
 
@@ -216,8 +219,8 @@ class Tracker extends Neuron {
 
 
 	angleToPWM(value) {
-    	var yaw = Math.round((((value[0] - YAW_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_MAX - YAW_MIN)) + PWM_YAW_MIN);
-    	var pitch = Math.round((((value[1] - PITCH_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_MAX - PITCH_MIN)) + PWM_PITCH_MIN);
+    	var yaw = Math.round((((value[0] - YAW_SERVO_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_SERVO_MAX - YAW_SERVO_MIN)) + PWM_YAW_MIN);
+    	var pitch = Math.round((((value[1] - PITCH_SERVO_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_SERVO_MAX - PITCH_SERVO_MIN)) + PWM_PITCH_MIN);
     	return [yaw, pitch];
     }
     servoWrite(value) {    	
