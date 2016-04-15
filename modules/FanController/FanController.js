@@ -18,6 +18,7 @@ class FanController extends Neuron {
         this.tach2 = 0;
         this.tach3 = 0;
         this.tach4 = 0;
+        var parent = this;
         this.setRegister();
         setInterval(function(){
             readtemp();
@@ -109,6 +110,11 @@ class FanController extends Neuron {
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x29)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x78)));
         this.model.set('Temperature Readings', this.TEMP);
+        this.log.output('Temperature Sensor 1: ${this.TEMP[0]} \n
+            Temperature Sensor 2: ${this.TEMP[1]}
+            Temperature Sensor 3: ${this.TEMP[2]}
+            Temperature Sensor 4: ${this.TEMP[3]}
+            Temperature Sensor 5: ${this.TEMP[4]}');
         return this.TEMP;
     }
     writeTempLimits(UPPER_TEMP,LOWER_TEMP) {
@@ -210,7 +216,11 @@ class FanController extends Neuron {
      }
      readRegister(CMD_ADDR) {
         var i2c = this.i2c;
-        return i2c.readByteSync(0x2C,CMD_ADDR);
+        var reading = i2c.readByteSync(0x2C,CMD_ADDR);
+        this.log.output('${CMD_ADDR}: ${this.TEMP[4]}');
+        return reading;
+
+
      }
      readFanSpeed(){
         var i2c = this.i2c;
@@ -266,7 +276,7 @@ class FanController extends Neuron {
           this.tach2 = parseInt(this.tach2,2);
         }
         if(this.tach3 > "1000000000000000"){   
-          this.tach3 = parseInt(this.tach3,2) - Math.pow(2,16);
+          this.tach3 = parseI nt(this.tach3,2) - Math.pow(2,16);
         }
         else{
           this.tach3 = parseInt(this.tach3,2);
@@ -284,6 +294,11 @@ class FanController extends Neuron {
             Fan3: this.tach3,
             Fan4: this.tach4
         });
+        //output to console
+         this.log.output('Fan Speed 1: ${this.tach1}
+            Fan Speed 2: ${this.tach2}
+            Fan Speed 3: ${this.tach3}
+            Fan Speed 4: ${this.tach4}');
      }
 }
 

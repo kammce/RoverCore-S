@@ -169,4 +169,7 @@ describe('Fan Controller Class',function(){
             expect(unittest.readRegister(CMD_ADDR)).to.be.equal(20);
         });
     });
+    describe('readFanSpeed()',function(){
+        //meeps
+    })
 });
