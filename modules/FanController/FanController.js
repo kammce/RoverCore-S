@@ -19,14 +19,14 @@ class FanController extends Neuron {
         this.tach3 = 0;
         this.tach4 = 0;
         var parent = this;
-        this.setRegister();
+        parent.setRegister();
         setInterval(function(){
-            readtemp();
-        },6000);
+            parent.readtemp();
+        },2000);
         //Memory stored in Model
-        this.model.registerMemory('Temperature Readings');
-        this.model.registerMemory('Fan Speed');
-        this.model.registerMemory('Limit Registers');
+        parent.model.registerMemory('Temperature Readings');
+        parent.model.registerMemory('Fan Speed');
+        parent.model.registerMemory('Limit Registers');
     }
     react(input) {
         /*Manual input?
@@ -73,14 +73,6 @@ class FanController extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
     }
     decodeTEMP(temp) {
-        /* 
-        if(temp>=0x80){
-            return parseInt(temp,16)-256;
-        } 
-        else {
-            return parseInt(temp,16);
-        }
-        */
         if(temp>=128){
             return (temp - 256);
         } else{
@@ -168,7 +160,7 @@ class FanController extends Neuron {
             Lower: LOWER
         });
         return this.TEMPLIMIT;
-    }  
+    }
      setRegister() {    //Settings/Enabling System for Automatic Control
         var i2c = this.i2c;
         this.InitReg = [];
@@ -188,23 +180,23 @@ class FanController extends Neuron {
         i2c.writeByteSync(0x2C,0x70,0x5A);
         i2c.writeByteSync(0x2C,0x71,0x5A);
         /*
-        Setting the PWM Min Duty Cycle to 50% for all four fans 
+        Setting the PWM Min Duty Cycle to 50% for all four fans
         Fan will run at PWMmin when temp exceeds TEMPmin
         */
-        i2c.writeByteSync(0x2C,0x6A,0x80);  
+        i2c.writeByteSync(0x2C,0x6A,0x80);
         i2c.writeByteSync(0x2C,0x6B,0x80);
         i2c.writeByteSync(0x2C,0x6C,0x80);
         i2c.writeByteSync(0x2C,0x6D,0x80);
-         /* 
-        Setting PWMmax, the maximum PWM duty cycle, to max by writing to registers 0x38 to 0x3B. 
+         /*
+        Setting PWMmax, the maximum PWM duty cycle, to max by writing to registers 0x38 to 0x3B.
         */
         i2c.writeByteSync(0x2C,0x38,0xFF);
         i2c.writeByteSync(0x2C,0x39,0xFF);
         i2c.writeByteSync(0x2C,0x3A,0xFF);
         i2c.writeByteSync(0x2C,0x3B,0xFF);
         /*
-        Write to the STRT bit in Configuration Register 1 (0x40 Bit[0]) to start the ADT7470 monitoring cycle. 
-        Set Bit 7 in this register to 1 to enable the TMP05 start pulse. 
+        Write to the STRT bit in Configuration Register 1 (0x40 Bit[0]) to start the ADT7470 monitoring cycle.
+        Set Bit 7 in this register to 1 to enable the TMP05 start pulse.
         */
         i2c.writeByteSync(0x2C,0x40,0x81);
         return this.InitReg;
@@ -226,62 +218,62 @@ class FanController extends Neuron {
         var i2c = this.i2c;
 
         //Reading high and low bytes for Tach
-        var tach1low = i2c.readByteSync(0x2C, 0x2A);  
-        var tach1high = i2c.readByteSync(0x2C, 0x2B);  
-        var tach2low = i2c.readByteSync(0x2C, 0x2C);  
-        var tach2high = i2c.readByteSync(0x2C, 0x2D);  
-        var tach3low = i2c.readByteSync(0x2C, 0x2E);  
-        var tach3high = i2c.readByteSync(0x2C, 0x2F);  
-        var tach4low = i2c.readByteSync(0x2C, 0x30);  
-        var tach4high = i2c.readByteSync(0x2C, 0x31);  
+        var tach1low = i2c.readByteSync(0x2C, 0x2A);
+        var tach1high = i2c.readByteSync(0x2C, 0x2B);
+        var tach2low = i2c.readByteSync(0x2C, 0x2C);
+        var tach2high = i2c.readByteSync(0x2C, 0x2D);
+        var tach3low = i2c.readByteSync(0x2C, 0x2E);
+        var tach3high = i2c.readByteSync(0x2C, 0x2F);
+        var tach4low = i2c.readByteSync(0x2C, 0x30);
+        var tach4high = i2c.readByteSync(0x2C, 0x31);
 
         //Converting to Binary String
-        tach1low = Number(tach1low).toString(2);  
-        tach1high = Number(tach1high).toString(2);  
-        tach2low = Number(tach2low).toString(2);  
-        tach2high = Number(tach2high).toString(2);  
-        tach3low = Number(tach3low).toString(2);  
-        tach3high = Number(tach3high).toString(2); 
-        tach4low = Number(tach4low).toString(2);  
-        tach4high = Number(tach4high).toString(2);  
+        tach1low = Number(tach1low).toString(2);
+        tach1high = Number(tach1high).toString(2);
+        tach2low = Number(tach2low).toString(2);
+        tach2high = Number(tach2high).toString(2);
+        tach3low = Number(tach3low).toString(2);
+        tach3high = Number(tach3high).toString(2);
+        tach4low = Number(tach4low).toString(2);
+        tach4high = Number(tach4high).toString(2);
         //above function does not store leading 0's
 
         //fills in leading 0's
-        tach1low = "00000000".substr(tach1low.length) + tach1low;  
-        tach1high = "00000000".substr(tach1high.length) + tach1high;  
-        tach2low = "00000000".substr(tach2low.length) + tach2low;  
-        tach2high = "00000000".substr(tach2high.length) + tach2high;  
-        tach3low = "00000000".substr(tach3low.length) + tach3low;  
-        tach3high = "00000000".substr(tach3high.length) + tach3high;  
-        tach4low = "00000000".substr(tach4low.length) + tach4low;  
-        tach4high = "00000000".substr(tach4high.length) + tach4high;  
+        tach1low = "00000000".substr(tach1low.length) + tach1low;
+        tach1high = "00000000".substr(tach1high.length) + tach1high;
+        tach2low = "00000000".substr(tach2low.length) + tach2low;
+        tach2high = "00000000".substr(tach2high.length) + tach2high;
+        tach3low = "00000000".substr(tach3low.length) + tach3low;
+        tach3high = "00000000".substr(tach3high.length) + tach3high;
+        tach4low = "00000000".substr(tach4low.length) + tach4low;
+        tach4high = "00000000".substr(tach4high.length) + tach4high;
 
         //combine high and low bytes
-        this.tach1 = tach1high + tach1low;  
-        this.tach2 = tach2high + tach2low;  
-        this.tach3 = tach3high + tach3low;  
-        this.tach4 = tach4high + tach4low;  
+        this.tach1 = tach1high + tach1low;
+        this.tach2 = tach2high + tach2low;
+        this.tach3 = tach3high + tach3low;
+        this.tach4 = tach4high + tach4low;
 
         //convert to decimal
-        if(this.tach1 > "1000000000000000"){   
+        if(this.tach1 > "1000000000000000"){
           this.tach1 = parseInt(this.tach1,2) - Math.pow(2,16);
         }
         else{
           this.tach1 = parseInt(this.tach1,2);
         }
-        if(this.tach2 > "1000000000000000"){   
+        if(this.tach2 > "1000000000000000"){
           this.tach2 = parseInt(this.tach2,2) - Math.pow(2,16);
         }
         else{
           this.tach2 = parseInt(this.tach2,2);
         }
-        if(this.tach3 > "1000000000000000"){   
+        if(this.tach3 > "1000000000000000"){
           this.tach3 = parseI nt(this.tach3,2) - Math.pow(2,16);
         }
         else{
           this.tach3 = parseInt(this.tach3,2);
         }
-        if(this.tach4 > "1000000000000000"){   
+        if(this.tach4 > "1000000000000000"){
           this.tach4 = parseInt(this.tach4,2) - Math.pow(2,16);
         }
         else{
