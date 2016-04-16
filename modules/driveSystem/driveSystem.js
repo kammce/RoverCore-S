@@ -22,7 +22,9 @@ class DriveSystem extends Neuron {
         var parent = this;
 
         var sendState = function() { 
+            //console.log("sendstate triggored");
             var zeroPad = function (num, places) {
+                console.log("//////////////////////////" + num);
                 var zero = places - num.toString().length + 1;
                 return Array(+(zero > 0 && zero)).join("0") + num;
             }
@@ -62,74 +64,24 @@ class DriveSystem extends Neuron {
         this.mode = 'z'; 
         // z is arbitrary, and forces sendState to send a k
         this.modeOld = 'z';
-        //////////////////
-        this.cur=['a','b','c','d','e','f'];
-        this.rpm=['a','b','c','d','e','f'];
+        /////////////////
         
         if(typeof port === "undefined"){
             var SP = require("../../node_modules/serialport/serialport");
             var SerialPort = SP.SerialPort;
-            var serialport = new SerialPort("COM8", {
+            var serialport = new SerialPort("COM13", {
                 baudrate: 9600,
-                //parser: SP.parsers.readline("\n")
+                parser: SP.parsers.readline("\n")
             });
             this.log.output("Using real SerialPort");
             this.port = serialport;
             this.port.on("open", function () {
                 parent.port.on('data', function (data){
-                    /*var dataSplit;
-                    if(data[0] === 'r' && data.includes('\n')){
-                        dataSplit = data.split(",");
-                         parent.rpm.a = parseInt(['0x' + dataSplit[1]]);
-                         parent.rpm.b = parseInt(['0x' + dataSplit[2]]);
-                         parent.rpm.c = parseInt(['0x' + dataSplit[3]]);
-                         parent.rpm.d = parseInt(['0x' + dataSplit[4]]);
-                         parent.rpm.e = parseInt(['0x' + dataSplit[5]]);
-                         parent.rpm.f = parseInt(['0x' + dataSplit[6]]);
-                    }
-                    else if(data[0] === 'c' && data.includes('\n')){
-                         dataSplit = data.split(",");
-                         parent.cur.a = parseInt(['0x' + dataSplit[1]])/100;
-                         parent.cur.b = parseInt(['0x' + dataSplit[2]])/100;
-                         parent.cur.c = parseInt(['0x' + dataSplit[3]])/100;
-                         parent.cur.d = parseInt(['0x' + dataSplit[4]])/100;
-                         parent.cur.e = parseInt(['0x' + dataSplit[5]])/100;
-                         parent.cur.f = parseInt(['0x' + dataSplit[6]])/100;
-                    }
-                    else {
-                        console.log("Data Error!");
-                    }*/
+                    
                     parent.log.output("RECIEVED" + data.toString());
                 });
-                parent.interval = setInterval(sendState, 100);
+                 setTimeout( function(){parent.interval = setInterval(sendState, 100);}, 5000);
             });
-        }else{
-            this.port = port;
-            this.port.on('data', function (data){
-                var dataSplit;
-                if(data[0] === 'r' && data.includes('\n')){
-                    dataSplit = data.split(",");
-                     this.rpm.a = parseInt(['0x' + dataSplit[1]]);
-                     this.rpm.b = parseInt(['0x' + dataSplit[2]]);
-                     this.rpm.c = parseInt(['0x' + dataSplit[3]]);
-                     this.rpm.d = parseInt(['0x' + dataSplit[4]]);
-                     this.rpm.e = parseInt(['0x' + dataSplit[5]]);
-                     this.rpm.f = parseInt(['0x' + dataSplit[6]]);
-                }
-                else if(data[0] === 'c' && data.includes('\n')){
-                     dataSplit = data.split(",");
-                     this.cur.a = parseInt(['0x' + dataSplit[1]])/100;
-                     this.cur.b = parseInt(['0x' + dataSplit[2]])/100;
-                     this.cur.c = parseInt(['0x' + dataSplit[3]])/100;
-                     this.cur.d = parseInt(['0x' + dataSplit[4]])/100;
-                     this.cur.e = parseInt(['0x' + dataSplit[5]])/100;
-                     this.cur.f = parseInt(['0x' + dataSplit[6]])/100;
-                }
-                else {
-                    console.log("Data Error!");
-                }
-            });
-            this.interval = setInterval(sendState, 100);
         }
     }
     react(input) {
@@ -174,6 +126,58 @@ class DriveSystem extends Neuron {
                 
     }
 }
+/*var dataSplit;
+ this.cur=['a','b','c','d','e','f'];
+        this.rpm=['a','b','c','d','e','f'];
+                    if(data[0] === 'r' && data.includes('\n')){
+                        dataSplit = data.split(",");
+                         parent.rpm.a = parseInt(['0x' + dataSplit[1]]);
+                         parent.rpm.b = parseInt(['0x' + dataSplit[2]]);
+                         parent.rpm.c = parseInt(['0x' + dataSplit[3]]);
+                         parent.rpm.d = parseInt(['0x' + dataSplit[4]]);
+                         parent.rpm.e = parseInt(['0x' + dataSplit[5]]);
+                         parent.rpm.f = parseInt(['0x' + dataSplit[6]]);
+                    }
+                    else if(data[0] === 'c' && data.includes('\n')){
+                         dataSplit = data.split(",");
+                         parent.cur.a = parseInt(['0x' + dataSplit[1]])/100;
+                         parent.cur.b = parseInt(['0x' + dataSplit[2]])/100;
+                         parent.cur.c = parseInt(['0x' + dataSplit[3]])/100;
+                         parent.cur.d = parseInt(['0x' + dataSplit[4]])/100;
+                         parent.cur.e = parseInt(['0x' + dataSplit[5]])/100;
+                         parent.cur.f = parseInt(['0x' + dataSplit[6]])/100;
+                    }
+                    else {
+                        console.log("Data Error!");
+                    }
 
+                    else{
+            this.port = port;
+            this.port.on('data', function (data){
+                var dataSplit;
+                if(data[0] === 'r' && data.includes('\n')){
+                    dataSplit = data.split(",");
+                     this.rpm.a = parseInt(['0x' + dataSplit[1]]);
+                     this.rpm.b = parseInt(['0x' + dataSplit[2]]);
+                     this.rpm.c = parseInt(['0x' + dataSplit[3]]);
+                     this.rpm.d = parseInt(['0x' + dataSplit[4]]);
+                     this.rpm.e = parseInt(['0x' + dataSplit[5]]);
+                     this.rpm.f = parseInt(['0x' + dataSplit[6]]);
+                }
+                else if(data[0] === 'c' && data.includes('\n')){
+                     dataSplit = data.split(",");
+                     this.cur.a = parseInt(['0x' + dataSplit[1]])/100;
+                     this.cur.b = parseInt(['0x' + dataSplit[2]])/100;
+                     this.cur.c = parseInt(['0x' + dataSplit[3]])/100;
+                     this.cur.d = parseInt(['0x' + dataSplit[4]])/100;
+                     this.cur.e = parseInt(['0x' + dataSplit[5]])/100;
+                     this.cur.f = parseInt(['0x' + dataSplit[6]])/100;
+                }
+                else {
+                    console.log("Data Error!");
+                }
+            });
+            this.interval = setInterval(sendState, 100);
+        }*/
 
 module.exports = DriveSystem;
