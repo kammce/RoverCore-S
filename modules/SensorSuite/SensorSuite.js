@@ -18,25 +18,26 @@ class SensorSuite extends Neuron {
 
         // Construct Class here
             //mpu6050 class initialization
-        this.mpu = new mpu6050(this.i2c, this.log);
+        this.mpu = new mpu6050(0x68, this.i2c, this.log);
+//        this.mpu2 = new mpu6050(0x69, this.i2c, this.log);
         this.mpu.wakeUp();
+//        this.mpu2.wakeUp();
         var parent = this;
-        setInterval(function() {
-             parent.mpu.readData();
-             parent.updateModel();
+        model.registerMemory('MPU');
+//        model.registerMemory('MPU2');
+        var update = setInterval(function() {
+            parent.mpu.readData();
+            parent.updateModel();
+//            parent.mpu2.readData();
+//            parent.updateModel2();
+            // console log for debugging purposes
+            console.log(parent.model.get('MPU'));
+            // console.log("0x69: " + parent.model.get('MPU2'));
         }, 500);
     }
     react(input) {
-        var mpu = this.mpu;
         var name = input.name;
 
-        switch(name){
-
-            case "log":
-                mpu.Log();
-                break;
-
-        }
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -59,10 +60,19 @@ class SensorSuite extends Neuron {
     updateModel() {
         var mpu = this.mpu;
         this.model.set('MPU', {
-            xAngle: mpu.xangle,
-            yAngle: mpu.yangle,
-            zAngle: mpu.zangle,
-            temperature: mpu.temp
+            xAngle: mpu.xangle.toFixed(3),
+            yAngle: mpu.yangle.toFixed(3),
+            temperature: mpu.celsius.toFixed(3)
+            // compass: mpu.convertCompass()
+        });
+    }
+    updateModel2() {
+        var mpu = this.mpu2;
+        this.model.set('MPU2', {
+            xAngle: mpu.xangle.toFixed(3),
+            yAngle: mpu.yangle.toFixed(3),
+            temperature: mpu.celsius.toFixed(3)
+            // compass: mpu.convertCompass()
         });
     }
 }
