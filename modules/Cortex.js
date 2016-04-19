@@ -25,11 +25,11 @@ class Cortex {
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
 		this.SPINE = require('./Spine');
-		this.I2C = function () {};
-		if(!this.simulate) {
-			var I2C_BUS = require('i2c-bus');
-			this.I2C = I2C_BUS.openSync(3);
-		}
+		//this.I2C = function () {};
+		//if(!this.simulate) {
+		//	var I2C_BUS = require('i2c-bus');
+		//	this.I2C = I2C_BUS.openSync(3);
+		//}
 
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
