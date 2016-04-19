@@ -30,7 +30,6 @@ describe('Testing SensorSuite Class', function () {
 		}
 	};
 
-
 	class model {
 
 	};
