@@ -14,21 +14,6 @@ if (cluster.isMaster) {
 if (cluster.isWorker) {
 //restarts code if uncaught error
 
-var Neuron = require('../Neuron');
-var EVK7P = require('./EVK7P');
-var serialport = require('serialport');
-var SerialPort = serialport.SerialPort;
-var port = new SerialPort("/dev/cu.usbmodem1411", {
-//initialize on port /dev/tty-usbserial1
-  baudrate: 9600,
-  parser: serialport.parsers.readline('\r\n')
-  // look for return and newline at the end of each data packet
-});
-
-
-this.EVK7P = new EVK7P(this.log);
-//???????
-
 
 class GPS extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, model) {
@@ -41,6 +26,18 @@ class GPS extends Neuron {
         this.model = model;
         // Construct Class here
         // 
+        // 
+        // 
+        var Neuron = require('../Neuron');
+        var EVK7P = require('./EVK7P');
+        var serialport = require('serialport');
+        var SerialPort = serialport.SerialPort;
+        var port = new SerialPort("/dev/cu.usbmodem1411", {
+        //initialize on port /dev/tty-usbserial1
+            baudrate: 9600,
+            parser: serialport.parsers.readline('\r\n')
+            // look for return and newline at the end of each data packet
+});
     }
     react(input) {
         this.log.output(`REACTING ${this.name}: `, input);
@@ -102,7 +99,14 @@ function parseData(data) {
             //piece 5 = longitude number
             EVK7P.longDir = piece[6];
             //piece 6 = longitude direction
-            console.log(EVK7P.lat + " " + EVK7P.latDir + ", " + EVK7P.long + " " + EVK7P.longDir);
+            //console.log(EVK7P.lat + " " + EVK7P.latDir + ", " + EVK7P.long + " " + EVK7P.longDir);
+            
+            //this.log.output("DATA");
+            //this.feedback("DATA");
+            //
+            function updateModel() {
+
+            };
     }
     //console.log(piece[0],piece[2]); //$GPRMC, A/V
     //console.log(piece[3],piece[4]); // LAT, dir
