@@ -27,8 +27,8 @@ class Cortex {
 		this.SPINE = require('./Spine');
 		this.I2C = function () {};
 		if(!this.simulate) {
-			//var I2C_BUS = require('i2c-bus');
-			//this.I2C = I2C_BUS.openSync(3);
+			var I2C_BUS = require('i2c-bus');
+			this.I2C = I2C_BUS.openSync(3);
 		}
 
 		// Store Singleton version of Classes
