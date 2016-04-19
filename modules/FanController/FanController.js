@@ -19,15 +19,15 @@ class FanController extends Neuron {
         this.tach3 = 0;
         this.tach4 = 0;
         var parent = this;
-        var update = setInterval(function(){
-            parent.updateTemp();
-        },100)
         parent.setRegister();
         //Memory stored in Model
         parent.model.registerMemory('Temperature Readings');
         parent.model.registerMemory('Fan Speed');
         parent.model.registerMemory('Limit Registers');
-    }
+   	var update = setInterval(function(){
+		parent.updateTemp();
+	 },1000);
+	}
     react(input) {
         /*Manual input?
         LEARN ABOUT ME AND FIX ME
@@ -105,43 +105,17 @@ class FanController extends Neuron {
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x28)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x29)));
         this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x78)));
-        parent.model.set('Temperature Readings', {
-            Temperature1: this.TEMP[0];
-            Temperature2: this.TEMP[1];
-            Temperature3: this.TEMP[2];
-            Temperature4: this.TEMP[3];
-            Temperature5: this.TEMP[4];
+        this.model.set('Temperature Readings', {
+            Temperature1: this.TEMP[0],
+            Temperature2: this.TEMP[1],
+            Temperature3: this.TEMP[2],
+            Temperature4: this.TEMP[3],
+            Temperature5: this.TEMP[4]
         });
-        return;
+	return;
     }
     readTemp() {
-        /*
-        var i2c = this.i2c;
-        this.TEMP = [];
-        //1-10 Temperature sensor, max temperature
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x20)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x21)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x22)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x23)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x24)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x25)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x26)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x27)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x28)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x29)));
-        this.TEMP.push(this.decodeTEMP(i2c.readByteSync(0x2C,0x78)));
-        this.model.set('Temperature Readings', {
-            Temperature1: this.TEMP[0];
-            Temperature2: this.TEMP[1];
-            Temperature3: this.TEMP[2];
-            Temperature4: this.TEMP[3];
-            Temperature5: this.TEMP[4];
-        }); */
-        this.log.output(`Temperature Sensor 1: ${parent.model.get('Temperature1')} 
-            Temperature Sensor 2: ${parent.model.get('Temperature2')} 
-            Temperature Sensor 3: ${parent.model.get('Temperature3')} 
-            Temperature Sensor 4: ${parent.model.get('Temperature4')} 
-            Temperature Sensor 5: ${parent.model.get('Temperature5')}`);
+        this.log.output(`${this.model.get('Temperature Readings').Temperature1}`);
         return this.TEMP;
     }
     writeTempLimits(UPPER_TEMP,LOWER_TEMP) {
