@@ -31,7 +31,9 @@ describe('Testing SensorSuite Class', function () {
 	};
 
 
+	class model {
 
+	};
 
 	var awake = 0;
 	class i2c_bus{
