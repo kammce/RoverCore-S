@@ -8,6 +8,10 @@ class Cortex {
 		/** Standard feedback method back to Server **/
 		this.feedback = function(lobe_name) {
 			var output = "";
+			if(lobe_name === "up-call") {
+				parent.handleUpCall(arguments);
+				return;
+			}
 			for (var i = 1; i < arguments.length; i++) {
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
@@ -22,9 +26,11 @@ class Cortex {
 		};
 
 		// Loading Cortex Modules
+		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
 		this.SPINE = require('./Spine');
+		this.SERIALPORT = require('serialport').SerialPort;
 		this.I2C = function () {};
 		if(!this.simulate) {
 			var I2C_BUS = require('i2c-bus');
@@ -143,6 +149,36 @@ class Cortex {
 			}
 		}
 	}
+	upcall(command) {
+		var haltAll = function() {
+			for(var lobe in this.time_since_last_command) {
+				this.lobe_map[lobe]._halt();
+			}
+		}
+		var idleAll = function() {
+			for(var lobe in this.time_since_last_command) {
+				this.lobe_map[lobe]._idle();
+			}
+		}
+		switch(command) {
+			case "HALTALL":
+				haltAll();
+				break;
+			case "IDLEALL": 
+				idleAll();
+				break;
+			case "SYSTEM-SHUTDOWN": 
+				this.exec("shutdown -h now");
+				break;
+			case "SYSTEM-RESTART":
+				this.exec("reboot");
+				break;
+			case "RESTART-CORTEX":
+				// Simply end the process and allow "forever" to restart RoverCore
+				process.exit(0);
+				break;
+		}
+	}
 	loadLobes() {
 		var fs = require('fs');
 	    var path = require('path');
@@ -195,6 +231,16 @@ class Cortex {
 				} else {
 					Lobe = require(lobe_config_files[i]['source_path']);
 				}
+				var lobe_utitilites = {
+					"name": lobe_config_files[i]['lobe_name'], 
+					"feedback": this.feedback,
+					"log": lobe_log,
+					"idle_timeout": lobe_config_files[i]['idle_time'],
+					"i2c": this.I2C,
+					"model": this.Model,
+					"serialport": this.SERIALPORT,
+					"upcall": this.upcall,
+				};
 				// Add Lobe to Lobe Map with key being the lobe_name
 				this.lobe_map[lobe_config_files[i]['lobe_name']] = new Lobe(
 					lobe_config_files[i]['lobe_name'], 
@@ -202,7 +248,9 @@ class Cortex {
 					lobe_log,
 					lobe_config_files[i]['idle_time'],
 					this.I2C,
-					this.Model
+					this.Model,
+					this.SERIALPORT,
+					this.upcall
 				);
 				// Give lobe property mission_controller. 
 				// If mission_controller disconnects or reconnects, 

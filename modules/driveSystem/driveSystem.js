@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 //  string to send to smd
 //smxxvxxaxxe
 
