@@ -32,6 +32,9 @@ const Lidar_Distance_LowByte    = 0x10;
 const YAW_PIN = 0;
 const PITCH_PIN = 1;
 
+const PANORAMA_TIME = 1000;
+const PANORAMA_ANGLE = 45;
+
 class Tracker extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, i2c, model, debug) {
         super(name, feedback, color_log, idle_timeout);
@@ -55,6 +58,8 @@ class Tracker extends Neuron {
 
         this.model.registerMemory('LIDAR');
         this.model.registerMemory('CAMERA GIMBAL');
+
+        this.busy = false;
     }
 
     parseCommand(i) {    	  	  
@@ -98,17 +103,50 @@ class Tracker extends Neuron {
             setTimeout(function(){
                 //this.log.output("LIDAR HEALTH: ", this.lidarHealth);
                 parent.feedback("LIDAR HEALTH: ", parent.lidarHealth);
-            }, 10);
-            
+            }, 10);            
+        } else if(i.mode === "panorama") {
+            this.panorama();
         }
     }
     react(input) {
         //this.log.output(`REACTING ${this.name}: `, input);
         //this.feedback(`REACTING ${this.name}: `, input); 
-        
-        this.parseCommand(input);       
+        if(this.busy === false){
+            this.parseCommand(input);    
+        }
+           
 
 	}
+    panorama() {
+        this.busy = true;
+        var parent = this;
+
+        var startPanorama = function(i) {
+            return new Promise(function(resolve){
+                parent.parseCommand({
+                    mode: "moveAngle",
+                    yaw: -180,
+                    pitch: 0
+                });
+                setTimeout(resolve(--i), PANORAMA_TIME);
+            });
+        };
+
+        var movePanorama = function (i) {
+            return new Promise(function(resolve){
+                parent.parseCommand({
+                    mode: "moveInterval",
+                    yaw: PANORAMA_ANGLE,
+                    pitch: 0
+                });
+                if(i <= 1) {
+                    parent.busy = false;
+                }
+                setTimeout(resolve(--i), PANORAMA_TIME);
+            });
+        };
+        startPanorama(8).then(movePanorama).then(movePanorama).then(movePanorama).then(movePanorama).then(movePanorama).then(movePanorama).then(movePanorama);
+    }
     halt() {
       //  this.log.output(`HALTING ${this.name}`);
        // this.feedback(`HALTING ${this.name}`);
