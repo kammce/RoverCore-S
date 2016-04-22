@@ -46,29 +46,39 @@ class MPU6050{
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(this.SA, 0x6B, 1);
+        try {
+            i2c.writeByteSync(this.SA, 0x6B, 1);
+        }catch(e) {
+            console.log(e);
+
+        }
     }
 
     readData() {        //read temp and accelerometer data from chip
         var i2c = this.i2c;
 
-        this.xposH = i2c.readByteSync(this.SA, 0x3B);  //read byte from data register
-        this.xposL = i2c.readByteSync(this.SA, 0x3C);  //read byte from data register
-        this.yposH = i2c.readByteSync(this.SA, 0x3D);  //read byte from data register
-        this.yposL = i2c.readByteSync(this.SA, 0x3E);  //read byte from data register
-        this.zposH = i2c.readByteSync(this.SA, 0x3F);  //read byte from data register
-        this.zposL = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
-        this.tempH = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
-        this.tempL = i2c.readByteSync(this.SA, 0x42);  //read byte from data register
-        // this.xmagnL = i2c.readByteSync(0x68, 0x03);
-        // this.xmagnH = i2c.readByteSync(0x68, 0x04);
-        // this.ymagnL = i2c.readByteSync(0x68, 0x05);
-        // this.ymagnH = i2c.readByteSync(0x68, 0x06);
-        // this.zmagnL = i2c.readByteSync(0x68, 0x07);
-        // this.zmagnH = i2c.readByteSync(0x68, 0x08);
-        // this.asax = i2c.readByteSync(0x68, 0x10);
-        // this.asay = i2c.readByteSync(0x68, 0x11);
-        // this.asaz = i2c.readByteSync(0x68, 0x12);
+        try {
+            this.xposH = i2c.readByteSync(this.SA, 0x3B);  //read byte from data register
+            this.xposL = i2c.readByteSync(this.SA, 0x3C);  //read byte from data register
+            this.yposH = i2c.readByteSync(this.SA, 0x3D);  //read byte from data register
+            this.yposL = i2c.readByteSync(this.SA, 0x3E);  //read byte from data register
+            this.zposH = i2c.readByteSync(this.SA, 0x3F);  //read byte from data register
+            this.zposL = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
+            this.tempH = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
+            this.tempL = i2c.readByteSync(this.SA, 0x42);  //read byte from data register
+            // this.xmagnL = i2c.readByteSync(0x68, 0x03);
+            // this.xmagnH = i2c.readByteSync(0x68, 0x04);
+            // this.ymagnL = i2c.readByteSync(0x68, 0x05);
+            // this.ymagnH = i2c.readByteSync(0x68, 0x06);
+            // this.zmagnL = i2c.readByteSync(0x68, 0x07);
+            // this.zmagnH = i2c.readByteSync(0x68, 0x08);
+            // this.asax = i2c.readByteSync(0x68, 0x10);
+            // this.asay = i2c.readByteSync(0x68, 0x11);
+            // this.asaz = i2c.readByteSync(0x68, 0x12);
+        }catch(e) {
+            console.log(e);
+        }
+
 
 
         this.xposL = Number(this.xposL).toString(2);  //convert to binary string
@@ -85,7 +95,7 @@ class MPU6050{
         // this.ymagnH = Number(this.ymagnH).toString(2);
         // this.zmagnL = Number(this.zmagnL).toString(2);
         // this.zmagnH = Number(this.zmagnH).toString(2);
-        //above function does not store leading 0's
+        //above functions do not store leading 0's
 
         //fills in leading 0's
         this.xposH = "00000000".substr(this.xposH.length) + this.xposH;  //fill in missing zeros
@@ -211,14 +221,18 @@ class MPU6050{
 
     convertTemp() {     //converts to Celsius
         //for mpu6050
-        // this.celsius = parseFloat(this.temp)/340 + 36.53;
+        this.celsius = parseFloat(this.temp)/340 + 36.53;
         //for mpu9250
-        this.celsius = parseFloat(this.temp)/333.87 + 21;
+        // this.celsius = parseFloat(this.temp)/333.87 + 21;
     }
 
     sleep() {       //put chip in sleep mode
         var i2c = this.i2c;
-        i2c.writeByteSync(this.SA, 0x6B, 0);
+        try {
+            i2c.writeByteSync(this.SA, 0x6B, 0);
+        }catch(e) {
+            console.log(e);
+        }
     }
 
     Log() {     //log data measured by chip

@@ -22,7 +22,7 @@ class SensorSuite extends Neuron {
 //        this.mpu2.wakeUp();
         var parent = this;
         parent.model.registerMemory('MPU');
-//        model.registerMemory('MPU2');
+//        parent.model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
             parent.updateModel();
