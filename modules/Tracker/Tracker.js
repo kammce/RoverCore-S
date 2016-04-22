@@ -15,7 +15,7 @@ const PITCH_SERVO_MIN                 = -90;
 const PITCH_SERVO_MAX                 = 90;
 //Constraint of yaw servo
 const PITCH_MIN = -90;
-const PITCH_MAX = 85;
+const PITCH_MAX = 90;
 //Length of pulse in uSeconds
 const PWM_YAW_MIN = 600;
 const PWM_YAW_MAX = 2400;
