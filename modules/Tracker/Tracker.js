@@ -51,8 +51,8 @@ class Tracker extends Neuron {
         	this.pwm = new PWMDriver(0x5c, 60, i2c);            
         }               
 
-	    this.gimbalPosition = [0,0];
-	    this.defaultPosition = [0,0];        
+	    
+	           
 	    this.lidarMeasurement = 0;
 	    this.lidarHealth = true;
 
@@ -60,36 +60,96 @@ class Tracker extends Neuron {
         this.model.registerMemory('CAMERA GIMBAL');
 
         this.busy = false;
+
+        //Target 
+        this.target = {
+            yaw: 0,
+            pitch: 0
+        };
+
+        //Accelerometer data
+        this.orientation = {
+            roll: 0,
+            pitch: 0            
+        };
+
+        //Angles servos will move to
+        this.output = {
+            yaw: 0,
+            pitch: 0
+        };
+
+        this.defaultPosition = {
+            yaw: 0,
+            pitch: 0
+        };
+
+
+
+        this.pid(); //Start PID loop
     }
 
+
+    pid() {
+        var relativePitch = 0;
+        var P = 1;
+        var I = 1;
+        var D = 1;
+        var err = 0;
+        var prevErr = 0;
+        var ierr = 0;
+        var derr = 0;
+        var dt = 0.01;
+        var parent = this;
+
+        var PWMOutput;
+
+        setInterval(function(){
+             
+            parent.orientation.pitch = this.model.database['MPU']['xAngle'];
+            parent.orientation.roll = this.model.database['MPU']['yAngle'];
+
+            relativePitch = Math.cos((parent.output.yaw % 360)*Math.pi/180)*parent.orientation.pitch + Math.sin((parent.output.yaw % 360)*Math.pi/180)*parent.orientation.roll;
+
+            prevErr = err;
+            err = (parent.target.pitch - relativePitch) - (parent.output.pitch);
+            ierr = ierr + err;
+            derr = err - prevErr;
+
+            parent.output.yaw = parent.target.yaw;
+            parent.output.pitch = P * err + (I * ierr * dt) + (D * derr/dt);
+
+            //Constrains Pitch to bounds
+            if(parent.output.pitch>PITCH_MAX) {
+                parent.output.pitch = PITCH_MAX;
+            } else if(parent.output.pitch < PITCH_MIN) {
+                parent.output.pitch = PITCH_MIN;
+            } 
+
+            PWMOutput = parent.angleToPWM(parent.output);
+            parent.servoWrite(PWMOutput);
+            parent.updateModel();
+
+
+
+        }, 10);
+
+
+
+    }
     parseCommand(i) {    	  	  
-    	var output;
-        var gimbal;   
+    	  
         var parent = this;           
-        if(i.mode === 'moveAngle') { 
-            //Determines angle to move servos                                   
-            gimbal = this.moveAngleLocal([i.yaw, i.pitch], this.gimbalPosition);                    
-            this.gimbalPosition = gimbal;                                     
-            //Converts output angle to PWM pulse length                 
-            output = this.angleToPWM(gimbal);
-            //Writes to servo
-            this.servoWrite(output);
-            this.updateModel();                       
+        if(i.mode === 'moveAngle') {                                               
+            parent.target = this.moveAngleLocal(i, this.output);   
+                                  
         } else if(i.mode === "moveInterval") {                                  
-            gimbal = this.moveInterval([i.yaw, i.pitch], this.gimbalPosition);
-            this.gimbalPosition = gimbal;                 
-            output = this.angleToPWM(gimbal);
-            this.servoWrite(output);
-            this.updateModel();                                   
+            parent.target = this.moveInterval(i, this.output);                                              
         } else if(i.mode === "setHome") {
             //Updates the default position                  
-            this.defaultConfig([i.yaw, i.pitch]);                                     
+            this.defaultConfig(i);                                     
         } else if(i.mode === "moveHome" ) {                                  
-            gimbal = this.recalibrate();                  
-            this.gimbalPosition = gimbal;                 
-            output = this.angleToPWM(gimbal);
-            this.servoWrite(output);
-            this.updateModel();                                   
+            parent.target = this.recalibrate();                                                 
         } else if(i.mode === "getDistance") { 
             //this.lidarMeasurement = this.getDistance();
             this.getDistance();                              
@@ -113,6 +173,8 @@ class Tracker extends Neuron {
         //this.feedback(`REACTING ${this.name}: `, input); 
         if(this.busy === false){
             this.parseCommand(input);    
+        } else if(input.mode === "abort") {
+            this.busy = false;
         }
            
 
@@ -122,7 +184,10 @@ class Tracker extends Neuron {
         var parent = this;
 
         var startPanorama = function(i) {
-            return new Promise(function(resolve){
+            return new Promise(function(resolve, reject){
+                if( parent.busy === false) {
+                    reject("aborted");
+                }
                 parent.parseCommand({
                     mode: "moveAngle",
                     yaw: -180,
@@ -133,7 +198,10 @@ class Tracker extends Neuron {
         };
 
         var movePanorama = function (i) {
-            return new Promise(function(resolve){
+            return new Promise(function(resolve, reject){
+                if( parent.busy === false) {
+                    reject("aborted");
+                }
                 parent.parseCommand({
                     mode: "moveInterval",
                     yaw: PANORAMA_ANGLE,
@@ -184,8 +252,8 @@ class Tracker extends Neuron {
     	return this.defaultPosition;
     }
     defaultConfig(value) {
-    	if(value[0] > YAW_MAX || value[0] < YAW_MIN || 
-    		value[1] > PITCH_SERVO_MAX || value[1] < PITCH_SERVO_MIN) {
+    	if(value.yaw > YAW_MAX || value.yaw < YAW_MIN || 
+    		value.pitch > PITCH_SERVO_MAX || value.pitch < PITCH_SERVO_MIN) {
     		return false;
     	} else {
     		this.defaultPosition = value;
@@ -194,60 +262,59 @@ class Tracker extends Neuron {
     }
 
     moveAngleLocal(value, position) {
-    	var targetAngle = [0,0];
-        value[0] = value[0] % 360;
+    	var targetAngle = {
+            pitch: 0,
+            yaw: 0
+        };
+        value.yaw = value.yaw % 360;
 
 
-    	//Constrains Pitch to bounds
-    	if(value[1]>PITCH_MAX) {
-    		targetAngle[1] = PITCH_MAX;
-    	} else if(value[1] < PITCH_MIN) {
-    		targetAngle[1] = PITCH_MIN;
-    	} else {
-    		targetAngle[1] = value[1];
-    	}
-
+    	
+        targetAngle.pitch = value.pitch;
     	//Determine whether going clockwise or anticlockwise is closer
-    	targetAngle[0] = Math.floor((position[0])/360) * 360 + value[0];
-    	if(((position[0]) - targetAngle[0]) > (position[0]) - (targetAngle[0] - 360)) {
-    		targetAngle[0] = targetAngle[0] - 360;
+    	targetAngle.yaw = Math.floor((position.yaw)/360) * 360 + value.yaw;
+    	if(((position.yaw) - targetAngle.yaw) > (position.yaw) - (targetAngle.yaw - 360)) {
+    		targetAngle.yaw = targetAngle.yaw - 360;
     	}
 
     	//Prevents gimbal from exceeding the ideal bounds
-    	if(targetAngle[0] <= YAW_MIN ) {
-    		targetAngle[0] = targetAngle[0] + 360;
-    	} else if(targetAngle[0] >= YAW_MAX) {
-    		targetAngle[0] = targetAngle[0] - 360;
+    	if(targetAngle.yaw <= YAW_MIN ) {
+    		targetAngle.yaw = targetAngle.yaw + 360;
+    	} else if(targetAngle.yaw >= YAW_MAX) {
+    		targetAngle.yaw = targetAngle.yaw - 360;
     	}    
         
     	return targetAngle;
     	
     }
     moveInterval(value, position){
-    	var targetAngle = [0,0];
+    	var targetAngle = {
+            pitch: 0,
+            yaw: 0
+        };
     	
-    	if((position[0] + value[0]) <= YAW_SERVO_MAX && (position[0] + value[0]) >= YAW_SERVO_MIN) {
-    		targetAngle[0] = position[0] + value[0];
-    		if(targetAngle[0] >= YAW_MAX || targetAngle[0] <= YAW_MIN) {
+    	if((position.yaw + value.yaw) <= YAW_SERVO_MAX && (position.yaw + value.yaw) >= YAW_SERVO_MIN) {
+    		targetAngle.yaw = position.yaw + value.yaw;
+    		if(targetAngle.yaw >= YAW_MAX || targetAngle.yaw <= YAW_MIN) {
     			this.feedback("WARNING: Tracker YAW is exceeding safe limits");
     		}
     	} else {    		
     		this.feedback("WARNING: Tracker YAW has exceeded limits");
-    		if((position[0] + value[0]) > YAW_SERVO_MAX) {
-    			targetAngle[0] = YAW_SERVO_MAX;
+    		if((position.yaw + value.yaw) > YAW_SERVO_MAX) {
+    			targetAngle.yaw = YAW_SERVO_MAX;
     		} else {
-    			targetAngle[0] = YAW_SERVO_MIN;
+    			targetAngle.yaw = YAW_SERVO_MIN;
     		}
     	}
 
-    	if((position[1] + value[1]) <= PITCH_SERVO_MAX && (position[1] + value[1]) >= PITCH_SERVO_MIN) {
-    		targetAngle[1] = position[1] + value[1];
+    	if((position.pitch + value.pitch) <= PITCH_SERVO_MAX && (position.pitch + value.pitch) >= PITCH_SERVO_MIN) {
+    		targetAngle.pitch = position.pitch + value.pitch;
     	} else {
     		this.feedback("WARNING: Tracker PITCH has exceeded limits");
-    		if((position[1] + value[1]) > PITCH_SERVO_MAX) {
-    			targetAngle[1] = PITCH_SERVO_MAX;
+    		if((position.pitch + value.pitch) > PITCH_SERVO_MAX) {
+    			targetAngle.pitch = PITCH_SERVO_MAX;
     		} else {
-    			targetAngle[1] = PITCH_SERVO_MIN;
+    			targetAngle.pitch = PITCH_SERVO_MIN;
     		}
     	}
 
@@ -257,8 +324,8 @@ class Tracker extends Neuron {
 
 
 	angleToPWM(value) {
-    	var yaw = Math.round((((value[0] - YAW_SERVO_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_SERVO_MAX - YAW_SERVO_MIN)) + PWM_YAW_MIN);
-    	var pitch = Math.round((((value[1] - PITCH_SERVO_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_SERVO_MAX - PITCH_SERVO_MIN)) + PWM_PITCH_MIN);
+    	var yaw = Math.round((((value.yaw - YAW_SERVO_MIN) * (PWM_YAW_MAX - PWM_YAW_MIN)) / (YAW_SERVO_MAX - YAW_SERVO_MIN)) + PWM_YAW_MIN);
+    	var pitch = Math.round((((value.pitch - PITCH_SERVO_MIN) * (PWM_PITCH_MAX - PWM_PITCH_MIN)) / (PITCH_SERVO_MAX - PITCH_SERVO_MIN)) + PWM_PITCH_MIN);
     	return [yaw, pitch];
     }
     servoWrite(value) {    	
@@ -271,8 +338,8 @@ class Tracker extends Neuron {
 
     	this.model.set('LIDAR' , this.lidarMeasurement);
     	this.model.set('CAMERA GIMBAL' , {
-    		yaw: this.gimbalPosition[0],
-    		pitch: this.gimbalPosition[1]
+    		yaw: this.output.yaw,
+    		pitch: this.output.pitch
     	});
 
     }
