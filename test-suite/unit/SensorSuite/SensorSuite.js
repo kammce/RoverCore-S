@@ -31,17 +31,20 @@ describe('Testing SensorSuite Class', function () {
 	};
 
 
-	class modelClass {
-		constructor(some1,some2,some3) {
+class modelClass {
+    constructor(some1,some2,some3) {
+      this.some1 = "";
+      this.some2 = "";
+      this.some3 = "";
+    }
+    registerMemory(some1) {
+      this.some1 = some1;
+    }
+    set(some1, some2) {
+      this.some2 = 35;
+    }
 
-		}
-		registerMemory(some1) {
-		}
-		set(some1, some2) {
-
-		}
-
-	};
+  };
 	module.exports = modelClass;
 	var model = new modelClass();
 
@@ -71,6 +74,7 @@ describe('Testing SensorSuite Class', function () {
 
 	var dummyTemp = 176;
 
+	var toFixed;
 //	var i2c = function() {}; // filler i2c object (not used in test)
 	// var model = function() {}; // filler model object (not used in test)
 
@@ -114,30 +118,32 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: readData()', function() {
 			it('expected data to be read in', function () {
 				test_lobe.mpu.readData();
-				expect(test_lobe.mpu.xpos).to.equal(-19276);
-				expect(test_lobe.mpu.ypos).to.equal(-19276);
-				expect(test_lobe.mpu.zpos).to.equal(-19276);
-				expect(test_lobe.mpu.temp).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[17]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[18]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[19]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[20]).to.equal(-19276);
+				expect(test_lobe.mpu.yAdj).to.equal(-9638);
+				expect(test_lobe.mpu.xAdj).to.equal(-9638);
 			});
 		});
 		describe('Function: convertPosition()', function() {
 			it('expected position values to be converted to angles', function () {
 				test_lobe.mpu.convertPosition();
-				expect(test_lobe.mpu.xangle).to.equal(-35.26390990826984);//
-				expect(test_lobe.mpu.yangle).to.equal(-35.26390990826984);//
+				expect(test_lobe.mpu.xangle).to.equal('-35.264');//
+				expect(test_lobe.mpu.yangle).to.equal('-35.264');//
 				// expect(test_lobe.mpu.zangle).to.equal(-35.26390990826984);
 			});
 		});
 		describe('Function: convertTemp()', function() {
 			it('expected temperature value to be converted to celsius', function () {
 				test_lobe.mpu.convertTemp();
-				expect(test_lobe.mpu.celsius).to.equal(-20.164117647058823);//
+				expect(test_lobe.mpu.celsius).to.equal('-20.164');//
 			});
 		});
 		describe('Function: log()', function() {
 			it('expected data to be logged', function () {
 				test_lobe.mpu.Log();
-				expect(expected_log).to.equal("x-angle: -35.264 y-angle: -35.264 z-angle: -35.264 temperature: -20.164");
+				expect(expected_log).to.equal("x-angle: -35.264 y-angle: -35.264 temperature: -20.164");
 			});
 		});
 		describe('Function: sleep()', function() {
@@ -146,6 +152,19 @@ describe('Testing SensorSuite Class', function () {
 				expect(awake).to.equal(0);
 			});
 		});
+		describe('Function: convertCompass()', function() {
+      it('expected compass value to be converted to degrees relative to North', function () {
+        test_lobe.mpu.convertCompass();
+        expect(test_lobe.mpu.heading).to.equal(45);
+      });
+    });
+    describe('Function: updateModel()', function() {
+      it('expected model to be updated', function () {
+        test_lobe.updateModel();
+        expect(model.some1).to.equal('MPU');
+        expect(model.some2).to.equal(35);
+      });
+    });
 	// 	describe('Function: groundTemp()', function() {
 	// 		it('expected temperature conversion to celsius', function () {
 	// 			test_lobe.lm35.groundTemp();
