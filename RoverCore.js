@@ -25,6 +25,11 @@ OPTIONS
               This is useful for testing communication between interface and
               modules. Data sent to protolobe will be echoed back to the server
               and sent to stdout (console).
+
+       -i, --isolate "module" | "module1,moduel2,..."
+              Isolate a particular lobe. For a single module, you need only 
+              put in the name. List of lobes must be comma seperated list 
+              without spaces. 
 `);
 	process.exit();
 } 
