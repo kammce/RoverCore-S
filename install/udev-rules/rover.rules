@@ -1,51 +1,11 @@
-Ok, with that, I will give you all of the trails.
+# SJSU Robotics Rover Cameras
+# This file should be installed to /etc/udev/rules.d so that RoverCore's video module can locate the approprate webcams for mission use.
+#
+# type this at the command prompt: sudo cp rover-video.rules /etc/udev/rules.d
 
-Mechanical
-The mechanical team was given the task of building a 3D model of a rover. Each member was assigned a part to CAD using Solidworks. For this task, learning how to build a 3D model of something with CAD is crucial. You may use any CADing software such as CREO, Solidworks, AutoCAD etc. My favorite currently is OnShape since it is free and runs on your browser. For your assignment, you will build a battery case for LiPo pouch cells (not the cylindrical cells). The case should be flat as to fit below a rover body. Think of a Tesla car as an example. The case will enclose LiPo batteries. Note that they can explode or catch fire if punctured or shorted. You will also have to decide on the material the case will be made of. Everything about the design should be considered and nothing be left out. That includes tolerances  the parts, how the parts will be manufactured, the cost of other components etc.
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0BFD493F", SYMLINK+="video-arm"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="9FB1593F", SYMLINK+="video-hull"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="8574D65F", SYMLINK+="video-navi"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0011426250", SYMLINK+="video-tracker"
 
-Electrical
-The electrical team was tasked to build a PCB for the rover using Diptrace. A task for you would be to build an PCB that can control an LED strip serially using either I2C or SPI. The led strip will be one without internal controllers.
-
-Mission Control
-Members were assigned to build a todo list using HTML5. You may use libraries such as jQuery and Bootstrap, but you may not use frameworks such as angular, backbone or react. The point of this task is to get you familiar with near enough vanilla web design.
-
-Control Systems
-Members were assigned to build a 1-axis gimbal that control roll. Using an arduino, any servo motor with a servo horn and an accelerator, get the servo to point the servo horn towards the sky or towards the ground regardless of how you rotate the servo body. Look up gimbals if you need help visualizing this. The next step is to be able to communicate with the arduino using NodeJS and the serialport library to assign a new goal angle for the servo. For example, you send 45 to the arduino and the now the servo will point 45 degrees with respect to the sky.
-
-Hope that helps,
-
-Paypal
-Ebay
-LG 
-Semtech
-ChipMOS
-Zebra Technologies
-Broadcom
-Ditech 
-Objectivity
-Canon
-Analog Devices
-Cisco
-Samsung+
-Yahoo
-Juniper
-Ruckus
-Intel
-BAE System
-Stinger Ghaffarian Technologies**
-
-
-SJSU student Community Activities
-- President of S.oftware and C.omputer E.ngineering Society from 2014-2015.
-- Officer of S.oftware and C.omputer E.ngineering Society from 2012-now.
-- President of the SJSU Robotics Team from 2013-now
-- Robotics team project lead
-- Robotics team mission control captain
-- Student assistant for E10 for 2.5 years.
-
-Accomplishments
-- Awarded Scott T. Axline Memorial Student Award for Excellence in Service April 2015.
-- Tied with MIT team at NASA hosted RASC-AL RoboOps Robotics competition.
-- 35 hours of Robotics educational outreach
-- Transitioned robotics club into a competitive robotics team.
-- Transitioned S.oftware and C.omputer E.ngineering Society from a gamer club to a society of academically and project oriented engineers
+SUBSYSTEM="tty", ATTRS{idVendor}=="1b4f", ATTRS{idProduct}=="1b4f", SYMLINK+="ttyBATT1"
