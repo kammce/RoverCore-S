@@ -34,7 +34,7 @@ class Cortex {
 		this.I2C = function () {};
 		if(!this.simulate) {
 			var I2C_BUS = require('i2c-bus');
-			this.I2C = I2C_BUS.openSync(3);
+			this.I2C = I2C_BUS.openSync(1);
 		}
 
 		// Store Singleton version of Classes
@@ -52,14 +52,14 @@ class Cortex {
 		// Send Model to Signal Relay on update
 
 		/** Connect to Signal Relay **/
-		// Cortex should act as a client and connect to Signal 
+		// Cortex should act as a client and connect to Signal
 		// Relayusing primus.js and websockets as the transport.
 		connection.on('open', function open() {
 			connection.write({
-				intent: 'REGISTER', 
+				intent: 'REGISTER',
 				info: {
-					entity: 'cortex', 
-					password: 'destroyeveryone' 
+					entity: 'cortex',
+					password: 'destroyeveryone'
 				}
 			});
 			parent.log.output("CONNECTED! I AM HERE!");
@@ -89,7 +89,7 @@ class Cortex {
 		connection.on('end', function () {
 			parent.log.output('Connection closed');
 		});
-		// Handle Idling Lobes that have not gotten a command  
+		// Handle Idling Lobes that have not gotten a command
 		this.idling_loop = setInterval(function() {
 			parent.handleIdleStatus();
 		}, 100);
@@ -99,7 +99,7 @@ class Cortex {
 		// Log any data coming in
 		this.log.output(`INCOMING: `, data);
 		try {
-			if(data.hasOwnProperty('target') && 
+			if(data.hasOwnProperty('target') &&
 				data.hasOwnProperty('command')) {
 				if(this.lobe_map.hasOwnProperty(data['target'])) {
 					setImmediate(function() {
@@ -109,7 +109,7 @@ class Cortex {
 					return;
 				}
 				throw new Error(`Target ${data['target']} does not exist in lobe_map.`);
-			} else if(data.hasOwnProperty('target') && 
+			} else if(data.hasOwnProperty('target') &&
 				data.hasOwnProperty('connection')) {
 				switch(data['connection']) {
 					case "disconnected":
@@ -279,9 +279,9 @@ class Cortex {
 		  }
 		  return result;
 		}
-
 		var modules = getDirectories("./modules");
 		
+		// Take the intersection of the modules in the modules folder and the isolation arguments
 		if(typeof isolation === "string") {
 			isolation = isolation.split(',');
 			modules = intersection_destructive(isolation, modules);
