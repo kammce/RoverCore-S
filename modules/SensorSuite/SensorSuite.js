@@ -58,18 +58,18 @@ class SensorSuite extends Neuron {
     updateModel() {
         var mpu = this.mpu;
         this.model.set('MPU', {
-            xAngle: mpu.xangle,
-            yAngle: mpu.yangle,
-            temperature: mpu.celsius
+            xAngle: mpu.inputs[27],
+            yAngle: mpu.inputs[28],
+            temperature: mpu.inputs[29]
             // compass: mpu.convertCompass()
         });
     }
     updateModel2() {
         var mpu = this.mpu2;
         this.model.set('MPU2', {
-            xAngle: mpu.xangle,
-            yAngle: mpu.yangle,
-            temperature: mpu.celsius
+            xAngle: mpu.inputs[27],
+            yAngle: mpu.inputs[28],
+            temperature: mpu.inputs[29]
             // compass: mpu.convertCompass()
         });
     }

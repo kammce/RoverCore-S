@@ -58,7 +58,10 @@ class modelClass {
 
 		}
 		readByteSync(dev_addr, register){
-			return "180";
+			if(register === 0x10 || register === 0x11 || register === 0x12){
+				return "0";
+			}
+			else return "180";
 		}
 		readByte(dev_addr, register, cb){
 			return "180";
@@ -122,22 +125,22 @@ class modelClass {
 				expect(test_lobe.mpu.inputs[18]).to.equal(-19276);
 				expect(test_lobe.mpu.inputs[19]).to.equal(-19276);
 				expect(test_lobe.mpu.inputs[20]).to.equal(-19276);
-				expect(test_lobe.mpu.yAdj).to.equal(-9638);
-				expect(test_lobe.mpu.xAdj).to.equal(-9638);
+				expect(test_lobe.mpu.inputs[25]).to.equal(-9638);
+				expect(test_lobe.mpu.inputs[24]).to.equal(-9638);
 			});
 		});
 		describe('Function: convertPosition()', function() {
 			it('expected position values to be converted to angles', function () {
 				test_lobe.mpu.convertPosition();
-				expect(test_lobe.mpu.xangle).to.equal('-35.264');//
-				expect(test_lobe.mpu.yangle).to.equal('-35.264');//
+				expect(test_lobe.mpu.inputs[27]).to.equal('-35.264');//
+				expect(test_lobe.mpu.inputs[28]).to.equal('-35.264');//
 				// expect(test_lobe.mpu.zangle).to.equal(-35.26390990826984);
 			});
 		});
 		describe('Function: convertTemp()', function() {
 			it('expected temperature value to be converted to celsius', function () {
 				test_lobe.mpu.convertTemp();
-				expect(test_lobe.mpu.celsius).to.equal('-20.164');//
+				expect(test_lobe.mpu.inputs[29]).to.equal('-20.164');//
 			});
 		});
 		describe('Function: log()', function() {
@@ -155,7 +158,7 @@ class modelClass {
 		describe('Function: convertCompass()', function() {
       it('expected compass value to be converted to degrees relative to North', function () {
         test_lobe.mpu.convertCompass();
-        expect(test_lobe.mpu.heading).to.equal(45);
+        expect(test_lobe.mpu.inputs[30]).to.equal(45);
       });
     });
     describe('Function: updateModel()', function() {
