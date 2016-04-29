@@ -16,16 +16,17 @@ class MPU6050{
         // index 17-23: xpos, ypos, zpos, temp, xmagn, ymagn, zmagn
         // index 24-26: xAdj, yAdj, zAdj
         // index 27-30: xangle, yangle, celsius, heading
+        // index 31-32: DRDY (data ready), Status bit for magnetometer
 
     }
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
         try {
+            i2c.writeByteSync(this.SA, 0x0A, 2);
             i2c.writeByteSync(this.SA, 0x6B, 1);
         }catch(e) {
             this.log.output("While waking MPU6050: ERROR: ", e);
-
         }
     }
 
@@ -44,15 +45,19 @@ class MPU6050{
             this.inputs[5] = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
             this.inputs[6] = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
             this.inputs[7] = i2c.readByteSync(this.SA, 0x42);
-            this.inputs[8] = i2c.readByteSync(0x68, 0x04); //xmagnH
-            this.inputs[9] = i2c.readByteSync(0x68, 0x03); //xmagnL
-            this.inputs[10] = i2c.readByteSync(0x68, 0x06); //ymagnH
-            this.inputs[11] = i2c.readByteSync(0x68, 0x05); //ymagnL
-            this.inputs[12] = i2c.readByteSync(0x68, 0x08); //zmagnH
-            this.inputs[13] = i2c.readByteSync(0x68, 0x07); //zmagnL
-            this.inputs[14] = i2c.readByteSync(0x68, 0x10); //asax
-            this.inputs[15] = i2c.readByteSync(0x68, 0x11); //asay
-            this.inputs[16] = i2c.readByteSync(0x68, 0x12); //asaz
+            this.inputs[31] = i2c.readByteSync(this.SA, 0x02);
+            if(this.inputs[31] === "1"){
+                this.inputs[8] = i2c.readByteSync(this.SA, 0x04); //xmagnH
+                this.inputs[9] = i2c.readByteSync(this.SA, 0x03); //xmagnL
+                this.inputs[10] = i2c.readByteSync(this.SA, 0x06); //ymagnH
+                this.inputs[11] = i2c.readByteSync(this.SA, 0x05); //ymagnL
+                this.inputs[12] = i2c.readByteSync(this.SA, 0x08); //zmagnH
+                this.inputs[13] = i2c.readByteSync(this.SA, 0x07); //zmagnL
+                this.inputs[32] = i2c.readByteSync(this.SA, 0x09); // Status bit
+            }
+            this.inputs[14] = i2c.readByteSync(this.SA, 0x10); //asax
+            this.inputs[15] = i2c.readByteSync(this.SA, 0x11); //asay
+            this.inputs[16] = i2c.readByteSync(this.SA, 0x12); //asaz
 
         }catch(e) {
             this.log.output("While reading from MPU6050: ERROR: ", e);
@@ -110,9 +115,8 @@ class MPU6050{
     convertTemp() {     //converts to Celsius
         //for mpu6050
         this.inputs[29] = (parseFloat(this.inputs[20])/340 + 36.53).toFixed(3);
-        // this.celsius = (parseFloat(this.temp)/340 + 36.53).toFixed(3);
         //for mpu9250
-        // this.celsius = parseFloat(this.temp)/333.87 + 21;
+        // this.inputs[29] = (parseFloat(this.temp)/333.87 + 21).toFixed(3);
     }
 
     sleep() {       //put chip in sleep mode

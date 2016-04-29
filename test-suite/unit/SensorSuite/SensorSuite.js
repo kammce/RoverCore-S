@@ -61,6 +61,9 @@ class modelClass {
 			if(register === 0x10 || register === 0x11 || register === 0x12){
 				return "0";
 			}
+			if(register === 0x02){
+				return "1";
+			} 
 			else return "180";
 		}
 		readByte(dev_addr, register, cb){
