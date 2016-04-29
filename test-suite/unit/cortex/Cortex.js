@@ -56,7 +56,7 @@ describe('Testing Cortex Class', function () {
 			// Check if protolobe is in the lobe_map
 			expect(cortex.lobe_map["Protolobe"]).to.exist;
 			// Check if protolobe is in the lobe_map
-			expect(cortex.lobe_map["Protolobe"].idle_time).to.equal(config['idle_time']);
+			expect(cortex.lobe_map["Protolobe"].config.idle_time).to.equal(config['idle_time']);
 			// Check if protolobe is in the lobe_map
 			expect(cortex.lobe_map["Protolobe"].mission_controller).to.equal(config['mission_controller']);
 		});

@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 //  string to send to smd
 //smxxvxxaxxe
 
@@ -106,19 +104,23 @@ class DriveSystem extends Neuron {
         }*/
     }
     halt() {
-        //this.state = 'halt';
+        this.state = 'halt';
         //clearInterval(this.interval);
+        this.port.write('S000,090E');
+        this.speed = 0;
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name ,`HALTING ${this.name}`);
     }
     resume() {
-        //this.state = 'react';
+        this.state = 'react';
         //this.interval = setInterval(this.sendState(), 100);
         this.log.output(`RESUMING ${this.name}`);
         this.feedback(this.name ,`RESUMING ${this.name}`);
     }
     idle() {
-        //this.state = 'idle';
+        this.state = 'idle';
+        this.port.write('S000,090E');
+        this.speed = 0;
         //clearInterval(this.interval);
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
