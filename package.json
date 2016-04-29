@@ -17,6 +17,7 @@
     "forever-monitor": "",
     "primus": "^4.0.1",
     "ws": "^0.8.0",
+    "serialport": "",
     "i2c-bus": ""
   }
 }
