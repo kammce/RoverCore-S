@@ -51,7 +51,9 @@ class Tracker extends Neuron {
         	this.pwm = new PWMDriver(0x5c, 60, i2c);            
         }               
 
-	    
+	    this.Kp = 1;
+        this.Ki = 0;
+        this.Kd = 0;
 	           
 	    this.lidarMeasurement = 0;
 	    this.lidarHealth = true;
@@ -60,6 +62,7 @@ class Tracker extends Neuron {
         this.model.registerMemory('CAMERA GIMBAL');
 
         this.busy = false;
+        this.stopped = false;
 
         //Target 
         this.target = {
@@ -92,9 +95,7 @@ class Tracker extends Neuron {
 
     pid() {
         var relativePitch = 0;
-        var P = 1;
-        var I = 1;
-        var D = 1;
+        
         var err = 0;
         var prevErr = 0;
         var ierr = 0;
@@ -117,7 +118,7 @@ class Tracker extends Neuron {
             derr = err - prevErr;
 
             parent.output.yaw = parent.target.yaw;
-            parent.output.pitch = P * err + (I * ierr * dt) + (D * derr/dt);
+            parent.output.pitch = this.Kp * err + (this.Ki * ierr * dt) + (this.Kd * derr/dt);
 
             //Constrains Pitch to bounds
             if(parent.output.pitch>PITCH_MAX) {
@@ -125,10 +126,12 @@ class Tracker extends Neuron {
             } else if(parent.output.pitch < PITCH_MIN) {
                 parent.output.pitch = PITCH_MIN;
             } 
-
-            PWMOutput = parent.angleToPWM(parent.output);
-            parent.servoWrite(PWMOutput);
-            parent.updateModel();
+            if(parent.stopped === false){
+                PWMOutput = parent.angleToPWM(parent.output);
+                parent.servoWrite(PWMOutput);
+                parent.updateModel();
+            }
+            
 
 
 
@@ -141,17 +144,14 @@ class Tracker extends Neuron {
     	  
         var parent = this;           
         if(i.mode === 'moveAngle') {                                               
-            parent.target = this.moveAngleLocal(i, this.output);   
-                                  
+            parent.target = this.moveAngleLocal(i, this.output);                                 
         } else if(i.mode === "moveInterval") {                                  
             parent.target = this.moveInterval(i, this.output);                                              
-        } else if(i.mode === "setHome") {
-            //Updates the default position                  
+        } else if(i.mode === "setHome") {                             
             this.defaultConfig(i);                                     
         } else if(i.mode === "moveHome" ) {                                  
             parent.target = this.recalibrate();                                                 
-        } else if(i.mode === "getDistance") { 
-            //this.lidarMeasurement = this.getDistance();
+        } else if(i.mode === "getDistance") {             
             this.getDistance();                              
             setTimeout(function(){
                 parent.updateModel();
@@ -166,6 +166,10 @@ class Tracker extends Neuron {
             }, 10);            
         } else if(i.mode === "panorama") {
             this.panorama();
+        } else if(i.mode === "setPID") {
+            this.Kp = i.Kp;
+            this.Ki = i.Ki;
+            this.Kd = i.Kd;
         }
     }
     react(input) {
@@ -218,12 +222,21 @@ class Tracker extends Neuron {
     halt() {
       //  this.log.output(`HALTING ${this.name}`);
        // this.feedback(`HALTING ${this.name}`);
-        this.parseCommand({
-        	mode : "moveAngle",
-        	yaw : 0,
-        	pitch : -90
-        	
+        this.stopped = true;
+        var PWMOutput = this.angleToPWM({
+            yaw: 0,
+            pitch: 90
         });
+        this.target = {
+            yaw: 0,
+            pitch: 90
+        };
+        this.output = {
+            yaw: 0,
+            pitch: 90
+        };
+        this.servoWrite(PWMOutput);
+        this.updateModel();
 
         var parent = this;
         setTimeout(function() {        	
@@ -234,6 +247,7 @@ class Tracker extends Neuron {
     resume() {
        // this.log.output(`RESUMING ${this.name}`);
        // this.feedback(`RESUMING ${this.name}`);
+       this.stopped = false;
         this.parseCommand({
         	mode : "moveHome"
         });        
@@ -256,7 +270,8 @@ class Tracker extends Neuron {
     		value.pitch > PITCH_SERVO_MAX || value.pitch < PITCH_SERVO_MIN) {
     		return false;
     	} else {
-    		this.defaultPosition = value;
+    		this.defaultPosition.yaw = value.yaw;
+            this.defaultPosition.pitch = value.pitch;
     		return true;
     	}
     }
@@ -267,8 +282,6 @@ class Tracker extends Neuron {
             yaw: 0
         };
         value.yaw = value.yaw % 360;
-
-
     	
         targetAngle.pitch = value.pitch;
     	//Determine whether going clockwise or anticlockwise is closer
@@ -307,16 +320,9 @@ class Tracker extends Neuron {
     		}
     	}
 
-    	if((position.pitch + value.pitch) <= PITCH_SERVO_MAX && (position.pitch + value.pitch) >= PITCH_SERVO_MIN) {
-    		targetAngle.pitch = position.pitch + value.pitch;
-    	} else {
-    		this.feedback("WARNING: Tracker PITCH has exceeded limits");
-    		if((position.pitch + value.pitch) > PITCH_SERVO_MAX) {
-    			targetAngle.pitch = PITCH_SERVO_MAX;
-    		} else {
-    			targetAngle.pitch = PITCH_SERVO_MIN;
-    		}
-    	}
+    	
+    	targetAngle.pitch = position.pitch + value.pitch;
+    	
 
     	return targetAngle;
     }

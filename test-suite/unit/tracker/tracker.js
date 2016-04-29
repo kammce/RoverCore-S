@@ -32,84 +32,85 @@ describe('Testing Tracker Class', function() {
 	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
 
 
-	describe('#react moveAngle', function(){
-			before(function(done){
-				test_lobe.gimbalPosition = [0,0];
+	describe('#react moveAngle', function(){				
+
+			it('#react moveAngle should correctly modify gimbalPosition', function(){			
+				test_lobe.target = {
+            		yaw: 0,
+            		pitch: 0
+       			 };
 				test_lobe.react({					
 					mode: "moveAngle",
 					yaw: 4, 
 					pitch: 5					
 				});
-				done();
+				expect(test_lobe.target).is.eql({
+					yaw: 4,
+					pitch: 5
+				});
 			});
-
-			it('#react moveAngle should correctly modify gimbalPosition', function(){			
-				expect(test_lobe.gimbalPosition).is.eql([4,5]);
-			});
-			it('#react moveAngle should send correct signal to servo',function() {
-				expect(test_lobe.pwm.microValue.pop()).to.eql(1556);
-				expect(test_lobe.pwm.microValue.pop()).to.eql(1506);
-			});
+			
 		});
 
-	describe('#react moveInterval', function(){
-		before(function(done){
-			test_lobe.gimbalPosition = [0,0];
+	describe('#react moveInterval', function(){			
+		
+		it('#moveInterval should correctly modify gimbalPosition', function() {		
+			test_lobe.target = {
+	    		yaw: 0,
+	    		pitch: 0
+			 };
+
 			test_lobe.react({
 				mode: "moveInterval",
-					yaw: 5, 
-					pitch: 6
+				yaw: 5, 
+				pitch: 6
 			});
-			done();
-		});
-		it('#moveInterval should correctly modify gimbalPosition', function() {		
-			
-			expect(test_lobe.gimbalPosition).is.eql([5,6]);
+
+			expect(test_lobe.target).is.eql({
+				yaw: 5,
+				pitch: 6
+			});
 		});
 	});
 
-	describe('#react defaultConfig', function(){
-		before(function(done){
+	describe('#react defaultConfig', function(){			
+		
+		it('# defaultConfig should correctly set default servo position', function(){
 			test_lobe.react({
 				mode: "setHome",
 				yaw: 1,
 				pitch: 2
 			});
-			done();
-		});
-		it('# defaultConfig should correctly set default servo position', function(){
-			expect(test_lobe.defaultPosition).is.eql([1,2]);
+
+			expect(test_lobe.defaultPosition).is.eql({
+				yaw: 1,
+				pitch: 2
+			});
 		});
 	});
-	describe('#react recalibrate', function(){
-		before(function(done){
+	describe('#react recalibrate', function(){					
+		
+		it('#recalibrate should return to default position', function(){
 			test_lobe.react({
 				mode : "moveHome"
 			});
-			done();
-		});
-		it('#recalibrate should return to default position', function(){
-			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+			expect(test_lobe.target).is.eql(test_lobe.defaultPosition);
 		});
 	});
 
 	describe('#resume', function(){
-		before(function(done){
-			test_lobe.resume();
-			done();
-		});
+		
 		it('#resume should return to default position', function(){
-			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+			test_lobe.resume();
+			expect(test_lobe.target).is.eql(test_lobe.defaultPosition);
 		});		
 	});
 
 	describe('#idle', function(){
-		before(function(done){
-			test_lobe.idle();
-			done();
-		});
+		
 		it('#idle should return to default position', function(){
-			expect(test_lobe.gimbalPosition).is.eql(test_lobe.defaultPosition);
+			test_lobe.idle();
+			expect(test_lobe.target).is.eql(test_lobe.defaultPosition);
 		});
 	});
 	
@@ -119,7 +120,10 @@ describe('Testing Tracker Class', function() {
 			setTimeout(function(){ done(); }, 1200);
 		});
 		it('#halt should move gimbal to shutdown position', function(){
-			expect(test_lobe.gimbalPosition).is.eql([0,-90]);
+			expect(test_lobe.target).is.eql({
+				yaw: 0,
+				pitch: 90
+			});
 		});
 		it('#halt should set servo duty cycle to 100', function(){
 			expect(test_lobe.pwm.dutyValue.pop()).to.eql(100);
@@ -138,40 +142,34 @@ describe('Testing Tracker Class', function() {
 			setTimeout(done(),100);
 		});
 		it('#model should be updated when react is called', function(){
-			expect(model.database['CAMERA GIMBAL']['value']).to.eql({
-					yaw: 90,
-					pitch: 90
-			});
+			expect(model.database['CAMERA GIMBAL']['value']).to.eql(test_lobe.output);
 		});
 		//Test lidar
 	});
 
 	describe('#testing standard class functions', function(){
 		it('#moveAngle', function() {
-			expect(test_lobe.moveAngleLocal([180, 90], [0,0])).to.eql([180, 90]);
-			expect(test_lobe.moveAngleLocal([90, 0], [360, 0])).to.eql([450, 0]);
-			expect(test_lobe.moveAngleLocal([200, 0], [540, 0])).to.eql([200, 0]);
-			expect(test_lobe.moveAngleLocal([0, 100], [0, 0])).to.eql([0, 90]);
+			expect(test_lobe.moveAngleLocal({yaw: 180, pitch: 90 }, {yaw:0, pitch:0 })).to.eql({yaw: 180, pitch: 90 });
+			expect(test_lobe.moveAngleLocal({yaw: 90, pitch:0 }, {yaw:360, pitch: 0 })).to.eql({yaw: 450, pitch: 0 });
+			expect(test_lobe.moveAngleLocal({yaw: 200, pitch: 0 }, {yaw: 540, pitch: 0 })).to.eql({yaw: 200, pitch: 0 });			
 		});
 		
 		it('#moveInterval', function() {
-			expect(test_lobe.moveInterval([10,10], [20, 20], [0, 0, 0], 
-				[false, false])).to.eql([30, 30]);
-			expect(test_lobe.moveInterval([20, 20], [620, 80], [0, 0, 0], 
-				[false, false])).to.eql([630, 90]);
+			expect(test_lobe.moveInterval({yaw: 10, pitch: 10 }, {yaw: 20, pitch: 20})).to.eql({yaw: 30, pitch: 30});
+			expect(test_lobe.moveInterval({yaw: 20, pitch: 20}, {yaw: 620, pitch: 80})).to.eql({yaw: 630, pitch: 100});
 
 		});
 		it('#angleToPWM', function(){
-			expect(test_lobe.angleToPWM([0,0])).to.eql([1500, 1500]);
-			expect(test_lobe.angleToPWM([630, 90])).to.eql([2400 , 2500]);
+			expect(test_lobe.angleToPWM({yaw: 0, pitch: 0})).to.eql([1500,1500]);
+			expect(test_lobe.angleToPWM({yaw: 630, pitch: 90})).to.eql([2400, 2500]);
 		});
 		it('#defaultConfig', function(){
-			expect(test_lobe.defaultConfig([0,0])).to.be.true;
-			expect(test_lobe.defaultConfig([1000, 180])).to.be.false;
+			expect(test_lobe.defaultConfig({yaw: 0, pitch: 0})).to.be.true;
+			expect(test_lobe.defaultConfig({yaw: 1000, pitch: 180})).to.be.false;
 		});
 		it('#recalibrate', function(){
-			test_lobe.defaultConfig([90, 90]);
-			expect(test_lobe.recalibrate()).to.eql([90, 90]);
+			test_lobe.defaultConfig({yaw: 90, pitch: 90});
+			expect(test_lobe.recalibrate()).to.eql({yaw: 90, pitch: 90});
 		});	
 		/*
 		it('#getDistance', function(){
