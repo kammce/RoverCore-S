@@ -36,14 +36,14 @@ const PANORAMA_TIME = 1000;
 const PANORAMA_ANGLE = 45;
 
 class Tracker extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model, debug) {
-        super(name, feedback, color_log, idle_timeout);
-        this.name = name;
-        this.feedback = feedback;
-        this.log = color_log;
-        this.idle_time = idle_timeout;
-        this.i2c = i2c;
-        this.model = model;        
+    constructor(util) {
+        super(util);
+        this.name = util.name;
+        this.feedback = util.feedback;
+        this.log = util.color_log;
+        this.idle_time = util.idle_timeout;
+        this.i2c = util.i2c;
+        this.model = util.model;        
         //debug = true;
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
