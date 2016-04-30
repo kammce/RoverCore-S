@@ -35,7 +35,6 @@ class SensorSuite extends Neuron {
     }
     react(input) {
         var name = input.name;
-
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -60,8 +59,8 @@ class SensorSuite extends Neuron {
         this.model.set('MPU', {
             xAngle: mpu.inputs[27],
             yAngle: mpu.inputs[28],
-            temperature: mpu.inputs[29]
-            // compass: mpu.convertCompass()
+            temperature: mpu.inputs[29],
+            compass: mpu.inputs[30]
         });
     }
     updateModel2() {
@@ -69,8 +68,8 @@ class SensorSuite extends Neuron {
         this.model.set('MPU2', {
             xAngle: mpu.inputs[27],
             yAngle: mpu.inputs[28],
-            temperature: mpu.inputs[29]
-            // compass: mpu.convertCompass()
+            temperature: mpu.inputs[29],
+            compass: mpu.inputs[30]
         });
     }
 }
