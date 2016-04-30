@@ -210,16 +210,17 @@ class Cortex {
 					"upcall": this.upcall,
 				};
 				// Construct Lobe module
-				var module = new Lobe(
-					config['lobe_name'], 
-					this.feedback,
-					log,
-					config['idle_time'],
-					this.I2C,
-					this.Model,
-					this.SERIALPORT,
-					this.upcall
-				);
+				var module = new Lobe(lobe_utitilites);
+				/*
+				config['lobe_name'], 
+				this.feedback,
+				log,
+				config['idle_time'],
+				this.I2C,
+				this.Model,
+				this.SERIALPORT,
+				this.upcall
+				*/
 				// Attach config property to module
 				module.config = config;
 				// Attach mission controller to module
