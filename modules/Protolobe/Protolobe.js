@@ -7,7 +7,7 @@ class ProtoLobe extends Neuron {
         super(util);
         this.name = util.name;
         this.feedback = util.feedback;
-        this.log = util.color_log;
+        this.log = util.log;
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
         this.model = util.model;
