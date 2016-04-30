@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 //  string to send to smd
 //smxxvxxaxxe
 
@@ -19,70 +17,75 @@ class DriveSystem extends Neuron {
         this.idle_time = idle_timeout;
         this.i2c = i2c;
         this.model = model;
-        this.port = port;
+        var parent = this;
+
+        var sendState = function() { 
+            //console.log("sendstate triggored");
+            var zeroPad = function (num, places) {
+                console.log("//////////////////////////" + num);
+                var zero = places - num.toString().length + 1;
+                return Array(+(zero > 0 && zero)).join("0") + num;
+            }
+            if(parent.mode !== parent.modeOld){
+                parent.log.output('M' + parent.mode + "E");
+                parent.port.write('M' + parent.mode + "E" + "\n");
+                parent.modeOld = parent.mode;
+            }
+            else if((parent.speed !== parent.speedOld) || (parent.angle !== parent.angleOld)){
+                    var speed_str = 'S' + zeroPad(parent.speed, 3) + ',' + zeroPad(parent.angle, 3) +"E" + "\n";
+                    parent.log.output("speed_str = ", speed_str);
+                    parent.port.write(speed_str, function(err, results) {});
+                    parent.speedOld = parent.speed;
+                    parent.angleOld = parent.angle;
+            }
+            else if(parent.limit !== parent.limitOld){
+                parent.port.write('L' + parent.limit + "E");
+                parent.limitOld = parent.limit;
+            }
+            else if(parent.PIDState !== parent.PIDStateOld){
+                parent.port.write('P' + parent.PIDState + "E");
+                parent.PIDStateOld = parent.PIDState;
+            }
+            //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
+        }
+
         ////////////////
         this.state = 'react';
         this.speed = 0;
-        this.speedOld = 1;
+        this.speedOld = 0;
         this.angle = 90;
-        this.angleOld = 91;
+        this.angleOld = 90;
         this.limit = 50;
-        this.limitOld = 51;
+        this.limitOld = 50;
         this.PIDState = 'on';
         this.PIDStateOld = 'off';
-        this.mode = 'c';
-        this.modeOld = 'k';
-        //////////////////
-        this.interval = setInterval(this.sendState(), 100);
-        this.cur=['a','b','c','d','e','f'];
-        this.rpm=['a','b','c','d','e','f'];
-        this.port.on('data', function (data){
-            var dataSplit;
-            if(data[0] === 'r' && data.includes('\n')){
-                dataSplit = data.split(",");
-                 this.rpm.a = parseInt(['0x' + dataSplit[1]]);
-                 this.rpm.b = parseInt(['0x' + dataSplit[2]]);
-                 this.rpm.c = parseInt(['0x' + dataSplit[3]]);
-                 this.rpm.d = parseInt(['0x' + dataSplit[4]]);
-                 this.rpm.e = parseInt(['0x' + dataSplit[5]]);
-                 this.rpm.f = parseInt(['0x' + dataSplit[6]]);
-            }
-            else if(data[0] === 'c' && data.includes('\n')){
-                 dataSplit = data.split(",");
-                 this.cur.a = parseInt(['0x' + dataSplit[1]])/100;
-                 this.cur.b = parseInt(['0x' + dataSplit[2]])/100;
-                 this.cur.c = parseInt(['0x' + dataSplit[3]])/100;
-                 this.cur.d = parseInt(['0x' + dataSplit[4]])/100;
-                 this.cur.e = parseInt(['0x' + dataSplit[5]])/100;
-                 this.cur.f = parseInt(['0x' + dataSplit[6]])/100;
-            }
-            else {
-                console.log("Data Error!");
-            }
-        });
-    }
-    sendState(){
-        if(this.mode !== this.modeOld){
-            this.port.write('M' + this.mode + "\n");
-            this.modeOld = this.mode;
+        this.mode = 'z'; 
+        // z is arbitrary, and forces sendState to send a k
+        this.modeOld = 'z';
+        /////////////////
+        
+        if(typeof port === "undefined"){
+            var SP = require("../../node_modules/serialport/serialport");
+            var SerialPort = SP.SerialPort;
+            var serialport = new SerialPort("COM13", {
+                baudrate: 9600,
+                parser: SP.parsers.readline("\n")
+            });
+            this.log.output("Using real SerialPort");
+            this.port = serialport;
+            this.port.on("open", function () {
+                parent.port.on('data', function (data){
+                    
+                    parent.log.output("RECIEVED" + data.toString());
+                });
+                 setTimeout( function(){parent.interval = setInterval(sendState, 100);}, 5000);
+            });
         }
-        if((this.speed !== this.speedOld) || (this.angle !== this.angleOld)){
-            this.port.write('S' + this.speed + ',' + this.angle +"\n");
-            this.speedOld = this.speed;
-            this.angleOld = this.angle;
-        }
-        if(this.limit !== this.limitOld){
-            this.port.write('L' + this.limit + "\n");
-            this.limitOld = this.limit;
-        }
-        if(this.PIDState !== this.PIDStateOld){
-            this.port.write('P' + this.PIDState + "\n");
-            this.PIDStateOld = this.PIDState;
-        }
-        //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
     }
     react(input) {
-        if(this.state === 'react'){
+        //if(this.state === 'react'){
+            this.log.output("React was called");
+            this.log.output("input = ", input);
             this.speed = input.speed;
             this.angle = input.angle;
             this.mode = input.mode;
@@ -90,31 +93,93 @@ class DriveSystem extends Neuron {
             this.PIDState = input.PIDState;
             this.log.output(`REACTING ${this.name}: `, input);
             this.feedback(this.name ,`REACTING ${this.name}: `, input);
-            return true;
+            //console.log("DATA that was Recieved" + input.toString());
+            //this.port.write(input.toString());
+            //this.port.write("\n");
+            /*return true;
+
         }
         else{
             return false;
-        }
+        }*/
     }
     halt() {
         this.state = 'halt';
-        clearInterval(this.interval);
+        //clearInterval(this.interval);
+        this.port.write('S000,090E');
+        this.speed = 0;
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name ,`HALTING ${this.name}`);
     }
     resume() {
         this.state = 'react';
-        this.interval = setInterval(this.sendState(), 100);
+        //this.interval = setInterval(this.sendState(), 100);
         this.log.output(`RESUMING ${this.name}`);
         this.feedback(this.name ,`RESUMING ${this.name}`);
     }
     idle() {
         this.state = 'idle';
-        clearInterval(this.interval);
+        this.port.write('S000,090E');
+        this.speed = 0;
+        //clearInterval(this.interval);
         this.log.output(`IDLING ${this.name}`);
         this.feedback(this.name ,`IDLING ${this.name}`);
+        //this.port.write('S000,090E');
+                
     }
 }
+/*var dataSplit;
+ this.cur=['a','b','c','d','e','f'];
+        this.rpm=['a','b','c','d','e','f'];
+                    if(data[0] === 'r' && data.includes('\n')){
+                        dataSplit = data.split(",");
+                         parent.rpm.a = parseInt(['0x' + dataSplit[1]]);
+                         parent.rpm.b = parseInt(['0x' + dataSplit[2]]);
+                         parent.rpm.c = parseInt(['0x' + dataSplit[3]]);
+                         parent.rpm.d = parseInt(['0x' + dataSplit[4]]);
+                         parent.rpm.e = parseInt(['0x' + dataSplit[5]]);
+                         parent.rpm.f = parseInt(['0x' + dataSplit[6]]);
+                    }
+                    else if(data[0] === 'c' && data.includes('\n')){
+                         dataSplit = data.split(",");
+                         parent.cur.a = parseInt(['0x' + dataSplit[1]])/100;
+                         parent.cur.b = parseInt(['0x' + dataSplit[2]])/100;
+                         parent.cur.c = parseInt(['0x' + dataSplit[3]])/100;
+                         parent.cur.d = parseInt(['0x' + dataSplit[4]])/100;
+                         parent.cur.e = parseInt(['0x' + dataSplit[5]])/100;
+                         parent.cur.f = parseInt(['0x' + dataSplit[6]])/100;
+                    }
+                    else {
+                        console.log("Data Error!");
+                    }
 
+                    else{
+            this.port = port;
+            this.port.on('data', function (data){
+                var dataSplit;
+                if(data[0] === 'r' && data.includes('\n')){
+                    dataSplit = data.split(",");
+                     this.rpm.a = parseInt(['0x' + dataSplit[1]]);
+                     this.rpm.b = parseInt(['0x' + dataSplit[2]]);
+                     this.rpm.c = parseInt(['0x' + dataSplit[3]]);
+                     this.rpm.d = parseInt(['0x' + dataSplit[4]]);
+                     this.rpm.e = parseInt(['0x' + dataSplit[5]]);
+                     this.rpm.f = parseInt(['0x' + dataSplit[6]]);
+                }
+                else if(data[0] === 'c' && data.includes('\n')){
+                     dataSplit = data.split(",");
+                     this.cur.a = parseInt(['0x' + dataSplit[1]])/100;
+                     this.cur.b = parseInt(['0x' + dataSplit[2]])/100;
+                     this.cur.c = parseInt(['0x' + dataSplit[3]])/100;
+                     this.cur.d = parseInt(['0x' + dataSplit[4]])/100;
+                     this.cur.e = parseInt(['0x' + dataSplit[5]])/100;
+                     this.cur.f = parseInt(['0x' + dataSplit[6]])/100;
+                }
+                else {
+                    console.log("Data Error!");
+                }
+            });
+            this.interval = setInterval(sendState, 100);
+        }*/
 
 module.exports = DriveSystem;

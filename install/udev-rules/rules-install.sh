@@ -6,4 +6,4 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "Installing rover video identifiers into /etc/udev/rules.d"
-cp rover-video.rules /etc/udev/rules.d
+cp rover.rules /etc/udev/rules.d

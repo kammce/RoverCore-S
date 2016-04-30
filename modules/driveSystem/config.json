@@ -2,5 +2,5 @@
 	"lobe_name": "driveSystem",
 	"log_color": "magenta",
 	"idle_time": 5000,
-	"mission_controller": "driveSystemUser"
+	"mission_controller": "navi"
 }
