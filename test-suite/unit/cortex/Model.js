@@ -169,7 +169,7 @@ describe('Testing Model Class', function () {
 					data['message']['TEST_UNIT0']['timestamp'] = 0;		
 					data['message'] = JSON.stringify(data['message']);
 					expect(data).to.eql({
-						lobe: "Model",
+						lobe: "model",
 						message: JSON.stringify({ 
 							"TEST_UNIT0": {
 								timestamp: 0,
