@@ -1,6 +1,7 @@
 "use strict";
 
-var SerialPort = require('serialport').SerialPort;  //Library for serial link; using serial-port
+// var SerialPort = require('serialport').SerialPort;  //Library for serial link; using serial-port
+var SerialPort = require('../TEST_serialport.js');  // For Unit Testing
 var Neuron = require('../Neuron');
 
 class Arm extends Neuron {
@@ -20,43 +21,43 @@ class Arm extends Neuron {
             "wrist": 180,
             "elbow": 76,
             "base": 180,
-            "shoulder": 58
+            "shoulder": 58,
             "claw": 60      //TBD
-        }
+        };
         var low = {
             "wrist": 0,
             "elbow": 0,
             "base": 0,
-            "shoulder": 0
+            "shoulder": 0,
             "claw": 0       //TBD
-        }
+        };
 
         // Arm state records
         this.laser = 0; //defaults to off
         this.target = { // This variable stores the current target position of the arm
-            base: 0,
-            shoulder: 0,
-            elbow: 0,
-            wrist: 0,
-            roll: 0;
-            rolldir: 0,
-            claw: "r"
+            "base": 0,
+            "shoulder": 0,
+            "elbow": 0,
+            "wrist": 0,
+            "roll": 0,
+            "rolldir": 0,
+            "claw": "r"
         };
         this.current = {
-            base: 0,
-            shoulder: 0,
-            elbow: 0,
-            wrist: 0,
-            claw: 0
-        }
+            "base": 0,
+            "shoulder": 0,
+            "elbow": 0,
+            "wrist": 0,
+            "claw": 0
+        };
         this.position = { // This variable stores feedback from the motors
-            base: 90,
-            shoulder: 29,
-            elbow: 38,
-            wrist: 90,
-            roll: 180,
-            rolldir: 0,
-            claw: "r"
+            "base": 90,
+            "shoulder": 29,
+            "elbow": 38,
+            "wrist": 90,
+            "roll": 180,
+            "rolldir": 0,
+            "claw": "r"
         };
 
         // Register model memory
@@ -67,49 +68,51 @@ class Arm extends Neuron {
             baudrate: 9600
         });
 
-        // Define serial connection startup behaviour
+        // Define serial connection startup behavior
         this.serial.on("open", function(){
-            this.log.output(`REACTING ${this.name} \n `, "SAMD21 serial connection made!");
+            parent.log.output(`REACTING ${parent.name} \n `, "SAMD21 serial connection made!");
         });
 
         // Parse any incoming data from SAMD21
         this.serial.on("data", function(message){
             // if incoming message is incorrectly formatted
             if(message[0] !== "q" || !(message.includes(",")) || message[message.length - 1] !== "?"){
-                this.log.output(`REACTING ${this.name} \n `, "Invalid SAMD21 message string");
+                parent.log.output(`REACTING ${parent.name} \n `, "Invalid SAMD21 message string");
                 return;
             }
-            
+
             // remove "?" ending symbol and "q," start symbol
             message = message.substring(2, message.length - 1);
             var data = message.split(",");
-            
+            // console.log(data);
+
             // if incoming message did not include enough data
-            if(data.length != 8){
-                this.log.output(`REACTING ${this.name} \n `, "Incomplete SAMD21 data");
+            if(data.length !== 11){
+                parent.log.output(`REACTING ${parent.name} \n `, "Incomplete SAMD21 data");
                 return;
             }
             
             // record positions
-            parent.position.wrist = data[0];    //wrist diff gerabox pitch
-            parent.position.shoulder = data[1]; //shoulder DC motor pitch
-            parent.position.roll = data[2];     //wrist diff gearbox roll angle
-            parent.position.elbow = data[3];    //elbow firgelli pitch angle (determined by pot feedback)
-            parent.position.base = data[4];     //base rotunda angle
+            parent.position.wrist = parseInt(data[0]);    //wrist diff gerabox pitch
+            parent.position.shoulder = parseInt(data[1]); //shoulder DC motor pitch
+            parent.position.roll = parseInt(data[2]);     //wrist diff gearbox roll angle
+            parent.position.elbow = parseInt(data[3]);    //elbow firgelli pitch angle (determined by pot feedback)
+            parent.position.base = parseInt(data[4]);     //base rotunda angle
+            parent.position.claw = parseInt(data[5]);            //claw servo angle
 
             // record current draw
-            parent.current.base = data[5];      //base rotunda current
-            parent.current.shoulder = data[6];  //shoulder DC motor current
-            parent.current.elbow = data[7];     //elbow firgelli current
-            parent.current.wrist = data[8];     //wrist servos' current
-            parent.current.claw = data[9];      //claw servo current
+            parent.current.base = parseInt(data[6]);      //base rotunda current
+            parent.current.shoulder = parseInt(data[7]);  //shoulder DC motor current
+            parent.current.elbow = parseInt(data[8]);     //elbow firgelli current
+            parent.current.wrist = parseInt(data[9]);     //wrist servos' current
+            parent.current.claw = parseInt(data[10]);      //claw servo current
 
             // place data into the model
             var ArmPresentState = {
                 position: parent.position,
                 current: parent.current,
                 target: parent.target
-            }
+            };
             parent.model.set("Arm_State", ArmPresentState);
         });
 
@@ -147,8 +150,16 @@ class Arm extends Neuron {
                     goal.base = low.base;
                 }
             }
+            if (goal.claw > high.claw || goal.claw < low.claw) {
+                // Set angle to correct limit
+                if(goal.claw > high.claw){
+                    goal.claw = high.claw;
+                } else {
+                    goal.claw = low.claw;
+                }
+            }
         };
-        this.readSAM = function(){  //gets all data from the SAMD21
+        this.readSAM = function(){  //manually ask for all data from the SAMD21 //Is this really needed, since SAMD sends data automatically?
             // Query SAMD21 control software for All data
             parent.serial.write("<,A?");
         };
@@ -171,7 +182,7 @@ class Arm extends Neuron {
             
             // send command to SAMD21
             parent.serial.write(cmdstr);
-        }
+        };
         this.moveArm = function(goal){
             var cmdstr = ">";
 
@@ -217,12 +228,15 @@ class Arm extends Neuron {
             cmdstr += "," + parent.target.base;     //base rotunda
             cmdstr += "," + parent.target.shoulder; //shoulder DC motor
             cmdstr += "," + parent.target.elbow;    //elbow firgelli
-            cmdstr += "," + parent.targer.claw;     //claw release/(grab+force) 
+            cmdstr += "," + parent.target.claw;     //claw release/(grab+force) 
             cmdstr += "," + parent.target.wrist;    //wrist pitch
             cmdstr += "," + goal.direction;         //claw rotation direction
             cmdstr += "," + goal.rotate;            //claw rotation angle
             cmdstr += "," + parent.laser;
             cmdstr += "?";
+
+            parent.position.rolldir = goal.direction;
+            parent.target.rolldir = goal.direction;
 
             // send command to SAMD21
             parent.serial.write(cmdstr);
