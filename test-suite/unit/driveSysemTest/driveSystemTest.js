@@ -44,7 +44,6 @@ describe('Testing driveSystem', function(){
 			dataOutput = {mode: '',speed:0, angle:0, limit:'', PIDState:''};;
 		}
 	};
-	module.exports = serialport;
 	class log{
 		constructor(){
 
@@ -54,13 +53,24 @@ describe('Testing driveSystem', function(){
 		}
 	};
 	
-	module.exports = log;
 	var feedback = function(blah1, blah2, blah3){};
 	var serialportInject = new serialport();
 	var logInject = new log();
 
-	var name, idel_timeout, i2c, model;
-	var test_unit = new driveSystem(name, feedback, logInject, idel_timeout, i2c, model, serialportInject);
+	var name, idle_timeout, i2c, model;
+
+
+	var util = {
+		name: "DriveSystem",
+		feedback: feedback,
+		log: logInject,
+		idle_timeout: 2000,
+		i2c: i2c,
+		model: model,
+		serial: serialportInject,
+	};
+
+	var test_unit = new driveSystem(util);
 
 	describe('Testing Constructor Initialization', function(){
 		before(function() {

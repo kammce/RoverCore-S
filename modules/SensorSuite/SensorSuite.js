@@ -7,23 +7,22 @@ var Neuron = require('../Neuron');
 var mpu6050 = require('./MPU6050.js');
 
 class SensorSuite extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model) {
-        super(name, feedback, color_log, idle_timeout);
-        this.name = name;
-        this.feedback = feedback;
-        this.log = color_log;
-        this.idle_time = idle_timeout;
-        this.i2c = i2c;
-        this.model = model;
-
+    constructor(util) {
+        super(util);
+        this.name = util.name;
+        this.feedback = util.feedback;
+        this.log = util.log;
+        this.idle_time = util.idle_timeout;
+        this.i2c = util.i2c;
+        this.model = util.model;
         // Construct Class here
-            //mpu6050 class initialization
+        //mpu6050 class initialization
         this.mpu = new mpu6050(0x68, this.i2c, this.log);
 //        this.mpu2 = new mpu6050(0x69, this.i2c, this.log);
         this.mpu.wakeUp();
 //        this.mpu2.wakeUp();
         var parent = this;
-        model.registerMemory('MPU');
+        this.model.registerMemory('MPU');
 //        model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
