@@ -59,7 +59,8 @@ describe('Testing Tracker Class', function() {
 	    		yaw: 0,
 	    		pitch: 0
 			 };
-
+			 console.log("debug");
+			 console.log(test_lobe.debug);
 			test_lobe.react({
 				mode: "moveInterval",
 				yaw: 5, 

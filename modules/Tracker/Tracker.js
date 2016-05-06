@@ -43,7 +43,8 @@ class Tracker extends Neuron {
         this.log = color_log;
         this.idle_time = idle_timeout;
         this.i2c = i2c;
-        this.model = model;        
+        this.model = model;
+        this.debug = debug;        
         //debug = true;
         if(debug === true) {        	
 			this.pwm = new PWMDriverTest();
@@ -105,37 +106,54 @@ class Tracker extends Neuron {
 
         var PWMOutput;
 
-        setInterval(function(){
-             
-            parent.orientation.pitch = this.model.database['MPU']['xAngle'];
-            parent.orientation.roll = this.model.database['MPU']['yAngle'];
+        if(parent.debug === false) { 
+            setInterval(function(){                 
+               var MPU = parent.model.get('MPU');
+                    if(typeof MPU !== 'undefined') {
+                    parent.orientation.pitch = MPU.xAngle;
+                    parent.orientation.roll = MPU.yAngle;
 
-            relativePitch = Math.cos((parent.output.yaw % 360)*Math.pi/180)*parent.orientation.pitch + Math.sin((parent.output.yaw % 360)*Math.pi/180)*parent.orientation.roll;
-
-            prevErr = err;
-            err = (parent.target.pitch - relativePitch) - (parent.output.pitch);
-            ierr = ierr + err;
-            derr = err - prevErr;
-
-            parent.output.yaw = parent.target.yaw;
-            parent.output.pitch = this.Kp * err + (this.Ki * ierr * dt) + (this.Kd * derr/dt);
-
-            //Constrains Pitch to bounds
-            if(parent.output.pitch>PITCH_MAX) {
-                parent.output.pitch = PITCH_MAX;
-            } else if(parent.output.pitch < PITCH_MIN) {
-                parent.output.pitch = PITCH_MIN;
-            } 
-            if(parent.stopped === false){
-                PWMOutput = parent.angleToPWM(parent.output);
-                parent.servoWrite(PWMOutput);
-                parent.updateModel();
-            }
-            
+                    }
+                     if(parent.debug === true) {
+                        parent.orientation = {
+                            yaw: 0, 
+                            pitch: 0
+                        }
+                    }
 
 
+                relativePitch = Math.cos((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.pitch + Math.sin((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.roll;
 
-        }, 10);
+                prevErr = err;
+                err = (parent.target.pitch - relativePitch) - (parent.output.pitch);
+                ierr = ierr + err;
+                derr = err - prevErr;
+
+                parent.output.yaw = parent.target.yaw;
+                parent.output.pitch = parent.Kp * err + (parent.Ki * ierr * dt) + (parent.Kd * derr/dt);
+
+                //Constrains Pitch to bounds
+                if(parent.output.pitch>PITCH_MAX) {
+                    parent.output.pitch = PITCH_MAX;
+                } else if(parent.output.pitch < PITCH_MIN) {
+                    parent.output.pitch = PITCH_MIN;
+                } 
+                if(parent.stopped === false){
+                    PWMOutput = parent.angleToPWM(parent.output);
+                    parent.servoWrite(PWMOutput);
+                    parent.updateModel();
+                }
+                
+
+
+
+            }, 10); 
+        } else {
+            parent.output = parent.target;
+            PWMOutput = parent.angleToPWM(parent.output);
+            parent.servoWrite(PWMOutput);
+            parent.updateModel();
+        }
 
 
 
@@ -144,9 +162,9 @@ class Tracker extends Neuron {
     	  
         var parent = this;           
         if(i.mode === 'moveAngle') {                                               
-            parent.target = this.moveAngleLocal(i, this.output);                                 
+            this.target = this.moveAngleLocal(i, this.output);                                 
         } else if(i.mode === "moveInterval") {                                  
-            parent.target = this.moveInterval(i, this.output);                                              
+            this.target = this.moveInterval(i, this.output);                                              
         } else if(i.mode === "setHome") {                             
             this.defaultConfig(i);                                     
         } else if(i.mode === "moveHome" ) {                                  
