@@ -1,7 +1,5 @@
 "use strict";
 
-var sinon = require('sinon');
-
 describe('Testing BatteryManager Class', function () {
 	// Loading Libraries
 	var BatteryManager = require('../../../modules/BatteryManager/BatteryManager');
@@ -32,7 +30,19 @@ describe('Testing BatteryManager Class', function () {
 	var signal = "";
 	var upcall = function(SIGNAL) { upcalled = true; signal = SIGNAL; };
 	var empty_funct = function(){};
-	var unit = new BatteryManager("BatteryManager", empty_funct, log, 0, empty_funct, model, Serial, upcall);
+
+	var util = {
+		name: "BatteryManager",
+		feedback: empty_funct,
+		log: log, 
+		idle_timeout: 0,
+		i2c: empty_funct,
+		model: model,
+		serial: Serial,
+		upcall: upcall
+	};
+
+	var unit = new BatteryManager(util);
 
 	describe('Test serialport interval is sending data', function() {
 		before(function() {
