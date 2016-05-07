@@ -31,7 +31,16 @@ describe('Testing Protolobe Class', function () {
 	var i2c = function() {}; // filler i2c object (not used in test)
 	var model = function() {}; // filler model object (not used in test)
 
-	var test_lobe = new Protolobe("Protolobe", feedback, log, 500, i2c, model);
+	var util = {
+		name:"Protolobe",
+		feedback: feedback,
+		log: log, 
+		idle_timeout: 500,
+		i2c: i2c,
+		model: model
+	};
+
+	var test_lobe = new Protolobe(util);
 
 	describe('Testing Protolobe Methods', function () {
 		it('#react() should be called', function () {

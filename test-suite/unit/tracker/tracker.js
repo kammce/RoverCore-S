@@ -29,7 +29,16 @@ describe('Testing Tracker Class', function() {
 	var dutyPin = [], microPin = [];
 	var dutyValue = [], microValue = [];	
 	var i2c = new I2CTest();
-	var test_lobe = new Tracker("Tracker", feedback, log, 2000, i2c, model, true);
+	var util = {
+		name: "Tracker",
+		feedback: feedback,
+		log: log,
+		idle_timeout: 2000,
+		i2c: i2c,
+		model: model,
+		debug: true
+	}
+	var test_lobe = new Tracker(util);
 
 
 	describe('#react moveAngle', function(){				

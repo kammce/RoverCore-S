@@ -9,14 +9,15 @@
 var Neuron = require('../Neuron');
 
 class DriveSystem extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model, port) {
-        super(name, feedback, color_log, idle_timeout);
-        this.name = name;
-        this.feedback = feedback;
-        this.log = color_log;
-        this.idle_time = idle_timeout;
-        this.i2c = i2c;
-        this.model = model;
+    constructor(util) {
+        super(util);
+        this.name = util.name;
+        this.feedback = util.feedback;
+        this.log = util.log;
+        this.idle_time = util.idle_timeout;
+        this.i2c = util.i2c;
+        this.model = util.model;
+        
         var parent = this;
 
         var sendState = function() { 
