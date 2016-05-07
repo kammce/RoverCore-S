@@ -10,12 +10,14 @@ class MPU6050{
         this.i2c = i2c;
         this.log = log;
         this.inputs = [];
-        // index 0-13: xposH, xposL, yposH, yposL, zposH, zposL, tempH, tempL, xmagnH, xmagnL, ymagnH, ymagnL, zmagnH, zmagnL
-        // index 14-16: asax, asay, asaz
+        // index 0-16: xposH, xposL, yposH, yposL, zposH, zposL, tempH, tempL, xmagnH, xmagnL, ymagnH, ymagnL, zmagnH, zmagnL, asax, asay, asaz
         // index 17-23: xpos, ypos, zpos, temp, xmagn, ymagn, zmagn
         // index 24-26: xAdj, yAdj, zAdj
         // index 27-30: xangle, yangle, celsius, heading
         // index 31-32: DRDY (data ready), Status bit for magnetometer
+
+        this.registerArray = [0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40, 0x41, 0x42, 0x04, 0x03, 0x06, 0x05, 0x08, 0x07, 0x10, 0x11, 0x12];
+
     }
 
     wakeUp() {      //tell chip to exit sleep mode
@@ -31,27 +33,40 @@ class MPU6050{
     readData() {        //read temp and accelerometer data from chip
         var i2c = this.i2c;
         try {
-            this.inputs[0] = i2c.readByteSync(this.SA, 0x3B);  //read byte from data register
-            this.inputs[1] = i2c.readByteSync(this.SA, 0x3C);  //read byte from data register
-            this.inputs[2] = i2c.readByteSync(this.SA, 0x3D);  //read byte from data register
-            this.inputs[3] = i2c.readByteSync(this.SA, 0x3E);  //read byte from data register
-            this.inputs[4] = i2c.readByteSync(this.SA, 0x3F);  //read byte from data register
-            this.inputs[5] = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
-            this.inputs[6] = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
-            this.inputs[7] = i2c.readByteSync(this.SA, 0x42);
+
             this.inputs[31] = i2c.readByteSync(this.SA, 0x02); //begin magnetometer read
-            if(this.inputs[31] === "1"){
-                this.inputs[8] = i2c.readByteSync(this.SA, 0x04); //xmagnH
-                this.inputs[9] = i2c.readByteSync(this.SA, 0x03); //xmagnL
-                this.inputs[10] = i2c.readByteSync(this.SA, 0x06); //ymagnH
-                this.inputs[11] = i2c.readByteSync(this.SA, 0x05); //ymagnL
-                this.inputs[12] = i2c.readByteSync(this.SA, 0x08); //zmagnH
-                this.inputs[13] = i2c.readByteSync(this.SA, 0x07); //zmagnL
-                this.inputs[32] = i2c.readByteSync(this.SA, 0x09); // Status bit - end magnetometer read
+
+            for(var i = 0; i < 17; i++){
+                if(this.inputs[31] === '1'){
+                    this.inputs[i] = i2c.readByteSync(this.SA, this.registerArray[i]);
+                }
+                else {
+                    if(i > 8 && i < 14);
+                    else this.inputs[i] = i2c.readByteSync(this.SA, this.registerArray[i]);
+                }
             }
-            this.inputs[14] = i2c.readByteSync(this.SA, 0x10); //asax
-            this.inputs[15] = i2c.readByteSync(this.SA, 0x11); //asay
-            this.inputs[16] = i2c.readByteSync(this.SA, 0x12); //asaz
+
+            // this.inputs[0] = i2c.readByteSync(this.SA, 0x3B);  //read byte from data register
+            // this.inputs[1] = i2c.readByteSync(this.SA, 0x3C);  //read byte from data register
+            // this.inputs[2] = i2c.readByteSync(this.SA, 0x3D);  //read byte from data register
+            // this.inputs[3] = i2c.readByteSync(this.SA, 0x3E);  //read byte from data register
+            // this.inputs[4] = i2c.readByteSync(this.SA, 0x3F);  //read byte from data register
+            // this.inputs[5] = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
+            // this.inputs[6] = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
+            // this.inputs[7] = i2c.readByteSync(this.SA, 0x42);
+            // this.inputs[31] = i2c.readByteSync(this.SA, 0x02); //begin magnetometer read
+            // if(this.inputs[31] === "1"){
+            //     this.inputs[11] = i2c.readByteSync(this.SA, 0x04); //xmagnH
+            //     this.inputs[12] = i2c.readByteSync(this.SA, 0x03); //xmagnL
+            //     this.inputs[1] = i2c.readByteSync(this.SA, 0x06); //ymagnH
+            //     this.inputs[11] = i2c.readByteSync(this.SA, 0x05); //ymagnL
+            //     this.inputs[12] = i2c.readByteSync(this.SA, 0x08); //zmagnH
+            //     this.inputs[13] = i2c.readByteSync(this.SA, 0x07); //zmagnL
+            //     this.inputs[32] = i2c.readByteSync(this.SA, 0x09); // Status bit - end magnetometer read
+            // }
+            // this.inputs[14] = i2c.readByteSync(this.SA, 0x10); //asax
+            // this.inputs[15] = i2c.readByteSync(this.SA, 0x11); //asay
+            // this.inputs[16] = i2c.readByteSync(this.SA, 0x12); //asaz
         }catch(e) {
             this.log.output("While reading from MPU6050: ERROR: ", e);
         }

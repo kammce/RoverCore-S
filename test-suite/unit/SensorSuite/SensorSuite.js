@@ -119,6 +119,7 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: readData()', function() {
 			it('expected data to be read in', function () {
 				test_lobe.mpu.readData();
+				expect(test_lobe.mpu.inputs[14]).to.equal(0);
 				expect(test_lobe.mpu.inputs[17]).to.equal(-19276);
 				expect(test_lobe.mpu.inputs[18]).to.equal(-19276);
 				expect(test_lobe.mpu.inputs[19]).to.equal(-19276);
