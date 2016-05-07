@@ -3,6 +3,7 @@
 var Neuron = require('../Neuron');
 var PWMDriver = require('../PWMDriver');
 var PWMDriverTest = require('./PWMDriverTest');
+var pidController = require('./pid.js');
 
 //Range of yaw servo
 const YAW_SERVO_MIN                   = -630;
@@ -52,9 +53,12 @@ class Tracker extends Neuron {
         	this.pwm = new PWMDriver(0x5c, 60, i2c);            
         }               
 
-	    this.Kp = 1;
-        this.Ki = 0;
-        this.Kd = 0;
+	    this.KpPitch = 0.75;
+        this.KiPitch = 0;
+        this.KdPitch = 0;
+        this.KpYaw = 0.75;
+        this.KiPitch = 0;
+        this.KdPitch = 0;
 	           
 	    this.lidarMeasurement = 0;
 	    this.lidarHealth = true;
@@ -95,42 +99,25 @@ class Tracker extends Neuron {
 
 
     pid() {
-        var relativePitch = 0;
-        
-        var err = 0;
-        var prevErr = 0;
-        var ierr = 0;
-        var derr = 0;
+        var relativePitch = 0;       
         var dt = 0.01;
         var parent = this;
-
         var PWMOutput;
+        this.pitchPID = new pidController(this.KpPitch, this.KiPitch, this.KpPitch, dt);
+        this.yawPID = new pidController(this.KpYaw, this.KiYaw, this. KdYaw, dt);
 
         if(parent.debug === false) { 
             setInterval(function(){                 
-               var MPU = parent.model.get('MPU');
-                    if(typeof MPU !== 'undefined') {
+                var MPU = parent.model.get('MPU');
+                if(typeof MPU !== 'undefined') {
                     parent.orientation.pitch = MPU.xAngle;
                     parent.orientation.roll = MPU.yAngle;
-
-                    }
-                     if(parent.debug === true) {
-                        parent.orientation = {
-                            yaw: 0, 
-                            pitch: 0
-                        }
-                    }
-
-
+                }
+                 
                 relativePitch = Math.cos((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.pitch + Math.sin((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.roll;
 
-                prevErr = err;
-                err = (parent.target.pitch - relativePitch) - (parent.output.pitch);
-                ierr = ierr + err;
-                derr = err - prevErr;
-
-                parent.output.yaw = parent.target.yaw;
-                parent.output.pitch = parent.Kp * err + (parent.Ki * ierr * dt) + (parent.Kd * derr/dt);
+                parent.output.yaw = parent.yawPID.update(parent.output.yaw, parent.target.yaw);
+                parent.output.pitch = parent.pitchPID.update(parent.output.pitch, parent.target.pitch - relativePitch);               
 
                 //Constrains Pitch to bounds
                 if(parent.output.pitch>PITCH_MAX) {
@@ -143,9 +130,6 @@ class Tracker extends Neuron {
                     parent.servoWrite(PWMOutput);
                     parent.updateModel();
                 }
-                
-
-
 
             }, 10); 
         } else {
@@ -185,9 +169,8 @@ class Tracker extends Neuron {
         } else if(i.mode === "panorama") {
             this.panorama();
         } else if(i.mode === "setPID") {
-            this.Kp = i.Kp;
-            this.Ki = i.Ki;
-            this.Kd = i.Kd;
+            this.yawPID.setPID(i.yaw.Kp, i.yaw.Ki, i.yaw.Kd);
+            this.pitchPID.setPID(i.pitch.Kp, i.pitch.Ki, i.pitch.Kd);           
         }
     }
     react(input) {
