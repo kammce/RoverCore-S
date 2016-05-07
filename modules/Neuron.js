@@ -8,7 +8,7 @@ class Neuron {
 		}
 		this.name = util.name;	
 		this.feedback = util.feedback;
-		this.log = util.color_log;
+		this.log = util.log;
 		if (typeof util.idle_timeout === 'undefined') {
 			this.idle_timeout = 1000;
 		} else { this.idle_timeout = util.idle_timeout; }

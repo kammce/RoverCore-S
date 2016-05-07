@@ -34,6 +34,7 @@ describe('Testing SensorSuite Class', function () {
 	var dev_addr1 =[], dev_addr2 =[];
 	var	register1 =[], register2 =[];
 	var	command1 =[], command2 =[];
+	var awake = 0;
 	class i2c_bus{
 		constructor(something1, something2, something3) {}
 
@@ -62,6 +63,7 @@ describe('Testing SensorSuite Class', function () {
 
 //	var i2c = function() {}; // filler i2c object (not used in test)
 	// var model = function() {}; // filler model object (not used in test)
+
 	var i2c = new i2c_bus();
 	var Model = require('../../../modules/Model');
 	var model = new Model(function() {});
@@ -78,6 +80,19 @@ describe('Testing SensorSuite Class', function () {
 	var test_lobe = new SensorSuite(util);
 
 
+	var Model = require('../../../modules/Model');
+	var model = new Model(function() {});
+
+	var util = {
+		name: "SensorSuite",
+		feedback: feedback,
+		log: log,
+		idle_timeout: 500,
+		i2c: i2c,
+		model: model
+	};
+
+	var test_lobe = new SensorSuite(util);
 
 	describe('Testing SensorSuite Methods', function () {
 		describe('Function: react(input)', function () {

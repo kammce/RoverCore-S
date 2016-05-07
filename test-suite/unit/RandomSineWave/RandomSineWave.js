@@ -9,7 +9,18 @@ describe('Testing RandomSineWave Class', function () {
 		this.timeout(6000);
 		it('Three values read from model should be changing', function (done) {
 			var model = new Model(function() {});
-			var test_unit = new RandomSineWave("RandomSineWave", function() {} , function() {} , 20000, function() {}, model);
+			
+			var util = {
+				name: "RandomSineWave",
+				feedback: function() {},
+				log:  function() {}, 
+				idle_timeout: 20000,
+				i2c:  function() {},
+				model: model
+			};
+
+			var test_unit = new RandomSineWave(util);
+
 			var values = [0, 0, 0];
 			var count = 0;
 

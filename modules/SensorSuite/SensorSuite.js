@@ -13,9 +13,8 @@ class SensorSuite extends Neuron {
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
         this.model = util.model;
-
         // Construct Class here
-            //mpu6050 class initialization
+        //mpu6050 class initialization
         this.mpu = new mpu6050(0x68, this.i2c, this.log);
 //        this.mpu2 = new mpu6050(0x69, this.i2c, this.log);
         this.mpu.wakeUp();
@@ -23,6 +22,8 @@ class SensorSuite extends Neuron {
         var parent = this;
         parent.model.registerMemory('MPU');
 //        parent.model.registerMemory('MPU2');
+        this.model.registerMemory('MPU');
+//        model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
             parent.updateModel();

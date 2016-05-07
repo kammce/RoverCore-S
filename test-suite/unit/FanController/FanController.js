@@ -3,64 +3,75 @@
 var file = require('../../../modules/FanController/FanController.js');
 var expect = require('chai').expect;
 var temp;
-    var dev_addr1 =[], dev_addr2 =[];
-    var register1 =[], register2 =[];
-    var command1 =[], command2 =[];
-    //Dummy i2c class
-    class i2c_bus{
-        constructor(something1, something2, something3) {
-            
-        }
-        writeByteSync(dev_addr, register, command){
-            dev_addr1.push(dev_addr);
-            register1.push(register);
-            command1.push(command);
-            
-        }
-        readByteSync(dev_addr, register){
-            return register;
-        }
-        writeByte(dev_addr, register, command, cb){
-            dev_addr2.push(dev_addr);
-            register2.push(register);
-            command2.push(command);
-        }
-        readByte(dev_addr, register, cb){
-            return register;
-        }
-        reset(){
-            dev_addr1 =[], dev_addr2 =[];
-            register1 =[], register2 =[];
-            command1 =[], command2 =[];
-        }
+var dev_addr1 =[], dev_addr2 =[];
+var register1 =[], register2 =[];
+var command1 =[], command2 =[];
+//Dummy i2c class
+class i2c_bus{
+    constructor(something1, something2, something3) {
+        
+    }
+    writeByteSync(dev_addr, register, command){
+        dev_addr1.push(dev_addr);
+        register1.push(register);
+        command1.push(command);
+        
+    }
+    readByteSync(dev_addr, register){
+        return register;
+    }
+    writeByte(dev_addr, register, command, cb){
+        dev_addr2.push(dev_addr);
+        register2.push(register);
+        command2.push(command);
+    }
+    readByte(dev_addr, register, cb){
+        return register;
+    }
+    reset(){
+        dev_addr1 =[], dev_addr2 =[];
+        register1 =[], register2 =[];
+        command1 =[], command2 =[];
+    }
 
-    };
+};
 
 var i2c = new i2c_bus();
-var model = function(){};
+var Model = require('../../../modules/Model');
+var model = new Model(function() {});
 var log = function() { }
-    log.output = function(input) { 
-        expected_log = "";
-        for (var i = 0; i < arguments.length; i++) {
-            if(typeof arguments[i] === "object") {
-                expected_log += JSON.stringify(arguments[i])+"\n";
-            } else {
-                expected_log += arguments[i];
-            }
+log.output = function(input) { 
+    expected_log = "";
+    for (var i = 0; i < arguments.length; i++) {
+        if(typeof arguments[i] === "object") {
+            expected_log += JSON.stringify(arguments[i])+"\n";
+        } else {
+            expected_log += arguments[i];
         }
-    };
+    }
+};
 
-    var feedback = function(input) { 
-        expected_feedback = "";
-        for (var i = 0; i < arguments.length; i++) {
-            if(typeof arguments[i] === "object") {
-                expected_feedback += JSON.stringify(arguments[i])+"\n";
-            } else {
-                expected_feedback += arguments[i];
-            }
-        } 
-    };
-var unittest = new file("Fan Controller", feedback,log,4000,i2c,model);
+var feedback = function(input) { 
+    expected_feedback = "";
+    for (var i = 0; i < arguments.length; i++) {
+        if(typeof arguments[i] === "object") {
+            expected_feedback += JSON.stringify(arguments[i])+"\n";
+        } else {
+            expected_feedback += arguments[i];
+        }
+    } 
+};
+
+var util = {
+    name: "FanController",
+    feedback: feedback,
+    log: log, 
+    idle_timeout: 4000,
+    i2c: i2c,
+    model: model
+};
+
+var unittest = new file(util);
 var UPPER_TEMP = 127;
 var LOWER_TEMP = -127;
 var CMD_ADDR;
