@@ -43,12 +43,13 @@ class Tracker extends Neuron {
         this.log = util.color_log;
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
-        this.model = util.model;        
+        this.model = util.model;
+        this.debug = util.debug;        
         //debug = true;
-        if(debug === true) {        	
+        if(this.debug === true) {        	
 			this.pwm = new PWMDriverTest();
         } else {
-        	this.pwm = new PWMDriver(0x5c, 60, i2c);            
+        	this.pwm = new PWMDriver(0x5c, 60, this.i2c);            
         }               
 
 	    this.gimbalPosition = [0,0];
