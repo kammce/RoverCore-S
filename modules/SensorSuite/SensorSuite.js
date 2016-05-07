@@ -9,7 +9,7 @@ class SensorSuite extends Neuron {
         super(util);
         this.name = util.name;
         this.feedback = util.feedback;
-        this.log = util.color_log;
+        this.log = util.log;
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
         this.model = util.model;
@@ -35,6 +35,7 @@ class SensorSuite extends Neuron {
     }
     react(input) {
         var name = input.name;
+
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -54,6 +55,7 @@ class SensorSuite extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
        // mpu.sleep();
     }
+
     updateModel() {
         var mpu = this.mpu;
         this.model.set('MPU', {

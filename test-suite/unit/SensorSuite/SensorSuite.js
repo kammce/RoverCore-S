@@ -30,21 +30,6 @@ describe('Testing SensorSuite Class', function () {
 		}
 	};
 
-class modelClass {
-    constructor(some1,some2,some3) {
-      this.some1 = "";
-      this.some2 = "";
-      this.some3 = "";
-    }
-    registerMemory(some1) {
-      this.some1 = some1;
-    }
-    set(some1, some2) {
-      this.some2 = 35;
-    }
-
-  };
-	module.exports = modelClass;
 
 	var dev_addr1 =[], dev_addr2 =[];
 	var	register1 =[], register2 =[];
@@ -77,10 +62,22 @@ class modelClass {
 
 //	var i2c = function() {}; // filler i2c object (not used in test)
 	// var model = function() {}; // filler model object (not used in test)
-
-	var model = new modelClass();
 	var i2c = new i2c_bus();
-	var test_lobe = new SensorSuite("SensorSuite", feedback, log, 500, i2c, model);
+	var Model = require('../../../modules/Model');
+	var model = new Model(function() {});
+
+	var util = {
+		name: "SensorSuite",
+		feedback: feedback,
+		log: log,
+		idle_timeout: 500,
+		i2c: i2c,
+		model: model
+	};
+
+	var test_lobe = new SensorSuite(util);
+
+
 
 	describe('Testing SensorSuite Methods', function () {
 		describe('Function: react(input)', function () {
@@ -165,8 +162,8 @@ class modelClass {
     describe('Function: updateModel()', function() {
       it('expected model to be updated', function () {
         test_lobe.updateModel();
-        expect(model.some1).to.equal('MPU');
-        expect(model.some2).to.equal(35);
+        	expect(model.database['MPU'].value.xAngle).to.equal(test_lobe.mpu.inputs[27]);
+        // expect(model.get('MPU')).to.equal('MPU');
       });
     });
 	 });
