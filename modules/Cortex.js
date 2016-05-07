@@ -250,42 +250,16 @@ class Cortex {
 				return fs.statSync(path.join(srcpath, file)).isDirectory();
 			});
 		}
-		/* destructively finds the intersection of 
-		 * two arrays in a simple fashion.  
-		 *
-		 * PARAMS
-		 *  a - first array, must already be sorted
-		 *  b - second array, must already be sorted
-		 *
-		 * NOTES
-		 *  State of input arrays is undefined when
-		 *  the function returns.  They should be 
-		 *  (prolly) be dumped.
-		 *
-		 *  Should have O(n) operations, where n is 
-		 *    n = MIN(a.length, b.length)
-		 */
-		function intersection_destructive(a, b)
-		{
-		  var result = [];
-		  while( a.length > 0 && b.length > 0 )
-		  {  
-				if      (a[0] < b[0] ){ a.shift(); }
-				else if (a[0] > b[0] ){ b.shift(); }
-				else /* they're equal */
-				{
-					result.push(a.shift());
-					b.shift();
-				}
-		  }
-		  return result;
-		}
 		var modules = getDirectories("./modules");
 		
 		// Take the intersection of the modules in the modules folder and the isolation arguments
 		if(typeof isolation === "string") {
-			isolation = isolation.split(',');
-			modules = intersection_destructive(isolation, modules);
+			isolation = isolation.replace(/ /g,'').split(',');
+			// Using filter and indexOf to create a 
+			// set intersection between isolation and modules
+			modules = isolation.filter(function(n) {
+				return modules.indexOf(n) != -1;
+			});
 		}
 		if(modules.length === 0) { 
 			this.log.output("No modules found, exiting RoverCore");

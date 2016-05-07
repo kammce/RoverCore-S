@@ -3,19 +3,19 @@
 var Neuron = require('../Neuron');
 
 class BatteryManager extends Neuron {
-	constructor(name, feedback, color_log, idle_timeout, i2c, model, Serialport, upcall) {
-		super(name, feedback, color_log, idle_timeout);
-		this.name = name;
-		this.feedback = feedback;
-		this.log = color_log;
-		this.idle_time = idle_timeout;
-		this.i2c = i2c;
-		this.model = model;
-		this.upcall = upcall;
+	constructor(util) {
+        super(util);
+        this.name = util.name;
+        this.feedback = util.feedback;
+        this.log = util.log;
+        this.idle_time = util.idle_timeout;
+        this.i2c = util.i2c;
+        this.model = util.model;
+        this.upcall = util.upcall;
 		// Construct Class here
-		this.serialport = new Serialport.SerialPort("/dev/ttyUSB-BATTERY0", {
+		this.serialport = new util.serial.SerialPort("/dev/ttyUSB-BATTERY0", {
 			baudrate: 115200,
-			parser: Serialport.parsers.readline('\n')
+			parser: util.serial.parsers.readline('\n')
 		}); // false = disable auto open
 
 		var parent = this;
