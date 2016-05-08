@@ -1,5 +1,5 @@
 {
 	"lobe_name": "SensorSuite",
-	"log_color": "red",
+	"log_color": "cyan",
 	"idle_time": 4000
 }

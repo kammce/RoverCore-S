@@ -3,45 +3,57 @@
 var Neuron = require('../Neuron');
 
 class BatteryManager extends Neuron {
-	constructor(name, feedback, color_log, idle_timeout, i2c, model, Serialport, upcall) {
-		super(name, feedback, color_log, idle_timeout);
-		this.name = name;
-		this.feedback = feedback;
-		this.log = color_log;
-		this.idle_time = idle_timeout;
-		this.i2c = i2c;
-		this.model = model;
-		this.upcall = upcall;
+	constructor(util) {
+        super(util);
+        this.name = util.name;
+        this.feedback = util.feedback;
+        this.log = util.log;
+        this.idle_time = util.idle_timeout;
+        this.i2c = util.i2c;
+        this.model = util.model;
+        this.upcall = util.upcall;
 		// Construct Class here
-		this.serialport = new Serialport.SerialPort("/dev/ttyUSB-BATTERY0", {
+		this.serialport = new util.serial.SerialPort("/dev/ttyUSB-BATTERY0", {
 			baudrate: 115200,
-			parser: Serialport.parsers.readline('\n')
-		}); // false = disable auto open
+			parser: util.serial.parsers.readline('\n')
+		}, false); // false = disable auto open
 
 		var parent = this;
+		const retryLimit = 5;
+		var trys = 0;
+		// Register memory in model
+		this.model.registerMemory("Battery");
 		// Continously request data from battery
 		function request() {
 			setTimeout(() => {
 				parent.serialport.write("\x06");
 			}, 1000);
 		}
-
-		// var serialOpenRoutine = (err) => {
-		// 	if (err) { 
-		// 		this.serialport.close();
-		// 		setTimeout(() => {
-		// 			this.serialport.open();
-		// 		}, 1000);
-		// 		return;
-		// 	}
-		// 	request();
-		// };
-
-		// this.serialport.open(serialOpenRoutine);
-		
-		// Register memory in model
-		this.model.registerMemory("Battery");
-
+		// Attempt to open serial device 
+		var serialOpenRoutine = (err) => {
+			if(trys >= retryLimit) {
+				return;
+			} else if (err) { 
+				this.log.output("Failed to open /dev/ttyUSB-BATTERY0", trys);
+				this.feedback("Failed to open /dev/ttyUSB-BATTERY0");
+				trys++;
+				setTimeout(() => {
+					this.log.output("Reattempting to open /dev/ttyUSB-BATTERY0", trys);
+					this.feedback("Reattempting to open /dev/ttyUSB-BATTERY0");
+					this.serialport.open(serialOpenRoutine);
+				}, 2000);
+				return;
+			} else {
+				request();
+			}
+		};
+		// Attempt to open serialport
+		this.serialport.open(serialOpenRoutine);
+		// Handle Error events by sending them back to mission control
+		this.serialport.on("err", (err) => {
+			this.log.output("Communication error with /dev/ttyUSB-BATTERY0");
+			this.feedback("Communication error with /dev/ttyUSB-BATTERY0");
+		});
 		// Battery should respond with a request for all data,
 		// This listener should parse it and store it in the model
 		this.serialport.on("data", (data) => {
@@ -96,10 +108,9 @@ class BatteryManager extends Neuron {
 				this.log.output("Did not handle battery input ", e);
 				this.feedback("Did not handle battery input ", e);
 			}
-			// Continously request data from battery
+			// Make another request from battery
 			request();
 		});
-		request();
 	}
 	react(input) {
 		// this.log.output(`REACTING ${this.name}: `, input);
