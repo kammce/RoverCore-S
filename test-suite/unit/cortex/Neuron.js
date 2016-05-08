@@ -4,8 +4,17 @@ var Neuron = require('../../../modules/Neuron');
 
 describe('Testing Neuron Class', function () {
 	var color_log = function() {}
-	color_log.output = function() {}; 
-	var test_unit = new Neuron("unit_test", function feedback() {}, color_log, 1000);
+	color_log.output = function() {};
+
+	var util = {
+		name:"unit_test", 
+		feedback: function feedback() {}, 
+		log: color_log, 
+		idle_timeout: 1000
+	};
+
+	var test_unit = new Neuron(util);
+
 	describe('#_halt()', function () {
 		it('Assert that function will return "UNDEF" if halt is undefined.', function () {
 			test_unit.halt = undefined;

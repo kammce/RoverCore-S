@@ -1,17 +1,17 @@
 "use strict";
 class Neuron {
-	constructor(name, feedback, color_log, idle_timeout) {
-		if( typeof name !== "string" || 
-			typeof feedback !== "function" || 
-			typeof color_log !== "function" ) {
+	constructor(util) {
+		if( typeof util.name !== "string" || 
+			typeof util.feedback !== "function" || 
+			typeof util.color_log !== "function" ) {
 			return false;		
 		}
-		this.name = name;	
-		this.feedback = feedback;
-		this.log = color_log;
-		if (typeof idle_timeout === 'undefined') {
+		this.name = util.name;	
+		this.feedback = util.feedback;
+		this.log = util.log;
+		if (typeof util.idle_timeout === 'undefined') {
 			this.idle_timeout = 1000;
-		} else { this.idle_timeout = idle_timeout; }
+		} else { this.idle_timeout = util.idle_timeout; }
 		this.state = "CONSTRUCTING";
 	}
 	

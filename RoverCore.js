@@ -25,6 +25,11 @@ OPTIONS
               This is useful for testing communication between interface and
               modules. Data sent to protolobe will be echoed back to the server
               and sent to stdout (console).
+
+       -i, --isolate "module" | "module1,moduel2,..."
+              Isolate a particular lobe. For a single module, you need only 
+              put in the name. List of lobes must be comma seperated list 
+              without spaces. 
 `);
 	process.exit();
 } 
@@ -39,6 +44,7 @@ console.log("Loading Cortex");
 var Socket = new Primus.createSocket();
 var simulate = false;
 var target = 'http://localhost:9000';
+var isolation;
 var connection;
 // Check for -s/--simulate argument
 if(process.argv.indexOf("--simulate") != -1 || process.argv.indexOf("-s") != -1) {
@@ -52,6 +58,14 @@ if(process.argv.indexOf("-t") != -1) {
 	target = process.argv[process.argv.indexOf("--target")+1];
 	console.log(`Target Server = ${target}`);
 }
+// Check for -i/--isolate argument
+if(process.argv.indexOf("-i") != -1) {
+       isolation = process.argv[process.argv.indexOf("-i")+1];
+       console.log(`Attempting to isolate ${isolation}`);
+} else if(process.argv.indexOf("--isolate") != -1) {
+       isolation = process.argv[process.argv.indexOf("--isolate")+1];
+       console.log(`Attempting to isolate ${isolation}`);
+}
 
 console.log(`Setting up socket communication on ${target}`);
 connection = Socket(target, { 
@@ -63,4 +77,4 @@ connection = Socket(target, {
 });
 
 console.log(`Launching Cortex!`);
-new Cortex(connection, simulate);
+new Cortex(connection, simulate, isolation);
