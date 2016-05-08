@@ -51,7 +51,7 @@ var simulate = false;
 var target = 'http://localhost:9000';
 var isolation;
 var connection;
-var i2cport = 1;
+var i2cport = 3;
 // Check for -s/--simulate argument
 if(process.argv.indexOf("--simulate") != -1 || process.argv.indexOf("-s") != -1) {
 	simulate = true;
