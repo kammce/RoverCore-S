@@ -206,7 +206,7 @@ class Cortex {
 					"idle_timeout": config['idle_time'],
 					"i2c": this.I2C,
 					"model": this.Model,
-					"serialport": this.SERIALPORT,
+					"serial": this.SERIALPORT,
 					"upcall": this.upcall,
 				};
 				// Construct Lobe module
