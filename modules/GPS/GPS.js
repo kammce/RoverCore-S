@@ -1,6 +1,8 @@
 //GPS is currently set to update every 500ms (hardware)
 //baud set to 9600 bps
 "use strict";
+var fs = require('fs');
+
 var Neuron = require('../Neuron');
 var EVK7P = require('./EVK7P');
 
@@ -42,7 +44,9 @@ class GPS extends Neuron {
         this.port.on('close', this.showPortClose);
         this.port.on('error', this.showError);
         this.port.on('data', function(data) {
+                fs.appendFile('/tmp/test.txt', data + "\n", function (err) {
 
+                });
         var parent = this;
        //this.parseNMEA(data);
         //updateModel();
@@ -79,6 +83,7 @@ class GPS extends Neuron {
                 EVK7P.longDir = piece[6];
                 //piece 6 = longitude direction
                 console.log(EVK7P.lat + " " + EVK7P.latDir + ", " + EVK7P.long + " " + EVK7P.longDir);
+                //need to split lat and long into 2 vars each (lat1=37,lat2=25.97389, etc) 
                 store({
                      lat: EVK7P.lat,
                      latDir: EVK7P.latDir,
