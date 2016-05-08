@@ -1,11 +1,12 @@
 'use strict';
 
 class Cortex {
-	constructor(connection, simulate, isolation) {
+	constructor(controls) {
 		console.log("STARTING Rover Core!");
 		var parent = this;
-		this.simulate = simulate;
-		this.connection = connection;
+
+		this.simulate = controls.simulate;
+		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
 		this.feedback = (lobe_name) => {
 			var output = "";
@@ -30,25 +31,29 @@ class Cortex {
 		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
-		this.SPINE = require('./Spine');
 		this.SERIALPORT = require('serialport');
 		this.I2C = function () {};
-		// if(!this.simulate) {
-		// 	var I2C_BUS = require('i2c-bus');
-		// 	this.I2C = I2C_BUS.openSync(1);
-		// }
 
+		console.log("Running Systems Check...");
+		var os = require('os');
+		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone') {
+			console.log(`System Hostname is on ${os.hostname()}`);
+			if(!controls.simulate && controls.i2cport != -1) {
+				console.log("Connecting to i2c-bus");
+				var I2C_BUS = require('i2c-bus');
+				this.I2C = I2C_BUS.openSync(controls.i2cport);
+			}
+		} else {
+			console.log("Running on none Embedded platform. I2C ports will not be used!");
+		}
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
 		this.Model = new this.MODEL(this.feedback);
-		if(!this.simulate) {
-			this.Spine = new this.SPINE();
-		}
 		/** Load All Modules in Module Folder **/
 		this.lobe_map = {};
 		this.time_since_last_command = {};
 		// Load all modules from module folder into module’s map.
-		this.loadLobes(isolation);
+		this.loadLobes(controls.isolation);
 		/** Deliver data from server to Modules **/
 		// Send Model to Signal Relay on update
 
@@ -213,16 +218,6 @@ class Cortex {
 				};
 				// Construct Lobe module
 				var module = new Lobe(lobe_utitilites);
-				/*
-				config['lobe_name'], 
-				this.feedback,
-				log,
-				config['idle_time'],
-				this.I2C,
-				this.Model,
-				this.SERIALPORT,
-				this.upcall
-				*/
 				// Attach config property to module
 				module.config = config;
 				// Attach mission controller to module
