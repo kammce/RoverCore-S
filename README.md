@@ -4,16 +4,16 @@ RoverCore is meant to run on an embedded Linux platform such as Odroid, BeagleBo
 
 # **Development Libraries and Tools**
 -----
-* npm				- Package Manager
-* primus			- Web sockets abstraction library 
-* i2c-bus       	- Abstraction layer for the linux I2C driver
-* Color 			- Terminal text coloring library
-* Colorspace 		- Terminal text coloring library
-* Forever Monitor	- Watch dog to keep RoverCore alive forever
-* Mocha				- Unit Testing framework
-* Chai				- TDD (Test Driven Design) Assertion Library
-* JSHint			- Javascript linting software
-* Grunt				- Task Runner (for unit testing, linting)
+* npm               - Package Manager
+* primus            - Web sockets abstraction library 
+* i2c-bus           - Abstraction layer for the linux I2C driver
+* Color             - Terminal text coloring library
+* Colorspace        - Terminal text coloring library
+* Forever Monitor   - Watch dog to keep RoverCore alive forever
+* Mocha             - Unit Testing framework
+* Chai              - TDD (Test Driven Design) Assertion Library
+* JSHint            - Javascript linting software
+* Grunt             - Task Runner (for unit testing, linting)
 
 # **Installation Instructions**
 -----
@@ -21,29 +21,59 @@ The RoverCore code is meant to run on embedded linux platform, thus running a li
 #### First time installation instructions on personal machine:
 This will install the development libraries which allow Mocha, Chai, Grunt etc to run on your host machine.
 
-	npm install
+    npm install
 
 To run RoverCore
 
     node RoverCore.js 
 
-RoverCore can also be set to simulation mode which helps when debugging it from the interface. Simulation mode will set all modules found in the modules folder to Protolobe. Protolobe will automatically write data sent to it via the React function to stdout and back to the server
-To run RoverCore in simulation mode
-
-    node RoverCore.js --simulation
-
 To run a local dummy server
 
-	node server-integration-test.js
+    node server-integration-test.js
 
+When you run *node RoverCore.js -h*
+
+    NAME
+       RoverCore.js - Start RoverCore
+
+    SYNOPSIS
+       node RoverCore.js [-h]
+       node RoverCore.js [-t http://address:port] [-s]
+
+    OPTIONS
+       -h 
+              this parameter returns manual information 
+
+       -t, --target     http://address:port
+              This parameter sets the address of the Primus.js server that 
+              RoverCore will communicate with.
+              Defaults to http://localhost:9000.
+
+       -s, --simulate
+              This parameter will replace empty version of every module 
+              in the modules folder with a Protolobe module. The Protolobe 
+              will have the name and idle charateristics of the module it 
+              is replacing. This is useful for testing communication 
+              between interface and modules. Data sent to protolobe will 
+              be echoed back to the server and sent to stdout (console).
+
+       -i, --isolate "module" | "module1,moduel2,..."
+              Isolate a particular lobe. For a single module, you need 
+              only put in the name. List of lobes must be comma 
+              seperated list without spaces. 
+       -p, --i2cport "<port number>"
+              Select the I2C port that the device will use. If -1 is used, 
+              the I2C library will be replaced with an empty function This
+              will cause the modules that use them to fail at load.
+              Defaults to 1
 
 #### Installation instructions for Odroid, BeagleBone, RaspPi etc:
 Install dependencies without development libraries
 
-	npm install --production
+    npm install --production
 
 Run RoverCore
-	node RoverCore.js
+    node RoverCore.js
 
 #### How to Optimize Embedded Linux:
 * Disable GUI (Xorg, lightdm etc)

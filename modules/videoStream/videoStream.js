@@ -16,6 +16,7 @@ class videoStream extends Neuron {
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
         this.model = util.model;
+        this.url = util.url;
         // Construct Class here
     }
     react(input) {
@@ -51,18 +52,18 @@ class videoStream extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
     }
     spawnStream1(input) {
-        child1 = spawn('ffmpeg', ['-f', 'video4linux2', '-s', '1280x720', '-input_format', 'h264', '-i', '/dev/video-'+input.data.camera, '-vcodec', 'copy', '-an', '-f', 'mpegts', '-copyts', 'udp://127.0.0.1:9000']);
+        child1 = spawn('ffmpeg', ['-f', 'video4linux2', '-s', '1280x720', '-input_format', 'h264', '-i', '/dev/video-'+input.data.camera, '-vcodec', 'copy', '-an', '-f', 'mpegts', '-copyts', 'udp://'+this.url.hostname+':9000']);
         child1.stdout.on("data", function(data) {
-        // console.log("out: " + data.toString("utf8"));
+            // console.log("out: " + data.toString("utf8"));
         });
         child1.stderr.on("data", function(data) {
             // console.log("err: " + data.toString("utf8"));
         });
     }
     spawnStream2(input) {
-        child2 = spawn('ffmpeg', ['-f', 'video4linux2', '-s', '1280x720', '-input_format', 'h264', '-i', '/dev/video-'+input.data.camera, '-vcodec', 'copy', '-an', '-f', 'mpegts', '-copyts', 'udp://127.0.0.1:9002']);
+        child2 = spawn('ffmpeg', ['-f', 'video4linux2', '-s', '1280x720', '-input_format', 'h264', '-i', '/dev/video-'+input.data.camera, '-vcodec', 'copy', '-an', '-f', 'mpegts', '-copyts', 'udp://'+this.url.hostname+':9002']);
         child2.stdout.on("data", function(data) { 
-        // console.log("out: " + data.toString("utf8"));
+            // console.log("out: " + data.toString("utf8"));
         });
         child2.stderr.on("data", function(data) {
             // console.log("err: " + data.toString("utf8"));
