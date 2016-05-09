@@ -159,14 +159,14 @@ describe('Testing Tracker Class', function() {
 
 	describe('#testing standard class functions', function(){
 		it('#moveAngle', function() {
-			expect(test_lobe.moveAngleLocal({yaw: 180, pitch: 90 }, {yaw:0, pitch:0 })).to.eql({yaw: 180, pitch: 90 });
-			expect(test_lobe.moveAngleLocal({yaw: 90, pitch:0 }, {yaw:360, pitch: 0 })).to.eql({yaw: 450, pitch: 0 });
-			expect(test_lobe.moveAngleLocal({yaw: 200, pitch: 0 }, {yaw: 540, pitch: 0 })).to.eql({yaw: 200, pitch: 0 });			
+			expect(test_lobe.moveAngleLocal({yaw: 180, pitch: 90 })).to.eql({yaw: 180, pitch: 90 });
+			expect(test_lobe.moveAngleLocal({yaw: 90, pitch:0 })).to.eql({yaw: 90, pitch: 0 });
+			expect(test_lobe.moveAngleLocal({yaw: 200, pitch: 0 })).to.eql({yaw: 200, pitch: 0 });			
 		});
 		
 		it('#moveInterval', function() {
 			expect(test_lobe.moveInterval({yaw: 10, pitch: 10 }, {yaw: 20, pitch: 20})).to.eql({yaw: 30, pitch: 30});
-			expect(test_lobe.moveInterval({yaw: 20, pitch: 20}, {yaw: 620, pitch: 80})).to.eql({yaw: 630, pitch: 100});
+			expect(test_lobe.moveInterval({yaw: 20, pitch: 20}, {yaw: 620, pitch: 80})).to.eql({yaw: 630, pitch: 90});
 
 		});
 		it('#angleToPWM', function(){
