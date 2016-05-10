@@ -7,7 +7,6 @@ var Neuron = require('../Neuron');
 class Arm extends Neuron {
     constructor(name, feedback, color_log, idle_timeout, i2c, model) {
         super(name, feedback, color_log, idle_timeout);
-        var parent = this;
         this.name = name;
         this.feedback = feedback;
         this.log = color_log;
@@ -15,8 +14,14 @@ class Arm extends Neuron {
         this.i2c = i2c; // holds link to a Bus object returned by i2c-bus.open(); will use to grab data off of motor-reading adc
         this.model = model;
         this.tool = 0; //tool currently being held
-        
-        // Angular Bounds (Index convention: 0:wrist, 1:elbow, 2:base, 3:shoulder)
+        const maxAttempts = 50;    //Max attempts to try to extablish serialport connection
+        const update_time = 500;    //Interval time for the lobe to broadcast its present state to console
+        const setup_time = 2500;    //Time for things to "setup"/initialize before beginning to broadcast its present state to console
+        const SAMD21addr = "/dev/SAMD21-Address";
+        var attempts = 0;
+        var parent = this;
+
+        // Angular Bounds
         var high = {
             "wrist": 180,
             "elbow": 76,
@@ -32,7 +37,7 @@ class Arm extends Neuron {
             "claw": 0       //TBD
         };
 
-        // Arm state records
+        // Arm instantaneous state records
         this.laser = 0; //defaults to off
         this.target = { // This variable stores the current target position of the arm
             "base": 0,
@@ -41,37 +46,74 @@ class Arm extends Neuron {
             "wrist": 0,
             "roll": 0,
             "rolldir": 0,
-            "claw": "r"
+            "claw": 0
         };
         this.current = {
-            "base": 0,
-            "shoulder": 0,
-            "elbow": 0,
-            "wrist": 0,
-            "claw": 0
+            "base": 0.00,
+            "shoulder": 0.00,
+            "elbow": 0.00,
+            "wrist": 0.00,
+            "claw": 0.00
         };
         this.position = { // This variable stores feedback from the motors
             "base": 90,
             "shoulder": 29,
             "elbow": 38,
-            "wrist": 90,
-            "roll": 180,
+            "wrist": 90,    //pitch
+            "roll": 180,    //roll angle
             "rolldir": 0,
-            "claw": "r"
+            "claw": 0
         };
+        this.current_limit = {  // Current limit is expected to be 0.00-100.00% from interface, and 0-1000 to SAMD21
+            "base": 100.00,
+            "shoulder": 100.00,
+            "elbow": 100.00,
+            "wrist": 100.00,
+            "claw": 100.00
+        }
 
         // Register model memory
         this.model.registerMemory("Arm_State");  //current state of Arm; current draw, positions, target positions
 
-        // Create Serialport connection
-        this.serial = new SerialPort("/dev/tty-addressOfSamd21", {  // SAMD21 serial port address
+        // Create Serialport object
+        this.serial = new SerialPort(SAMD21addr, {  // SAMD21 serial port address
             baudrate: 9600
-        });
+        }, false);  //false prevents serialport from openning automatically
 
-        // Define serial connection startup behavior
-        this.serial.on("open", function(){
-            parent.log.output(`REACTING ${parent.name} \n `, "SAMD21 serial connection made!");
-        });
+        // Create continuous-interval state reporting function (logs current state to console,etc.)
+        this.reportState = function(){
+            if(parent.serial.isOpen()){
+                if(parent.position !== parent.target){
+                    parent.log.output(parent.position);
+                    parent.log.output(parent.target);
+                    parent.log.output(parent.current);
+                }
+            }
+        };
+
+        // Creat Serialport Connection Establishment Error Handler
+        var openSerial = (err) => {     // equiv. to "var openSerial = function(err){}", but keeps scope in Arm lobe (only on JS ECMA 6)
+            if(attempts >= maxAttempts){
+                return;
+            } else if (err) {
+                this.log.output(`REACTING ${this.name} \n `, "Failed to open " + SAMD21addr + " (attempt " + attempts + ")"); //log to console
+                this.feedback("Failed to open " + SAMD21addr + " (attempt " + attempts + ")"); //log to interface
+                attempts++;     //increment current attempt
+                setTimeout(() => {  //Try openning serialport again
+                    this.log.output(`REACTING ${this.name} \n `, "Retry openning " + SAMD21addr + " (attempt " + attempts + ")"); //log to console
+                    this.feedback("Retry openning " + SAMD21addr + " (attempt " + attempts + ")"); //log to interface
+                    this.port.open(openSerial);
+                }, 2000);
+                return;
+            } else {
+                setTimeout(() => {
+                    this.reportInterval = setInterval(this.reportState, update_time);
+                }, setup_time);
+            }
+        };
+
+        // Startup the connection
+        this.serial.open(openSerial);
 
         // Parse any incoming data from SAMD21
         this.serial.on("data", function(message){
@@ -92,13 +134,13 @@ class Arm extends Neuron {
                 return;
             }
             
-            // record positions
-            parent.position.wrist = parseInt(data[0]);    //wrist diff gerabox pitch
-            parent.position.shoulder = parseInt(data[1]); //shoulder DC motor pitch
-            parent.position.roll = parseInt(data[2]);     //wrist diff gearbox roll angle
-            parent.position.elbow = parseInt(data[3]);    //elbow firgelli pitch angle (determined by pot feedback)
-            parent.position.base = parseInt(data[4]);     //base rotunda angle
-            parent.position.claw = parseInt(data[5]);            //claw servo angle
+            // record positions (follows order rotunda->dc->firgelli->wrist->claw)
+            parent.position.base = parseInt(data[0]);
+            parent.position.shoulder = parseInt(data[1]);
+            parent.position.elbow = parseInt(data[2]);
+            parent.position.wrist = parseInt(data[3]);  //pitch
+            parent.position.roll = parseInt(data[4]);   //roll angle
+            parent.position.claw = parseInt(data[5]);
 
             // record current draw
             parent.current.base = parseInt(data[6]);      //base rotunda current
@@ -111,9 +153,16 @@ class Arm extends Neuron {
             var ArmPresentState = {
                 position: parent.position,
                 current: parent.current,
+                current_limit: parent.current_limit,
                 target: parent.target
             };
             parent.model.set("Arm_State", ArmPresentState);
+        });
+
+        // Define protocol when communication error occurs
+        this.serial.on("err", function (err){
+            parent.log.output(`REACTING ${parent.name} \n `, "Communication error with " + SAMD21addr + " occurred"); //log to console
+            parent.feedback("Communication error with " + SAMD21addr + " occurred"); //log to interface
         });
 
         // If any one of the angles is out-of-bounds, set the angle to the correct limit;
@@ -161,10 +210,15 @@ class Arm extends Neuron {
         };
         this.readSAM = function(){  //manually ask for all data from the SAMD21 //Is this really needed, since SAMD sends data automatically?
             // Query SAMD21 control software for All data
-            parent.serial.write("<,A?");
+            if(parent.serial.isOpen()){
+                parent.serial.write("<,A?");
+            } else {
+                parent.log.output(`REACTING ${parent.name} \n `, "Communication Error with " + SAMD21addr);
+                parent.feedback("Communication Error with " + SAMD21addr);
+            }
         };
         this.turnLaser = function(state){
-            var cmdstr = ">";
+            var cmdstr = "C";
 
             // update the Arm's laser state
             parent.laser = state;
@@ -173,18 +227,23 @@ class Arm extends Neuron {
             cmdstr += "," + parent.target.base;      //base rotunda
             cmdstr += "," + parent.target.shoulder;  //shoulder DC motor
             cmdstr += "," + parent.target.elbow;     //elbow firgelli
-            cmdstr += "," + parent.target.claw;
             cmdstr += "," + parent.target.wrist;     //wrist pitch
             cmdstr += "," + parent.target.rolldir;
             cmdstr += "," + parent.target.roll;
+            cmdstr += "," + parent.target.claw;
             cmdstr += "," + state;
             cmdstr += "?";
             
             // send command to SAMD21
-            parent.serial.write(cmdstr);
+            if(parent.serial.isOpen()){
+                parent.serial.write(cmdstr);
+            } else {
+                parent.log.output(`REACTING ${parent.name} \n `, "Communication Error with " + SAMD21addr);
+                parent.feedback("Communication Error with " + SAMD21addr);
+            }
         };
         this.moveArm = function(goal){
-            var cmdstr = ">";
+            var cmdstr = "C";
 
             // update the Arm's target position
             parent.target.wrist = goal.wrist;
@@ -197,30 +256,25 @@ class Arm extends Neuron {
             cmdstr += "," + goal.base;      //base rotunda
             cmdstr += "," + goal.shoulder;  //shoulder DC motor
             cmdstr += "," + goal.elbow;     //elbow firgelli
-            cmdstr += "," + parent.target.claw;
             cmdstr += "," + goal.wrist;     //wrist pitch
             cmdstr += "," + parent.target.rolldir;
             cmdstr += "," + parent.target.roll;
+            cmdstr += "," + parent.target.claw;
             cmdstr += "," + parent.laser;
             cmdstr += "?";
             
             // send command to SAMD21
-            parent.serial.write(cmdstr);
+            if(parent.serial.isOpen()){
+                parent.serial.write(cmdstr);
+            } else {
+                parent.log.output(`REACTING ${parent.name} \n `, "Communication Error with " + SAMD21addr);
+                parent.feedback("Communication Error with " + SAMD21addr);
+            }
         };
         this.moveClaw = function(goal){
-            var cmdstr = ">";
+            var cmdstr = "C";
 
-            // update the Arm's target position
-            if(goal.grab === 0){            //release
-                parent.target.claw = "r";       //claw grab (?)
-            } else {                        //grab
-                if(goal.force > 100){
-                    goal.force = 100;
-                } else if(goal.force < 0) {
-                    goal.force = 0;
-                }
-                parent.target.claw = "g" + goal.force;
-            }
+            parent.target.claw = goal.grab;
             parent.target.roll = goal.rotate;       //claw rotation angle
             parent.target.rolldir = goal.direction; //claw rotation direction
 
@@ -228,10 +282,10 @@ class Arm extends Neuron {
             cmdstr += "," + parent.target.base;     //base rotunda
             cmdstr += "," + parent.target.shoulder; //shoulder DC motor
             cmdstr += "," + parent.target.elbow;    //elbow firgelli
-            cmdstr += "," + parent.target.claw;     //claw release/(grab+force) 
             cmdstr += "," + parent.target.wrist;    //wrist pitch
             cmdstr += "," + goal.direction;         //claw rotation direction
             cmdstr += "," + goal.rotate;            //claw rotation angle
+            cmdstr += "," + goal.grab;     //claw target angle
             cmdstr += "," + parent.laser;
             cmdstr += "?";
 
@@ -239,7 +293,45 @@ class Arm extends Neuron {
             parent.target.rolldir = goal.direction;
 
             // send command to SAMD21
-            parent.serial.write(cmdstr);
+            if(parent.serial.isOpen()){
+                parent.serial.write(cmdstr);
+            } else {
+                parent.log.output(`REACTING ${parent.name} \n `, "Communication Error with " + SAMD21addr);
+                parent.feedback("Communication Error with " + SAMD21addr);
+            }
+        };
+        this.limitCurrent = function(obj){
+            var cmdstr = "A";
+            var lims = {    //translate the percentages to numbers between 0-1000 (or whatever resolution we need)
+                "base": Math.floor(obj.base * (1000/100)),
+                "shoulder": Math.floor(obj.shoulder * (1000/100)),
+                "elbow": Math.floor(obj.elbow * (1000/100)),
+                "wrist": Math.floor(obj.wrist * (1000/100)),
+                "claw": Math.floor(obj.claw * (1000/100))
+            };
+
+            // update the current limits
+            parent.current_limit.base = obj.base;
+            parent.current_limit.shoulder = obj.shoulder;
+            parent.current_limit.elbow = obj.elbow;
+            parent.current_limit.wrist = obj.wrist;
+            parent.current_limit.claw = obj.claw;
+
+            // format command string
+            cmdstr += "," + lims.base;   //rotunda limit
+            cmdstr += "," + lims.shoulder;   //dc motor limit
+            cmdstr += "," + lims.elbow;   //firgelli limit
+            cmdstr += "," + lims.wrist;   //diff wrist limit
+            cmdstr += "," + lims.claw;   //claw limit
+            cmdstr += "?";
+
+            // send command to SAMD21
+            if(parent.serial.isOpen()){
+                parent.serial.write(cmdstr);
+            } else {
+                parent.log.output(`REACTING ${parent.name} \n `, "Communication Error with " + SAMD21addr);
+                parent.feedback("Communication Error with " + SAMD21addr);
+            }
         };
     }
     
@@ -270,22 +362,39 @@ class Arm extends Neuron {
                 break;
             }
             case "claw":{
+                var limits = {
+                    "base": this.current_limit.base,
+                    "shoulder": this.current_limit.shoulder,
+                    "elbow": this.current_limit.elbow,
+                    "wrist": this.current_limit.wrist,
+                    "claw": data.force
+                };
+                this.limitCurrent(limits);
                 this.moveClaw(data);
+
+                break;
+            }
+            case "limit":{
+                var limits = data;
+                limits.claw = this.current_limit.claw;
+                this.limitCurrent(limits);
                 break;
             }
             default:
-                this.log.output(`REACTING ${this.name}: `, "Invalid Input");
-                this.log.output(`REACTING ${this.name}`, "invalid input");
+                this.log.output(`REACTING ${this.name}: `, "react(): Invalid Input");
+                this.log.output(`REACTING ${this.name}`, "react(): Invalid Input");
         }
 
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
     halt() {
+        clearInterval(this.reportInterval);
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name, `HALTING ${this.name}`);
     }
     resume() {
+        this.reportInterval = setInterval(this.reportState, update_time);   //is update_time in this scope?
         this.log.output(`RESUMING ${this.name}`);
         this.feedback(this.name, `RESUMING ${this.name}`);
     }

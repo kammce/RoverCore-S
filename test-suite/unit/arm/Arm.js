@@ -103,13 +103,8 @@ describe("Testing class Arm:", function(){
 		};
 
 		testunit.moveClaw(input);
-
 		it("Expected moveClaw() to change the target position of the claw/wrist roll", function(){
-			expect(testunit.target.claw).to.contain("g");
-
-			var newForce = parseInt(testunit.target.claw.substring(1));
-
-			expect(newForce).to.eql(input.force);
+			expect(testunit.target.claw).to.eql(input.grab);
 			expect(testunit.target.roll).to.eql(input.rotate);
 			expect(testunit.target.rolldir).to.eql(input.direction);
 		});
@@ -125,187 +120,89 @@ describe("Testing class Arm:", function(){
 		});
 	});
 
-	// describe("function isSafe():", function(){	//sync way
-	// 	var safeAngles = {
-	// 		base: 180,
-	// 		shoulder: 50,
-	// 		elbow: 66,
-	// 		wrist: 180
-	// 	};
-	// 	var unsafeAngles = {
-	// 		base: 360,
-	// 		shoulder: 360,
-	// 		elbow: 360,
-	// 		wrist: 360
-	// 	};
-	// 	var unsafeSingle = {
-	// 		base: 90,
-	// 		shoulder: 56,
-	// 		elbow: 79,
-	// 		wrist: 165
-	// 	}
-	// 	it("Expected isSafe() to return true on safe angle parameters", function(){	//each it() call defines a function test case
-	// 		expect(testunit.isSafe(safeAngles)).to.eql(true);
-	// 	});
-	// 	it("Expected isSafe() to return false on unsafe angle parameters", function(){
-	// 		expect(testunit.isSafe(unsafeAngles)).to.eql(false);
-	// 	});
-	// 	it("Expected isSafe() to return false on even just one unsafe angle parameter", function(){
-	// 		expect(testunit.isSafe(unsafeSingle)).to.eql(false);
-	// 	});
-	// });
-	// describe("function readadc():", function(){
-	// 	var testobj = testunit.readadc(0x00);
-	// 	it("Expected readadc() to return an object with all required keys", function(){
-	// 		expect(testobj).to.have.all.keys("bpos","spos","epos", "cpos");			
-	// 	});
-	// 	// it("Expected readadc() to not contain any null or undefined values", function () {
-	// 	// 	expect(testobj.bpos).to.not.be.null;
-	// 	// 	expect(testobj.spos).to.not.be.null;
-	// 	// 	expect(testobj.epos).to.not.be.null;
-	// 	// 	expect(testobj.cpos).to.not.be.null;
-	// 	// });
-	// });
-
-	// describe("function switchTool()", function(){
-	// 	var tooltest = new Arm("Arm", feedback, color_log, 4000, i2c, model);
-	// 	var tool_old = tooltest.tool;
-
-	// 	// var output = tooltest.switchTool(tool_new);
-	// 	it("Expected switchTool(1) to have went to and grabbed tool 1 from toolposition1",function(){
-	// 		tooltest.switchTool(1);
-	// 		expect(tooltest.target.claw).to.equal(tooltest.toolposition1.claw);
-	// 		expect(tooltest.target.wrist_r).to.equal(tooltest.toolposition1.wrist_r);
-	// 		expect(tooltest.target.wrist_l).to.equal(tooltest.toolposition1.wrist_l);	
-	// 		expect(tooltest.tool).to.not.equal(tool_old);
-	// 		expect(tooltest.tool).to.equal(1);		
-	// 	});
-	// 	it("Expected Arm to be in a safe position after switching to tool 1",function(){
-	// 		expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
-	// 		expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
-	// 	});
-
-	// 	it("Expected switchTool(2) to have went to and grabbed tool 2 from toolposition2",function(){
-	// 		tool_old = tooltest.tool;
-	// 		expect(tooltest.tool).to.equal(tool_old);
-	// 		tooltest.switchTool(2);
-	// 		expect(tooltest.target.claw).to.equal(tooltest.toolposition2.claw);
-	// 		expect(tooltest.target.wrist_r).to.equal(tooltest.toolposition2.wrist_r);
-	// 		expect(tooltest.target.wrist_l).to.equal(tooltest.toolposition2.wrist_l);	
-	// 		expect(tooltest.tool).to.not.equal(tool_old);
-	// 		expect(tooltest.tool).to.equal(2);		
-	// 	});
-	// 	it("Expected Arm to be in a safe position after switching to tool 2",function(){
-	// 		expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
-	// 		expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
-	// 	});
-
-	// 	it("Expected switchTool(0) to have emptied the claw",function(){
-	// 		tool_old = tooltest.tool;
-	// 		tooltest.switchTool(0);
-	// 		expect(tooltest.target.claw).to.not.equal(tooltest.toolposition2.claw);
-	// 		expect(tooltest.tool).to.equal(0);						
-	// 	});
-	// 	it("Expected Arm to be in a safe position after switching to tool 2",function(){
-	// 		expect(tooltest.target.shoulder).to.equal(tooltest.idleposition.shoulder);
-	// 		expect(tooltest.target.elbow).to.equal(tooltest.idleposition.elbow);
-	// 	});
+	describe("function limitCurrent():", function(){
+		var oldClawLimit = testunit.current_limit.claw;
+		var limitArm = {
+			"base": 98.67,
+			"shoulder": 23.09,
+			"elbow": 19.76,
+			"wrist": 90,
+			"claw": 68.78
+		};
 		
+		testunit.limitCurrent(limitArm);
+		it("Expected limitCurrent() to change all current_limits to given values", function(){
+			expect(testunit.current_limit).to.eql(limitArm);
+		});
+	});
+
+	describe("function react():", function(){
+		this.timeout(500);	//each test (i.e. "it()") inherits a timeout of 500 ms, approx.
+		var armTest = {
+			"name": "move",
+			"data": {
+				"base": 140,
+				"shoulder": 15,
+				"elbow": 45,
+				"wrist": 106
+			}
+		};
+		var clawTest = {
+			"name:": "claw",
+			"data":{
+				"rotate": -1,
+				"direction": 1,
+				"grab": 1,
+				"force": 45.89
+			}
+		};
+		var toolTest = {
+			"name:": "tool",
+			"data":{
+				"option": "laser",
+				"param": 1
+			}
+		};
+		var limitTest = {
+			"name": "limit",
+			"data": {
+				"base": 54.76,
+				"shoulder": 13.87,
+				"elbow": 35.74,
+				"wrist": 69.90
+			}
+		};
 		
-	// });
+		it("Expected react() to move the arm to the position given", function(){
+			testunit.react(armTest);
 
-	// describe("function moveServo():", function(){
-	// 	var base_old = testunit.target.base;
-	// 	var base_new = 54;
-	// 	var output = testunit.moveServo("base", base_new);
+			expect(testunit.position.base).to.eql(armTest.data.base);
+			expect(testunit.position.shoulder).to.eql(armTest.data.shoulder);
+			expect(testunit.position.elbow).to.eql(armTest.data.elbow);
+			expect(testunit.position.wrist).to.eql(armTest.data.wrist);
+		});
+		it("Expected react() to move the claw to the position given, and change the claw current limit", function(){
+			testunit.react(clawTest);
 
-	// 	it("Expected moveServo() to return an object with microseconds and direction after moving base to the specified angle", function(){
-	// 		expect(output).to.have.all.keys("usec", "dir");
-	// 	});
-	// 	it("Expected moveServo() to have changed target.base after moving base to the specified angle", function(){
-	// 		expect(testunit.target.base).to.not.equal(base_old);
-	// 	});
+			expect(testunit.position.claw).to.eql(testunit.serial.new_movement.clawAngle);
+			expect(testunit.position.rolldir).to.eql(clawTest.data.direction);
+		});
+		it("Expected react() to change the laser power state to the one given", function(){
+			testunit.react(toolTest);
 
-	// 	var base_old2 = testunit.target.base;
-	// 	var output2 = testunit.moveServo("base", "stop");
+			expect(testunit.laser).to.eql(toolTest.data.param);
+		});
+		it("Expected react() to change the current limits of all but the claw motor", function(){
+			testunit.react(limitTest);
+			var limitArm = {
+				"base": limitTest.data.base,
+				"shoulder": limitTest.data.shoulder,
+				"elbow": limitTest.data.elbow,
+				"wrist": limitTest.data.wrist,
+				"claw": testunit.current_limit.claw
+			}
 
-	// 	it("Expected moveServo() to return 'stopped' when 'stop' is specified", function(){
-	// 		expect(output2).to.eql("stopped");
-	// 	});
-	// 	it("Expected moveServo() to not change target.base after stopping base motor", function(){
-	// 		expect(testunit.target.base).to.equal(base_old2);
-	// 	});
-	// });
-	// describe("function moveActuator():", function(){
-	// 	var shoulder_old = testunit.target.shoulder;
-	// 	var shoulder_new = 54;
-	// 	var output = testunit.moveActuator("shoulder", shoulder_new);
-
-	// 	it("Expected moveActuator() to return an object with duty and direction after moving shoulder to the specified angle", function(){
-	// 		expect(output).to.have.all.keys("duty_cycle", "dir");
-	// 	});
-	// 	it("Expected moveActuator() to have changed target.shoulder after moving shoulder to the specified angle", function(){
-	// 		expect(testunit.target.shoulder).to.not.equal(shoulder_old);
-	// 	});
-
-	// 	var shoulder_old2 = testunit.target.shoulder;
-	// 	var output2 = testunit.moveActuator("shoulder", "stop");
-
-	// 	it("Expected moveActuator() to return 'stopped' when 'stop' is specified", function(){
-	// 		expect(output2).to.eql("stopped");
-	// 	});
-	// 	it("Expected moveActuator() to not change target.shoulder after stopping shoulder motor", function(){
-	// 		expect(testunit.target.shoulder).to.equal(shoulder_old2);
-	// 	});
-	// });
-
-	// describe("function grab()", function(){
-	// 	var claw_old = testunit.position;
-	// 	var claw_new = 54;
-	// 	var output = testunit.grab(claw_new);
-
-	// 	it("Expected grab() to have changed target.claw after moving claw to the specified angle", function(){
-	// 		expect(testunit.target.claw).to.not.equal(claw_old);
-	// 	});
-
-	// });
-
-	// describe("function react():", function(){
-	// 	var old_target = testunit.target;
-	// 	it("Expected react() to have changed target when given the command to move to a new position", function(){
-	// 		var input = {
-	// 			name: "move",
-	// 			data: {
-	// 				"base": 15,
-	// 				"shoulder": 43,
-	// 				"elbow": 15,
-	// 				"wrist": 50
-	// 			}
-	// 		};
-	// 		testunit.react(input);
-	// 		var new_target = testunit.target;
-
-	// 		expect(new_target.base).to.not.eql(old_target.base);
-	// 		expect(new_target.shoulder).to.not.eql(old_target.shoulder);
-	// 		expect(new_target.elbow).to.not.eql(old_target.elbow);
-	// 		expect(new_target.wrist).to.not.eql(old_target.wrist);
-	// 	});
-	// });
-	/*  Wyatt & Austin's claw functions  */
-	// describe("function claw():", function(){
-	// 	it("Expected claw() to exist", function(){
-	// 		expect(testunit.claw).to.be.a("function");
-	// 	});
-	// });
-	// describe("function switchTool():", function(){
-	// 	it("Expected switchTool() to exist", function(){
-	// 		expect(testunit.switchTool).to.be.a("function");
-	// 	});
-	// });
-	// describe("function tool():", function(){
-	// 	it("Expected tool() to exist", function(){
-	// 		expect(testunit.tool).to.be.a("function");
-	// 	});
-	// });
-	/*  End Wyatt & Austin's claw functions  */
+			expect(testunit.current_limit).to.eql(limitArm);
+		});
+	});
 });

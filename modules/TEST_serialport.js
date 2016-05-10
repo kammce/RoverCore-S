@@ -5,11 +5,11 @@ const util = require("util");
 
 function compileResponse(obj){
 	var response = "q,";
-	response += obj.new_movement.dboxPitch + ",";
-	response += obj.new_movement.dc + ",";
-	response += obj.new_movement.dboxRoll + ",";
-	response += obj.new_movement.firgelli + ",";
 	response += obj.new_movement.rotunda + ",";
+	response += obj.new_movement.dc + ",";
+	response += obj.new_movement.firgelli + ",";
+	response += obj.new_movement.dboxPitch + ",";
+	response += obj.new_movement.dboxTarget + ",";	//roll target angle
 	response += obj.new_movement.clawAngle + ",";
 	response += obj.currentReading.rotunda + ",";
 	response += obj.currentReading.dc + ",";
@@ -33,21 +33,22 @@ class SerialPort{	// mock serial port library
 		this.openimmediately = openimmediately;
 		this.callback = callback;
 		this.returnbuffer = "";
-		this.functions = {
-			data: "",
-			open: "",
-			close: ""
-		};
 		this.new_movement = {
 			rotunda: 0,
 			dc: 0,
 			firgelli: 0,
-			clawMode: "r",
 			clawAngle: 0,
 			dboxPitch: 0,
-			dboxRoll: 0,
+			dboxRollDir: 0,
 			dboxTarget: 0,
 			laser: 0
+		};
+		this.current_limit =  {
+			rotunda: 0,
+			dc: 0,
+			firgelli: 0,
+			dbox: 0,
+			claw: 0
 		};
 		this.currentReading = {
 			rotunda: 0,
@@ -60,7 +61,15 @@ class SerialPort{	// mock serial port library
 
 		var parent = this;
 
-		this.on = function(eventname, func){
+		this.open = function (callback){
+			parent.emitter.on("open", callback);
+		};
+
+		this.isOpen = function (){
+			return true;
+		};
+
+		this.on = function (eventname, func){
 			switch(eventname){
 				case "open":{
 					// parent.functions.open = func;
@@ -94,24 +103,28 @@ class SerialPort{	// mock serial port library
 
 			// Parse the received command
 			switch(type){
-				case ">":{
-					parent.new_movement.rotunda = cmd[1];
-					parent.new_movement.dc = cmd[2];
-					parent.new_movement.firgelli = cmd[3];
-					parent.new_movement.clawMode = cmd[4];
-					parent.new_movement.dboxPitch = cmd[5];
-					parent.new_movement.dboxRoll = cmd[6];
-					parent.new_movement.dboxTarget = cmd[7];
-					parent.new_movement.laser = cmd[8];
-					parent.new_movement.clawAngle = Math.floor(Math.random() * (180 - 0)) + 0; // randomNum * (max - min) + min
+				case "C":{	//move arm command
+					parent.new_movement.rotunda = parseInt(cmd[1]);
+					parent.new_movement.dc = parseInt(cmd[2]);
+					parent.new_movement.firgelli = parseInt(cmd[3]);
+					parent.new_movement.dboxPitch = parseInt(cmd[4]);
+					parent.new_movement.dboxRollDir = parseInt(cmd[5]);
+					parent.new_movement.dboxTarget = parseInt(cmd[6]);
+					parent.new_movement.clawAngle = parseInt(cmd[7]);
+					parent.new_movement.laser = parseInt(cmd[8]);
+					// parent.new_movement.clawAngle = Math.floor(Math.random() * (180 - 0)) + 0; // randomNum * (max - min) + min
 
 					parent.respond();
 					break;
 				}
-				case "<":{
-					// if(cmd[1] == "A"){
-					// 	parent.functions.data(compileResponse(parent));
-					// }
+				case "A":{	//limit current command
+					parent.current_limit.rotunda = parseInt(cmd[1]);
+					parent.current_limit.dc = parseInt(cmd[2]);
+					parent.current_limit.firgelli = parseInt(cmd[3]);
+					parent.current_limit.dbox= parseInt(cmd[4]);
+					parent.current_limit.claw = parseInt(cmd[5]);
+
+					parent.respond();
 					break;
 				}
 				default:{
@@ -122,7 +135,7 @@ class SerialPort{	// mock serial port library
 
 		this.respond = function(){
 			// parent.functions.data(compileResponse(parent));
-			parent.emitter.emit("data", compileResponse(parent));
+			parent.emitter.emit("data", compileResponse(parent)); //pass in the parent pointer
 		};
 	}
 }
