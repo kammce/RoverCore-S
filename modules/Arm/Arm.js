@@ -17,7 +17,7 @@ class Arm extends Neuron {
         const maxAttempts = 50;    //Max attempts to try to extablish serialport connection
         const update_time = 500;    //Interval time for the lobe to broadcast its present state to console
         const setup_time = 2500;    //Time for things to "setup"/initialize before beginning to broadcast its present state to console
-        const SAMD21addr = "/dev/SAMD21-Address";
+        const SAMD21addr = "/dev/ttyACM0";
         var attempts = 0;
         var parent = this;
 
