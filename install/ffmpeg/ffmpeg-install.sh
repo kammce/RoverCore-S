@@ -14,7 +14,6 @@ cd ffmpeg
   --enable-libmp3lame \
   --enable-libopus \
   --enable-libx264 \
-  --enable-libaacplus \
   --enable-nonfree
 
 make

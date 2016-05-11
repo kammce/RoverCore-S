@@ -19,35 +19,37 @@ class DriveSystem extends Neuron {
         this.model = util.model;
         
         var parent = this;
+        
+        const retryLimit = 50;
+        const INTERVAL_TIME = 100;
+        const SETUP_TIME = 5000;
+        var trys = 0;
 
-        var sendState = function() { 
-            //console.log("sendstate triggored");
-            var zeroPad = function (num, places) {
-                console.log("//////////////////////////" + num);
-                var zero = places - num.toString().length + 1;
-                return Array(+(zero > 0 && zero)).join("0") + num;
+        /* sendState: will send goal states to the FIST-MCU 
+         * (Feedback influenced Steering and Travel system) */ 
+        var sendState = function () {
+            if(parent.port.isOpen()) {
+                if(parent.mode !== parent.modeOld){
+                    parent.log.output('M' + parent.mode + "E");
+                    parent.port.write('M' + parent.mode + "E" + "\n");
+                    parent.modeOld = parent.mode;
+                }
+                if((parent.speed !== parent.speedOld) || (parent.angle !== parent.angleOld)){
+                        var speed_str = 'S' + zeroPad(parent.speed, 3) + ',' + zeroPad(parent.angle, 3) +"E" + "\n";
+                        parent.log.output("speed_str = ", speed_str);
+                        parent.port.write(speed_str, function(err, results) {});
+                        parent.speedOld = parent.speed;
+                        parent.angleOld = parent.angle;
+                }
+                 if(parent.limit !== parent.limitOld){
+                    parent.port.write('L' + parent.limit + "E");
+                    parent.limitOld = parent.limit;
+                }
+                else if(parent.PIDState !== parent.PIDStateOld){
+                    parent.port.write('P' + parent.PIDState + "E");
+                    parent.PIDStateOld = parent.PIDState;
+                }
             }
-            if(parent.mode !== parent.modeOld){
-                parent.log.output('M' + parent.mode + "E");
-                parent.port.write('M' + parent.mode + "E" + "\n");
-                parent.modeOld = parent.mode;
-            }
-            else if((parent.speed !== parent.speedOld) || (parent.angle !== parent.angleOld)){
-                    var speed_str = 'S' + zeroPad(parent.speed, 3) + ',' + zeroPad(parent.angle, 3) +"E" + "\n";
-                    parent.log.output("speed_str = ", speed_str);
-                    parent.port.write(speed_str, function(err, results) {});
-                    parent.speedOld = parent.speed;
-                    parent.angleOld = parent.angle;
-            }
-            else if(parent.limit !== parent.limitOld){
-                parent.port.write('L' + parent.limit + "E");
-                parent.limitOld = parent.limit;
-            }
-            else if(parent.PIDState !== parent.PIDStateOld){
-                parent.port.write('P' + parent.PIDState + "E");
-                parent.PIDStateOld = parent.PIDState;
-            }
-            //port.write('sm' + this.mode + 'v' + this.speed + 'a' + this.angle + 'e');
         }
 
         ////////////////
@@ -65,23 +67,43 @@ class DriveSystem extends Neuron {
         this.modeOld = 'z';
         /////////////////
         
-        if(typeof port === "undefined"){
-            var SP = require("../../node_modules/serialport/serialport");
-            var SerialPort = SP.SerialPort;
-            var serialport = new SerialPort("COM13", {
-                baudrate: 9600,
-                parser: SP.parsers.readline("\n")
-            });
-            this.log.output("Using real SerialPort");
-            this.port = serialport;
-            this.port.on("open", function () {
-                parent.port.on('data', function (data){
-                    
-                    parent.log.output("RECIEVED" + data.toString());
-                });
-                 setTimeout( function(){parent.interval = setInterval(sendState, 100);}, 5000);
-            });
-        }
+        this.port = new util.serial.SerialPort("/dev/FIST-MCU", {
+            baudrate: 9600,
+            parser: util.serial.parsers.readline('\n')
+        }, false); // false = disable auto open
+
+        /* Serial Open Routine: will continously attempt to access the 
+         * serialport until retry limit has been met. */
+        var serialOpenRoutine = (err) => {
+            if(trys >= retryLimit) {
+                return;
+            } else if (err) { 
+                this.log.output("Failed to open /dev/FIST-MCU", trys);
+                this.feedback("Failed to open /dev/FIST-MCU");
+                trys++;
+                setTimeout(() => {
+                    this.log.output("Reattempting to open /dev/FIST-MCU", trys);
+                    this.feedback("Reattempting to open /dev/FIST-MCU");
+                    this.port.open(serialOpenRoutine);
+                }, 2000);
+                return;
+            } else {
+                setTimeout(() => {
+                    this.interval = setInterval(sendState, INTERVAL_TIME);
+                }, SETUP_TIME);
+            }
+        };
+        // Attempt to open Serial port
+        this.port.open(serialOpenRoutine);
+        // Listen for data on the serial port
+        this.port.on('data', (data) => {
+            this.log.output("RECIEVED" + data.toString());
+        });
+        // Handle Error events by sending them back to mission control
+        this.port.on("err", (err) => {
+            this.log.output("Communication error with /dev/driveSystemMCU");
+            this.feedback("Communication error with /dev/driveSystemMCU");
+        });
     }
     react(input) {
         //if(this.state === 'react'){
@@ -106,8 +128,9 @@ class DriveSystem extends Neuron {
     }
     halt() {
         this.state = 'halt';
-        //clearInterval(this.interval);
-        this.port.write('S000,090E');
+        if(this.port.isOpen()) {
+            this.port.write('S000,090E');
+        }
         this.speed = 0;
         this.log.output(`HALTING ${this.name}`);
         this.feedback(this.name ,`HALTING ${this.name}`);
@@ -120,7 +143,9 @@ class DriveSystem extends Neuron {
     }
     idle() {
         this.state = 'idle';
-        this.port.write('S000,090E');
+        if(this.port.isOpen()) {
+            this.port.write('S000,090E');
+        }
         this.speed = 0;
         //clearInterval(this.interval);
         this.log.output(`IDLING ${this.name}`);

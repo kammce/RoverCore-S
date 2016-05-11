@@ -1,6 +1,6 @@
 {
 	"lobe_name": "BatteryManager",
-	"log_color": "purple",
+	"log_color": "blackBright",
 	"idle_time": 1000,
 	"mission_controller": "captain",
 	"upcall": true
