@@ -93,7 +93,16 @@ class videoStream extends Neuron {
         });
     }
     spawnAudio() {
-        child3 = spawn('ffmpeg', ['-re', '-f', 'alsa', '-ac', '2', '-i', 'hw:0,0', '-acodec', 'libmp3lame', '-b:a', '128k', '-vn', '-f', 'rtp', 'rtp://127.0.0.1:9004'])
+        child3 = spawn('ffmpeg', [
+            '-re',
+            '-f', 'alsa',
+            '-ac', '2',
+            '-i', 'hw:CARD=C920',
+            '-acodec', 'libmp3lame',
+            '-b:a', '128k',
+            '-vn',
+            '-f', 'rtp', 'rtp://'+this.url.hostname+':9006'
+        ]);
     }
     endStream1(input) {
         if (child1) {
