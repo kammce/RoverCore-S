@@ -1,133 +1,137 @@
 //GPS is currently set to update every 500ms (hardware)
 //baud set to 9600 bps
 "use strict";
-var fs = require('fs');
 
 var Neuron = require('../Neuron');
-var EVK7P = require('./EVK7P');
 
 class GPS extends Neuron {
-    constructor(name, feedback, color_log, idle_timeout, i2c, model) {
-        super(name, feedback, color_log, idle_timeout);
-        this.name = name;
-        this.feedback = feedback;
-        this.log = color_log;
-        this.idle_time = idle_timeout;
-        //this.i2c = i2c;
-        this.model = model;
-        this.GPS = new EVK7P();
-        // Construct Class here
-        // 
-        var parent = this;
-        var serialport = require('serialport');
-        var SerialPort = serialport.SerialPort;
-        this.port = new SerialPort("/dev/cu.usbmodem1411", {
-            //initialize on port /dev/tty-usbserial1
-            baudrate: 9600,
-            parser: serialport.parsers.readline('\r\n')
-            // look for return and newline at the end of each data packet
-        });
+	constructor(util) {
+		super(util);
+		this.name = util.name;
+		this.feedback = util.feedback;
+		this.log = util.log;
+		this.idle_time = util.idle_timeout;
+		this.i2c = util.i2c;
+		this.model = util.model;
+		
+		const retryLimit = 50;
+		const INTERVAL_TIME = 100;
+		const SETUP_TIME = 5000;
+		var trys = 0;
+		// Construct Class here
+		var parent = this;
 
-        this.model.registerMemory('GPS');
-        this.model.set('GPS',  {
-            lat: 0,
-            latDir: 0,
-            long: 0,
-            longDir: 0
-        });
+		/////////////////
+		this.model.registerMemory('GPS');
+		this.model.set('GPS',  {
+			lat: 0,
+			latDir: 0,
+			long: 0,
+			longDir: 0
+		});
+		this.port = new util.serial.SerialPort("/dev/ttyGPS", {
+			baudrate: 9600,
+			parser: util.serial.parsers.readline('\r\n')
+		}, false); // false = disable auto open
 
-        var store = function(data) {
-            parent.model.set('GPS', data);
-        }
+		/* Serial Open Routine: will continously attempt to access the 
+		 * serialport until retry limit has been met. */
+		var serialOpenRoutine = (err) => {
+			if(trys >= retryLimit) {
+				return;
+			} else if (err) { 
+				this.log.output("Failed to open /dev/ttyGPS", trys);
+				this.feedback("Failed to open /dev/ttyGPS");
+				trys++;
+				setTimeout(() => {
+					this.log.output("Reattempting to open /dev/ttyGPS", trys);
+					this.feedback("Reattempting to open /dev/ttyGPS");
+					this.port.open(serialOpenRoutine);
+				}, 2000);
+				return;
+			}
+		};
+		// Attempt to open Serial port
+		this.port.open(serialOpenRoutine);
 
-        this.port.on('open', this.showPortOpen);
-        this.port.on('close', this.showPortClose);
-        this.port.on('error', this.showError);
-        this.port.on('data', function(data) {
-                fs.appendFile('/tmp/test.txt', data + "\n", function (err) {
+		this.port.on('open', () => {
+			var msg = "ttyGPS has opened";
+			this.log.output(msg);
+			this.feedback(this.name, msg);
+		});
+		this.port.on('close', () => {
+			var msg = "ttyGPS closed";
+			this.log.output(msg);
+			this.feedback(this.name, msg);
+		});
 
-                });
-        var parent = this;
-       //this.parseNMEA(data);
-        //updateModel();
-        if(data.substring(0,6) === "$GPRMC"){
-        //checks that correct NMEA sentence is used
-        var piece = data.split(",",7);
-            if (piece[2] !=="A") {
-                console.log("NO GPS FIX");
-            }
-            else if(piece[2] ==="A") {
-                //checks for fix first
-                EVK7P.data = (data);
-                EVK7P.nmeaType = piece[0];
-                //piece 0 = $GPRMC
-                EVK7P.utc = piece[1];
-                //piece 1 = UTC time
-                EVK7P.fix = piece[2];
-                //piece 2 = A (which is good)
-                EVK7P.lat = piece[3];
-                var firstLat = EVK7P.lat.slice(0,2);
-                var secondLat = EVK7P.lat.slice(2,10);
-                var delimiter = "º";
-                var latResult = firstLat+delimiter+secondLat;
-                EVK7P.lat = latResult;
-                //piece 3 = latitude number
-                EVK7P.latDir = piece[4];
-                //piece 4 = latitude cardianl direction
-                EVK7P.long = piece[5];
-                var firstLong = EVK7P.long.slice(0,3);
-                var secondLong = EVK7P.long.slice(3,11);
-                var longResult = firstLong+delimiter+secondLong;
-                EVK7P.long = longResult;
-                //piece 5 = longitude number
-                EVK7P.longDir = piece[6];
-                //piece 6 = longitude direction
-                console.log(EVK7P.lat + " " + EVK7P.latDir + ", " + EVK7P.long + " " + EVK7P.longDir);
-                //need to split lat and long into 2 vars each (lat1=37,lat2=25.97389, etc) 
-                store({
-                     lat: EVK7P.lat,
-                     latDir: EVK7P.latDir,
-                     long: EVK7P.long,
-                     longDir: EVK7P.longDir,
-                });
-            }
-           }
-    });
+		this.port.on('err', (err) => {
+			var msg = "Error occurred with ttyGPS";
+			this.log.output(msg, err);
+			this.feedback(msg, err);
+		});
+		this.port.on('data', (data) => {
+			//this.log.output(data);
+			//checks that correct NMEA sentence is used
+			if(data.substring(0,6) === "$GPRMC"){
+				var piece = data.split(",",7);
+				if (piece[2] !=="A") {
+					console.log("NO GPS FIX");
+				}
+				else if(piece[2] ==="A") {
+					//checks for fix first
+					var data = data;
+					var nmeaType = piece[0];
+					//piece 0 = $GPRMC
+					var utc = piece[1];
+					//piece 1 = UTC time
+					var fix = piece[2];
+					//piece 2 = A (which is good)
+					var lat = piece[3];
 
-        var update = setInterval(function() {
-            //parent.parseNMEA();
-            //parent.updateModel();
-            // console log for debugging purposes
-            parent.log.output(parent.model.get('GPS'));
-             // console.log("0x69: " + parent.model.get('MPU2'));
-        }, 500);
-    }
-    react(input) {
-        this.log.output(`REACTING ${this.name}: `, input);
-        this.feedback(this.name ,`REACTING ${this.name}: `, input);
-    }
-    halt() {
-        this.log.output(`HALTING ${this.name}`);
-        this.feedback(this.name ,`HALTING ${this.name}`);
-    }
-    resume() {
-        this.log.output(`RESUMING ${this.name}`);
-        this.feedback(this.name ,`RESUMING ${this.name}`);
-    }
-    idle() {
-        this.log.output(`IDLING ${this.name}`);
-        this.feedback(this.name ,`IDLING ${this.name}`);
-        //not sure why you'd idle the GPS..
-    }
-    showPortOpen() {
-        console.log('open');
-    }
-    showError(error) {
-        console.log("Error" + error);
-    }
-    showPortClose() {
-        console.log("port closed!");
-    }
+					var firstLat = lat.slice(0,2);
+					var secondLat = lat.slice(2,10);
+					var delimiter = "º";
+					var latResult = firstLat+delimiter+secondLat;
+					var lat = latResult;
+					//piece 3 = latitude number
+					var latDir = piece[4];
+					//piece 4 = latitude cardianl direction
+					var long = piece[5];
+					var firstLong = long.slice(0,3);
+					var secondLong = long.slice(3,11);
+					var longResult = firstLong+delimiter+secondLong;
+					var long = longResult;
+					//piece 5 = longitude number
+					var longDir = piece[6];
+					//piece 6 = longitude direction
+					this.model.set('GPS', {
+						 lat: lat,
+						 latDir: latDir,
+						 long: long,
+						 longDir: longDir,
+					});
+				}
+			}
+		});
+	}
+	react(input) {
+		this.log.output(`REACTING ${this.name}: `, input);
+		this.feedback(this.name ,`REACTING ${this.name}: `, input);
+	}
+	halt() {
+		this.log.output(`HALTING ${this.name}`);
+		this.feedback(this.name ,`HALTING ${this.name}`);
+	}
+	resume() {
+		this.log.output(`RESUMING ${this.name}`);
+		this.feedback(this.name ,`RESUMING ${this.name}`);
+	}
+	idle() {
+		this.log.output(`IDLING ${this.name}`);
+		this.feedback(this.name ,`IDLING ${this.name}`);
+		//not sure why you'd idle the GPS..
+	}
 }
 
 module.exports = GPS; 
