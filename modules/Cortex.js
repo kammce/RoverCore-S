@@ -29,6 +29,7 @@ class Cortex {
 		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
+		this.SPINE = require('./Spine');
 		this.SERIALPORT = require('serialport');
 		this.I2C = function () {};
 
@@ -41,6 +42,12 @@ class Cortex {
 				var I2C_BUS = require('i2c-bus');
 				this.I2C = I2C_BUS.openSync(controls.i2cport);
 			}
+			// Setup SPINE
+			this.SPINE.expose(13, "OUTPUT");
+			setInterval(() => {
+				var switcher = this.SPINE.digitalRead() ? 0 : 1;
+				this.SPINE.digitalWrite(switcher);
+			}, 500);
 		} else {
 			console.log("Running on none Embedded platform. I2C ports will not be used!");
 		}
@@ -211,6 +218,7 @@ class Cortex {
 					"i2c": this.I2C,
 					"model": this.Model,
 					"serial": this.SERIALPORT,
+					"spine": this.SPINE,
 					"upcall": this.upcall,
 					"url": this.connection.url
 				};
