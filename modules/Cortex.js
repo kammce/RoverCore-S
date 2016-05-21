@@ -8,20 +8,18 @@ class Cortex {
 		this.simulate = controls.simulate;
 		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
-		this.feedback = (lobe_name) => {
+		var parent = this;
+		this.feedback = function(lobe_name) {
 			var output = "";
-			if(lobe_name === "up-call") {
-				this.handleUpCall(arguments);
-				return;
-			}
 			for (var i = 1; i < arguments.length; i++) {
+				//console.log(arguments[i]);
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
 				} else {
 					output += arguments[i]+"\n";
 				}
 			}
-			this.connection.write({
+			parent.connection.write({
 				target: lobe_name,
 				message: output
 			});

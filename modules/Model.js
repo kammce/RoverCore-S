@@ -32,11 +32,7 @@ class Model {
 				timestamp: this.currentTime(),
 				value: value
 			};
-			// create realtime reply
-			var realtime_reply = { };
-			// add key word to realtime reply
-			realtime_reply[key] = this.database[key];
-			this.feedback("model", realtime_reply);
+			this.feedback("model", this.database[key]);
 			return true;
 		} else {
 			return false;
