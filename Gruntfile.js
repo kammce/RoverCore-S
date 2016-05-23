@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 						'test-suite/assist/config_chai.js'
 					]
 				},
-				src: ['test-suite/unit/tracker/*.js']
+				src: ['test-suite/unit/**/*.js']
 			}
 		},
 		jshint: {
