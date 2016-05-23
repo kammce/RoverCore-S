@@ -8,20 +8,18 @@ class Cortex {
 		this.simulate = controls.simulate;
 		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
-		this.feedback = (lobe_name) => {
+		var parent = this;
+		this.feedback = function(lobe_name) {
 			var output = "";
-			if(lobe_name === "up-call") {
-				this.handleUpCall(arguments);
-				return;
-			}
 			for (var i = 1; i < arguments.length; i++) {
+				//console.log(arguments[i]);
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
 				} else {
 					output += arguments[i]+"\n";
 				}
 			}
-			this.connection.write({
+			parent.connection.write({
 				target: lobe_name,
 				message: output
 			});
@@ -31,6 +29,7 @@ class Cortex {
 		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
+		this.SPINE = require('./Spine');
 		this.SERIALPORT = require('serialport');
 		this.I2C = function () {};
 
@@ -43,6 +42,12 @@ class Cortex {
 				var I2C_BUS = require('i2c-bus');
 				this.I2C = I2C_BUS.openSync(controls.i2cport);
 			}
+			// Setup SPINE
+			this.SPINE.expose(13, "OUTPUT");
+			setInterval(() => {
+				var switcher = this.SPINE.digitalRead() ? 0 : 1;
+				this.SPINE.digitalWrite(switcher);
+			}, 500);
 		} else {
 			console.log("Running on none Embedded platform. I2C ports will not be used!");
 		}
@@ -213,6 +218,7 @@ class Cortex {
 					"i2c": this.I2C,
 					"model": this.Model,
 					"serial": this.SERIALPORT,
+					"spine": this.SPINE,
 					"upcall": this.upcall,
 					"url": this.connection.url
 				};
