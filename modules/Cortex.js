@@ -175,10 +175,10 @@ class Cortex {
 			case "HALTALL":
 				haltAll();
 				break;
-			case "IDLEALL": 
+			case "IDLEALL":
 				idleAll();
 				break;
-			case "SYSTEM-SHUTDOWN": 
+			case "SYSTEM-SHUTDOWN":
 				this.exec("shutdown -h now");
 				break;
 			case "SYSTEM-RESTART":
@@ -197,21 +197,21 @@ class Cortex {
 			// Read config.json file, parse it, and return config object
 			config = JSON.parse(fs.readFileSync(`./modules/${directory}/config.json`));
 			// check if config object has the right properties
-			if(typeof config['lobe_name'] === "string" && 
-				typeof config['log_color'] === "string" && 
+			if(typeof config['lobe_name'] === "string" &&
+				typeof config['log_color'] === "string" &&
 				typeof config['idle_time'] === "number") {
 				// Adding source code path to config object
 				config['source_path'] = `./${directory}/${config['lobe_name']}`;
 				// Generate Logger
 				var log = new this.LOG(
-					config['lobe_name'], 
+					config['lobe_name'],
 					config['log_color']
 				);
 				// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 				Lobe = (this.simulate) ? require("./Protolobe/Protolobe.js") : require(config['source_path']);
 				// Generate lobe utilities object
 				var lobe_utitilites = {
-					"name": config['lobe_name'], 
+					"name": config['lobe_name'],
 					"feedback": this.feedback,
 					"log": log,
 					"idle_timeout": config['idle_time'],
@@ -254,19 +254,19 @@ class Cortex {
 			});
 		}
 		var modules = getDirectories("./modules");
-		
+
 		// Take the intersection of the modules in the modules folder and the isolation arguments
 		if(typeof isolation === "string") {
 			isolation = isolation.replace(/ /g,'').split(',');
-			// Using filter and indexOf to create a 
+			// Using filter and indexOf to create a
 			// set intersection between isolation and modules
 			modules = isolation.filter(function(n) {
 				return modules.indexOf(n) != -1;
 			});
 		}
-		if(modules.length === 0) { 
+		if(modules.length === 0) {
 			this.log.output("No modules found, exiting RoverCore");
-			process.exit(); 
+			process.exit();
 		}
 		for (var i = 0; i < modules.length; i++) {
 			var lobe = this.loadLobe(modules[i]);
@@ -274,7 +274,7 @@ class Cortex {
 			if(typeof lobe === "undefined") { continue; }
 			this.lobe_map[lobe.config['lobe_name']] = lobe;
 			// Set time since last command to zero to IDLE all lobes in the beginning
-			this.time_since_last_command[lobe.config['lobe_name']] = 0;	
+			this.time_since_last_command[lobe.config['lobe_name']] = 0;
 		}
 	}
 }
