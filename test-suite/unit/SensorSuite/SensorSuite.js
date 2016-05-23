@@ -30,17 +30,25 @@ describe('Testing SensorSuite Class', function () {
 		}
 	};
 
+
+	var dev_addr1 =[], dev_addr2 =[];
+	var	register1 =[], register2 =[];
+	var	command1 =[], command2 =[];
 	var awake = 0;
 	class i2c_bus{
-		constructor(something1, something2, something3) {
+		constructor(something1, something2, something3) {}
 
-		}
 		writeByteSync(dev_addr, register, command){
-			awake = command;
-
+			command1.push(command);
 		}
 		readByteSync(dev_addr, register){
-			return "180";
+			if(register === 0x10 || register === 0x11 || register === 0x12){
+				return "0";
+			}
+			else if(register === 0x02){
+				return 1;
+			}
+			else return "180";
 		}
 		readByte(dev_addr, register, cb){
 			return "180";
@@ -51,9 +59,26 @@ describe('Testing SensorSuite Class', function () {
 			command1 =[], command2 =[];
 		}
 	};
-	var i2c = new i2c_bus();
+	module.exports = i2c_bus;
 
-	var dummyTemp = 176;
+//	var i2c = function() {}; // filler i2c object (not used in test)
+	// var model = function() {}; // filler model object (not used in test)
+
+	var i2c = new i2c_bus();
+	var Model = require('../../../modules/Model');
+	var model = new Model(function() {});
+
+	var util = {
+		name: "SensorSuite",
+		feedback: feedback,
+		log: log,
+		idle_timeout: 500,
+		i2c: i2c,
+		model: model
+	};
+
+	var test_lobe = new SensorSuite(util);
+
 
 	var Model = require('../../../modules/Model');
 	var model = new Model(function() {});
@@ -101,54 +126,61 @@ describe('Testing SensorSuite Class', function () {
 		describe('Function: wakeUp()', function() {
 			it('expected data read to start', function () {   //wakeUp()
 				test_lobe.mpu.wakeUp();
-				expect(awake).to.equal(1);
+				expect(command1[0]).to.equal(1);
+				// expect(command1[1]).to.equal(1);
+				i2c.reset();
 			});
 		});
 		describe('Function: readData()', function() {
 			it('expected data to be read in', function () {
 				test_lobe.mpu.readData();
-				expect(test_lobe.mpu.xpos).to.equal(-19276);
-				expect(test_lobe.mpu.ypos).to.equal(-19276);
-				expect(test_lobe.mpu.zpos).to.equal(-19276);
-				expect(test_lobe.mpu.temp).to.equal(-19276);
+				// expect(test_lobe.mpu.inputs[14]).to.equal(0);
+				expect(test_lobe.mpu.inputs[17]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[18]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[19]).to.equal(-19276);
+				expect(test_lobe.mpu.inputs[20]).to.equal(-19276);
+				// expect(test_lobe.mpu.inputs[25]).to.equal(-9638);
+				// expect(test_lobe.mpu.inputs[24]).to.equal(-9638);
 			});
 		});
 		describe('Function: convertPosition()', function() {
 			it('expected position values to be converted to angles', function () {
 				test_lobe.mpu.convertPosition();
-				expect(test_lobe.mpu.xangle).to.equal(-35.26390990826984);//
-				expect(test_lobe.mpu.yangle).to.equal(-35.26390990826984);//
-				expect(test_lobe.mpu.zangle).to.equal(-35.26390990826984);
+				expect(test_lobe.mpu.inputs[27]).to.equal(-135);
+				expect(test_lobe.mpu.inputs[28]).to.equal(-135);
 			});
 		});
 		describe('Function: convertTemp()', function() {
 			it('expected temperature value to be converted to celsius', function () {
 				test_lobe.mpu.convertTemp();
-				expect(test_lobe.mpu.celsius).to.equal(-20.164117647058823);//
+				expect(test_lobe.mpu.inputs[29]).to.equal(-36.735);
 			});
 		});
 		describe('Function: log()', function() {
 			it('expected data to be logged', function () {
 				test_lobe.mpu.Log();
-				expect(expected_log).to.equal("x-angle: -35.264 y-angle: -35.264 z-angle: -35.264 temperature: -20.164");
+				expect(expected_log).to.equal("pitch: -135 roll: -135 temperature: -36.735");
 			});
 		});
 		describe('Function: sleep()', function() {
 			it('expected data read to stop', function () {
 				test_lobe.mpu.sleep();
-				expect(awake).to.equal(0);
+				expect(command1[0]).to.equal(0);
+				i2c.reset();
 			});
 		});
-	// 	describe('Function: groundTemp()', function() {
-	// 		it('expected temperature conversion to celsius', function () {
-	// 			test_lobe.lm35.groundTemp();
-	// 			expect(test_lobe.groundTemp()).to.equal(85.9375);
-	// 		});
-	// 	describe('Function: humidity()', function() {
-	// 		it('expected temperature conversion to percentage', function () {
-	// 			test_lobe.humidity();
-	// 			expect(test_lobe.humidity()).to.equal(??????);
-	// 		});
-	// 	});
+		// describe('Function: convertCompass()', function() {
+  //     it('expected compass value to be converted to degrees relative to North', function () {
+  //       test_lobe.mpu.convertCompass();
+  //       expect(test_lobe.mpu.inputs[30]).to.equal(45);
+  //     });
+  //   });
+    describe('Function: updateModel()', function() {
+      it('expected model to be updated', function () {
+        test_lobe.updateModel();
+        	expect(model.database['MPU'].value.pitch).to.equal(test_lobe.mpu.inputs[27]);
+        // expect(model.get('MPU')).to.equal('MPU');
+      });
+    });
 	 });
 });
