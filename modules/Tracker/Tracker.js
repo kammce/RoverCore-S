@@ -50,14 +50,9 @@ class Tracker extends Neuron {
 			this.pwm = new PWMDriverTest();
         } else {
         	this.pwm = new PWMDriver(0x5c, 60, this.i2c);            
-        }               
+        }   
 
-	    this.KpPitch = 0.75;
-        this.KiPitch = 0;
-        this.KdPitch = 0;
-        this.KpYaw = 0.75;
-        this.KiPitch = 0;
-        this.KdPitch = 0;
+
 	           
 	    this.lidarMeasurement = 0;
 	    this.lidarHealth = true;
@@ -93,19 +88,17 @@ class Tracker extends Neuron {
 
 
 
-        this.pid(); //Start PID loop
+        this.loop(); //Start main loop
     }
 
 
-    pid() {
+    loop() {
         var relativePitch = 0;       
-        var dt = 0.01;
         var parent = this;
-        var PWMOutput;
-        this.pitchPID = new pidController(this.KpPitch, this.KiPitch, this.KpPitch, dt);
-        this.yawPID = new pidController(this.KpYaw, this.KiYaw, this.KdYaw, dt);
+        var PWMOutput;      
+        var weight = .02;
 
-        if(parent.debug === false) { 
+        if(parent.debug !== true) { 
             setInterval(function(){                 
                 var MPU = parent.model.get('MPU');
                 if(typeof MPU !== 'undefined') {
@@ -115,8 +108,9 @@ class Tracker extends Neuron {
                  
                 relativePitch = Math.cos((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.pitch + Math.sin((parent.output.yaw % 360)*Math.PI/180)*parent.orientation.roll;
 
-                parent.output.yaw = parent.yawPID.update(parent.output.yaw, parent.target.yaw);
-                parent.output.pitch = parent.pitchPID.update(parent.output.pitch, parent.target.pitch - relativePitch);               
+                parent.output.yaw = weight*parent.target.yaw+(1-weight)*parent.output.yaw; 
+                parent.output.pitch = weight*(parent.target.pitch - relativePitch)+(1-weight)*parent.output.pitch;      
+                              
 
               
                 if(parent.stopped === false){
