@@ -1,25 +1,25 @@
 'use strict';
 
 class Cortex {
-	constructor(connection, simulate, isolation) {
+	constructor(controls) {
 		console.log("STARTING Rover Core!");
 		var parent = this;
-		this.simulate = simulate;
+
+		this.simulate = controls.simulate;
+		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
+		var parent = this;
 		this.feedback = function(lobe_name) {
 			var output = "";
-			if(lobe_name === "up-call") {
-				parent.handleUpCall(arguments);
-				return;
-			}
 			for (var i = 1; i < arguments.length; i++) {
+				//console.log(arguments[i]);
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
 				} else {
 					output += arguments[i]+"\n";
 				}
 			}
-			connection.write({
+			parent.connection.write({
 				target: lobe_name,
 				message: output
 			});
@@ -31,31 +31,42 @@ class Cortex {
 		this.MODEL = require('./Model');
 		this.SPINE = require('./Spine');
 		this.SERIALPORT = require('serialport');
-		// this.I2C = function () {};
-		// if(!this.simulate) {
-		// 	var I2C_BUS = require('i2c-bus');
-		// 	this.I2C = I2C_BUS.openSync(1);
-		// }
+		this.I2C = function () {};
 
+		console.log("Running Systems Check...");
+		var os = require('os');
+		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone') {
+			console.log(`System Hostname is on ${os.hostname()}`);
+			if(!controls.simulate && controls.i2cport != -1) {
+				console.log("Connecting to i2c-bus");
+				var I2C_BUS = require('i2c-bus');
+				this.I2C = I2C_BUS.openSync(controls.i2cport);
+			}
+			// Setup SPINE
+			this.SPINE.expose(13, "OUTPUT");
+			setInterval(() => {
+				var switcher = this.SPINE.digitalRead() ? 0 : 1;
+				this.SPINE.digitalWrite(switcher);
+			}, 500);
+		} else {
+			console.log("Running on none Embedded platform. I2C ports will not be used!");
+		}
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
 		this.Model = new this.MODEL(this.feedback);
-		if(!this.simulate) {
-			this.Spine = new this.SPINE();
-		}
 		/** Load All Modules in Module Folder **/
 		this.lobe_map = {};
 		this.time_since_last_command = {};
 		// Load all modules from module folder into module’s map.
-		this.loadLobes(isolation);
+		this.loadLobes(controls.isolation);
 		/** Deliver data from server to Modules **/
 		// Send Model to Signal Relay on update
 
 		/** Connect to Signal Relay **/
 		// Cortex should act as a client and connect to Signal
 		// Relayusing primus.js and websockets as the transport.
-		connection.on('open', function open() {
-			connection.write({
+		this.connection.on('open', () => {
+			this.connection.write({
 				intent: 'REGISTER',
 				info: {
 					entity: 'cortex',
@@ -64,33 +75,33 @@ class Cortex {
 			});
 			parent.log.output("CONNECTED! I AM HERE!");
 		});
-		connection.on('data', function(data) {
-			parent.handleIncomingData(data);
+		this.connection.on('data', (data) => {
+			this.handleIncomingData(data);
 		});
-		connection.on('error', function error(err) {
-			parent.log.output('CONNECTION error!', err.stack);
+		this.connection.on('error',  (err) => {
+			this.log.output('CONNECTION error!', err.stack);
 		});
-		connection.on('reconnect', function (/* opts */) {
-			parent.log.output('RECONNECTION attempt started!');
+		this.connection.on('reconnect', () => {
+			this.log.output('RECONNECTION attempt started!');
 		});
-		connection.on('reconnect scheduled', function (opts) {
-			parent.log.output(`Reconnecting in ${opts.scheduled} ms`);
-			parent.log.output(`This is attempt ${opts.attempt} out of ${opts.retries}`);
+		this.connection.on('reconnect scheduled', (opts) => {
+			this.log.output(`Reconnecting in ${opts.scheduled} ms`);
+			this.log.output(`This is attempt ${opts.attempt} out of ${opts.retries}`);
 		});
-		connection.on('reconnected', function (opts) {
-			parent.log.output(`It took ${opts.duration} ms to reconnect`);
+		this.connection.on('reconnected', (opts) => {
+			this.log.output(`It took ${opts.duration} ms to reconnect`);
 		});
-		connection.on('reconnect timeout', function (err/*, opts*/) {
-			parent.log.output(`Timeout expired: ${err.message}`);
+		this.connection.on('reconnect timeout', (err) => {
+			this.log.output(`Timeout expired: ${err.message}`);
 		});
-		connection.on('reconnect failed', function (err/*, opts*/) {
-			parent.log.output(`The reconnection failed: ${err.message}`);
+		this.connection.on('reconnect failed', (err) => {
+			this.log.output(`The rethis.connection failed: ${err.message}`);
 		});
-		connection.on('end', function () {
-			parent.log.output('Connection closed');
+		this.connection.on('end', () => {
+			this.log.output('Connection closed');
 		});
 		// Handle Idling Lobes that have not gotten a command
-		this.idling_loop = setInterval(function() {
+		this.idling_loop = setInterval(() => {
 			parent.handleIdleStatus();
 		}, 100);
 	}
@@ -206,21 +217,13 @@ class Cortex {
 					"idle_timeout": config['idle_time'],
 					"i2c": this.I2C,
 					"model": this.Model,
-					"serialport": this.SERIALPORT,
+					"serial": this.SERIALPORT,
+					"spine": this.SPINE,
 					"upcall": this.upcall,
+					"url": this.connection.url
 				};
 				// Construct Lobe module
 				var module = new Lobe(lobe_utitilites);
-				/*
-				config['lobe_name'], 
-				this.feedback,
-				log,
-				config['idle_time'],
-				this.I2C,
-				this.Model,
-				this.SERIALPORT,
-				this.upcall
-				*/
 				// Attach config property to module
 				module.config = config;
 				// Attach mission controller to module
