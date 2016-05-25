@@ -1,6 +1,4 @@
-//
-//
-//
+
 "use strict";
 
 var Neuron = require('../Neuron');
@@ -19,20 +17,20 @@ class SensorSuite extends Neuron {
         //mpu6050 class initialization
         this.mpu = new mpu6050(0x68, this.i2c, this.log);
 //        this.mpu2 = new mpu6050(0x69, this.i2c, this.log);
-        this.mpu.wakeUp();
-//        this.mpu2.wakeUp();
         var parent = this;
-        this.model.registerMemory('MPU');
-//        model.registerMemory('MPU2');
+        parent.mpu.wakeUp();
+//        parent.mpu2.wakeUp();
+        parent.model.registerMemory('MPU');
+//        parent.model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
             parent.updateModel();
 //            parent.mpu2.readData();
 //            parent.updateModel2();
             // console log for debugging purposes
-            console.log(parent.model.get('MPU'));
+            //parent.log.output("\n",parent.model.get('MPU'));
             // console.log("0x69: " + parent.model.get('MPU2'));
-        }, 500);
+        }, 10);
     }
     react(input) {
         var name = input.name;
@@ -56,22 +54,23 @@ class SensorSuite extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
        // mpu.sleep();
     }
+
     updateModel() {
         var mpu = this.mpu;
         this.model.set('MPU', {
-            xAngle: mpu.xangle.toFixed(3),
-            yAngle: mpu.yangle.toFixed(3),
-            temperature: mpu.celsius.toFixed(3)
-            // compass: mpu.convertCompass()
+            roll: mpu.inputs[27],
+            pitch: mpu.inputs[28],
+            temperature: mpu.inputs[29]
+            // compass: mpu.inputs[30]
         });
     }
     updateModel2() {
         var mpu = this.mpu2;
         this.model.set('MPU2', {
-            xAngle: mpu.xangle.toFixed(3),
-            yAngle: mpu.yangle.toFixed(3),
-            temperature: mpu.celsius.toFixed(3)
-            // compass: mpu.convertCompass()
+            xAngle: mpu.inputs[27],
+            yAngle: mpu.inputs[28],
+            temperature: mpu.inputs[29]
+            // compass: mpu.inputs[30]
         });
     }
 }
