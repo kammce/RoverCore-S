@@ -8,20 +8,18 @@ class Cortex {
 		this.simulate = controls.simulate;
 		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
-		this.feedback = (lobe_name) => {
+		var parent = this;
+		this.feedback = function(lobe_name) {
 			var output = "";
-			if(lobe_name === "up-call") {
-				this.handleUpCall(arguments);
-				return;
-			}
 			for (var i = 1; i < arguments.length; i++) {
+				//console.log(arguments[i]);
 				if(typeof arguments[i] === "object") {
 					output += JSON.stringify(arguments[i])+"\n";
 				} else {
 					output += arguments[i]+"\n";
 				}
 			}
-			this.connection.write({
+			parent.connection.write({
 				target: lobe_name,
 				message: output
 			});
@@ -31,11 +29,15 @@ class Cortex {
 		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
+		var Spine = new require('./Spine');
+		this.SPINE = new Spine();
 		this.SERIALPORT = require('serialport');
 		this.I2C = function () {};
 
 		console.log("Running Systems Check...");
 		var os = require('os');
+		var led_state = 0;
+
 		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone') {
 			console.log(`System Hostname is on ${os.hostname()}`);
 			if(!controls.simulate && controls.i2cport != -1) {
@@ -43,9 +45,18 @@ class Cortex {
 				var I2C_BUS = require('i2c-bus');
 				this.I2C = I2C_BUS.openSync(controls.i2cport);
 			}
+			// Setup SPINE
+			this.SPINE.expose(13, "OUTPUT");
+			setInterval(() => {
+				var switcher = (led_state == 5 || led_state == 7) ? 0 : 1;
+				++led_state;
+				led_state = (led_state > 7) ? 0 : led_state;
+				this.SPINE.digitalWrite(13, switcher);
+			}, 50);
 		} else {
 			console.log("Running on none Embedded platform. I2C ports will not be used!");
 		}
+
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
 		this.Model = new this.MODEL(this.feedback);
@@ -170,10 +181,10 @@ class Cortex {
 			case "HALTALL":
 				haltAll();
 				break;
-			case "IDLEALL": 
+			case "IDLEALL":
 				idleAll();
 				break;
-			case "SYSTEM-SHUTDOWN": 
+			case "SYSTEM-SHUTDOWN":
 				this.exec("shutdown -h now");
 				break;
 			case "SYSTEM-RESTART":
@@ -187,32 +198,33 @@ class Cortex {
 	}
 	loadLobe(directory) {
 		var fs = require('fs');
-	    var config, Lobe;
+		var config, Lobe;
 		try {
 			// Read config.json file, parse it, and return config object
 			config = JSON.parse(fs.readFileSync(`./modules/${directory}/config.json`));
 			// check if config object has the right properties
-			if(typeof config['lobe_name'] === "string" && 
-				typeof config['log_color'] === "string" && 
+			if(typeof config['lobe_name'] === "string" &&
+				typeof config['log_color'] === "string" &&
 				typeof config['idle_time'] === "number") {
 				// Adding source code path to config object
 				config['source_path'] = `./${directory}/${config['lobe_name']}`;
 				// Generate Logger
 				var log = new this.LOG(
-					config['lobe_name'], 
+					config['lobe_name'],
 					config['log_color']
 				);
 				// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 				Lobe = (this.simulate) ? require("./Protolobe/Protolobe.js") : require(config['source_path']);
 				// Generate lobe utilities object
 				var lobe_utitilites = {
-					"name": config['lobe_name'], 
+					"name": config['lobe_name'],
 					"feedback": this.feedback,
 					"log": log,
 					"idle_timeout": config['idle_time'],
 					"i2c": this.I2C,
 					"model": this.Model,
 					"serial": this.SERIALPORT,
+					"spine": this.SPINE,
 					"upcall": this.upcall,
 					"url": this.connection.url
 				};
@@ -236,11 +248,11 @@ class Cortex {
 	}
 	loadLobes(isolation) {
 		var fs = require('fs');
-	    var path = require('path');
+		var path = require('path');
 
-	    /********************************
-	     *		Utility functions		*
-	     ********************************/
+		/********************************
+		 *		Utility functions		*
+		 ********************************/
 
 		function getDirectories(srcpath) {
 			return fs.readdirSync(srcpath).filter(function(file) {
@@ -248,19 +260,19 @@ class Cortex {
 			});
 		}
 		var modules = getDirectories("./modules");
-		
+
 		// Take the intersection of the modules in the modules folder and the isolation arguments
 		if(typeof isolation === "string") {
 			isolation = isolation.replace(/ /g,'').split(',');
-			// Using filter and indexOf to create a 
+			// Using filter and indexOf to create a
 			// set intersection between isolation and modules
 			modules = isolation.filter(function(n) {
 				return modules.indexOf(n) != -1;
 			});
 		}
-		if(modules.length === 0) { 
+		if(modules.length === 0) {
 			this.log.output("No modules found, exiting RoverCore");
-			process.exit(); 
+			process.exit();
 		}
 		for (var i = 0; i < modules.length; i++) {
 			var lobe = this.loadLobe(modules[i]);
@@ -268,7 +280,7 @@ class Cortex {
 			if(typeof lobe === "undefined") { continue; }
 			this.lobe_map[lobe.config['lobe_name']] = lobe;
 			// Set time since last command to zero to IDLE all lobes in the beginning
-			this.time_since_last_command[lobe.config['lobe_name']] = 0;	
+			this.time_since_last_command[lobe.config['lobe_name']] = 0;
 		}
 	}
 }

@@ -6,6 +6,8 @@
 KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0BFD493F", SYMLINK+="video-arm"
 KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="9FB1593F", SYMLINK+="video-hull"
 KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="8574D65F", SYMLINK+="video-navi"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0011426250", SYMLINK+="video-tracker"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="See3CAM_30Z10X", SYMLINK+="video-tracker"
 
-SUBSYSTEM="tty", ATTRS{idVendor}=="1b4f", ATTRS{idProduct}=="1b4f", SYMLINK+="ttyBATT1"
+KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1b4f", ATTRS{idProduct}=="1b4f", SYMLINK+="ttyBATT"
+KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0010", ATTRS{serial}=="5533034383135190C012", SYMLINK+="ttyFIST"
+KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a7", ATTRS{product}=="u-blox 7 - GPS/GNSS Receiver", SYMLINK+="ttyGPS"

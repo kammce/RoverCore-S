@@ -66,7 +66,6 @@ class DriveSystem extends Neuron {
         // z is arbitrary, and forces sendState to send a k
         this.modeOld = 'z';
         /////////////////
-        
         this.port = new util.serial.SerialPort("/dev/FIST-MCU", {
             baudrate: 9600,
             parser: util.serial.parsers.readline('\n')
