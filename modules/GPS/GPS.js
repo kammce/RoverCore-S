@@ -80,25 +80,12 @@ class GPS extends Neuron {
 		this.port.on('data', (data) => {
 			//this.log.output(data);
 			//checks that correct NMEA sentence is used
-<<<<<<< HEAD
 			//$GPGGA,222351.00,3720.21369,N,12152.88007,W,1,05,2.86,17.9,M,-29.9,M,,*59
 			if(data.substring(0,6) === "$GPGGA"){
 				//this.log.output(data);
 				var piece = data.split(",",14);
 				if (piece[6] ==="0") {
 					console.log("NO GPS FIX");
-=======
-			/*
-			$GPRMC,003657.30,A,3720.23309,N,12152.89647,W,0.476,,220516,,,A*6D
-			$GPRMC,003657.40,A,3720.23295,N,12152.89654,W,0.567,,220516,,,A*6D
-			$GPRMC,003657.50,A,3720.23282,N,12152.89659,W,0.616,,220516,,,A*62
-			*/
-			this.log.output(data);
-			if(data.substring(0,6) === "$GPRMC"){
-				var piece = data.split(",",7);
-				if (piece[2] !=="A") {
-					this.log.output("NO GPS FIX");
->>>>>>> master
 				}
 				else if(piece[6] ==="1" || piece[6] ==="2") {
 					//checks for fix first (1=gps, 2=dgps)
