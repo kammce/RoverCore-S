@@ -19,14 +19,7 @@ class MPU6050{
 
     wakeUp() {      //tell chip to exit sleep mode
         var i2c = this.i2c;
-        // var d;
         try {
-            // i2c.writeByteSync(0x0C, 0x0A, 0x00);
-            // i2c.writeByteSync(this.SA, 0x0A, 0x0F);
-            // d = i2c.readByteSync(0x68, 0x00);
-            // this.log.output("I AM ", d, " I should be: 0x48");
-            // i2c.writeByteSync(this.SA, 0x0B, 1);
-            // i2c.writeByteSync(0x0C, 0x0A, 0x01);
             i2c.writeByteSync(this.SA, 0x6B, 1);
         }catch(e) {
             this.log.output("While waking MPU6050: ERROR: ", e);
@@ -37,50 +30,31 @@ class MPU6050{
         var i2c = this.i2c;
         try {
 
-            // for(var i = 0; i < 17; i++){
-            //     if(this.inputs[31] === '1'){
-            //         this.inputs[i] = i2c.readByteSync(this.SA, this.registerArray[i]);
-            //     }
-            //     else {
-            //         if(i > 8 && i < 14);
-            //         else this.inputs[i] = i2c.readByteSync(this.SA, this.registerArray[i]);
-            //     }
-            // }
             setTimeout(this.readAccel(),50);
-            // setTimeout(this.readMagn(),50);
-            // }
+            setTimeout(this.readMagn(),50);
 
         }catch(e) {
             this.log.output("While reading from MPU6050: ERROR: ", e);
         }
 
-        //combines into a 16-bit string
-        var k = 0;
+        //combines into a 16-bit number
         //0-14 when magnetomoter data being used
-        for (var i = 0; i < 8; i+=2) {
-            this.inputs[i+17-k] = ((Number(this.inputs[i]) << 8) | Number(this.inputs[i+1]));
-            // this.inputs[i+17-k] = (Number(this.inputs[i])).toString(2) + (Number(this.inputs[i+1])).toString(2);
-            k++;
+        //0-8 when not using magnetometer data
+        for (var i = 0, k = 17; i < 14; i+=2, k++) {
+            this.inputs[k] = ((Number(this.inputs[i]) << 8) | Number(this.inputs[i+1]));
         }
 
-        // for (var i = 14; i < 17; i++) {
-        //     this.inputs[i] = this.inputs[i].toString(2);
-        // }
-
-        // for(var i = 14; i < 17; i++){
-        //     if(this.inputs[i] > "10000000"){   //convert 16 bit to decimal
-        //         this.inputs[i] = parseInt(this.inputs[i],2) - Math.pow(2,8);
-        //     }
-        //     else{
-        //         this.inputs[i] = parseInt(this.inputs[i],2);
-        //     }
-        // }
-
-        // this.inputs[24] = this.inputs[21]*((((this.inputs[14]-128)*0.5)/128)+1);
-        // this.inputs[25] = this.inputs[22]*((((this.inputs[15]-128)*0.5)/128)+1);
-        // this.inputs[26] = this.inputs[23]*((((this.inputs[16]-128)*0.5)/128)+1);
-
         for (var i = 17; i < 24; i++) {
+            if(this.inputs[i] > 32768){
+                this.inputs[i] = this.inputs[i] - Math.pow(2,16);
+            }
+        }
+        var mRes = 10*4912/32760;
+        this.inputs[24] = this.inputs[21]*(((this.inputs[14]-128)/256)+1)*mRes;
+        this.inputs[25] = this.inputs[22]*(((this.inputs[15]-128)/256)+1)*mRes;
+        this.inputs[26] = this.inputs[23]*(((this.inputs[16]-128)/256)+1)*mRes;
+
+        for (var i = 24; i < 27; i++) {
             if(this.inputs[i] > 32768){
                 this.inputs[i] = this.inputs[i] - Math.pow(2,16);
             }
@@ -88,7 +62,7 @@ class MPU6050{
 
         this.convertPosition();
         this.convertTemp();
-        // this.convertCompass();
+        this.convertCompass();
     }
 
     readMagn() {
@@ -97,39 +71,35 @@ class MPU6050{
         i2c.writeByteSync(0x0C, 0x0A, 0x01);
         this.inputs[31] = i2c.readByteSync(0x0C, 0x02); //begin magnetometer read
         if (this.inputs[31] === 1 || this.inputs[31] === 3) {
-            this.inputs[8] = i2c.readByteSync(0x0C, 0x04); //xmagnH
-            this.inputs[9] = i2c.readByteSync(0x0C, 0x03); //xmagnL
-            this.inputs[10] = i2c.readByteSync(0x0C, 0x06); //ymagnH
-            this.inputs[11] = i2c.readByteSync(0x0C, 0x05); //ymagnL
-            this.inputs[12] = i2c.readByteSync(0x0C, 0x08); //zmagnH
-            this.inputs[13] = i2c.readByteSync(0x0C, 0x07); //zmagnL
+            for (var i = 8; i < 17; i++) {
+                this.inputs[i] = i2c.readByteSync(0x0C, this.registerArray[i]);
+            }
             this.inputs[32] = i2c.readByteSync(0x0C, 0x09); // Status bit - end magnetometer read
         }
-        this.inputs[14] = i2c.readByteSync(0x0C, 0x10); //asax
-        this.inputs[15] = i2c.readByteSync(0x0C, 0x11); //asay
-        this.inputs[16] = i2c.readByteSync(0x0C, 0x12); //asaz
         i2c.writeByteSync(this.SA, 0x37, 0x00);
     }
 
     readAccel() {
         var i2c = this.i2c;
 
-        this.inputs[0] = i2c.readByteSync(this.SA, 0x3B);  //read byte from data register
-        this.inputs[1] = i2c.readByteSync(this.SA, 0x3C);  //read byte from data register
-        this.inputs[2] = i2c.readByteSync(this.SA, 0x3D);  //read byte from data register
-        this.inputs[3] = i2c.readByteSync(this.SA, 0x3E);  //read byte from data register
-        this.inputs[4] = i2c.readByteSync(this.SA, 0x3F);  //read byte from data register
-        this.inputs[5] = i2c.readByteSync(this.SA, 0x40);  //read byte from data register
-        this.inputs[6] = i2c.readByteSync(this.SA, 0x41);  //read byte from data register
-        this.inputs[7] = i2c.readByteSync(this.SA, 0x42);
-        // i2c.writeByteSync(this.SA, 0x37, 0x02);
+        for (var i = 0; i < 8; i++) {
+            this.inputs[i] = i2c.readByteSync(this.SA, this.registerArray[i]);
+        }
+        i2c.writeByteSync(this.SA, 0x37, 0x02);
     }
 
     convertCompass() {  //returns a degree, 0 degrees is North. Positive degrees move clockwise.
-        this.inputs[30] = Number(((Math.atan(this.inputs[25]/this.inputs[24]) * 180) / Math.PI).toFixed(3));
-        if (this.inputs[30] < 0) {
-            this.inputs[30] += 360;
-        }
+        var ayf = this.inputs[28]*Math.PI/180;
+        var axf = this.inputs[27]*Math.PI/180;
+        var X_h = this.inputs[24]*Math.cos(ayf) + this.inputs[25]*Math.sin(axf)*Math.sin(ayf) - this.inputs[26]*Math.cos(axf)*Math.sin(ayf);
+        var Y_h = this.inputs[25]*Math.cos(axf) - this.inputs[26]*Math.sin(axf);
+
+        this.inputs[30] = Number((Math.atan(Y_h/X_h)*180/Math.PI).toFixed(3));   //tilted surface compass
+        if(X_h<0)   this.inputs[30] = 180 - this.inputs[30];
+        else if(X_h>0  && Y_h<0)  this.inputs[30]=-this.inputs[30];
+        else if(X_h>0  && Y_h>0)  this.inputs[30]=360-this.inputs[30];
+        else if(X_h===0 && Y_h<0) this.inputs[30]=90;
+        else if(X_h===0 && Y_h>0) this.inputs[30]=270;
     }
 
     convertPosition() {     //converts x- and y-angles
@@ -157,7 +127,7 @@ class MPU6050{
     }
 
     Log() {     //log data measured by chip
-        this.log.output(`pitch: ${this.inputs[27]} roll: ${this.inputs[28]} temperature: ${this.inputs[29]}`);/* compass: ${this.heading.(3)}*/
+        this.log.output(`roll: ${this.inputs[27]} pitch: ${this.inputs[28]} temperature: ${this.inputs[29]} heaading: ${this.inputs[30]}`);
     }
 }
 

@@ -60,8 +60,8 @@ class SensorSuite extends Neuron {
         this.model.set('MPU', {
             roll: mpu.inputs[27],
             pitch: mpu.inputs[28],
-            temperature: mpu.inputs[29]
-            // compass: mpu.inputs[30]
+            temperature: mpu.inputs[29],
+            compass: mpu.inputs[30]
         });
     }
     updateModel2() {
