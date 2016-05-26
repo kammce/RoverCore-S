@@ -1,6 +1,6 @@
 "use strict";
 
-class MPU6050{
+class MPU9250{
     constructor(SA, i2c, log) {
         //need this because i2c is created in rovercore
         this.SA = SA;
@@ -22,7 +22,7 @@ class MPU6050{
         try {
             i2c.writeByteSync(this.SA, 0x6B, 1);
         }catch(e) {
-            this.log.output("While waking MPU6050: ERROR: ", e);
+            this.log.output("While waking MPU9250: ERROR: ", e);
         }
     }
 
@@ -34,7 +34,7 @@ class MPU6050{
             setTimeout(this.readMagn(),50);
 
         }catch(e) {
-            this.log.output("While reading from MPU6050: ERROR: ", e);
+            this.log.output("While reading from MPU9250: ERROR: ", e);
         }
 
         //combines into a 16-bit number
@@ -111,7 +111,7 @@ class MPU6050{
     }
 
     convertTemp() {     //converts to Celsius
-        //for mpu6050
+        //for mpu9250
         // this.inputs[29] = (parseFloat(this.inputs[20])/340 + 36.53).toFixed(3);
         //for mpu9250
         this.inputs[29] = Number((parseFloat(this.inputs[20])/333.87 + 21).toFixed(3));
@@ -122,7 +122,7 @@ class MPU6050{
         try {
             i2c.writeByteSync(this.SA, 0x6B, 0);
         }catch(e) {
-            this.log.output("While putting MPU6050 to sleep: ERROR: ", e);
+            this.log.output("While putting MPU9250 to sleep: ERROR: ", e);
         }
     }
 
@@ -131,4 +131,4 @@ class MPU6050{
     }
 }
 
-module.exports = MPU6050;
+module.exports = MPU9250;

@@ -2,7 +2,7 @@
 "use strict";
 
 var Neuron = require('../Neuron');
-var mpu6050 = require('./MPU6050.js');
+var mpu9250 = require('./MPU9250.js');
 
 class SensorSuite extends Neuron {
     constructor(util) {
@@ -14,27 +14,28 @@ class SensorSuite extends Neuron {
         this.i2c = util.i2c;
         this.model = util.model;
         // Construct Class here
-        //mpu6050 class initialization
-        this.mpu = new mpu6050(0x68, this.i2c, this.log);
-//        this.mpu2 = new mpu6050(0x69, this.i2c, this.log);
+        //mpu9250 class initialization
+
+        //When only using one chip, comment out all lines related to "mpu2"
+        this.mpu = new mpu9250(0x68, this.i2c, this.log);
+        this.mpu2 = new mpu9250(0x69, this.i2c, this.log);
         var parent = this;
         parent.mpu.wakeUp();
-//        parent.mpu2.wakeUp();
+        parent.mpu2.wakeUp();
         parent.model.registerMemory('MPU');
-//        parent.model.registerMemory('MPU2');
+        parent.model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
             parent.updateModel();
-//            parent.mpu2.readData();
-//            parent.updateModel2();
+            parent.mpu2.readData();
+            parent.updateModel2();
             // console log for debugging purposes
-            parent.log.output("\n",parent.model.get('MPU'));
-            // console.log("0x69: " + parent.model.get('MPU2'));
+            parent.log.output("\nChip1:\n",parent.model.get('MPU'));
+            console.log("\nChip2:\n", parent.model.get('MPU2'));
         }, 10);
     }
     react(input) {
         var name = input.name;
-
         this.log.output(`REACTING ${this.name}: `, input);
         this.feedback(this.name ,`REACTING ${this.name}: `, input);
     }
@@ -54,14 +55,13 @@ class SensorSuite extends Neuron {
         this.feedback(this.name ,`IDLING ${this.name}`);
        // mpu.sleep();
     }
-
     updateModel() {
         var mpu = this.mpu;
         this.model.set('MPU', {
             roll: mpu.inputs[27],
             pitch: mpu.inputs[28],
             temperature: mpu.inputs[29],
-            compass: mpu.inputs[30]
+            heading: mpu.inputs[30]
         });
     }
     updateModel2() {
