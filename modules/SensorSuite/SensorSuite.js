@@ -28,7 +28,7 @@ class SensorSuite extends Neuron {
 //            parent.mpu2.readData();
 //            parent.updateModel2();
             // console log for debugging purposes
-            parent.log.output("\n",parent.model.get('MPU'));
+            //parent.log.output("\n",parent.model.get('MPU'));
             // console.log("0x69: " + parent.model.get('MPU2'));
         }, 10);
     }

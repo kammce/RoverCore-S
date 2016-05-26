@@ -23,7 +23,7 @@ class GPS extends Neuron {
 
 		/////////////////
 		this.model.registerMemory('GPS');
-		this.model.set('GPS',  {
+		this.model.set('GPS', {
 			lat: 0,
 			latDir: 0,
 			long: 0,
@@ -73,10 +73,16 @@ class GPS extends Neuron {
 		this.port.on('data', (data) => {
 			//this.log.output(data);
 			//checks that correct NMEA sentence is used
+			/*
+			$GPRMC,003657.30,A,3720.23309,N,12152.89647,W,0.476,,220516,,,A*6D
+			$GPRMC,003657.40,A,3720.23295,N,12152.89654,W,0.567,,220516,,,A*6D
+			$GPRMC,003657.50,A,3720.23282,N,12152.89659,W,0.616,,220516,,,A*62
+			*/
+			this.log.output(data);
 			if(data.substring(0,6) === "$GPRMC"){
 				var piece = data.split(",",7);
 				if (piece[2] !=="A") {
-					console.log("NO GPS FIX");
+					this.log.output("NO GPS FIX");
 				}
 				else if(piece[2] ==="A") {
 					//checks for fix first

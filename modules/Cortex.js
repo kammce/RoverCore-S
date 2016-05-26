@@ -29,12 +29,15 @@ class Cortex {
 		this.exec = require('child_process').exec;
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
-		this.SPINE = require('./Spine');
+		var Spine = new require('./Spine');
+		this.SPINE = new Spine();
 		this.SERIALPORT = require('serialport');
 		this.I2C = function () {};
 
 		console.log("Running Systems Check...");
 		var os = require('os');
+		var led_state = 0;
+
 		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone') {
 			console.log(`System Hostname is on ${os.hostname()}`);
 			if(!controls.simulate && controls.i2cport != -1) {
@@ -45,12 +48,15 @@ class Cortex {
 			// Setup SPINE
 			this.SPINE.expose(13, "OUTPUT");
 			setInterval(() => {
-				var switcher = this.SPINE.digitalRead() ? 0 : 1;
-				this.SPINE.digitalWrite(switcher);
-			}, 500);
+				var switcher = (led_state == 5 || led_state == 7) ? 0 : 1;
+				++led_state;
+				led_state = (led_state > 7) ? 0 : led_state;
+				this.SPINE.digitalWrite(13, switcher);
+			}, 50);
 		} else {
 			console.log("Running on none Embedded platform. I2C ports will not be used!");
 		}
+
 		// Store Singleton version of Classes
 		this.log = new this.LOG("Cortex", "white");
 		this.Model = new this.MODEL(this.feedback);
@@ -192,7 +198,7 @@ class Cortex {
 	}
 	loadLobe(directory) {
 		var fs = require('fs');
-	    var config, Lobe;
+		var config, Lobe;
 		try {
 			// Read config.json file, parse it, and return config object
 			config = JSON.parse(fs.readFileSync(`./modules/${directory}/config.json`));
@@ -242,11 +248,11 @@ class Cortex {
 	}
 	loadLobes(isolation) {
 		var fs = require('fs');
-	    var path = require('path');
+		var path = require('path');
 
-	    /********************************
-	     *		Utility functions		*
-	     ********************************/
+		/********************************
+		 *		Utility functions		*
+		 ********************************/
 
 		function getDirectories(srcpath) {
 			return fs.readdirSync(srcpath).filter(function(file) {
