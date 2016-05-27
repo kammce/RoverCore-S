@@ -1,0 +1,51 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/nodejs', '/usr/bin/npm', 'install', '.' ]
+2 info using npm@2.14.19
+3 info using node@v4.3.0
+4 verbose install initial load of /home/a-nasty/Documents/github/rovercore-v2/package.json
+5 warn package.json RoverCore@2.0.1 No repository field.
+6 warn package.json RoverCore@2.0.1 No license field.
+7 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/chai/package.json
+8 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/chai-spies/package.json
+9 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/colors/package.json
+10 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/colorspace/package.json
+11 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/forever-monitor/package.json
+12 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/grunt/package.json
+13 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/grunt-contrib-jshint/package.json
+14 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/grunt-mocha-test/package.json
+15 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/i2c-bus/package.json
+16 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/jshint-stylish/package.json
+17 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/mocha/package.json
+18 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/primus/package.json
+19 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/prompt/package.json
+20 verbose installManyTop reading scoped package data from /home/a-nasty/Documents/github/rovercore-v2/node_modules/ws/package.json
+21 info package.json chai-spies@0.7.1 No license field.
+22 info package.json grunt@0.4.5 No license field.
+23 info package.json grunt-mocha-test@0.12.7 No license field.
+24 info package.json colorspace@1.0.1 No repository field.
+25 verbose readDependencies loading dependencies from /home/a-nasty/Documents/github/rovercore-v2/package.json
+26 silly cache add args [ '.', null ]
+27 verbose cache add spec .
+28 silly cache add parsed spec Result {
+28 silly cache add   raw: '.',
+28 silly cache add   scope: null,
+28 silly cache add   name: null,
+28 silly cache add   rawSpec: '.',
+28 silly cache add   spec: '/home/a-nasty/Documents/github/rovercore-v2/modules/Scientific',
+28 silly cache add   type: 'local' }
+29 error addLocal Could not install /home/a-nasty/Documents/github/rovercore-v2/modules/Scientific
+30 verbose stack Error: EISDIR: illegal operation on a directory, read
+30 verbose stack     at Error (native)
+31 verbose cwd /home/a-nasty/Documents/github/rovercore-v2/modules/Scientific
+32 error Linux 3.19.0-49-generic
+33 error argv "/usr/bin/nodejs" "/usr/bin/npm" "install" "."
+34 error node v4.3.0
+35 error npm  v2.14.19
+36 error code EISDIR
+37 error errno -21
+38 error syscall read
+39 error eisdir EISDIR: illegal operation on a directory, read
+39 error eisdir This is most likely not a problem with npm itself
+39 error eisdir and is related to npm not being able to find a package.json in
+39 error eisdir a package you are trying to install.
+40 verbose exit [ -21, true ]

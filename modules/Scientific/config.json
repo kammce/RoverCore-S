@@ -1,0 +1,7 @@
+{
+        "lobe_name": "Scientific",
+        "log_color": "red",
+        "idle_time": 4000,
+        "mission_controller": "ScientificUser"
+}
+
