@@ -2,5 +2,5 @@
 	"lobe_name": "Arm",
 	"log_color": "yellow",
 	"idle_time": 4000,
-	"mission_controller": "arm"
+	"mission_controller": "Arm"
 }

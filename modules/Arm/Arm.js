@@ -18,6 +18,7 @@ class Arm extends Neuron {
 		const INTERVAL_TIME = 100;
 		const SETUP_TIME = 5000;
 		const ARM_PATH = "/dev/ttyArm";
+		const SERVO_OFF = 5;
 		var trys = 0;
 
         this.model.registerMemory('Arm');
@@ -29,7 +30,7 @@ class Arm extends Neuron {
 			elbow: 500,
 			wrist_method: SERVO_OFF,
 			wrist_pitch: 0,
-			wrist_roll: 0
+			wrist_roll: 0,
 			claw: 999,
 			laser: 0,
 		}
