@@ -56,8 +56,6 @@ class videoStream extends Neuron {
 			case "tracker":
 				var tracker_stream = input.data.stream;
 				var args = [
-					'-strict', '-2', 
-					'-threads', '2', 
 					'-f', 'video4linux2', 
 					'-s', '1280x720', 
 					'-i', '/dev/video-tracker', 
@@ -97,6 +95,8 @@ class videoStream extends Neuron {
 				break;
 			case "killall":
 				spawn('pkill', ['-9', '-f', '-e', 'ffmpeg']);
+				this.video_streams = [];
+				return;
 				break;
 			default:
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
@@ -120,17 +120,13 @@ class videoStream extends Neuron {
 		});
 	}
 	spawnAudio() {
-		this.audio_stream = spawn('ffmpeg', [
-			'-re',
-			'-f', 'alsa',
-			'-ac', '2',
-			'-i', 'hw:CARD=C920',
-			'-acodec', 'libmp3lame',
-			'-b:a', '128k',
-			'-vn',
-			'-f', 'rtp', 
-			`rtp://${this.url.hostname}:9008`
-		]);
+		this.audio_stream = spawn('sh', [ `${__dirname}/audio-script.sh`, this.url.hostname ]);
+		this.audio_stream.stdout.on('data', (data) => {
+		  console.log(`stdout: ${data}`);
+		});
+		this.audio_stream.stderr.on('data', (data) => {
+		  console.log(`stderr: ${data}`);
+		});
 	}
 	endStream(input) {
 		if (typeof this.video_streams[input.data.stream] !== "undefined") {
@@ -139,7 +135,7 @@ class videoStream extends Neuron {
 	}
 	endAudio() {
 		if (typeof this.audio_stream !== "undefined") {
-			this.audio_stream.kill('SIGINT');
+			exec("pkill -f 'arecord -f cd -D hw:CARD=C920'");
 		}
 	}
 }
