@@ -78,7 +78,6 @@ class Arm extends Neuron {
 	}
 	react(input) {
 		this.arm.rotonda = this.map(input.rotonda, -360, 360, 1, 999); // THIS IS STILL WRONG! THE DIRECTION IS 180 OFF!
-		this.arm.base = this.map(input.base, -90, 270, 1, 999);
 		var elbow = Math.abs(360-input.base);
 		this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999); // 0 is down, 999 is up
 		var pitch_angle = 270-(90-input.pitch); // [-90 (pitch up), 90, (pitch down)]
