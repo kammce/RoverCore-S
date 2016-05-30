@@ -24,9 +24,6 @@ class Scientific extends Neuron {
         var average=0;
         var samplesize=0;
         var sum = 0;
-        
-
-        //define ports**************************************
 
         //temperature and moisture sensors
         var SciencePort = new SerialPort(this.SciencePortName,
