@@ -28,32 +28,33 @@ class Scientific extends Neuron {
 		// Generate the output file along with a write stream to it
 		this.writeScience = fs.createWriteStream(output_file);
 
-		this.sensor_port = new SerialPort(SENSOR_PATH, {
+		this.sensor_port = new util.serial.SerialPort(SENSOR_PATH, {
 			baudRate: 1200,
-			parser:serialport.parsers.readline("\r\n")
-		});
-		this.lid_port = new util.serial.SerialPort(LID_PATH, {
-			baudrate: 9600,
-			parser: util.serial.parsers.readline('\n')
-		}); // false = disable auto open
+			parser: util.serial.parsers.readline("\r\n")
+		}, false);
+		this.lid_port = new util.serial.SerialPort(LID_PATH, { baudrate: 9600 }, false);
 
-		this.writeScience.write('datetime, temperature, moisture');
+		this.sensor_port.open((err) => {});
+		this.lid_port.open((err) => {});
+
+		this.writeScience.write('datetime, temperature, moisture\n');
 
 		this.sensor_port.on('data', (data) => {
 			var current_memory = this.model.get("SENSORS");
+			this.log.output(data.toString());
 			if(/T[0-9\.]/g.test(data)) {
 				var temp = parseFloat(data.substring(1));
 				if(!isNaN(temp)) {
 					current_memory['temperature'] = temp;
 					this.model.set("SENSORS", current_memory);
-					this.writeScience.write(`${Date().slice(0,-15)},${current_memory['temperature']}, ${current_memory['moisture']}`);
+					this.writeScience.write(`${Date().slice(0,-15)},${current_memory['temperature']}, ${current_memory['moisture']}\n`);
 				}
 			} else if(/M[0-9\.]/g.test(data)) {
 				var temp = parseFloat(data.substring(1));
 				if(!isNaN(temp)) {
 					current_memory['moisture'] = temp;
 					this.model.set("SENSORS", current_memory);
-					this.writeScience.write(`${Date().slice(0,-15)},${current_memory['temperature']}, ${current_memory['moisture']}`);
+					this.writeScience.write(`${Date().slice(0,-15)},${current_memory['temperature']}, ${current_memory['moisture']}\n`);
 				}
 			}
 		});
