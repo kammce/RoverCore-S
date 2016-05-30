@@ -17,7 +17,7 @@ class Arm extends Neuron {
 		const RETRY_LIMIT = 50;
 		const INTERVAL_TIME = 100;
 		const SETUP_TIME = 5000;
-		const ARM_PATH = "COM16";
+		const ARM_PATH = "/dev/ttyARM";
 		const SERVO_OFF = 5;
 		var trys = 0;
 
@@ -33,7 +33,7 @@ class Arm extends Neuron {
 			roll: 0,
 			claw: 999,
 			laser: 0,
-		};
+		}
 		/////////////////
 		this.port = new util.serial.SerialPort(ARM_PATH, {
 			baudrate: 9600,
@@ -78,7 +78,6 @@ class Arm extends Neuron {
 	}
 	react(input) {
 		this.arm.rotonda = this.map(input.rotonda, -360, 360, 1, 999); // THIS IS STILL WRONG! THE DIRECTION IS 180 OFF!
-		this.arm.base = this.map(input.base, -90, 270, 1, 999);
 		var elbow = Math.abs(360-input.base);
 		this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999); // 0 is down, 999 is up
 		var pitch_angle = 270-(90-input.pitch); // [-90 (pitch up), 90, (pitch down)]
@@ -88,7 +87,7 @@ class Arm extends Neuron {
 		this.arm.claw = this.map(input.claw, 1, 999, 1, 999); // used to clamp
 		this.arm.laser = input.laser;
 
-		// C:999,500,500,180,1,180,500,1E
+		//C:999,500,500,180,1,180,500,1E
 		var command = `C:${this.arm.rotonda},${this.arm.base},${this.arm.elbow},${this.arm.pitch},${this.arm.method},${this.arm.roll},${this.arm.claw},${this.arm.laser}E\n`;
 		//this.log.output("C:999,500,500,180,1,180,500,1E\n");
 		//this.port.write("C:999,500,500,180,1,180,500,1E\n");
