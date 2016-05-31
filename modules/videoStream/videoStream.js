@@ -53,24 +53,24 @@ class videoStream extends Neuron {
 			this.video_streams[input.data.stream].kill('SIGINT');
 		}
 		switch(input.data.camera) {
+			case "science":
 			case "tracker":
 				var tracker_stream = input.data.stream;
 				var args = [
-					'-strict', '-2', 
-					'-threads', '2', 
-					'-f', 'video4linux2', 
-					'-s', '1280x720', 
-					'-i', '/dev/video-tracker', 
-					'-vcodec', 'mjpeg', 
-					'-an', 
-					'-q', '0', 
-					'-r', '20', 
-					'-f', 'mjpeg', 
+					'-f', 'video4linux2',
+					'-s', '1280x720',
+					'-i', `/dev/video-${input.data.camera}`,
+					'-vcodec', 'mjpeg',
+					'-an',
+					'-q', '0',
+					'-r', '20',
+					'-f', 'mjpeg',
+					'-s', '1280x720',
 					`udp://${this.url.hostname}:${9001+((tracker_stream-1)*2)}`
 				];
 
 				this.video_streams[tracker_stream] = spawn('ffmpeg', args);
-				// Because the tracker has the tendancy to NOT supply enough data per frame 
+				// Because the tracker has the tendancy to NOT supply enough data per frame
 				// ffmpeg closes. This listener will restart ffmpeg when it closes on its own.
 				this.video_streams[tracker_stream].on('exit', (code) => {
 					this.log.output("Restarting tracker video!", code);
@@ -83,31 +83,33 @@ class videoStream extends Neuron {
 				break;
 			case "claw":
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
-					'-f', 'video4linux2', 
-					'-r', '20', 
-					'-s', '1280x720', 
-					'-input_format', 'mjpeg', 
-					'-i', '/dev/video-claw', 
-					'-vcodec', 'copy', 
-					'-an', 
-					'-q', '0', 
-					'-f', 'mjpeg', 
+					'-f', 'video4linux2',
+					'-r', '20',
+					'-s', '1280x720',
+					'-input_format', 'mjpeg',
+					'-i', '/dev/video-claw',
+					'-vcodec', 'copy',
+					'-an',
+					'-q', '0',
+					'-f', 'mjpeg',
 					`udp://${this.url.hostname}:${9001+((input.data.stream-1)*2)}`
 				]);
 				break;
 			case "killall":
 				spawn('pkill', ['-9', '-f', '-e', 'ffmpeg']);
+				this.video_streams = [];
+				return;
 				break;
 			default:
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
-					'-f', 'video4linux2', 
-					'-s', '1280x720', 
-					'-input_format', 'h264', 
-					'-i', `/dev/video-${input.data.camera}`, 
-					'-vcodec', 'copy', 
-					'-an', 
-					'-f', 'mpegts', 
-					'-copyts', 
+					'-f', 'video4linux2',
+					'-s', '1280x720',
+					'-input_format', 'h264',
+					'-i', `/dev/video-${input.data.camera}`,
+					'-vcodec', 'copy',
+					'-an',
+					'-f', 'mpegts',
+					'-copyts',
 					`udp://${this.url.hostname}:${9001+((input.data.stream-1)*2)}`
 				]);
 				break;
@@ -120,17 +122,13 @@ class videoStream extends Neuron {
 		});
 	}
 	spawnAudio() {
-		this.audio_stream = spawn('ffmpeg', [
-			'-re',
-			'-f', 'alsa',
-			'-ac', '2',
-			'-i', 'hw:CARD=C920',
-			'-acodec', 'libmp3lame',
-			'-b:a', '128k',
-			'-vn',
-			'-f', 'rtp', 
-			`rtp://${this.url.hostname}:9008`
-		]);
+		this.audio_stream = spawn('sh', [ `${__dirname}/audio-script.sh`, this.url.hostname ]);
+		this.audio_stream.stdout.on('data', (data) => {
+		  console.log(`stdout: ${data}`);
+		});
+		this.audio_stream.stderr.on('data', (data) => {
+		  console.log(`stderr: ${data}`);
+		});
 	}
 	endStream(input) {
 		if (typeof this.video_streams[input.data.stream] !== "undefined") {
@@ -139,7 +137,7 @@ class videoStream extends Neuron {
 	}
 	endAudio() {
 		if (typeof this.audio_stream !== "undefined") {
-			this.audio_stream.kill('SIGINT');
+			exec("pkill -f 'arecord -f cd -D hw:CARD=C920'");
 		}
 	}
 }
