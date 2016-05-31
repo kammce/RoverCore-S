@@ -35,7 +35,11 @@ class Scientific extends Neuron {
 		this.lid_port = new util.serial.SerialPort(LID_PATH, { baudrate: 9600 }, false);
 
 		this.sensor_port.open((err) => {});
-		this.lid_port.open((err) => {});
+		this.lid_port.open((err) => {
+			if(this.lid_port.isOpen()) {
+				this.lid_port.write('0');
+			}
+		});
 
 		this.writeScience.write('datetime, temperature, moisture\n');
 
@@ -65,12 +69,12 @@ class Scientific extends Neuron {
 		{
 			case "LID_OPEN":
 				if(this.lid_port.isOpen()) {
-					this.lid_port.write("1\r\n");
+					this.lid_port.write("1");
 				}
 				break;
 			case "LID_CLOSE":
 				if(this.lid_port.isOpen()) {
-					this.lid_port.write("0\r\n");
+					this.lid_port.write("0");
 				}
 				break;
 			default:

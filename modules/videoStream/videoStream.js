@@ -53,22 +53,24 @@ class videoStream extends Neuron {
 			this.video_streams[input.data.stream].kill('SIGINT');
 		}
 		switch(input.data.camera) {
+			case "science":
 			case "tracker":
 				var tracker_stream = input.data.stream;
 				var args = [
-					'-f', 'video4linux2', 
-					'-s', '1280x720', 
-					'-i', '/dev/video-tracker', 
-					'-vcodec', 'mjpeg', 
-					'-an', 
-					'-q', '0', 
-					'-r', '20', 
-					'-f', 'mjpeg', 
+					'-f', 'video4linux2',
+					'-s', '1280x720',
+					'-i', `/dev/video-${input.data.camera}`,
+					'-vcodec', 'mjpeg',
+					'-an',
+					'-q', '0',
+					'-r', '20',
+					'-f', 'mjpeg',
+					'-s', '1280x720',
 					`udp://${this.url.hostname}:${9001+((tracker_stream-1)*2)}`
 				];
 
 				this.video_streams[tracker_stream] = spawn('ffmpeg', args);
-				// Because the tracker has the tendancy to NOT supply enough data per frame 
+				// Because the tracker has the tendancy to NOT supply enough data per frame
 				// ffmpeg closes. This listener will restart ffmpeg when it closes on its own.
 				this.video_streams[tracker_stream].on('exit', (code) => {
 					this.log.output("Restarting tracker video!", code);
@@ -81,15 +83,15 @@ class videoStream extends Neuron {
 				break;
 			case "claw":
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
-					'-f', 'video4linux2', 
-					'-r', '20', 
-					'-s', '1280x720', 
-					'-input_format', 'mjpeg', 
-					'-i', '/dev/video-claw', 
-					'-vcodec', 'copy', 
-					'-an', 
-					'-q', '0', 
-					'-f', 'mjpeg', 
+					'-f', 'video4linux2',
+					'-r', '20',
+					'-s', '1280x720',
+					'-input_format', 'mjpeg',
+					'-i', '/dev/video-claw',
+					'-vcodec', 'copy',
+					'-an',
+					'-q', '0',
+					'-f', 'mjpeg',
 					`udp://${this.url.hostname}:${9001+((input.data.stream-1)*2)}`
 				]);
 				break;
@@ -100,14 +102,14 @@ class videoStream extends Neuron {
 				break;
 			default:
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
-					'-f', 'video4linux2', 
-					'-s', '1280x720', 
-					'-input_format', 'h264', 
-					'-i', `/dev/video-${input.data.camera}`, 
-					'-vcodec', 'copy', 
-					'-an', 
-					'-f', 'mpegts', 
-					'-copyts', 
+					'-f', 'video4linux2',
+					'-s', '1280x720',
+					'-input_format', 'h264',
+					'-i', `/dev/video-${input.data.camera}`,
+					'-vcodec', 'copy',
+					'-an',
+					'-f', 'mpegts',
+					'-copyts',
 					`udp://${this.url.hostname}:${9001+((input.data.stream-1)*2)}`
 				]);
 				break;
