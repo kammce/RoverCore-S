@@ -77,16 +77,23 @@ class Arm extends Neuron {
 		return Math.round(output);
 	}
 	react(input) {
-		this.arm.rotonda = this.map(input.rotonda, -360, 360, 1, 999); // THIS IS STILL WRONG! THE DIRECTION IS 180 OFF!
-		var elbow = Math.abs(360-input.base);
-		this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999); // 0 is down, 999 is up
-		var pitch_angle = 270-(90-input.pitch); // [-90 (pitch up), 90, (pitch down)]
-		this.arm.pitch = this.map(pitch_angle, 1, 270, 1, 270);
-		this.arm.method = input.method; // is what it is
-		this.arm.roll = this.map(input.roll, 1, 360, 1, 360); // used to clamp
-		this.arm.claw = this.map(input.claw, 1, 999, 1, 999); // used to clamp
-		this.arm.laser = input.laser;
-
+		if(input.hasOwnProperty("mimic")) {
+			this.arm.rotonda = this.map(input.rotonda, 1, 360, 1, 999);
+			this.arm.base = this.map(input.rotonda, 1, 360, 1, 999);
+			this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999);
+			this.arm.pitch = this.map(input.pitch, 1, 270, 1, 270);
+		} else {
+			//this.arm.rotonda = this.map(input.rotonda, -360, 360, 1, 999);
+			//var base = Math.abs(360-input.base);
+			//this.arm.base = base;
+			//this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999); // 0 is down, 999 is up
+			//var pitch_angle = 270-(90-input.pitch); // [-90 (pitch up), 90, (pitch down)]
+			//this.arm.pitch = this.map(pitch_angle, 1, 270, 1, 270);
+			this.arm.method = input.method; // is what it is
+			this.arm.roll = this.map(input.roll, 1, 360, 1, 360); // used to clamp
+			this.arm.claw = this.map(input.claw, 1, 999, 1, 999); // used to clamp
+			this.arm.laser = input.laser;
+		}
 		//C:999,500,500,180,1,180,500,1E
 		var command = `C:${this.arm.rotonda},${this.arm.base},${this.arm.elbow},${this.arm.pitch},${this.arm.method},${this.arm.roll},${this.arm.claw},${this.arm.laser}E\n`;
 		//this.log.output("C:999,500,500,180,1,180,500,1E\n");
