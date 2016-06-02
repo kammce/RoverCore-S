@@ -79,9 +79,10 @@ class Arm extends Neuron {
 	react(input) {
 		if(input.hasOwnProperty("mimic")) {
 			this.arm.rotonda = this.map(input.rotonda, 1, 360, 1, 999);
-			this.arm.base = this.map(input.rotonda, 1, 360, 1, 999);
-			this.arm.elbow = this.map(input.elbow, 1, 360, 1, 999);
-			this.arm.pitch = this.map(input.pitch, 1, 270, 1, 270);
+			this.arm.base = this.map(input.base, 60, 190, 1, 999);
+			this.arm.elbow = this.map(input.elbow, 70, 220, 1, 999);
+			var pitch_angle = Math.abs(360-input.pitch);
+			this.arm.pitch = this.map(pitch_angle, 120, 240, 1, 270);
 		} else {
 			//this.arm.rotonda = this.map(input.rotonda, -360, 360, 1, 999);
 			//var base = Math.abs(360-input.base);
@@ -94,13 +95,14 @@ class Arm extends Neuron {
 			this.arm.claw = this.map(input.claw, 1, 999, 1, 999); // used to clamp
 			this.arm.laser = input.laser;
 		}
-		//C:999,500,500,180,1,180,500,1E
+		//C:500,500,500,180,1,180,500,1E
 		var command = `C:${this.arm.rotonda},${this.arm.base},${this.arm.elbow},${this.arm.pitch},${this.arm.method},${this.arm.roll},${this.arm.claw},${this.arm.laser}E\n`;
-		//this.log.output("C:999,500,500,180,1,180,500,1E\n");
-		//this.port.write("C:999,500,500,180,1,180,500,1E\n");
-		this.log.output(command);
-		this.port.write(command);
-
+		if(this.port.isOpen()) {
+			//this.log.output("C:999,500,500,180,1,180,500,1E\n");
+	 		// this.port.write("C:500,500,500,180,1,180,500,1E\n");
+			this.log.output(command);
+			this.port.write(command);
+		}
 		this.model.set('ArmPosition', command);
 	}
 	halt() {
