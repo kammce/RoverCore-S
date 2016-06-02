@@ -35,7 +35,7 @@ class DriveSystem extends Neuron {
                     parent.modeOld = parent.mode;
                 }
                 if((parent.speed !== parent.speedOld) || (parent.angle !== parent.angleOld)){
-                        var speed_str = 'S' + zeroPad(parent.speed, 3) + ',' + zeroPad(parent.angle, 3) +"E" + "\n";
+                        var speed_str = 'S' + parent.speed + ',' + parent.angle +"E" + "\n";
                         parent.log.output("speed_str = ", speed_str);
                         parent.port.write(speed_str, function(err, results) {});
                         parent.speedOld = parent.speed;
@@ -101,8 +101,8 @@ class DriveSystem extends Neuron {
         });
         // Handle Error events by sending them back to mission control
         this.port.on("err", (err) => {
-            this.log.output("Communication error with /dev/driveSystemMCU");
-            this.feedback("Communication error with /dev/driveSystemMCU");
+            this.log.output("Communication error with ", FIST_PATH);
+            this.feedback("Communication error with ", FIST_PATH);
         });
     }
     react(input) {
