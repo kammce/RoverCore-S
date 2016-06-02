@@ -30,13 +30,12 @@ class DriveSystem extends Neuron {
         var sendState = function () {
             if(parent.port.isOpen()) {
                 if(parent.mode !== parent.modeOld){
-                    parent.log.output('M' + parent.mode + "E");
-                    parent.port.write('M' + parent.mode + "E" + "\n");
+                    parent.log.output(`M${parent.mode}E`);
+                    parent.port.write(`M${parent.mode}E\n`);
                     parent.modeOld = parent.mode;
                 }
                 if((parent.speed !== parent.speedOld) || (parent.angle !== parent.angleOld)){
-                        var speed_str = 'S' + parent.speed + ',' + parent.angle +"E" + "\n";
-                        parent.log.output("speed_str = ", speed_str);
+                        var speed_str = `S${parent.speed},${parent.angle}E\n`;
                         parent.port.write(speed_str, function(err, results) {});
                         parent.speedOld = parent.speed;
                         parent.angleOld = parent.angle;

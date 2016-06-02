@@ -54,7 +54,7 @@ class videoStream extends Neuron {
 		}
 		switch(input.data.camera) {
 			case "science":
-			case "tracker":
+			//case "tracker":
 				var tracker_stream = input.data.stream;
 				var args = [
 					'-f', 'video4linux2',
@@ -124,10 +124,10 @@ class videoStream extends Neuron {
 	spawnAudio() {
 		this.audio_stream = spawn('sh', [ `${__dirname}/audio-script.sh`, this.url.hostname ]);
 		this.audio_stream.stdout.on('data', (data) => {
-		  console.log(`stdout: ${data}`);
+		  //console.log(`stdout: ${data}`);
 		});
 		this.audio_stream.stderr.on('data', (data) => {
-		  console.log(`stderr: ${data}`);
+		  //console.log(`stderr: ${data}`);
 		});
 	}
 	endStream(input) {

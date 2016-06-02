@@ -18,17 +18,17 @@ class SensorSuite extends Neuron {
 
         //When only using one chip, comment out all lines related to "mpu2"
         this.mpu = new mpu9250(0x68, this.i2c, this.log);
-        this.mpu2 = new mpu9250(0x69, this.i2c, this.log);
+        //this.mpu2 = new mpu9250(0x69, this.i2c, this.log);
         var parent = this;
         parent.mpu.wakeUp();
-        parent.mpu2.wakeUp();
+        //parent.mpu2.wakeUp();
         parent.model.registerMemory('MPU');
-        parent.model.registerMemory('MPU2');
+        //parent.model.registerMemory('MPU2');
         var update = setInterval(function() {
             parent.mpu.readData();
             parent.updateModel();
-            parent.mpu2.readData();
-            parent.updateModel2();
+            //parent.mpu2.readData();
+            //parent.updateModel2();
             // console log for debugging purposes
             // parent.log.output("\nChip1:\n",parent.model.get('MPU'));
             // parent.log.output("\nChip2:\n",parent.model.get('MPU'));
