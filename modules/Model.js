@@ -5,29 +5,34 @@ class Model {
 		structure = {
 			"<registered key>": {
 				timestamp: <long int>
-				value: <any data type>	
+				value: <any data type>
 			},
 			...
 		}
 	*/
-	constructor(feedback) {
+	constructor(feedback)
+	{
 		// unit is milliseconds
 		this.feedback = feedback;
 		this.epoch = (new Date()).getTime();
 		this.database = {};
 	}
-	currentTime() {
+	currentTime()
+	{
 		return ((new Date()).getTime());
 	}
-	registerMemory(key) {
+	registerMemory(key)
+	{
 		this.database[key] = {
 			timestamp: this.currentTime(),
 			value: undefined
 		};
 		return true;
 	}
-	set(key, value) {
-		if(this.database.hasOwnProperty(key)) {
+	set(key, value)
+	{
+		if(this.database.hasOwnProperty(key))
+		{
 			this.database[key] = {
 				timestamp: this.currentTime(),
 				value: value
@@ -36,26 +41,36 @@ class Model {
 			realtime_reply[key] = this.database[key];
 			this.feedback("model", realtime_reply);
 			return true;
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
-	get(key) {
-		if(this.database.hasOwnProperty(key)) {
+	get(key)
+	{
+		if(this.database.hasOwnProperty(key))
+		{
 			return this.database[key]['value'];
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
-	getMemory(timestamp) {
-		if(typeof timestamp === 'undefined') {
+	getMemory(timestamp)
+	{
+		if(typeof timestamp === 'undefined' || timestamp === 0)
+		{
 			return this.database;
-		} else if(timestamp === 0) {
-			return this.database;
-		} else {
+		}
+		else
+		{
 			var latest_database = {};
-			for (var memory in this.database) {
-				if(this.database[memory]['timestamp'] >= timestamp) {
+			for (var memory in this.database)
+			{
+				if(this.database[memory]['timestamp'] >= timestamp)
+				{
 					// copy memory to latest_database
 					latest_database[memory] = this.database[memory];
 				}

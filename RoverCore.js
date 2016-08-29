@@ -30,11 +30,6 @@ OPTIONS
 			  Isolate a particular lobe. For a single module, you need
 			  only put in the name. List of lobes must be comma
 			  seperated list without spaces.
-	   -p, --i2cport "<port number>"
-			  Select the I2C port that the device will use. If -1 is used,
-			  the I2C library will be replaced with an empty function This
-			  will cause the modules that use them to fail at load.
-			  Defaults to 1
 `);
 	process.exit();
 }
@@ -71,14 +66,6 @@ if(process.argv.indexOf("-i") != -1) {
 } else if(process.argv.indexOf("--isolate") != -1) {
 	isolation = process.argv[process.argv.indexOf("--isolate")+1];
 	console.log(`Attempting to isolate ${isolation}`);
-}
-// Check for -p/--i2cport argument
-if(process.argv.indexOf("-p") != -1) {
-	i2cport = process.argv[process.argv.indexOf("-p")+1];
-	console.log(`Using i2c port ${i2cport}`);
-} else if(process.argv.indexOf("--i2cport") != -1) {
-	i2cport = process.argv[process.argv.indexOf("--i2cport")+1];
-	console.log(`Using i2c port ${i2cport}`);
 }
 
 console.log(`Setting up socket communication on ${target}`);

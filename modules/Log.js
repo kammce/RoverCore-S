@@ -1,10 +1,14 @@
 "use strict";
 /* Code is based off of http://seanmonstar.com/post/56448644049/consolelog-all-the-things. Retreived October 11th, 2015 */
 
-// var log = function hijacked_log(level) {
-//   if (arguments.length > 1 && level in this) {
+// var log = function hijacked_log(level)
+//   {
+//   if (arguments.length > 1 && level in this)
+//   {
 //     console.log.apply(this, arguments);
-//   } else {
+//   }
+//   else
+//   {
 //     var args = Array.prototype.slice.call(arguments);
 //     args.unshift(`[${Date().slice(0,-15)}][LOBE-NAME] :: `);
 //     console.log.apply(this, args);
@@ -15,17 +19,22 @@ var Console = require('console').Console;
 var colors = require('colors/safe');
 var fs = require('fs');
 
-/**** Prototype Field ****/
-class Log {
-	constructor(module_name, output_color) {
+class Log
+{
+	constructor(module_name, output_color)
+	{
 		this.module = module_name;
 		// check to see if the color exists and it is a function
-		if(typeof colors[output_color] === "function") {
-			// use that function to color the output
+		// use that function to color the output
+		if(typeof colors[output_color] === "function")
+		{
 			this.color = colors[output_color];
-		} else {
+		}
+		else
+		{
 			// otherwise, no color, input === output
-			this.color = function (input_str) {
+			this.color = function (input_str)
+			{
 				return input_str;
 			};
 		}
@@ -34,7 +43,8 @@ class Log {
 		this.constructor._mutes[this.module] = false;
 	}
 	// Output to stdout as well as the static log file
-	output() { // takes infinite arguments
+	output()
+	{ // takes infinite arguments
 		var console_args = Array.prototype.slice.call(arguments);
 		var journal_args = Array.prototype.slice.call(arguments);
 		// Add date, module and color into the console's arguments
@@ -44,28 +54,34 @@ class Log {
 			)
 		);
 		// If 'color_in_file' is true, then add the color commands into the write stream
-		if(this.constructor.color_in_file) {
+		if(this.constructor.color_in_file)
+		{
 			journal_args.unshift(
 				this.color(
 					`[${Date().slice(0,-15)}][${this.module}] ::`
 				)
 			);
-		} else {
+		}
+		else
+		{
 			journal_args.unshift(`[${Date().slice(0,-15)}][${this.module}] ::`);
 		}
 		// Output message to journal.
 		this.constructor.journal.log.apply(this, journal_args);
 		// If this modules is not muted then output to console.
-		if(!this.constructor._mutes[this.module]) {
+		if(!this.constructor._mutes[this.module])
+		{
 			console.log.apply(this, console_args);
 		}
 	}
 	// Mute this module
-	mute() {
+	mute()
+	{
 		this.constructor._mutes[this.module] = true;
 	}
 	// Unmute this module
-	unmute() {
+	unmute()
+	{
 		this.constructor._mutes[this.module] = false;
 	}
 }
@@ -73,7 +89,8 @@ class Log {
 /**** Static Field ****/
 Log.color_in_file = false;
 
-Log.initialize = function() {
+Log.initialize = function()
+{
 	var dir = './logs';
 	if (!fs.existsSync(dir)) { fs.mkdirSync(dir); }
 	// Name of stdout file
@@ -93,24 +110,29 @@ Log.initialize();
 // Map of modules that can be muted
 Log._mutes = {};
 // Static method to mute a log
-Log.mute = function(module_name) {
+Log.mute = function(module_name)
+{
 	// Check if log module name exists in _mutes structure
-	if(Log._mutes.hasOwnProperty(module_name)) {
+	if(Log._mutes.hasOwnProperty(module_name))
+	{
 		Log._mutes[module_name] = true;
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 };
 // Static method to unmute an log
-Log.unmute = function(module_name) {
+Log.unmute = function(module_name)
+{
 	// Check if log module name exists in _mutes structure
-	if(Log._mutes.hasOwnProperty(module_name)) {
+	if(Log._mutes.hasOwnProperty(module_name))
+	{
 		Log._mutes[module_name] = false;
 		return true;
-	} else {
-		return false;
 	}
+	return false;
 };
 
 module.exports = Log;

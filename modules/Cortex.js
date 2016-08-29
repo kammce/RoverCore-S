@@ -1,21 +1,27 @@
 'use strict';
 
-class Cortex {
-	constructor(controls) {
+class Cortex
+{
+	constructor(controls)
+	{
 		console.log("STARTING Rover Core!");
 		var parent = this;
 
 		this.simulate = controls.simulate;
 		this.connection = controls.connection;
 		/** Standard feedback method back to Server **/
-		var parent = this;
-		this.feedback = function(lobe_name) {
+		this.feedback = function(lobe_name)
+		{
 			var output = "";
-			for (var i = 1; i < arguments.length; i++) {
+			for (var i = 1; i < arguments.length; i++)
+			{
 				//console.log(arguments[i]);
-				if(typeof arguments[i] === "object") {
+				if(typeof arguments[i] === "object")
+				{
 					output += JSON.stringify(arguments[i])+"\n";
-				} else {
+				}
+				else
+				{
 					output += arguments[i]+"\n";
 				}
 			}
@@ -30,31 +36,30 @@ class Cortex {
 		this.LOG = require('./Log');
 		this.MODEL = require('./Model');
 		var Spine = new require('./Spine');
-		this.SPINE = new Spine();
+		this.SPINE = undefined;
 		this.SERIALPORT = require('serialport');
-		this.I2C = function () {};
 
 		console.log("Running Systems Check...");
 		var os = require('os');
-		var led_state = 0;
 
-		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone') {
+		if(os.hostname() === 'odroid' || os.hostname() === 'beaglebone')
+		{
 			console.log(`System Hostname is on ${os.hostname()}`);
-			if(!controls.simulate && controls.i2cport != -1) {
-				console.log("Connecting to i2c-bus");
-				var I2C_BUS = require('i2c-bus');
-				this.I2C = I2C_BUS.openSync(controls.i2cport);
-			}
+			this.SPINE = new Spine();
 			// Setup SPINE
 			this.SPINE.expose(13, "OUTPUT");
-			setInterval(() => {
-				var switcher = (led_state == 5 || led_state == 7) ? 0 : 1;
-				++led_state;
-				led_state = (led_state > 7) ? 0 : led_state;
+			setInterval(() =>
+			{
+				this.led_state = 0;
+				var switcher = (led_state === 5 || led_state === 7) ? 0 : 1;
+				++this.led_state;
+				this.led_state = (this.led_state > 7) ? 0 : this.led_state;
 				this.SPINE.digitalWrite(13, switcher);
 			}, 50);
-		} else {
-			console.log("Running on none Embedded platform. I2C ports will not be used!");
+		}
+		else
+		{
+			console.log("Running on none Embedded platform. GPIO ports will not be used!");
 		}
 
 		// Store Singleton version of Classes
@@ -71,76 +76,99 @@ class Cortex {
 		/** Connect to Signal Relay **/
 		// Cortex should act as a client and connect to Signal
 		// Relayusing primus.js and websockets as the transport.
-		this.connection.on('open', () => {
-			this.connection.write({
+		this.connection.on('open', () =>
+		{
+			this.connection.write(
+			{
 				intent: 'REGISTER',
-				info: {
+				info:
+				{
 					entity: 'cortex',
 					password: 'destroyeveryone'
 				}
 			});
 			parent.log.output("CONNECTED! I AM HERE!");
 		});
-		this.connection.on('data', (data) => {
+		this.connection.on('data', (data) =>
+		{
 			this.handleIncomingData(data);
 		});
-		this.connection.on('error',  (err) => {
+		this.connection.on('error',  (err) =>
+		{
 			this.log.output('CONNECTION error!', err.stack);
 		});
-		this.connection.on('reconnect', () => {
+		this.connection.on('reconnect', () =>
+		{
 			this.log.output('RECONNECTION attempt started!');
 		});
-		this.connection.on('reconnect scheduled', (opts) => {
+		this.connection.on('reconnect scheduled', (opts) =>
+		{
 			this.log.output(`Reconnecting in ${opts.scheduled} ms`);
 			this.log.output(`This is attempt ${opts.attempt} out of ${opts.retries}`);
 		});
-		this.connection.on('reconnected', (opts) => {
+		this.connection.on('reconnected', (opts) =>
+		{
 			this.log.output(`It took ${opts.duration} ms to reconnect`);
 		});
-		this.connection.on('reconnect timeout', (err) => {
+		this.connection.on('reconnect timeout', (err) =>
+		{
 			this.log.output(`Timeout expired: ${err.message}`);
 		});
-		this.connection.on('reconnect failed', (err) => {
+		this.connection.on('reconnect failed', (err) =>
+		{
 			this.log.output(`The rethis.connection failed: ${err.message}`);
 		});
-		this.connection.on('end', () => {
+		this.connection.on('end', () =>
+		{
 			this.log.output('Connection closed');
 		});
 		// Handle Idling Lobes that have not gotten a command
-		this.idling_loop = setInterval(() => {
+		this.idling_loop = setInterval(() =>
+		{
 			parent.handleIdleStatus();
 		}, 100);
 	}
-	handleIncomingData(data) {
+	handleIncomingData(data)
+	{
 		var parent = this;
 		// Log any data coming in
 		this.log.output(`INCOMING: `, data);
-		try {
-			if(data.hasOwnProperty('target') &&
-				data.hasOwnProperty('command')) {
-				if(this.lobe_map.hasOwnProperty(data['target'])) {
-					setImmediate(function() {
+		try
+		{
+			if(data.hasOwnProperty('target') && data.hasOwnProperty('command'))
+			{
+				if(this.lobe_map.hasOwnProperty(data['target']))
+				{
+					setImmediate(function()
+					{
 						parent.time_since_last_command[data['target']] = Date.now();
 						parent.lobe_map[data['target']]._react(data['command']);
 					});
 					return;
 				}
 				throw new Error(`Target ${data['target']} does not exist in lobe_map.`);
-			} else if(data.hasOwnProperty('target') &&
-				data.hasOwnProperty('connection')) {
-				switch(data['connection']) {
+			}
+			else if(data.hasOwnProperty('target') && data.hasOwnProperty('connection'))
+			{
+				switch(data['connection'])
+				{
 					case "disconnected":
-						for(let lobe in this.lobe_map) {
-							if(this.lobe_map[lobe]['mission_controller'] === data['target']) {
+						for(let lobe in this.lobe_map)
+						{
+							if(this.lobe_map[lobe]['mission_controller'] === data['target'])
+							{
 								this.lobe_map[lobe]._halt();
 								return;
 							}
 						}
 						break;
 					case "connected":
-						for(let lobe in this.lobe_map) {
-							if(typeof this.lobe_map[lobe]['mission_controller'] === "string") {
-								if(this.lobe_map[lobe]['mission_controller'] === data['target']) {
+						for(let lobe in this.lobe_map)
+						{
+							if(typeof this.lobe_map[lobe]['mission_controller'] === "string")
+							{
+								if(this.lobe_map[lobe]['mission_controller'] === data['target'])
+								{
 									this.lobe_map[lobe]._resume();
 									return;
 								}
@@ -151,33 +179,46 @@ class Cortex {
 						throw new Error(`Connection message must be 'connected' or 'disconnected', given ${data['connection']}.`);
 				}
 				throw new Error(`Target ${data['target']} is not associated with any lobes.`);
-			} else {
+			}
+			else
+			{
 				throw new Error(`Incoming data did not contain target and command/connection properties.`);
 			}
-		} catch(e) {
+		}
+		catch(e)
+		{
 			this.log.output('INVALID Data: ', e);
 		}
 	}
-	handleIdleStatus() {
-		for(var lobe in this.time_since_last_command) {
+	handleIdleStatus()
+	{
+		for(var lobe in this.time_since_last_command)
+		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_time']) {
+			if(delta >= this.lobe_map[lobe]['idle_time'])
+			{
 				this.lobe_map[lobe]._idle();
 			}
 		}
 	}
-	upcall(command) {
-		var haltAll = function() {
-			for(var lobe in this.time_since_last_command) {
+	upcall(command)
+	{
+		var haltAll = function()
+		{
+			for(var lobe in this.time_since_last_command)
+			{
 				this.lobe_map[lobe]._halt();
 			}
 		};
-		var idleAll = function() {
-			for(var lobe in this.time_since_last_command) {
+		var idleAll = function()
+		{
+			for(var lobe in this.time_since_last_command)
+			{
 				this.lobe_map[lobe]._idle();
 			}
 		};
-		switch(command) {
+		switch(command)
+		{
 			case "HALTALL":
 				haltAll();
 				break;
@@ -196,16 +237,19 @@ class Cortex {
 				break;
 		}
 	}
-	loadLobe(directory) {
+	loadLobe(directory)
+	{
 		var fs = require('fs');
 		var config, Lobe;
-		try {
+		try
+		{
 			// Read config.json file, parse it, and return config object
 			config = JSON.parse(fs.readFileSync(`./modules/${directory}/config.json`));
 			// check if config object has the right properties
 			if(typeof config['lobe_name'] === "string" &&
 				typeof config['log_color'] === "string" &&
-				typeof config['idle_time'] === "number") {
+				typeof config['idle_time'] === "number")
+			{
 				// Adding source code path to config object
 				config['source_path'] = `./${directory}/${config['lobe_name']}`;
 				// Generate Logger
@@ -221,7 +265,6 @@ class Cortex {
 					"feedback": this.feedback,
 					"log": log,
 					"idle_timeout": config['idle_time'],
-					"i2c": this.I2C,
 					"model": this.Model,
 					"serial": this.SERIALPORT,
 					"spine": this.SPINE,
@@ -238,43 +281,51 @@ class Cortex {
 				this.log.output(`Lobe ${config['lobe_name']} loaded SUCCESSFULLY`);
 				// Return constructed lobe object
 				return module;
-			} else {
+			}
+			else
+			{
 				throw new Error(`Failed to load configuration file for ${ directory }`);
 			}
-		} catch(e) {
+		}
+		catch(e)
+		{
 			// Log that a Lobe did not load properly
 			this.log.output(`Lobe ${config['lobe_name']} FAILED to load`, e);
 		}
 	}
-	loadLobes(isolation) {
+	loadLobes(isolation)
+	{
 		var fs = require('fs');
 		var path = require('path');
-
 		/********************************
 		 *		Utility functions		*
 		 ********************************/
-
-		function getDirectories(srcpath) {
-			return fs.readdirSync(srcpath).filter(function(file) {
+		function getDirectories(srcpath)
+		{
+			return fs.readdirSync(srcpath).filter(function(file)
+			{
 				return fs.statSync(path.join(srcpath, file)).isDirectory();
 			});
 		}
 		var modules = getDirectories("./modules");
-
 		// Take the intersection of the modules in the modules folder and the isolation arguments
-		if(typeof isolation === "string") {
+		if(typeof isolation === "string")
+		{
 			isolation = isolation.replace(/ /g,'').split(',');
 			// Using filter and indexOf to create a
 			// set intersection between isolation and modules
-			modules = isolation.filter(function(n) {
-				return modules.indexOf(n) != -1;
+			modules = isolation.filter(function(n)
+			{
+				return modules.indexOf(n) !== -1;
 			});
 		}
-		if(modules.length === 0) {
+		if(modules.length === 0)
+		{
 			this.log.output("No modules found, exiting RoverCore");
 			process.exit();
 		}
-		for (var i = 0; i < modules.length; i++) {
+		for (var i = 0; i < modules.length; i++)
+		{
 			var lobe = this.loadLobe(modules[i]);
 			// skip lobe if it returns undefined
 			if(typeof lobe === "undefined") { continue; }

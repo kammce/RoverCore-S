@@ -3,7 +3,8 @@
 var Neuron = require('../Neuron');
 
 class Simulation extends Neuron {
-    constructor(util) {
+    constructor(util)
+    {
         super(util);
         this.name = util.name;
         this.feedback = util.feedback;
@@ -11,21 +12,26 @@ class Simulation extends Neuron {
         this.idle_time = util.idle_timeout;
         this.i2c = util.i2c;
         this.model = util.model;
-        // Construct Class here
+        /* Construct Class After This Points
+        -------------------------------------- */
     }
-    react(input) {
+    react(input)
+    {
         this.log.output(`SIM REACTING ${this.name}: `, input);
         this.feedback(this.name ,`SIM REACTING ${this.name}: `, input);
     }
-    halt() {
+    halt()
+    {
         this.log.output(`SIM HALTING ${this.name}`);
         this.feedback(this.name ,`SIM HALTING ${this.name}`);
     }
-    resume() {
+    resume()
+    {
         this.log.output(`SIM RESUMING ${this.name}`);
         this.feedback(this.name ,`SIM RESUMING ${this.name}`);
     }
-    idle() {
+    idle()
+    {
         this.log.output(`SIM IDLING ${this.name}`);
         this.feedback(this.name ,`SIM IDLING ${this.name}`);
     }

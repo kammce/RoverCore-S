@@ -8,13 +8,13 @@ describe('Testing Cortex Class', function () {
 	var Cortex = require('../../../modules/Cortex');
 	var server = http.createServer();
 
-	var primus = new Primus(server, { 
-	  transformer: 'websockets' 
+	var primus = new Primus(server, {
+	  transformer: 'websockets'
 	});
 
 	server.listen(9999);
 
-	var Socket = new Primus.createSocket();	
+	var Socket = new Primus.createSocket();
 	var connection, cortex, spark;
 
 	describe('Cortex should initialize', function () {
@@ -31,10 +31,10 @@ describe('Testing Cortex Class', function () {
 					// Skip the messages about Cortex modules IDLEing themselves. Look just for ones with "info" attributes
 					if(data.hasOwnProperty("intent")) {
 						expect(data).to.eql({
-							intent: 'REGISTER', 
+							intent: 'REGISTER',
 							info: {
-								entity: 'cortex', 
-								password: 'destroyeveryone' 
+								entity: 'cortex',
+								password: 'destroyeveryone'
 							}
 						});
 						done();
@@ -48,7 +48,12 @@ describe('Testing Cortex Class', function () {
 					retries: Infinity // Number: How many times we shoult try to reconnect.
 				}
 			});
-			cortex = new Cortex(connection, true);
+			var controls = {
+				"connection": connection,
+				"simulate": false,
+				"isolation": false
+			}
+			cortex = new Cortex(controls, true);
 		});
 		it('#loadLobes should load modules found in modules folder', function() {
 			// Load protolobe config file
