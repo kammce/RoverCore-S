@@ -54,38 +54,25 @@ class videoStream extends Neuron {
 		}
 		switch(input.data.camera) {
 			case "science":
-			case "tracker":
-				var tracker_stream = input.data.stream;
 				var args = [
 					'-f', 'video4linux2',
-					'-s', '1280x720',
+					'-s', '640x480',
 					'-i', `/dev/video-${input.data.camera}`,
 					'-vcodec', 'mjpeg',
 					'-an',
 					'-q', '0',
 					'-r', '20',
 					'-f', 'mjpeg',
-					'-s', '1280x720',
-					`udp://${this.url.hostname}:${9001+((tracker_stream-1)*2)}`
+					'-s', '800x600',
+					`udp://${this.url.hostname}:${9001+((input.data.stream-1)*2)}`
 				];
-
-				this.video_streams[tracker_stream] = spawn('ffmpeg', args);
-				// Because the tracker has the tendancy to NOT supply enough data per frame
-				// ffmpeg closes. This listener will restart ffmpeg when it closes on its own.
-				this.video_streams[tracker_stream].on('exit', (code) => {
-					this.log.output("Restarting tracker video!", code);
-					//this.video_streams[tracker_stream] = spawn('ffmpeg', args);
-					// this will restart tracker
-					if(code !== 255) {
-						this.spawnStream(input);
-					}
-				});
+				this.video_streams[input.data.stream] = spawn('ffmpeg', args);
 				break;
 			case "claw":
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
 					'-f', 'video4linux2',
 					'-r', '20',
-					'-s', '1280x720',
+					'-s', '800x600',
 					'-input_format', 'mjpeg',
 					'-i', '/dev/video-claw',
 					'-vcodec', 'copy',
@@ -103,7 +90,7 @@ class videoStream extends Neuron {
 			default:
 				this.video_streams[input.data.stream] = spawn('ffmpeg', [
 					'-f', 'video4linux2',
-					'-s', '1280x720',
+					'-s', '800x600',
 					'-input_format', 'h264',
 					'-i', `/dev/video-${input.data.camera}`,
 					'-vcodec', 'copy',
@@ -141,5 +128,4 @@ class videoStream extends Neuron {
 		}
 	}
 }
-
 module.exports = videoStream;

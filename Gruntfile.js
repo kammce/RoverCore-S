@@ -15,6 +15,7 @@ module.exports = function(grunt) {
 				src: ['test-suite/unit/**/*.js']
 			}
 		},
+
 		jshint: {
 			options: {
 				reporter: require('jshint-stylish'),
@@ -27,11 +28,11 @@ module.exports = function(grunt) {
 				unused: true, // Warns when you define and never use your variables
 				eqeqeq: true, // Prohibits the use of == and != in favor of === and !==
 				esnext: true, // Tells JSHint that your code uses ECMAScript 6 specific syntax
-				node: true, // Defines globals available when your code is running inside of the Node 
+				node: true, // Defines globals available when your code is running inside of the Node
 				sub: true, //suppresses warnings about using [] notation when it can be expressed in dot notation: person['name'] vs. person.name.
 				globals: { // Predefine these so that JSHint does not complain about them
-					"process": true, 
-					"require": true, 
+					"process": true,
+					"require": true,
 					"global": true,
 					"module": true
 				}
@@ -41,5 +42,5 @@ module.exports = function(grunt) {
 	});
 	grunt.registerTask('default', ['jshint','mochaTest']);
 	grunt.registerTask('unittest', ['mochaUnitTest']);
-	grunt.registerTask('lint', ['jshint']);	
+	grunt.registerTask('lint', ['jshint']);
 };
