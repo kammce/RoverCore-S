@@ -84,9 +84,7 @@ class GPS extends Neuron {
 			if(data.substring(0,6) === "$GPGGA"){
 				//this.log.output(data);
 				var piece = data.split(",",14);
-				if (piece[6] ==="0") {
-					console.log("NO GPS FIX");
-				}
+				if (piece[6] ==="0") {}
 				else if(piece[6] ==="1" || piece[6] ==="2") {
 					//checks for fix first (1=gps, 2=dgps)
 					var data = data;
@@ -131,7 +129,6 @@ class GPS extends Neuron {
 						 number_of_satellites: satellites
 					});
 					//this.log.output(this.model.get('GPS'));
-
 				}
 			}
 		});
