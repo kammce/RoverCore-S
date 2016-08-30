@@ -1,5 +1,4 @@
 'use strict';
-
 // Check if the -h help
 if(process.argv.indexOf("-h") != -1) {
 	console.log(`NAME
@@ -33,55 +32,41 @@ OPTIONS
 `);
 	process.exit();
 }
-
-// Loading Primus
-var Primus = require('primus');
-console.log("Loading PrimusJS");
-// Loading Cortex
+// =====================================
+// Loading Libraries
+// =====================================
+console.log("Loading Libaries");
 var Cortex = require("./modules/Cortex");
-console.log("Loading Cortex");
-
 var Socket = new Primus.createSocket();
-var simulate = false;
-var target = 'http://localhost:9000';
-var isolation;
-var connection;
-var i2cport = 3;
-// Check for -s/--simulate argument
-if(process.argv.indexOf("--simulate") != -1 || process.argv.indexOf("-s") != -1) {
-	simulate = true;
+console.log("Loading Libaries COMPLETE");
+// =====================================
+// Check Arguments
+// =====================================
+console.log("Checking Arguments");
+var config = {
+	"target": 'http://localhost:9000',
+	"connection": undefined,
+	"simulate": false,
+	"isolation": false
+};
+if(process.argv.indexOf("-s") != -1)
+{
+	config.simulate = true;
 }
-// Check for -t/--target argument
-if(process.argv.indexOf("-t") != -1) {
-	target = process.argv[process.argv.indexOf("-t")+1];
-	console.log(`Target Server = ${target}`);
-} else if(process.argv.indexOf("--target") != -1) {
-	target = process.argv[process.argv.indexOf("--target")+1];
-	console.log(`Target Server = ${target}`);
+if(process.argv.indexOf("-t") != -1)
+{
+	config.target = process.argv[process.argv.indexOf("-t")+1];
+	console.log(`Target Proxy = ${config.target}`);
+	// NOTE: Add Proxy connection here!
 }
-// Check for -i/--isolate argument
-if(process.argv.indexOf("-i") != -1) {
-	isolation = process.argv[process.argv.indexOf("-i")+1];
-	console.log(`Attempting to isolate ${isolation}`);
-} else if(process.argv.indexOf("--isolate") != -1) {
-	isolation = process.argv[process.argv.indexOf("--isolate")+1];
-	console.log(`Attempting to isolate ${isolation}`);
+if(process.argv.indexOf("-i") != -1)
+{
+	config.isolation = process.argv[process.argv.indexOf("-i")+1];
+	console.log(`Attempting to isolate ${config.isolation}`);
 }
-
-console.log(`Setting up socket communication on ${target}`);
-connection = Socket(target, {
-	reconnect: {
-		max: 2000, // Number: The max delay before we try to reconnect.
-		min: 500, // Number: The minimum delay before we try reconnect.
-		retries: Infinity // Number: How many times we shoult try to reconnect.
-	}
-});
-
+console.log("Checking Arguments COMPLETE");
+// =====================================
+// Launching Cortex
+// =====================================
 console.log(`Launching Cortex!`);
-
-new Cortex({
-	"connection": connection,
-	"simulate": simulate,
-	"isolation": isolation,
-	"i2cport": i2cport
-});
+new Cortex(config);

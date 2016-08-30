@@ -4,8 +4,8 @@ var http = require('http');
 var server = http.createServer();
 
 var Primus = require('primus');
-var primus = new Primus(server, { 
-  transformer: 'websockets' 
+var primus = new Primus(server, {
+  transformer: 'websockets'
 });
 
 primus.on('connection', function connection(spark) {

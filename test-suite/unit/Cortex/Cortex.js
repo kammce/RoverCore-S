@@ -23,37 +23,24 @@ describe('Testing Cortex Class', function () {
 				spark.on('data', function(data) {});
 			});
 		});
-		it('Should connect to dummy server on reserved port 9999', function (done) {
+		it('Should connect to RoverCore server on port 9000', function (done) {
 			this.timeout(5000);
-			primus.on('connection', function connection(spark_obj) {
-				spark = spark_obj;
-				spark.on('data', function(data) {
-					// Skip the messages about Cortex modules IDLEing themselves. Look just for ones with "info" attributes
-					if(data.hasOwnProperty("intent")) {
-						expect(data).to.eql({
-							intent: 'REGISTER',
-							info: {
-								entity: 'cortex',
-								password: 'destroyeveryone'
-							}
-						});
-						done();
-					}
-				});
-			});
-			connection = Socket('http://localhost:9999', {
+			connection = Socket('http://localhost:9000', {
 				reconnect: {
 					max: 2000, // Number: The max delay before we try to reconnect.
 					min: 500, // Number: The minimum delay before we try reconnect.
 					retries: Infinity // Number: How many times we shoult try to reconnect.
 				}
 			});
-			var controls = {
-				"connection": connection,
+			// Check that a Primus client can connect with server.
+			connection.on('open', () => { done(); });
+			var config = {
+				"target": 'http://localhost:9000',
+				"connection": undefined,
 				"simulate": false,
 				"isolation": false
-			}
-			cortex = new Cortex(controls, true);
+			};
+			cortex = new Cortex(config);
 		});
 		it('#loadLobes should load modules found in modules folder', function() {
 			// Load protolobe config file
@@ -66,6 +53,7 @@ describe('Testing Cortex Class', function () {
 			expect(cortex.lobe_map["Protolobe"].mission_controller).to.equal(config['mission_controller']);
 		});
 	});
+
 	describe('Testing #handleIncomingData()', function () {
 		var react, halt, resume, idle;
 		beforeEach(function() {
@@ -78,10 +66,9 @@ describe('Testing Cortex Class', function () {
 		it('Lobe should receive target data from server', function (done) {
 			cortex.lobe_map["Protolobe"]._react = function(data) {
 				expect(data).to.equal("coldfustion");
-				console.log("Got this!");
 				done();
 			}
-			spark.write({
+			connection.write({
 				"target": 'Protolobe',
 				"command": 'coldfustion'
 			});
@@ -92,7 +79,7 @@ describe('Testing Cortex Class', function () {
 				cortex.lobe_map["Protolobe"].state = "HALTED";
 				done();
 			}
-			spark.write({
+			connection.write({
 				"target": 'ProtolobeUser',
 				"connection": 'disconnected'
 			});
@@ -103,7 +90,7 @@ describe('Testing Cortex Class', function () {
 				cortex.lobe_map["Protolobe"].state = "RUNNING";
 				done();
 			}
-			spark.write({
+			connection.write({
 				"target": 'ProtolobeUser',
 				"connection": 'connected'
 			});
@@ -125,10 +112,10 @@ describe('Testing Cortex Class', function () {
 			resume = cortex.lobe_map["Protolobe"]._resume;
 			idle = cortex.lobe_map["Protolobe"]._idle;
 		});
-		this.timeout(6000);
-		it('Should idle Protolobe after 4000ms of time', function (done) {
+		this.timeout(4000);
+		it('Should idle Protolobe after 2000ms of time', function (done) {
 			cortex.lobe_map["Protolobe"].state = "RUNNING";
-			spark.write({
+			connection.write({
 				"target": 'Protolobe',
 				"command": 'ONLY ONE MESSAGE... SHOULD IDLE SOON.'
 			});
@@ -146,13 +133,13 @@ describe('Testing Cortex Class', function () {
 			setTimeout(function() {
 				clearInterval(send_continuously);
 				done();
-			}, 5000);
+			}, 3000);
 			var send_continuously = setInterval(function() {
-				spark.write({
+				connection.write({
 					"target": 'Protolobe',
 					"command": 'STAY UP! DO NOT IDLE!'
 				});
-			}, 1000);
+			}, 500);
 		});
 		afterEach(function() {
 			// Restore methods

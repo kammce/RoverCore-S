@@ -5,7 +5,7 @@ class Neuron
 	{
 		if( typeof util.name !== "string" ||
 			typeof util.feedback !== "function" ||
-			typeof util.color_log !== "function" )
+			typeof util.log !== "function" )
 		{
 			return false;
 		}
