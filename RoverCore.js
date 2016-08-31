@@ -37,7 +37,6 @@ OPTIONS
 // =====================================
 console.log("Loading Libaries");
 var Cortex = require("./modules/Cortex");
-var Socket = new Primus.createSocket();
 console.log("Loading Libaries COMPLETE");
 // =====================================
 // Check Arguments

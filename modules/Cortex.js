@@ -10,6 +10,9 @@ class Cortex
 		this.exec = require('child_process').exec;
 		this.lobe_map = {};
 		this.time_since_last_command = {};
+		this.Mission_Controller = {
+			spark_id: '<Mission Controller Color>'
+		};
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -26,7 +29,15 @@ class Cortex
 			this.log.output('Connection id', spark.id);
 			spark.on('data', (data) =>
 			{
-				this.handleIncomingData(data);
+				if(data.hasOwnProperty('target') && data.hasOwnProperty('command'))
+				{
+					this.handleIncomingData(data);
+					//this.handleMissionControlConnections(data);
+				}
+				else
+				{
+					this.log.output('INVALID Data: Incoming data did not contain target and command/connection properties.');
+				}
 			});
 			spark.on('end', (/*data*/) =>
 			{
@@ -98,7 +109,6 @@ class Cortex
 		// Loading modules
 		// =====================================
 		this.loadLobes(config.isolation);
-
 		// =====================================
 		// Setup Idling Timer
 		// =====================================
@@ -110,64 +120,46 @@ class Cortex
 	handleIncomingData(data)
 	{
 		var parent = this;
-		this.log.output(`INCOMING: `, data);
-		try
+		if(this.lobe_map.hasOwnProperty(data['target']))
 		{
-			if(data.hasOwnProperty('target') && data.hasOwnProperty('command'))
+			setImmediate(function()
 			{
-				if(this.lobe_map.hasOwnProperty(data['target']))
-				{
-					setImmediate(function()
-					{
-						parent.time_since_last_command[data['target']] = Date.now();
-						parent.lobe_map[data['target']]._react(data['command']);
-					});
-					return;
-				}
-				throw new Error(`Target ${data['target']} does not exist in lobe_map.`);
-			}
-			else if(data.hasOwnProperty('target') && data.hasOwnProperty('connection'))
-			{
-				switch(data['connection'])
-				{
-					case "disconnected":
-						for(let lobe in this.lobe_map)
-						{
-							if(this.lobe_map[lobe]['mission_controller'] === data['target'])
-							{
-								this.lobe_map[lobe]._halt();
-								return;
-							}
-						}
-						break;
-					case "connected":
-						for(let lobe in this.lobe_map)
-						{
-							if(typeof this.lobe_map[lobe]['mission_controller'] === "string")
-							{
-								if(this.lobe_map[lobe]['mission_controller'] === data['target'])
-								{
-									this.lobe_map[lobe]._resume();
-									return;
-								}
-							}
-						}
-						break;
-					default:
-						throw new Error(`Connection message must be 'connected' or 'disconnected', given ${data['connection']}.`);
-				}
-				throw new Error(`Target ${data['target']} is not associated with any lobes.`);
-			}
-			else
-			{
-				throw new Error(`Incoming data did not contain target and command/connection properties.`);
-			}
+				parent.time_since_last_command[data['target']] = Date.now();
+				parent.lobe_map[data['target']]._react(data['command']);
+			});
 		}
-		catch(e)
+		else
 		{
-			this.log.output('INVALID Data: ', e);
+			this.log.output(`Target ${data['target']} does not exist in lobe_map.`);
 		}
 	}
+	// handleMissionControlConnections(data)
+	// {
+	// 	var lobe_select = "";
+	// 	for(let lobe in this.lobe_map)
+	// 	{
+	// 		if(this.lobe_map[lobe]['mission_controller'] === data['target'])
+	// 		{
+	// 			lobe_select = lobe;
+	// 			break;
+	// 		}
+	// 	}
+	// 	if(lobe_select === "") {
+	// 		this.log.output(`Target ${data['target']} is not associated with any lobes.`);
+	// 		return;
+	// 	}
+	// 	switch(data['connection'])
+	// 	{
+	// 		case "disconnected":
+	// 			this.lobe_map[lobe]._halt();
+	// 			break;
+	// 		case "connected":
+	// 			this.lobe_map[lobe]._resume();
+	// 			break;
+	// 		default:
+	// 			this.log.output(`Connection message must be 'connected' or 'disconnected', given ${data['connection']}.`);
+	// 	}
+	// }
 	handleIdleStatus()
 	{
 		for(var lobe in this.time_since_last_command)

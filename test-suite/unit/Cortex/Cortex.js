@@ -73,28 +73,28 @@ describe('Testing Cortex Class', function () {
 				"command": 'coldfustion'
 			});
 		});
-		it('Lobe should halt when a mission controller disconnected signal is sent', function(done) {
-			cortex.lobe_map["Protolobe"].state = "RUNNING";
-			cortex.lobe_map["Protolobe"]._halt = function() {
-				cortex.lobe_map["Protolobe"].state = "HALTED";
-				done();
-			}
-			connection.write({
-				"target": 'ProtolobeUser',
-				"connection": 'disconnected'
-			});
-		});
-		it('Lobe should resume when a mission controller connected signal is sent', function(done) {
-			cortex.lobe_map["Protolobe"].state = "HALTED";
-			cortex.lobe_map["Protolobe"]._resume = function() {
-				cortex.lobe_map["Protolobe"].state = "RUNNING";
-				done();
-			}
-			connection.write({
-				"target": 'ProtolobeUser',
-				"connection": 'connected'
-			});
-		});
+		// it('Lobe should halt when a mission controller disconnected signal is sent', function(done) {
+		// 	cortex.lobe_map["Protolobe"].state = "RUNNING";
+		// 	cortex.lobe_map["Protolobe"]._halt = function() {
+		// 		cortex.lobe_map["Protolobe"].state = "HALTED";
+		// 		done();
+		// 	}
+		// 	connection.write({
+		// 		"target": 'ProtolobeUser',
+		// 		"connection": 'disconnected'
+		// 	});
+		// });
+		// it('Lobe should resume when a mission controller connected signal is sent', function(done) {
+		// 	cortex.lobe_map["Protolobe"].state = "HALTED";
+		// 	cortex.lobe_map["Protolobe"]._resume = function() {
+		// 		cortex.lobe_map["Protolobe"].state = "RUNNING";
+		// 		done();
+		// 	}
+		// 	connection.write({
+		// 		"target": 'ProtolobeUser',
+		// 		"connection": 'connected'
+		// 	});
+		// });
 		afterEach(function() {
 			// Restore methods
 			cortex.lobe_map["Protolobe"]._react = react;

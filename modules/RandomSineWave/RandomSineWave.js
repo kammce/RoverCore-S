@@ -31,7 +31,6 @@ class RandomSineWave extends Neuron
             time += Math.PI/freq_multiplier;
 
             parent.model.set("random", next_value); // set model random value
-            //console.log(parent.model.get("random"));
         }, sample_rate);
     }
     react() {}
