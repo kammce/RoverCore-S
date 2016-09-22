@@ -12,6 +12,7 @@ class Neuron
 		this.name = util.name;
 		this.feedback = util.feedback;
 		this.log = util.log;
+		this.controller = undefined;
 		if (typeof util.idle_timeout === 'undefined')
 		{
 			this.idle_timeout = 1000;
