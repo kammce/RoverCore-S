@@ -5,13 +5,14 @@ class Neuron
 	{
 		if( typeof util.name !== "string" ||
 			typeof util.feedback !== "function" ||
-			typeof util.color_log !== "function" )
+			typeof util.log !== "function" )
 		{
 			return false;
 		}
 		this.name = util.name;
 		this.feedback = util.feedback;
 		this.log = util.log;
+		this.controller = undefined;
 		if (typeof util.idle_timeout === 'undefined')
 		{
 			this.idle_timeout = 1000;
