@@ -11,11 +11,8 @@ describe('Testing Cortex Class', function ()
 	var Cortex = require('../../../modules/Cortex');
 	var server = http.createServer();
 	// =====================================
-	// Construct and define Primus Server
+	// Construct and define Primus client
 	// =====================================
-	var primus = new Primus(server, {
-	  transformer: 'websockets'
-	});
 	//// Listen on port 9999 at address 0.0.0.0 (which means all local addresses on the machine)
 	server.listen(9999);
 	//// Create local client socket connection
@@ -27,16 +24,8 @@ describe('Testing Cortex Class', function ()
 
 	describe('Cortex should initialize', function ()
 	{
-		after(function()
-		{
-			primus.on('connection', function connection(spark_obj)
-			{
-				spark.on('data', function(data) {});
-			});
-		});
 		it('Should connect to RoverCore server on port 9000', function (done)
 		{
-			this.timeout(5000);
 			connection = Socket('http://localhost:9000', {
 				reconnect: {
 					max: 2000, //// Number: The max delay before we try to reconnect.
@@ -73,9 +62,6 @@ describe('Testing Cortex Class', function ()
 
 	describe('Testing #handleMissionControl() Assignment', function ()
 	{
-		var status;
-		beforeEach(function() {});
-		this.timeout(4000);
 		it('Should send assign current connection as Protolobe controller', function (done)
 		{
 			//// This will send a signal to Cortex to assign this user as the controller of Protolobe.
@@ -89,7 +75,6 @@ describe('Testing Cortex Class', function ()
 				done();
 			}, 1000);
 		});
-		afterEach(function() {});
 	});
 
 	describe('Testing #handleIncomingData()', function ()
@@ -182,7 +167,6 @@ describe('Testing Cortex Class', function ()
 	describe('Testing #sendLobeStatus()', function ()
 	{
 		var status;
-		this.timeout(1000);
 		beforeEach(function()
 		{
 			//// Save status
@@ -249,6 +233,16 @@ describe('Testing Cortex Class', function ()
 			setTimeout(() =>
 			{
 				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
+				done();
+			}, 400);
+		});
+		it('Protolobe controller should be an empty string when controller disconnects.', function (done)
+		{
+			expect(cortex.lobe_map["Protolobe"]["controller"]).to.not.be.empty;
+			connection.end();
+			setTimeout(() =>
+			{
+				expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
 				done();
 			}, 400);
 		});
