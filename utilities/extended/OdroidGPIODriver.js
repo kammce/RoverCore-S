@@ -1,19 +1,19 @@
 "use strict";
 /*
- *	var Spine = require('./spine.js');
- *	var spine = new Spine();
+ *	var OdroidGPIODriver = require('./OdroidGPIODriver.js');
+ *	var OdroidGPIODriver = new OdroidGPIODriver();
  *
- *	spine.expose(18, "OUTPUT");
- *	spine.digitalWrite(7, 1);
+ *	OdroidGPIODriver.expose(18, "OUTPUT");
+ *	OdroidGPIODriver.digitalWrite(7, 1);
  *
- *	spine.expose(15, "INPUT");
- *	spine.digitalRead(15);
+ *	OdroidGPIODriver.expose(15, "INPUT");
+ *	OdroidGPIODriver.digitalRead(15);
  *
  */
 
 var fs = require('fs');
 
-class Spine
+class OdroidGPIODriver
 {
 	constructor()
 	{
@@ -33,9 +33,34 @@ class Spine
 			{ "gpio": 191, "key": 9 },
 			{ "gpio": 192, "key": 7 }
 		];
+		// =====================================
+		// Generate OdroidGPIODriver Structure
+		// =====================================
 		for(var i in this.pinIndex)
 		{
 		    this.pins[this.pinIndex[i].key] = this.pinIndex[i];
+		}
+		// =====================================
+		// RoverCore Blink Led Indicator
+		// =====================================
+		console.log(`System Hostname is on ${os.hostname()}`);
+		var os = require('os');
+		if(os.hostname() === 'odroid')
+		{
+			console.log("RoverCore Blink Led Indicator.");
+			this.expose(13, "OUTPUT");
+			setInterval(() =>
+			{
+				this.led_state = 0;
+				var switcher = (this.led_state === 5 || this.led_state === 7) ? 0 : 1;
+				++this.led_state;
+				this.led_state = (this.led_state > 7) ? 0 : this.led_state;
+				this.digitalWrite(13, switcher);
+			}, 50);
+		}
+		else
+		{
+			console.log("Not Running on Odroid XU4. GPIO ports will not be used!");
 		}
 	}
 	digitalWrite(_pin, level)
@@ -97,4 +122,4 @@ class Spine
 	}
 }
 
-module.exports = Spine;
+module.exports = OdroidGPIODriver;

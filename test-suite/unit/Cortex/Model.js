@@ -1,6 +1,6 @@
 "use strict";
 
-var Model = require('../../../modules/Model');
+var Model = require('../../../utilities/Model');
 
 describe('Testing Model Class', function () {
 	// Loading Libraries
@@ -8,8 +8,8 @@ describe('Testing Model Class', function () {
 	var http = require('http');
 	var server = http.createServer();
 
-	var primus = new Primus(server, { 
-		transformer: 'websockets' 
+	var primus = new Primus(server, {
+		transformer: 'websockets'
 	});
 
 	server.listen(9998);
@@ -71,8 +71,6 @@ describe('Testing Model Class', function () {
 		});
 	});
 
-	// @param {Number} timestamp parameter tells getMemory() to return all
-	//		registered data values that have been changed after that value.
 	describe('Testing #getMemory() with input timestamping', function () {
 
 		it('#getMemory() returns full database with 0 timestamp', function () {
@@ -89,7 +87,7 @@ describe('Testing Model Class', function () {
 			test_unit.database['TEST_UNIT1']['timestamp'] = 0;
 
 			var full_database = test_unit.getMemory(0);
-			
+
 			expect(full_database).to.eql({
 				"TEST_UNIT0": {
 					timestamp: 0,
@@ -132,7 +130,7 @@ describe('Testing Model Class', function () {
 			test_unit.database['TEST_UNIT1']['timestamp'] = test_unit.epoch-100;
 			// One day in milliseconds = 86400000
 			var empty_structure = test_unit.getMemory(test_unit.epoch);
-			// Returned value should be 
+			// Returned value should be
 			expect(empty_structure).to.eql({
 				"TEST_UNIT0": {
 					timestamp: test_unit.epoch,
@@ -142,8 +140,6 @@ describe('Testing Model Class', function () {
 		});
 	});
 
-	// @param {Number} timestamp parameter tells getMemory() to return all
-	//		registered data values that have been changed after that value.
 	describe('Testing Realtime feedback', function () {
 		it('#set() should send message to server', function (done) {
 			var real_feedback = function(lobe_name) {
@@ -166,11 +162,11 @@ describe('Testing Model Class', function () {
 				spark.on('data', function(data) {
 					// FORCE set timestamp to 0 for consistancy
 					data['message'] = JSON.parse(data['message']);
-					data['message']['TEST_UNIT0']['timestamp'] = 0;		
+					data['message']['TEST_UNIT0']['timestamp'] = 0;
 					data['message'] = JSON.stringify(data['message']);
 					expect(data).to.eql({
 						lobe: "model",
-						message: JSON.stringify({ 
+						message: JSON.stringify({
 							"TEST_UNIT0": {
 								timestamp: 0,
 								value: 'SET_TEST_VALUE0'
@@ -200,7 +196,7 @@ describe('Testing Model Class', function () {
 			test_unit0.set("TEST_UNIT0", 'SET_TEST_VALUE0');
 			// Force timestamp to 0 (otherwise timestamp is not determinate)
 			test_unit0.database['TEST_UNIT0']['timestamp'] = 0;
-			
+
 		});
 	});
 });

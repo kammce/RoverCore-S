@@ -2,11 +2,11 @@
 // Check if the -h help
 if(process.argv.indexOf("-h") != -1) {
 	console.log(`NAME
-	   RoverCore.js - Start RoverCore
+	   RoverCore - Start RoverCore
 
 SYNOPSIS
-	   node RoverCore.js [-h]
-	   node RoverCore.js [-t http://address:port] [-s]
+	   node RoverCore [-h]
+	   node RoverCore [-t http://address:port] [-s]
 
 OPTIONS
 	   -h
@@ -18,12 +18,12 @@ OPTIONS
 			  Defaults to http://localhost:9000.
 
 	   -s, --simulate
-			  This parameter will replace empty version of every module
-			  in the modules folder with a Protolobe module. The Protolobe
-			  will have the name and idle charateristics of the module it
-			  is replacing. This is useful for testing communication
-			  between interface and modules. Data sent to protolobe will
-			  be echoed back to the server and sent to stdout (console).
+			  This parameter will replace every module with empty version
+              in the modules folder with a Protolobe module. The Protolobe
+              will have the name and idle charateristics of the module it
+              is replacing. This is useful for testing communication
+              between interface and modules. Data sent to protolobe will
+              be echoed back to the server and sent to stdout (console).
 
 	   -i, --isolate "module" | "module1,moduel2,..."
 			  Isolate a particular lobe. For a single module, you need

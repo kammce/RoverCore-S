@@ -1,6 +1,6 @@
 "use strict";
 
-var Log = require('../../../modules/Log');
+var Log = require('../../../utilities/Log');
 
 describe('Testing Log Class', function () {
 	var write, log, output = '';
@@ -29,6 +29,9 @@ describe('Testing Log Class', function () {
 		process.stdout.write = write;
 		console.log = log;
 	});
+	after(function() {
+		Log.deleteLogs();
+	})
 	/* TODO: Make create test to check if that Log statically creates only one log per require("Log") */
 	describe('#output()', function () {
 		it('Expect function to output to stdout when given a string', function () {
@@ -74,7 +77,7 @@ describe('Testing Log Class', function () {
 		});
 	});
 	describe('#mute(), #unmute()', function () {
-		it('Mute one log, expect only one log can output. Unmute logs, expect both to output', 
+		it('Mute one log, expect only one log can output. Unmute logs, expect both to output',
 			function () {
 			// Create two Logs
 			var test_unit0 = new Log("test_unit4", "cyan");
@@ -86,7 +89,7 @@ describe('Testing Log Class', function () {
 			expect(output).to.contain("Test1");
 			// Flush output
 			output = "";
-			// Mute one 
+			// Mute one
 			test_unit0.mute();
 			//Attempt to log both, expect only log two to output.
 			test_unit0.output("Test0");
@@ -117,7 +120,7 @@ describe('Testing Log Class', function () {
 			expect(output).to.contain("Test1");
 			// Flush output
 			output = "";
-			// Mute one 
+			// Mute one
 			expect(Log.mute("test_unit6")).to.be.true;
 			log(Log._mutes);
 			//Attempt to log both, expect only log two to output.

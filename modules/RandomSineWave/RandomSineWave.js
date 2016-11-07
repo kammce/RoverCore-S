@@ -11,12 +11,10 @@ class RandomSineWave extends Neuron
 		this.feedback = util.feedback;
 		this.log = util.log;
 		this.idle_time = util.idle_timeout;
-		this.i2c = util.i2c;
 		this.model = util.model;
         // =====================================
         // Construct Class After This Points
         // =====================================
-		var parent = this;
 		var time = 0;
 		var sample_rate = 250;
 		var amp = 10;
@@ -24,14 +22,16 @@ class RandomSineWave extends Neuron
 		var freq_multiplier = 50;
 		var next_value = 0;
 
-		this.model.registerMemory("random");
-		setInterval(function()
+		this.model.registerMemory("Random");
+		setInterval(() =>
 		{
-			next_value = amp*Math.sin(time); // generate sinewave signal
-			next_value += (Math.random() * noise_amp*2 + 1) - noise_amp; // injecting noise
+			//// generate sinewave signal
+			next_value = amp*Math.sin(time);
+			//// injecting noise
+			next_value += (Math.random() * noise_amp*2 + 1) - noise_amp;
 			time += Math.PI/freq_multiplier;
-
-			parent.model.set("random", next_value); // set model random value
+			//// set model random value
+			this.model.set("Random", next_value);
 		}, sample_rate);
 	}
 	react()     { return true; }

@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "colors": "",
-    "colorspace": "",
     "forever-monitor": "",
     "primus": "^4.0.1",
     "ws": "^0.8.0",

@@ -13,22 +13,21 @@ var connection = Socket('http://localhost:9000', {
 // Cortex should act as a client and connect to Signal
 // Relayusing primus.js and websockets as the transport.
 var send_protolobe;
+var controller = false;
 connection.on('open', () =>
 {
+	clearInterval(send_protolobe);
 	console.log('Connected to RoverCore!');
 	send_protolobe = setInterval(function() {
 		connection.write({
 			target: 'Protolobe',
 			command: 'test_data'
 		});
-	}, 2000);
+	}, 2500);
 	connection.write(
 	{
 		target: 'Cortex',
-		command:
-		{
-			login: 'ProtolobeUser',
-		}
+		command: 'Protolobe',
 	});
 	console.log("CONNECTED! I AM HERE!");
 });
