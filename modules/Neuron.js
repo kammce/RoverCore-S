@@ -13,15 +13,8 @@ class Neuron
 		this.feedback = util.feedback;
 		this.log = util.log;
 		this.controller = "";
-		if (typeof util.idle_timeout === 'undefined')
-		{
-			this.idle_timeout = 1000;
-		}
-		else
-		{
-			this.idle_timeout = util.idle_timeout;
-		}
-		this.state = "CONSTRUCTING";
+		this.idle_timeout = 1000;
+		this.state = "RUNNING";
 	}
 	_halt()
 	{

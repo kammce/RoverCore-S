@@ -47,16 +47,18 @@ describe('Testing Cortex Class', function ()
 			};
 			cortex = new Cortex(config);
 		});
-		it('#loadLobes should load modules found in modules folder', function()
+		it('#loadLobes should load modules found in modules folder', function(done)
 		{
-			//// Load protolobe config file
-			var config = JSON.parse(fs.readFileSync(`./modules/Protolobe/config.json`));
+			this.timeout(4000);
 			//// Check if protolobe is in the lobe_map
-			expect(cortex.lobe_map["Protolobe"]).to.exist;
-			//// Check if protolobe is in the lobe_map
-			expect(cortex.lobe_map["Protolobe"].config.idle_time).to.equal(config['idle_time']);
-			//// Check if protolobe is in the lobe_map
-			expect(cortex.lobe_map["Protolobe"].mission_controller).to.equal(config['mission_controller']);
+			setTimeout(function()
+			{
+				console.log(cortex.lobe_map);
+				expect(cortex.lobe_map["Protolobe"]).to.exist;
+				//// Check if protolobe is in the lobe_map
+				expect(cortex.lobe_map["Protolobe"].idle_timeout).to.exist;
+				done();
+			}, 2500);
 		});
 	});
 
@@ -204,7 +206,6 @@ describe('Testing Cortex Class', function ()
 			cortex.lobe_map["Protolobe"].status = status;
 		});
 	});
-
 
 	describe('Testing #handleMissionControl() Controls', function ()
 	{

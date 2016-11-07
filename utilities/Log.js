@@ -1,19 +1,4 @@
 "use strict";
-/* Code is based off of http://seanmonstar.com/post/56448644049/consolelog-all-the-things. Retreived October 11th, 2015 */
-
-// var log = function hijacked_log(level)
-//   {
-//   if (arguments.length > 1 && level in this)
-//   {
-//     console.log.apply(this, arguments);
-//   }
-//   else
-//   {
-//     var args = Array.prototype.slice.call(arguments);
-//     args.unshift(`[${Date().slice(0,-15)}][LOBE-NAME] :: `);
-//     console.log.apply(this, args);
-//   }
-// }
 
 var Console = require('console').Console;
 var colors = require('colors/safe');
@@ -24,20 +9,8 @@ class Log
 	constructor(module_name, output_color)
 	{
 		this.module = module_name;
-		// check to see if the color exists and it is a function
-		// use that function to color the output
-		if(typeof colors[output_color] === "function")
-		{
-			this.color = colors[output_color];
-		}
-		else
-		{
-			// otherwise, no color, input === output
-			this.color = function (input_str)
-			{
-				return input_str;
-			};
-		}
+		this.color = (input_str) => { return input_str; };
+		this.setColor(output_color);
 		// create new property with the name of this.module
 		// set mute status for current module to false.
 		this.constructor._mutes[this.module] = false;
@@ -74,6 +47,15 @@ class Log
 			console.log.apply(this, console_args);
 		}
 	}
+	setColor(output_color)
+	{
+		// check to see if the color exists and it is a function
+		// use that function to color the output
+		if(typeof colors[output_color] === "function")
+		{
+			this.color = colors[output_color];
+		}
+	}
 	// Mute this module
 	mute()
 	{
@@ -103,6 +85,18 @@ Log.initialize = function()
 	Log.writeError = fs.createWriteStream(Log.error_file);
 	// Create a custom console with file write streams as destinations for information
 	Log.journal = new Console(Log.writeOutput, Log.writeError);
+};
+
+Log.deleteLogs = function()
+{
+	if(fs.existsSync(Log.output_file))
+	{
+		fs.unlinkSync(Log.output_file);
+	}
+	if(fs.existsSync(Log.error_file))
+	{
+		fs.unlinkSync(Log.error_file);
+	}
 };
 
 // Initialize Log write streams and console outputs

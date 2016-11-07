@@ -1,10 +1,10 @@
 "use strict";
 
-//High byte ---- [7:5] reserved [4] full on [3:0] first 4 bits of 4096.    
+//High byte ---- [7:5] reserved [4] full on [3:0] first 4 bits of 4096.
 //Low  byte ---- [7:0] last 8 bits of 4096.
 
 //SM-BUS Signal Format
-//Start condition (S) | slave address | R/~W | Acknowledgement from slave | 
+//Start condition (S) | slave address | R/~W | Acknowledgement from slave |
 //Control register | Acknowledgement from slave | Data Byte | Acknowledgement from slave | stop condition(P)
 
 //  bus.writeByte(addr, cmd, byte, cb)
@@ -35,7 +35,7 @@ const PWM_DEV_LED0_OFF_H 	 = 0x09;
 const PWM_DEV_MODE1 	   	 = 0x00;
 const PWM_DEV_PRESCALE 		 = 0xFE;
 
-class PWMDriver {
+class PCA9685PWMDriver {
 	constructor(address, freq, i2c, log){
 		this.i2c = i2c;
 		this.freq = freq;
@@ -43,13 +43,13 @@ class PWMDriver {
 		this.log = log;
 		var prescale = Math.floor((((25000000 / 4096) / (freq* 0.9)) - 1) + 0.5);
 		i2c.writeByteSync(address, PWM_DEV_MODE1, 0x00);
-		var oldmode = i2c.readByteSync(address, PWM_DEV_MODE1); 
+		var oldmode = i2c.readByteSync(address, PWM_DEV_MODE1);
 		var newmode = parseInt((oldmode & 0x7F) | 0x10);
 		i2c.writeByteSync(address, PWM_DEV_MODE1, newmode);
 		i2c.writeByteSync(address, PWM_DEV_PRESCALE, prescale);
 		i2c.writeByteSync(address, PWM_DEV_MODE1, oldmode);
 		setTimeout(function(){i2c.writeByteSync(address, PWM_DEV_MODE1, (oldmode | 0xa1));}, 5,
-			function(err) {if (err){this.log.output("Error in PWMDriver constructor setTimeout");this.log.output(err);}}
+			function(err) {if (err){this.log.output("Error in PCA9685PWMDriver constructor setTimeout");this.log.output(err);}}
 		);
 	}
 	isNumber (o) {
@@ -60,7 +60,7 @@ class PWMDriver {
 		}
 	genByteH (input) {
 		if(!this.isNumber(input)){
-			this.log.output("Invalid Data Type in genByteH of setDUTY of PWMDriver");
+			this.log.output("Invalid Data Type in genByteH of setDUTY of PCA9685PWMDriver");
 		}
 		var MSB = input >> 8;
 		if(input===4096){
@@ -70,7 +70,7 @@ class PWMDriver {
 	}
 	genByteL (input) {
 		if(!this.isNumber(input)){
-			this.log.output("Invalid Data Type in genByteL of setDUTYof PWMDriver");
+			this.log.output("Invalid Data Type in genByteL of setDUTYof PCA9685PWMDriver");
 		}
 		var LSB = input & 0x0FF;
 		if(input===4096){
@@ -83,9 +83,9 @@ class PWMDriver {
 		var parent = this;
 		var sendpwmRegOnL = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnL of setDuty of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnL of setDuty of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -94,9 +94,9 @@ class PWMDriver {
 		};
 		var sendpwmRegOnH = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnH of setDuty of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnH of setDuty of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -105,24 +105,24 @@ class PWMDriver {
 		};
 		var sendpwmRegOffL = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffL of setDuty of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffL of setDuty of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
-				});	
+				});
 			 });
 		};
 		var sendpwmRegOffH = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffH of setDuty of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffH of setDuty of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
-				});	
+				});
 			 });
 		};
 		if(this.isNumber(duty) && duty<=100 && duty>=0){
@@ -144,9 +144,9 @@ class PWMDriver {
 		var tick = Math.floor(micro*oneMicro);
 		var sendpwmRegOnL = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnL of setMICRO of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnL of setMICRO of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -155,9 +155,9 @@ class PWMDriver {
 		};
 		var sendpwmRegOnH = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnH of setMICRO of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnH of setMICRO of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -166,21 +166,21 @@ class PWMDriver {
 		};
 		var sendpwmRegOffL = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffL of setMICRO of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffL of setMICRO of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
 				});
-				
+
 			 });
 		};
 		var sendpwmRegOffH = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffH of setMICRO of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffH of setMICRO of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -201,12 +201,12 @@ class PWMDriver {
 	setPWM(pin, on, off){
 		var i2c = this.i2c;
 		var parent = this;
-		
+
 		var sendpwmRegOnL = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_L+4*num, parent.genByteL(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnL of setPWM of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnL of setPWM of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -215,21 +215,21 @@ class PWMDriver {
 		};
 		var sendpwmRegOnH = function(num, on){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_ON_H+(4*num), parent.genByteH(on), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOnH of setPWM of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOnH of setPWM of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
 				});
 			 });
-			
+
 		};
 		var sendpwmRegOffL = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_L+(4*num), parent.genByteL(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffL of setPWM of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffL of setPWM of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -238,9 +238,9 @@ class PWMDriver {
 		};
 		var sendpwmRegOffH = function(num, off){
 			return new Promise(function(resolve) {
-				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){ 
+				i2c.writeByte(parent.dev_addr, PWM_DEV_LED0_OFF_H+(4*num), parent.genByteH(off), function(err){
 					if (err){
-						parent.log.output("writeByte error in sendpwmRegOffH of setPWM of PWMDriver");
+						parent.log.output("writeByte error in sendpwmRegOffH of setPWM of PCA9685PWMDriver");
 						parent.log.output(err);
 					}
 					resolve(1);
@@ -259,4 +259,4 @@ class PWMDriver {
 		}
 	}
 }
-module.exports = PWMDriver;
+module.exports = PCA9685PWMDriver;

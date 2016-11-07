@@ -77,42 +77,13 @@ class Cortex
 		// =====================================
 		// Setting up Logs and Model
 		// =====================================
-		this.LOG = require('./Log');
-		this.log = new this.LOG(this.name, "white");
+		this.LOG = require('../utilities/Log');
+		this.MODEL = require('../utilities/Model');
 
-		this.MODEL = require('./Model');
+		this.log = new this.LOG(this.name, "white");
 		this.Model = new this.MODEL(this.feedback);
 
-		this.SERIALPORT = require('serialport');
-
-		var SPINE = new require('./Spine');
-		this.spine = undefined;
-		// =====================================
-		// Running Systems Check
-		// =====================================
-		console.log("Running Systems Check...");
-		var os = require('os');
-		// =====================================
-		// RoverCore Blink Led Indicator
-		// =====================================
-		if(os.hostname() === 'odroid')
-		{
-			console.log(`System Hostname is on ${os.hostname()}`);
-			this.spine = new SPINE();
-			this.spine.expose(13, "OUTPUT");
-			setInterval(function()
-			{
-				this.led_state = 0;
-				var switcher = (this.led_state === 5 || this.led_state === 7) ? 0 : 1;
-				++this.led_state;
-				this.led_state = (this.led_state > 7) ? 0 : this.led_state;
-				parent.SPINE.digitalWrite(13, switcher);
-			}, 50);
-		}
-		else
-		{
-			console.log("Not Running on Odroid XU4. GPIO ports will not be used!");
-		}
+		this.extended_utilities = require("../utilities/Extended.js");
 		// =====================================
 		// Loading modules
 		// =====================================
@@ -207,7 +178,6 @@ class Cortex
 			this.log.output(msg);
 			this.feedback('Cortex', msg);
 		}
-		//// Find lobe associated with
 	}
 	handleIdleStatus()
 	{
@@ -236,10 +206,20 @@ class Cortex
 				this.lobe_map[lobe]._idle();
 			}
 		};
+		var resumeAll = function()
+		{
+			for(var lobe in this.time_since_last_command)
+			{
+				this.lobe_map[lobe]._resume();
+			}
+		};
 		switch(command)
 		{
 			case "HALTALL":
 				haltAll();
+				break;
+			case "RESUMEALL":
+				resumeAll();
 				break;
 			case "IDLEALL":
 				idleAll();
@@ -258,58 +238,34 @@ class Cortex
 	}
 	loadLobe(directory)
 	{
-		var fs = require('fs');
-		var config, Lobe;
 		try
 		{
-			//// Read config.json file, parse it, and return config object
-			config = JSON.parse(fs.readFileSync(`./modules/${directory}/config.json`));
-			//// check if config object has the right properties
-			if(typeof config['lobe_name'] === "string" &&
-				typeof config['log_color'] === "string" &&
-				typeof config['idle_time'] === "number")
-			{
-				//// Adding source code path to config object
-				config['source_path'] = `./${directory}/${config['lobe_name']}`;
-				//// Generate Logger
-				var log = new this.LOG(
-					config['lobe_name'],
-					config['log_color']
-				);
-				//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
-				Lobe = (this.simulate) ? require("./Protolobe/Protolobe.js") : require(config['source_path']);
-				//// Generate lobe utilities object
-				var lobe_utitilites = {
-					"name": config['lobe_name'],
-					"feedback": this.feedback,
-					"log": log,
-					"idle_timeout": config['idle_time'],
-					"model": this.Model,
-					"serial": this.SERIALPORT,
-					"spine": this.spine,
-					"upcall": this.upcall,
-					"target": this.target
-				};
-				//// Construct Lobe module
-				var module = new Lobe(lobe_utitilites);
-				//// Attach config property to module
-				module.config = config;
-				//// Attach mission controller to module
-				module.mission_controller = config['mission_controller'];
-				//// Log that a Lobe was loaded correctly
-				this.log.output(`Lobe ${config['lobe_name']} loaded SUCCESSFULLY`);
-				//// Return constructed lobe object
-				return module;
-			}
-			else
-			{
-				throw new Error(`Failed to load configuration file for ${ directory }`);
-			}
+			//// Adding source code path to config object
+			var source_path = `./${directory}/${directory}`;
+			//// Generate Logger
+			var log = new this.LOG(directory);
+			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
+			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
+			//// Generate lobe utilities object
+			var lobe_utitilites = {
+				"name": directory,
+				"feedback": () => { this.feedback(directory); },
+				"log": log,
+				"model": this.Model,
+				"upcall": this.upcall,
+				"extended": this.extended_utilities
+			};
+			//// Construct Lobe module
+			var module = new Lobe(lobe_utitilites);
+			//// Log that a Lobe was loaded correctly
+			this.log.output(`Lobe ${directory} loaded SUCCESSFULLY`);
+			//// Return constructed lobe object
+			return module;
 		}
 		catch(e)
 		{
 			// Log that a Lobe did not load properly
-			this.log.output(`Lobe ${config['lobe_name']} FAILED to load`, e);
+			this.log.output(`Lobe ${directory} FAILED to load`, e);
 		}
 	}
 	loadLobes(isolation)
@@ -344,11 +300,14 @@ class Cortex
 		for (var i = 0; i < modules.length; i++)
 		{
 			var lobe = this.loadLobe(modules[i]);
+			console.log("===================");
+			console.log(lobe);
+			console.log("===================");
 			// skip lobe if it returns undefined
 			if(typeof lobe === "undefined") { continue; }
-			this.lobe_map[lobe.config['lobe_name']] = lobe;
+			this.lobe_map[lobe['name']] = lobe;
 			// Set time since last command to zero to IDLE all lobes in the beginning
-			this.time_since_last_command[lobe.config['lobe_name']] = 0;
+			this.time_since_last_command[lobe['name']] = 0;
 		}
 	}
 }

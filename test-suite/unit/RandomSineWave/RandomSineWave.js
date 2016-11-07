@@ -3,19 +3,17 @@
 describe('Testing RandomSineWave Class', function () {
 	// Loading Libraries
 	var RandomSineWave = require('../../../modules/RandomSineWave/RandomSineWave');
-	var Model = require('../../../modules/Model');
+	var Model = require('../../../utilities/Model');
 
 	describe('Testing RandomSineWave Updating model', function () {
 		this.timeout(6000);
 		it('Three values read from model should be changing', function (done) {
 			var model = new Model(function() {});
-			
+
 			var util = {
 				name: "RandomSineWave",
 				feedback: function() {},
-				log:  function() {}, 
-				idle_timeout: 20000,
-				i2c:  function() {},
+				log:  function() {},
 				model: model
 			};
 

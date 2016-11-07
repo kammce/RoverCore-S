@@ -7,7 +7,7 @@ describe('Testing Protolobe Class', function () {
 	var expected_feedback;
 
 	var log = function() { }
-	log.output = function(input) { 
+	log.output = function(input) {
 		expected_log = "";
 		for (var i = 0; i < arguments.length; i++) {
 			if(typeof arguments[i] === "object") {
@@ -17,8 +17,9 @@ describe('Testing Protolobe Class', function () {
 			}
 		}
 	};
+	log.setColor = function(input) {};
 
-	var feedback = function(input) { 
+	var feedback = function(input) {
 		expected_feedback = "";
 		for (var i = 0; i < arguments.length; i++) {
 			if(typeof arguments[i] === "object") {
@@ -26,17 +27,15 @@ describe('Testing Protolobe Class', function () {
 			} else {
 				expected_feedback += arguments[i];
 			}
-		} 
+		}
 	};
-	var i2c = function() {}; // filler i2c object (not used in test)
+
 	var model = function() {}; // filler model object (not used in test)
 
 	var util = {
 		name:"Protolobe",
 		feedback: feedback,
-		log: log, 
-		idle_timeout: 500,
-		i2c: i2c,
+		log: log,
 		model: model
 	};
 

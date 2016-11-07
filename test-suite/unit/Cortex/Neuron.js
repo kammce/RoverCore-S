@@ -7,11 +7,13 @@ describe('Testing Neuron Class', function () {
 	color_log.output = function() {};
 
 	var util = {
-		name:"unit_test", 
-		feedback: function feedback() {}, 
-		log: color_log, 
-		idle_timeout: 1000
-	};
+		"name": "unit_test",
+		"feedback": () => { },
+		"log": color_log,
+		"model": () => {},
+		"upcall": () => {},
+		"extended": {}
+	}
 
 	var test_unit = new Neuron(util);
 
@@ -42,11 +44,6 @@ describe('Testing Neuron Class', function () {
 			test_unit.idle = undefined;
 			assert.equal(test_unit._idle(), "UNDEF");
 		});
-		// it('Assert that function will return false if halted.', function () {
-		// 	test_unit._halt();
-		// 	test_unit.idle = function() { return true; };
-		// 	assert.isFalse(test_unit._idle());
-		// });
 		it('Create stub idle function, assert that function returns true for a defined function.', function () {
 			test_unit.idle = function() { return true; };
 			assert.isTrue(test_unit._idle());
@@ -56,8 +53,8 @@ describe('Testing Neuron Class', function () {
 	describe('#_react()', function () {
 		it('Assert that method will return "UNDEF" if react is undefined.', function () {
 			test_unit.react = undefined;
-			// Inserted parameter to prove that UNDEF 
-			// only occurs when react is undefined and 
+			// Inserted parameter to prove that UNDEF
+			// only occurs when react is undefined and
 			// not based on input parameter.
 			assert.equal(test_unit._react("input"), "UNDEF");
 		});
