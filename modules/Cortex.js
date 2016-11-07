@@ -5,12 +5,12 @@ class Cortex
 	constructor(config)
 	{
 		console.log("STARTING Rover Core!");
-		var parent = this;
 		this.name = "Cortex";
 		this.simulate = config.simulate;
 		this.exec = require('child_process').exec;
 		this.lobe_map = {};
 		this.time_since_last_command = {};
+		this.previous_lobe_status = {};
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -122,14 +122,21 @@ class Cortex
 		}
 	}
 	sendLobeStatus() {
-		var status = {};
 		for (var lobe in this.lobe_map) {
-			status[lobe] = {
-				controller: this.lobe_map[lobe]['controller'],
-				state: this.lobe_map[lobe]['state']
-			};
+			if(!this.previous_lobe_status.hasOwnProperty(lobe))
+			{
+				this.previous_lobe_status[lobe] = {};
+			}
+			else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			{
+				this.previous_lobe_status[lobe] = {
+					lobe: lobe,
+					"controller": this.lobe_map[lobe]['controller'],
+					"state" : this.lobe_map[lobe]['state']
+				};
+				this.feedback(this.name, this.previous_lobe_status[lobe]);
+			}
 		}
-		this.feedback(this.name, status);
 	}
 	handleMissionControl(data, spark)
 	{
@@ -163,7 +170,10 @@ class Cortex
 		{
 			if(!this.lobe_map[data]['controller'])
 			{
+				msg = `${data} controller assigned to connection: ${spark.id}`;
 				this.lobe_map[data]['controller'] = spark.id;
+				this.log.output(msg);
+				this.feedback('Cortex', msg);
 			}
 			else
 			{
@@ -184,7 +194,7 @@ class Cortex
 		for(var lobe in this.time_since_last_command)
 		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_time'])
+			if(delta >= this.lobe_map[lobe]['idle_timeout'])
 			{
 				this.lobe_map[lobe]._idle();
 			}
@@ -247,13 +257,19 @@ class Cortex
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
+			var parent = this;
 			var lobe_utitilites = {
 				"name": directory,
-				"feedback": () => { this.feedback(directory); },
 				"log": log,
 				"model": this.Model,
 				"upcall": this.upcall,
-				"extended": this.extended_utilities
+				"extended": this.extended_utilities,
+				"feedback": function()
+				{
+					var args = Array.from(arguments);
+					args.unshift(directory);
+					parent.feedback.apply(null, args);
+				}
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);
@@ -300,9 +316,6 @@ class Cortex
 		for (var i = 0; i < modules.length; i++)
 		{
 			var lobe = this.loadLobe(modules[i]);
-			console.log("===================");
-			console.log(lobe);
-			console.log("===================");
 			// skip lobe if it returns undefined
 			if(typeof lobe === "undefined") { continue; }
 			this.lobe_map[lobe['name']] = lobe;

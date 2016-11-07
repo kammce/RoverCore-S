@@ -22,7 +22,7 @@ class RandomSineWave extends Neuron
 		var freq_multiplier = 50;
 		var next_value = 0;
 
-		this.model.registerMemory("random");
+		this.model.registerMemory("Random");
 		setInterval(() =>
 		{
 			//// generate sinewave signal
@@ -31,7 +31,7 @@ class RandomSineWave extends Neuron
 			next_value += (Math.random() * noise_amp*2 + 1) - noise_amp;
 			time += Math.PI/freq_multiplier;
 			//// set model random value
-			this.model.set("random", next_value);
+			this.model.set("Random", next_value);
 		}, sample_rate);
 	}
 	react()     { return true; }

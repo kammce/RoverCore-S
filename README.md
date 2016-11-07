@@ -159,7 +159,7 @@ In the RUNNING state, the lobe is active. The only way to exit a HALTED state is
 2. If another lobe uses an UPCALL to trigger resume of a specific lobe or all lobes.
 
 ### **IDLING state & idle() method**
-Lobes are put into an IDLING state if they have not been sent a command from mission control in the specified amount defined in the *config.json* file. This is useful for lobes that need period commands from mission control.
+Lobes are put into an IDLING state if they have not been sent a command from mission control in the specified amount defined in the *config.json* file. This is useful for lobes that need period commands from mission control. Lobes are put into IDLING state ~100ms after they are constructed.
 
 Example: Take drive system which is always told in an instant which direction to go and at what speed. If there is an issue with the connection or the mission control interface such that there is a long and sustained delay between a full throttle command a stop command, then the system may be locked in a full speed mode and could injure someone or damage itself. After a period of time, Cortex will run the lobe's idle() routine which could be design to stop the motors.
 

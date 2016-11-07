@@ -43,24 +43,25 @@ describe('Testing Protolobe Class', function () {
 
 	describe('Testing Protolobe Methods', function () {
 		it('#react() should be called', function () {
-			test_lobe.react("TESTING");
-			expect(expected_log).to.equal(`REACTING ${test_lobe.name}: TESTING`);
-			expect(expected_feedback).to.equal(`ProtolobeREACTING ${test_lobe.name}: TESTING`);
+			var input = "TESTING";
+			test_lobe.react(input);
+			expect(expected_log).to.equal(`REACTING ${test_lobe.name}: ${input}`);
+			expect(expected_feedback).to.equal(`REACTING ${test_lobe.name}: ${input}`);
 		});
 		it('#halt() should be called', function () {
 			test_lobe.halt();
 			expect(expected_log).to.equal(`HALTING ${test_lobe.name}`);
-			expect(expected_feedback).to.equal(`ProtolobeHALTING ${test_lobe.name}`);
+			expect(expected_feedback).to.equal(`HALTING ${test_lobe.name}`);
 		});
 		it('#resume() should be called', function () {
 			test_lobe.resume();
 			expect(expected_log).to.equal(`RESUMING ${test_lobe.name}`);
-			expect(expected_feedback).to.equal(`ProtolobeRESUMING ${test_lobe.name}`);
+			expect(expected_feedback).to.equal(`RESUMING ${test_lobe.name}`);
 		});
 		it('#idle() should be called', function () {
 			test_lobe.idle();
 			expect(expected_log).to.equal(`IDLING ${test_lobe.name}`);
-			expect(expected_feedback).to.equal(`ProtolobeIDLING ${test_lobe.name}`);
+			expect(expected_feedback).to.equal(`IDLING ${test_lobe.name}`);
 		});
 	});
 });

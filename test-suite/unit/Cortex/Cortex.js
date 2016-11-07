@@ -53,7 +53,6 @@ describe('Testing Cortex Class', function ()
 			//// Check if protolobe is in the lobe_map
 			setTimeout(function()
 			{
-				console.log(cortex.lobe_map);
 				expect(cortex.lobe_map["Protolobe"]).to.exist;
 				//// Check if protolobe is in the lobe_map
 				expect(cortex.lobe_map["Protolobe"].idle_timeout).to.exist;
