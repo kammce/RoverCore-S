@@ -1,8 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HTML RoverCore-S Client Integration Test</title>
+</head>
+<body>
+
+<script type="text/javascript" src="primus.js"></script>
+<script type="text/javascript">
 "use strict";
-var Primus = require('primus');
-var Socket = new Primus.createSocket();
-var connection = Socket('http://localhost:9000', {
-	reconnect: {
+var connection = Primus.connect("http://127.0.0.1:9000", {
+	reconnect: 
+	{
 		max: 2000, // Number: The max delay before we try to reconnect.
 		min: 500, // Number: The minimum delay before we try reconnect.
 		retries: Infinity // Number: How many times we should try to reconnect.
@@ -64,3 +72,7 @@ connection.on('end', () =>
 	console.log('Disconnected from RoverCore');
 	clearInterval(send_protolobe_interval);
 });
+
+</script>
+</body>
+</html>
