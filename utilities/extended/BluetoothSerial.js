@@ -13,6 +13,7 @@ class BluetoothSerial
 		this.log = params.log;
 		this.callback = params.callback;
 		this.serialbuffer = "";
+		this.callback_map = {};
 		var setup_serial = () =>
 		{
 			this.port = new SerialPort(`/dev/rfcomm${params.dev}`, {
@@ -25,13 +26,27 @@ class BluetoothSerial
 			this.port.on("data", (data) =>
 			{
 				this.serialbuffer += data.toString();
+				console.log(this.serialbuffer);
 				var split = this.serialbuffer.split('\n');
 				if(split.length > 1)
 				{
 					for (var i = 0; i < split.length-1; i++)
 					{
-						this.log(/\([0-9]+\)HEARTBEAT/g.match(split[i]));
-						this.callback(split[i]);
+						if(/^@[a-zA-Z],[0-9\-]+$/g.test(split[i]))
+						{
+							var info = split[i].split(",");
+							var key = info[0].charAt(1);
+							var value = parseFloat(info[1]);
+							//console.log(info);
+							if(typeof this.callback_map[key] === "function")
+							{
+								this.callback_map[key](value);
+							}
+							else
+							{
+								console.log("ERROR: COULD NOT CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+							}
+						}
 					}
 					this.serialbuffer = split[split.length-1];
 				}
@@ -81,16 +96,17 @@ class BluetoothSerial
 	}
 	send(key, value)
 	{
-		if(this.ready)
-		{
-			var msg = `@${key.charAt(0)},${value}\n`;
-			this.port.write(msg);
-		}
+		var msg = `@${key.charAt(0)},${parseFloat(value)}\n`;
+		this.sendraw(msg);
 	}
-	attachListener(key, value)
+	attachListener(key, callback)
 	{
-		var msg = `@${key},{value}\n`;
-		this.port.write(msg);
+		if(/^[a-zA-Z]$/g.test(key) && typeof callback === 'function')
+		{
+			this.callback_map[key] = callback;
+			return true;
+		}
+		return false;
 	}
 }
 
