@@ -96,46 +96,6 @@ RoverCore-S manual output:
 -----
 ## **Lobes in RoverCore-S and What They Do**
 The Lobes of RoverCore-S are modules that do work on the system. Lobes are structured classes that give mission control a means of controlling a specific system of the robot. Lobes can be used to retrieve and store sensor data, stream cameras, send an email, or literally do anything else that a Linux system running node.js can do.
-## **Creating a new Lobe**
-
-**Step 1:** Go into the modules folder and make a copy of the template folder **Protolobe**. Rename the copied folder to the name of the lobe you want to create. Naming convention for lobes is the same as Classes in the Java programming language:
-
-* Use CamelCase (no spaces, dashes, or underscores)
-* Cannot use special characters
-* Must start with a letter
-
-**Step 2:** Within your lobe folder, rename the **Protolobe.js** file to the name of your lobe folder.
-
-**Step 3:** Updating the *config.json* file.
-```
-#!json
-{
-    "log_color": "red",
-    "idle_time": 2000
-}
-```
-* *log_color* defines the color of the text output from your module. To know which colors exist see ()[]
-* *idle_time* defines the time
-
-**Step 4:** Within the renamed .js file, change the name of the *Class* and the *module.export = ClassName* from Protolobe to the name of the folder. Should look like the following:
-
-```
-#!javascript
-"use strict";
-
-var Neuron = require('../Neuron');
-
-class NewLobe extends Neuron // changed Protolobe to name of folder
-{
-    constructor(util)   { ... }
-    react(input)        { ... }
-    halt()              { ... }
-    resume()            { ... }
-    idle()              { ... }
-}
-
-module.exports = NewLobe; // changed Protolobe to name of folder
-```
 
 ## **How Lobes works**
 
@@ -162,6 +122,9 @@ In the RUNNING state, the lobe is active. The only way to exit a HALTED state is
 Lobes are put into an IDLING state if they have not been sent a command from mission control in the specified amount defined in the *config.json* file. This is useful for lobes that need period commands from mission control. Lobes are put into IDLING state ~100ms after they are constructed.
 
 Example: Take drive system which is always told in an instant which direction to go and at what speed. If there is an issue with the connection or the mission control interface such that there is a long and sustained delay between a full throttle command a stop command, then the system may be locked in a full speed mode and could injure someone or damage itself. After a period of time, Cortex will run the lobe's idle() routine which could be design to stop the motors.
+
+### **How Mission Control controller assignment **
+[IN PROGRESS]
 
 
 ### Utility Classes
@@ -218,7 +181,7 @@ var memories will contain the whole structure of the model:
 ```
 
 #### **upcall() function**
-[INCOMPLETE]
+[IN PROGRESS]
 
 #### **feedback() function**
 *feedback()* will send information back to mission control from the lobe.
@@ -227,6 +190,45 @@ Usage:
 
     this.feedback(msg_to_output, ...);
     this.feedback("HELLO WORLD", { foo: "bar" });
+
+## **Creating a new Lobe**
+
+**Step 1:** Go into the modules folder and make a copy of the template folder **Protolobe**. Rename the copied folder to the name of the lobe you want to create. Naming convention for lobes is the same as Classes in the Java programming language:
+
+* Use CamelCase (no spaces, dashes, or underscores)
+* Cannot use special characters
+* Must start with a letter
+
+**Step 2:** Within your lobe folder, rename the **Protolobe.js** file to the name of your lobe folder.
+
+**Step 3:** Change the name of the *Class* and the *module.export = ClassName* from Protolobe to the name of the folder. Should look like the following:
+
+```
+#!javascript
+"use strict";
+
+var Neuron = require('../Neuron');
+
+class NewLobe extends Neuron // changed Protolobe to name of folder
+{
+    constructor(util)   { ... }
+    react(input)        { ... }
+    halt()              { ... }
+    resume()            { ... }
+    idle()              { ... }
+}
+
+module.exports = NewLobe; // changed Protolobe to name of folder
+```
+
+**Step 4:** Updating the constructor method.
+```
+//// Set lobe color by changing this line
+//// See https://www.npmjs.com/package/colors for the list of text colors
+this.log.setColor("color of your choosing");
+// time in milliseconds before idle timeout
+this.idle_timeout = 2000;
+```
 
 #### **Utilities Structure**
 Each lobe is given a utilities structure by Cortex through their constructor method. The structure is as follows:
@@ -255,7 +257,7 @@ Each lobe is given a utilities structure by Cortex through their constructor met
 ## **Purpose**
 When designing software for mission critical system, the software must be fast, efficient, fail-safe, and without bugs and errors. To do this, one could manually check every single function but this raises the issue of the check not being through enough to check every single case and edge case. These mistakes accumulate and the end result is a system with various internal bugs that result in misbehavior. This could lead to a failure during a mission critical task rendering the system disabled or behaving in such a way that could jeopardize the mission, damage itself, or damage things around it.
 
-The solution is T.est D.riven D.esign (TDD), which is a methodology of creating tests for your code. When you have a suite of tests that do the work of testing your code for you, the tests will test the code the same way each time and will never miss a step. The tests never get sleepy, drunk, hungry, or sick and they will do all the work of testing your code to confirm that it is behaving properly. Their existence also allows the developer to determine when a change in the design somewhere else breaks a feature in another location.
+The solution is T.est D.riven D.esign (TDD), which is a methodology of creating tests for your code. When you have a suite of tests that do the work of testing your code for you, the tests will test the code the same way each time and will never miss a step. The tests never get sleepy, drunk, hungry, or sick and they will do all the work of testing your code to confirm that it is behaving properly. Their existence also allows the developer to determine when a change in the design somewhere else breaks a feature in another location. Making a test is the best way to test out a utility class or a lobe without having to use RoverCore.
 
 There are four types of test we will use for this project:
 
@@ -326,7 +328,7 @@ To deploy RoverCore-S, use the instructions in
 
 # **Versioning**
 -----
-No current versioning scheme.
+[IN PROGRESS]
 
 # **Authors**
 -----

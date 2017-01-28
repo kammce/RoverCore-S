@@ -29,9 +29,28 @@ describe('Testing BluetoothSerial Class', function ()
 				}
 			});
 
+			unit_test.attachListener('A', function(value)
+			{
+				console.log(`key[A] = ${value}`);
+			});
+			unit_test.attachListener('B', function(value)
+			{
+				console.log(`key[B] = ${value}`);
+			});
+			unit_test.attachListener('C', function(value)
+			{
+				console.log(`key[C] = ${value}`);
+			});
+			unit_test.attachListener('S', function(value)
+			{
+				console.log(`key[S] = ${value}`);
+			});
+
+			var a = 1;
+
 			setInterval(function() {
-				unit_test.send("A", 5.5243);
-			}, 1000);
+				unit_test.send("Z", a++);
+			}, 250);
 		});
 	});
 });
