@@ -11,7 +11,7 @@ class BluetoothSerial
 		this.callback_map = {};
 		this.device = params.device;
 		this.mac_address = params.mac;
-		this.baud_rate = params.baudRate;
+		this.baud_rate = params.baud;
 		this.fs = require('fs');
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
@@ -56,9 +56,9 @@ class BluetoothSerial
 		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
 			baudRate: this.baud_rate,
 		});
-		this.port.on("open", onPortOpen);
-		this.port.on("data", onPortData);
-		this.port.on("error", onPortError);
+		this.port.on("open", this.onPortOpen);
+		this.port.on("data", this.onPortData);
+		this.port.on("error", this.onPortError);
 	};
 	onPortOpen()
 	{
@@ -116,5 +116,61 @@ class BluetoothSerial
 		return false;
 	}
 }
+
+
+BluetoothSerial.bt_agent_process = undefined;
+
+//// For BlueZ5 bt-agent, for BlueZ4 bluetooth-agent
+//// NOTE: Bluetooth-agent has different arguments
+BluetoothSerial.bluetooth_agent = "bt-agent";
+BluetoothSerial.bluetooth_pincode_path = "/tmp/BluetoothPincodes";
+
+// "MAC Address": passkey/pin
+BluetoothSerial.bluetooth_devices = `
+00:21:13:00:71:0e 1234
+00:21:13:00:6e:a7 1234
+00:21:13:00:72:ba 1234
+00:21:13:00:71:a1 1234
+00:21:13:00:6f:a7 1234
+00:21:13:00:71:57 1234
+`;
+
+BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
+{
+	var spawn = require("child_process").spawn;
+	BluetoothSerial.bt_agent_process = spawn(
+		agent_ps,
+	[
+		"--capability", "NoInputNoOutput",
+		"--pin", code_path
+	]);
+	BluetoothSerial.bt_agent_process.on('close', (code) =>
+	{
+		//// NOTE: Could be potentially dangerous :P
+		//// Recursion mang!
+		BluetoothSerial.spawnBTAgent();
+	});
+};
+
+BluetoothSerial.initialize = function()
+{
+	var execSync = require("child_process").execSync;
+	var fs = require("fs");
+
+	//// bt-agent requires two SIGTERM signals to terminate fully.
+	//// 1st SIGTERM unregisters agent
+	//// 2nd SIGTERM kills bt-agent
+	//// 3rd Just to make sure
+	execSync("pkill bt-agent ; pkill bt-agent ; pkill bt-agent");
+
+	fs.writeFileSync(BluetoothSerial.bluetooth_pincode_path, BluetoothSerial.bluetooth_devices)
+
+	BluetoothSerial.spawnBTAgent(
+		BluetoothSerial.bluetooth_agent,
+		BluetoothSerial.bluetooth_pincode_path
+	);
+};
+
+BluetoothSerial.initialize();
 
 module.exports = BluetoothSerial;

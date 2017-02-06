@@ -19,27 +19,79 @@ describe('Testing BluetoothSerial Class', function ()
 
 	var write, log, output = '';
 	var fs = require('fs');
+	var execSync = require("child_process").execSync;
 
+	// =====================================
+	// Static methods tests
+	// =====================================
+	describe('BluetoothSerial.spawnBTAgent Test', function ()
+	{
+		it('Should spawn process bt-agent', function(done)
+		{
+			BluetoothSerial.spawnBTAgent();
+			var stdout = execSync("ps aux | grep bt-agent");
+			setTimeout(()=>
+			{
+				expect(stdout.toString()).to.contain("bt-agent --capability NoInputNoOutput");
+				done();
+			}, 100);
+		});
+		it('Should respawn bt-agent on bt-agent close', function(done)
+		{
+			execSync("pkill bt-agent ; pkill bt-agent ; pkill bt-agent");
+			var stdout = execSync("ps aux | grep bt-agent");
+			setTimeout(()=>
+			{
+				expect(stdout.toString()).to.contain("bt-agent --capability NoInputNoOutput");
+				done();
+			}, 100);
+		});
+	});
+
+	describe('BluetoothSerial.initialize Test', function ()
+	{
+		var stub;
+		before(function()
+		{
+			stub = sinon.stub(BluetoothSerial, "spawnBTAgent");
+		});
+		it('Should create /tmp/BluetoothPincodes and run spawnBTAgent', function(done)
+		{
+			var read = fs.readFileSync("/tmp/BluetoothPincodes");
+			expect(read).to.equal(BluetoothSerial.bluetooth_devices);
+			expect(BluetoothSerial.spawnBTAgent.called).to.be.true;
+		});
+		after(function()
+		{
+			stub.restore();
+		});
+	});
+
+	// =====================================
+	// Object methods test
+	// =====================================
 	describe('BluetoothSerial#constructor', function ()
 	{
 		it('Should initialize without failure', function()
 		{
 			unit_test = new BluetoothSerial({
-				mac: "00:21:13:00:71:A1",
+				mac: "00:21:13:00:6F:A7",
 				baud: 38400,
 				log: log,
-				dev: device
+				device: device
 			});
 			expect(unit_test).to.exist;
 			expect(unit_test).to.be.a('object');
 		});
 		it('RFCOMM should exist ', function(done)
 		{
-			fs.access(`/dev/rfcomm${device}`, fs.constants.R_OK | fs.constants.W_OK, (err) =>
-			{
-				expect(err).to.not.exist;
-				done();
-			});
+			setTimeout(function() {
+				fs.access(`/dev/rfcomm${device}`, fs.constants.R_OK | fs.constants.W_OK, (err) =>
+				{
+					expect(err).to.not.exist;
+					done();
+				});
+			}, 1000);
 		});
 	});
 
@@ -289,6 +341,23 @@ describe('Testing BluetoothSerial Class', function ()
 				expect(spy['S'].called).to.be.true;
 				done();
 			}, 250);
+		});
+	});
+
+	describe('BluetoothSerial Integration Test', function ()
+	{
+		this.timeout(5000);
+		it('Should initialize without failure', function(done)
+		{
+			var interval = setInterval(function()
+			{
+				unit_test.sendraw("hello world!");
+			}, 250);
+			setTimeout(function()
+			{
+				clearInterval(interval);
+				done();
+			}, 4500);
 		});
 	});
 });
