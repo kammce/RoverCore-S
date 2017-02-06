@@ -138,8 +138,8 @@ BluetoothSerial.bluetooth_devices = `
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 {
 	var spawn = require("child_process").spawn;
-	BluetoothSerial.bt_agent_process = spawn(
-		agent_ps,
+
+	BluetoothSerial.bt_agent_process = spawn(agent_ps,
 	[
 		"--capability", "NoInputNoOutput",
 		"--pin", code_path
@@ -148,7 +148,10 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	{
 		//// NOTE: Could be potentially dangerous :P
 		//// Recursion mang!
-		BluetoothSerial.spawnBTAgent();
+		BluetoothSerial.spawnBTAgent(
+			BluetoothSerial.bluetooth_agent,
+			BluetoothSerial.bluetooth_pincode_path
+		);
 	});
 };
 
@@ -159,18 +162,23 @@ BluetoothSerial.initialize = function()
 
 	//// bt-agent requires two SIGTERM signals to terminate fully.
 	//// 1st SIGTERM unregisters agent
+	execSync('pkill "bt-agent"');
 	//// 2nd SIGTERM kills bt-agent
+	execSync('pkill "bt-agent"');
 	//// 3rd Just to make sure
-	execSync("pkill bt-agent ; pkill bt-agent ; pkill bt-agent");
+	execSync('pkill "bt-agent"');
+	//// Kill all rfcomm processes before proceeding
+	execSync('pkill "rfcomm"');
 
-	fs.writeFileSync(BluetoothSerial.bluetooth_pincode_path, BluetoothSerial.bluetooth_devices)
+	fs.writeFileSync(
+		BluetoothSerial.bluetooth_pincode_path,
+		BluetoothSerial.bluetooth_devices
+	);
 
 	BluetoothSerial.spawnBTAgent(
 		BluetoothSerial.bluetooth_agent,
 		BluetoothSerial.bluetooth_pincode_path
 	);
 };
-
-BluetoothSerial.initialize();
 
 module.exports = BluetoothSerial;

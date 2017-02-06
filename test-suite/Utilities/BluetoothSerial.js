@@ -28,42 +28,47 @@ describe('Testing BluetoothSerial Class', function ()
 	{
 		it('Should spawn process bt-agent', function(done)
 		{
-			BluetoothSerial.spawnBTAgent();
-			var stdout = execSync("ps aux | grep bt-agent");
+			BluetoothSerial.spawnBTAgent(
+				BluetoothSerial.bluetooth_agent,
+				BluetoothSerial.bluetooth_pincode_path
+			);
+			var stdout = execSync('ps aux | grep "[b]t-agent"');
 			setTimeout(()=>
 			{
-				expect(stdout.toString()).to.contain("bt-agent --capability NoInputNoOutput");
+				expect(stdout.toString()).to.contain("bt-agent");
 				done();
-			}, 100);
+			}, 1000);
 		});
 		it('Should respawn bt-agent on bt-agent close', function(done)
 		{
-			execSync("pkill bt-agent ; pkill bt-agent ; pkill bt-agent");
-			var stdout = execSync("ps aux | grep bt-agent");
+			execSync('pkill "bt-agent"');
+			execSync('pkill "bt-agent"');
+			var stdout = execSync('ps aux | grep "[b]t-agent"');
 			setTimeout(()=>
 			{
-				expect(stdout.toString()).to.contain("bt-agent --capability NoInputNoOutput");
+				expect(stdout.toString()).to.contain("bt-agent");
 				done();
-			}, 100);
+			}, 1000);
 		});
 	});
 
 	describe('BluetoothSerial.initialize Test', function ()
 	{
-		var stub;
+		var spy;
 		before(function()
 		{
-			stub = sinon.stub(BluetoothSerial, "spawnBTAgent");
+			spy = sinon.spy(BluetoothSerial, "spawnBTAgent");
 		});
-		it('Should create /tmp/BluetoothPincodes and run spawnBTAgent', function(done)
+		it('Should create /tmp/BluetoothPincodes and run spawnBTAgent', function()
 		{
-			var read = fs.readFileSync("/tmp/BluetoothPincodes");
+			BluetoothSerial.initialize();
+			var read = fs.readFileSync("/tmp/BluetoothPincodes").toString();
 			expect(read).to.equal(BluetoothSerial.bluetooth_devices);
 			expect(BluetoothSerial.spawnBTAgent.called).to.be.true;
 		});
 		after(function()
 		{
-			stub.restore();
+			spy.restore();
 		});
 	});
 
@@ -359,5 +364,12 @@ describe('Testing BluetoothSerial Class', function ()
 				done();
 			}, 4500);
 		});
+	});
+
+	after(function()
+	{
+		execSync('pkill "bt-agent"');
+		execSync('pkill "bt-agent"');
+		execSync(`rfcomm release ${device}`);
 	});
 });
