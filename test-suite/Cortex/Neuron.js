@@ -1,6 +1,6 @@
 "use strict";
 
-var Neuron = require('../../../modules/Neuron');
+var Neuron = require('../../modules/Neuron');
 
 describe('Testing Neuron Class', function () {
 	var color_log = function() {}

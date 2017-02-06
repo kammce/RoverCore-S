@@ -1,9 +1,5 @@
 "use strict";
 
-var SerialPort = require("serialport");
-var exec = require("child_process").exec;
-var fs = require('fs');
-
 class BluetoothSerial
 {
 	constructor(params)
@@ -11,81 +7,92 @@ class BluetoothSerial
 		this.ready = false;
 		this.port;
 		this.log = params.log;
-		this.callback = params.callback;
-		this.serialbuffer = "";
+		this.serial_buffer = "";
 		this.callback_map = {};
-		var setup_serial = () =>
+		this.device = params.device;
+		this.mac_address = params.mac;
+		this.baud_rate = params.baudRate;
+		this.fs = require('fs');
+		this.exec = require("child_process").exec;
+		this.SerialPort = require("serialport");
+
+		this.setupRFComm();
+	}
+	setupRFComm()
+	{
+		if(this.fs.existsSync(`/dev/rfcomm${this.device}`))
 		{
-			this.port = new SerialPort(`/dev/rfcomm${params.dev}`, {
-				baudRate: params.baud,
-			});
-			this.port.on("open", () =>
+			this.exec(`rfcomm release ${this.device}`, (error, stdout, stderr) =>
 			{
-				this.ready = true;
-			});
-			this.port.on("data", (data) =>
-			{
-				this.serialbuffer += data.toString();
-				console.log(this.serialbuffer);
-				var split = this.serialbuffer.split('\n');
-				if(split.length > 1)
-				{
-					for (var i = 0; i < split.length-1; i++)
-					{
-						if(/^@[a-zA-Z],[0-9\-]+$/g.test(split[i]))
-						{
-							var info = split[i].split(",");
-							var key = info[0].charAt(1);
-							var value = parseFloat(info[1]);
-							//console.log(info);
-							if(typeof this.callback_map[key] === "function")
-							{
-								this.callback_map[key](value);
-							}
-							else
-							{
-								console.log("ERROR: COULD NOT CALL FUNCTION HANDLER FOR 'KEY' = ", key);
-							}
-						}
-					}
-					this.serialbuffer = split[split.length-1];
-				}
-			});
-			this.port.on("error", (err) =>
-			{
-				this.log.output(err);
-			});
-		};
-		var bind = () =>
-		{
-			//Mac_Addr, Baudrate, Log, Device_Number, callback
-			exec(`rfcomm bind ${params.dev} ${params.mac}`, (error, stdout, stderr) =>
-			{
+				//// TODO: Code coverage
 				if (error)
 				{
 					this.log.output(`exec error: ${error}`);
 				}
 				else
 				{
-					setup_serial();
-				}
-			});
-		};
-		if(fs.existsSync(`/dev/rfcomm${params.dev}`))
-		{
-			exec(`rfcomm release ${params.dev}`, (error, stdout, stderr) =>
-			{
-				if (error)
-				{
-					this.log.output(`exec error: ${error}`);
-				}
-				else
-				{
-					bind();
+					this.bind();
 				}
 			});
 		}
-		else { bind(); }
+		else { this.bind(); }
+	}
+	bind()
+	{
+		this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
+		{
+			if (error)
+			{
+				this.log.output(`Bluetooth Serial RFCOMM BIND error: ${error}`);
+			}
+			else
+			{
+				this.setupSerial();
+			}
+		});
+	};
+	setupSerial()
+	{
+		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
+			baudRate: this.baud_rate,
+		});
+		this.port.on("open", onPortOpen);
+		this.port.on("data", onPortData);
+		this.port.on("error", onPortError);
+	};
+	onPortOpen()
+	{
+		this.ready = true;
+	}
+	onPortData(data)
+	{
+		this.serial_buffer += data.toString();
+		var split = this.serial_buffer.split('\r\n');
+		if(split.length > 1)
+		{
+			for (var i = 0; i < split.length-1; i++)
+			{
+				if(/^@[a-zA-Z],[0-9\-]+$/g.test(split[i]))
+				{
+					var info = split[i].split(",");
+					var key = info[0].charAt(1);
+					var value = parseFloat(info[1]);
+					if(typeof this.callback_map[key] === "function")
+					{
+						this.callback_map[key](value);
+					}
+					else
+					{
+						this.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+					}
+				}
+			}
+			this.serial_buffer = split[split.length-1];
+		}
+	}
+	onPortError(err)
+	{
+		this.log.output(err);
 	}
 	sendraw(msg)
 	{
@@ -96,7 +103,7 @@ class BluetoothSerial
 	}
 	send(key, value)
 	{
-		var msg = `@${key.charAt(0)},${parseFloat(value)}\n`;
+		var msg = `@${key.charAt(0)},${parseFloat(value)}\r\n`;
 		this.sendraw(msg);
 	}
 	attachListener(key, callback)
