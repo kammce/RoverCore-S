@@ -51,6 +51,22 @@ class Tracker extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+
+		/* Memory registration */
+		this.model.registerMemory("lidarState");// LIDAR activation
+		this.model.registerMemory("ctlMode");	// Control Mode; SD: Speed/Direction Control, P: Position control
+		this.model.registerMemory("preset");	// Preset (if any): for values, see MC/Tracker lobe comm. standards
+		this.model.registerMemory("pitch");		// Pitch parameters
+		this.model.registerMemory("yaw");		// Yaw parameters
+		this.model.registerMemory("zoom");		// Zoom percentage
+
+		/* Memory initialization */
+		this.model.set("lidarState", {lidarState: false} );
+		this.model.set("ctlMode", {ctlMode: "SD"} );	// Will support only SD control for now... 2/3/17
+		this.model.set("preset", {preset: "Cancel"});	// No preset will be initiated at startup
+		this.model.set("pitch", {speed: 0, direction: "up"});	// no movement in the beginning
+		this.model.set("yaw", {speed: 0, direction: "left"});	// no movement in the beginning
+		this.model.set("zoom", {zoom: 0});				// begin with no zooming
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -59,6 +75,53 @@ class Tracker extends Neuron
      */
 	react(input)
 	{
+		// Determine Control Mode
+		var tempCtlMode = getControlMode(input);
+		if(tempCtlMode === false)
+		{
+			this.log.output("Error", "Ambiguous control mode");
+			return false;
+		}
+		else
+		{
+			this.model.set("ctlMode", {ctlMode: tempCtlMode});
+		}
+
+		// Determine Preset (if any)
+		if((Object.keys(input)).indexOf("preset") !== -1)
+		{
+			this.model.set("preset", {preset: input.preset});
+		}
+
+		// Send parameters to Teensy
+
+		// Pitch/Yaw parameters
+		switch(tempCtlMode)
+		{
+			case "SD":
+			{
+				// Pass SPEED/DIRECTIONAL Control Parameters
+				this.model.set("pitch", {speed: input.pitch.speed, direction: input.pitch.direction});
+				this.model.set("yaw", {speed: input.yaw.speed, direction: input.yaw.direction});
+				break;
+			}
+			case "P":
+			{
+				// Pass POSITIONAL Control Parameters
+				this.model.set("pitch", {angle: input.pitch.angle});
+				this.model.set("yaw", {angle: input.pitch.yaw});
+				break;
+			}
+			default:
+			{
+				this.log.output("Default", "Doing Nothing...");
+				break;
+			}
+		}
+
+		// Zoom parameters
+		this.model.set("zoom", {zoom: input.zoom});
+
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
 		return true;
@@ -97,6 +160,31 @@ class Tracker extends Neuron
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
 		return true;
+	}
+
+	// Utility Functions
+	/* Determines if control mode is SD or P, or if received mode is invalid */
+	getControlMode(missionControlObj)
+	{
+		// Store key lists
+		var pitchList = Object.keys(missionControlObj.pitch);
+		var yawList = Object.keys(missionControlObj.yaw);
+
+		// Decide control mode
+		if( (pitchList.indexOf("angle") !== -1) &&
+			(yawList.indexOf("angle") !== -1) )
+		{
+			return "P";
+		}
+		else if( ((pitchList.indexOf("speed") !== -1) && (pitchList.indexOf("direction") !== -1)) &&
+				 ((yawList.indexOf("speed") !== -1) && (yawList.indexOf("direction") !== -1)) )
+		{
+			return "SD";
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
