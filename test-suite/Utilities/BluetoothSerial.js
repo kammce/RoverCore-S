@@ -18,12 +18,14 @@ describe('Testing BluetoothSerial Class', function ()
 	var device = 1;
 
 	var write, log, output = '';
+	var mac = "00:21:13:00:6F:A7";
 	var fs = require('fs');
 	var execSync = require("child_process").execSync;
 
 	// =====================================
 	// Static methods tests
 	// =====================================
+
 	describe('BluetoothSerial.spawnBTAgent Test', function ()
 	{
 		it('Should spawn process bt-agent', function(done)
@@ -41,8 +43,8 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 		it('Should respawn bt-agent on bt-agent close', function(done)
 		{
-			execSync('pkill "bt-agent"');
-			execSync('pkill "bt-agent"');
+			execSync('killall bt-agent');
+			execSync('killall bt-agent');
 			var stdout = execSync('ps aux | grep "[b]t-agent"');
 			setTimeout(()=>
 			{
@@ -80,7 +82,7 @@ describe('Testing BluetoothSerial Class', function ()
 		it('Should initialize without failure', function()
 		{
 			unit_test = new BluetoothSerial({
-				mac: "00:21:13:00:6F:A7",
+				mac: mac,
 				baud: 38400,
 				log: log,
 				device: device
@@ -97,47 +99,6 @@ describe('Testing BluetoothSerial Class', function ()
 					done();
 				});
 			}, 1000);
-		});
-	});
-
-	describe('BluetoothSerial#setupRFComm', function ()
-	{
-		var stub_fs;
-		var stub_bind;
-		var stub_exec;
-		before(function()
-		{
-			stub_fs = sinon.stub(unit_test.fs, "existsSync");
-			stub_fs.onFirstCall().returns(false);
-			stub_fs.returns(true);
-
-			stub_bind = sinon.stub(unit_test, "bind");
-			stub_exec = sinon.stub(unit_test, "exec");
-		});
-		it('Should execute bind if fs.existsSync returns false', function()
-		{
-			//// 1st call
-			unit_test.setupRFComm();
-			expect(stub_bind.called).to.be.true;
-			expect(stub_exec.called).to.be.false;
-		});
-		it('Should execute exec if fs.existsSync returns true', function()
-		{
-			//// 2nd call
-			unit_test.setupRFComm();
-			//// Bind does not get called this case because spy 'exec' callback does not exist.
-			expect(stub_bind.called).to.be.false;
-			expect(stub_exec.called).to.be.true;
-		});
-		afterEach(function() {
-			stub_bind.reset();
-			stub_exec.reset();
-		});
-		after(function()
-		{
-			stub_fs.restore();
-			stub_bind.restore();
-			stub_exec.restore();
 		});
 	});
 
@@ -349,27 +310,28 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
+	//// NOTE: THIS TEST WILL CRASH YOUR COMPUTER IF THE BLUETOOTH DEVICE DOES NOT EXIST.
 	describe('BluetoothSerial Integration Test', function ()
 	{
 		this.timeout(5000);
-		it('Should initialize without failure', function(done)
+		it('Should send hello world via bluetooth to device', function()
 		{
 			var interval = setInterval(function()
 			{
 				unit_test.sendraw("hello world!");
-			}, 250);
+			}, 1000);
 			setTimeout(function()
 			{
 				clearInterval(interval);
 				done();
-			}, 4500);
+			}, 5000-1);
 		});
 	});
 
 	after(function()
 	{
-		execSync('pkill "bt-agent"');
-		execSync('pkill "bt-agent"');
-		execSync(`rfcomm release ${device}`);
+		execSync(`rfcomm release all`);
+		execSync('killall bt-agent');
+		execSync('killall bt-agent');
 	});
 });

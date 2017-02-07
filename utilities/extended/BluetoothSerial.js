@@ -16,26 +16,7 @@ class BluetoothSerial
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
 
-		this.setupRFComm();
-	}
-	setupRFComm()
-	{
-		if(this.fs.existsSync(`/dev/rfcomm${this.device}`))
-		{
-			this.exec(`rfcomm release ${this.device}`, (error, stdout, stderr) =>
-			{
-				//// TODO: Code coverage
-				if (error)
-				{
-					this.log.output(`exec error: ${error}`);
-				}
-				else
-				{
-					this.bind();
-				}
-			});
-		}
-		else { this.bind(); }
+		this.bind();
 	}
 	bind()
 	{
@@ -55,10 +36,12 @@ class BluetoothSerial
 	{
 		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
 			baudRate: this.baud_rate,
+			autoOpen: false
 		});
 		this.port.on("open", this.onPortOpen);
 		this.port.on("data", this.onPortData);
 		this.port.on("error", this.onPortError);
+		this.port.open();
 	};
 	onPortOpen()
 	{
@@ -148,6 +131,9 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	{
 		//// NOTE: Could be potentially dangerous :P
 		//// Recursion mang!
+
+		console.log("bt-agent (Bluetooth Pincode Pairing Agent) closed! RESTARTING NOW!");
+
 		BluetoothSerial.spawnBTAgent(
 			BluetoothSerial.bluetooth_agent,
 			BluetoothSerial.bluetooth_pincode_path
@@ -160,15 +146,17 @@ BluetoothSerial.initialize = function()
 	var execSync = require("child_process").execSync;
 	var fs = require("fs");
 
+	//// Release all bluetooth rfcomm connections
+	try { execSync('rfcomm release all'); } catch(e) {}
 	//// bt-agent requires two SIGTERM signals to terminate fully.
 	//// 1st SIGTERM unregisters agent
-	execSync('pkill "bt-agent"');
+	try { execSync('killall bt-agent'); } catch(e) {}
 	//// 2nd SIGTERM kills bt-agent
-	execSync('pkill "bt-agent"');
+	try { execSync('killall bt-agent'); } catch(e) {}
 	//// 3rd Just to make sure
-	execSync('pkill "bt-agent"');
+	try { execSync('killall bt-agent'); } catch(e) {}
 	//// Kill all rfcomm processes before proceeding
-	execSync('pkill "rfcomm"');
+	try { execSync('killall -9 rfcomm'); } catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,
