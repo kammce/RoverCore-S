@@ -13,11 +13,8 @@ describe('Testing BluetoothSerial Class', function ()
 	// =====================================
 	// Unit test global variables
 	// =====================================
-	var connection, unit_test, spark;
-
+	var unit_test;
 	var device = 1;
-
-	var write, log, output = '';
 	var mac = "00:21:13:00:6F:A7";
 	var fs = require('fs');
 	var execSync = require("child_process").execSync;
@@ -108,7 +105,7 @@ describe('Testing BluetoothSerial Class', function ()
 
 	describe('BluetoothSerial#onPortOpen', function ()
 	{
-		it('Should set ready flag to true after being called"', function()
+		it('Should set ready flag to true after being called"', function ()
 		{
 			unit_test.ready = false;
 			unit_test.onPortOpen();
@@ -134,7 +131,7 @@ describe('Testing BluetoothSerial Class', function ()
 			Bflag = false;
 			Bvalue = 0;
 		})
-		it('Should call A and B function in map given complete single message', function()
+		it('Should call A and B function in map given complete single message', function ()
 		{
 			unit_test.onPortData("@A,512\r\n");
 			unit_test.onPortData("@B,1024\r\n");
@@ -201,6 +198,7 @@ describe('Testing BluetoothSerial Class', function ()
 
 			expect(stub.calledWith("COULDN'T DO THE THING!!")).to.be.true;
 			expect(error_message).to.equal("COULDN'T DO THE THING!!");
+			expect(unit_test.ready).to.be.true;
 		});
 		after(function()
 		{
@@ -212,9 +210,10 @@ describe('Testing BluetoothSerial Class', function ()
 	{
 		const PORT_MESSAGE = "SENDRAW-TEST";
 		var stub_write;
-		var previous_port;
+		var previous_port, previous_ready_state;
 		before(function()
 		{
+			previous_ready_state = unit_test.ready;
 			previous_port = unit_test.port;
 			unit_test.port = { 'write': function() {} };
 			stub_write = sinon.stub(unit_test.port, "write");
@@ -246,7 +245,7 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 		after(function()
 		{
-			unit_test.ready = true;
+			unit_test.ready = previous_ready_state;
 			stub_write.restore();
 			unit_test.port = previous_port;
 		});
@@ -313,18 +312,25 @@ describe('Testing BluetoothSerial Class', function ()
 	//// NOTE: THIS TEST WILL CRASH YOUR COMPUTER IF THE BLUETOOTH DEVICE DOES NOT EXIST.
 	describe('BluetoothSerial Integration Test', function ()
 	{
-		this.timeout(5000);
-		it('Should send hello world via bluetooth to device', function()
+		this.timeout(10000);
+		it('Should send hello world via bluetooth to device', function(done)
 		{
-			var interval = setInterval(function()
+			unit_test.port.close(() =>
 			{
-				unit_test.sendraw("hello world!");
-			}, 1000);
-			setTimeout(function()
-			{
-				clearInterval(interval);
-				done();
-			}, 5000-1);
+				unit_test.port.open(() =>
+				{
+					var counter = 0;
+					var interval = setInterval(() =>
+					{
+						unit_test.send('A', counter++);
+					}, 1000);
+					setTimeout(() =>
+					{
+						clearInterval(interval);
+						done();
+					}, 9500);
+				});
+			});
 		});
 	});
 

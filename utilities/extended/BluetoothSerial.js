@@ -31,7 +31,7 @@ class BluetoothSerial
 				this.setupSerial();
 			}
 		});
-	};
+	}
 	setupSerial()
 	{
 		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
@@ -41,16 +41,26 @@ class BluetoothSerial
 		this.port.on("open", this.onPortOpen);
 		this.port.on("data", this.onPortData);
 		this.port.on("error", this.onPortError);
+		//// Embed BluetoothSerial Log into SerialPort Object
+		this.port.log = this.log;
+		this.port.blue = this;
+		//// Open Serial Port
 		this.port.open();
-	};
+	}
+	//// The SerialPort 'on' events exist only in the scope of the port object with reference to THIS!
 	onPortOpen()
 	{
-		this.ready = true;
+		this.blue = this.blue || this;
+
+		this.log.output(`Opening connection to ${this.path}`);
+		this.blue.ready = true;
 	}
 	onPortData(data)
 	{
-		this.serial_buffer += data.toString();
-		var split = this.serial_buffer.split('\r\n');
+		this.blue = this.blue || this;
+
+		this.blue.serial_buffer += data.toString();
+		var split = this.blue.serial_buffer.split('\r\n');
 		if(split.length > 1)
 		{
 			for (var i = 0; i < split.length-1; i++)
@@ -62,20 +72,26 @@ class BluetoothSerial
 					var value = parseFloat(info[1]);
 					if(typeof this.callback_map[key] === "function")
 					{
-						this.callback_map[key](value);
+						this.blue.callback_map[key](value);
 					}
 					else
 					{
-						this.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+						this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
 					}
 				}
 			}
-			this.serial_buffer = split[split.length-1];
+			this.blue.serial_buffer = split[split.length-1];
 		}
 	}
 	onPortError(err)
 	{
-		this.log.output(err);
+		this.blue = this.blue || this;
+
+		this.blue.log.output(err);
+		if(err.toString().indexOf("Error: Port is not open") !== -1)
+		{
+			this.blue.ready = false;
+		}
 	}
 	sendraw(msg)
 	{
