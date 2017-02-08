@@ -1,6 +1,6 @@
 "use strict";
 
-var Protolobe = require('../../../modules/Protolobe/Protolobe');
+var Protolobe = require('../../modules/Protolobe/Protolobe');
 
 describe('Testing Protolobe Class', function () {
 	var expected_log;

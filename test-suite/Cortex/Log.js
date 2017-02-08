@@ -1,6 +1,6 @@
 "use strict";
 
-var Log = require('../../../utilities/Log');
+var Log = require('../../utilities/Log');
 
 describe('Testing Log Class', function () {
 	var write, log, output = '';
@@ -31,7 +31,7 @@ describe('Testing Log Class', function () {
 	});
 	after(function() {
 		Log.deleteLogs();
-	})
+	});
 	/* TODO: Make create test to check if that Log statically creates only one log per require("Log") */
 	describe('#output()', function () {
 		it('Expect function to output to stdout when given a string', function () {
