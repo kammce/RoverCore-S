@@ -52,6 +52,25 @@ class Tracker extends Neuron
 		// Construct Class After This Points
 		// =====================================
 
+		/*
+		Personal Notes:
+			MODEL: used as a way to communicate with MC
+			BluetoothSerial.js: used as a way to communicate with Teensy
+		*/
+		/* Bluetooth Serial */
+		this.comms = new BluetoothSerial(
+			{
+				mac: "21:13:710e",
+				baud: 38400,	//recommended baud rate
+				log: this.log,
+				device: 3,		//tracker
+				callback: (data) =>
+				{
+					this.log.output(data);
+				}
+			}
+		);
+
 		/* Memory registration */
 		this.model.registerMemory("lidarState");// LIDAR activation
 		this.model.registerMemory("ctlMode");	// Control Mode; SD: Speed/Direction Control, P: Position control
@@ -85,15 +104,17 @@ class Tracker extends Neuron
 		else
 		{
 			this.model.set("ctlMode", {ctlMode: tempCtlMode});
+			/*Do I need to explicitly send the type of control mode?*/
 		}
 
 		// Determine Preset (if any)
 		if((Object.keys(input)).indexOf("preset") !== -1)
 		{
 			this.model.set("preset", {preset: input.preset});
+			this.comms.send(/*key for preset*/, /*value to represent input.preset*/);
 		}
 
-		// Send parameters to Teensy
+		// Send parameters to Teensy (BluetoothSerial) and Mission Control (Model)
 
 		// Pitch/Yaw parameters
 		switch(tempCtlMode)
@@ -103,6 +124,14 @@ class Tracker extends Neuron
 				// Pass SPEED/DIRECTIONAL Control Parameters
 				this.model.set("pitch", {speed: input.pitch.speed, direction: input.pitch.direction});
 				this.model.set("yaw", {speed: input.yaw.speed, direction: input.yaw.direction});
+				// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
+
+				// Send to Teensy
+				this.comms.send(/*key for pitch speed*/, /*value to represent input.pitch.speed*/);
+				this.comms.send(/*key for p
+					itch direction*/, /*value to represent input.pitch.direction*/);
+				this.comms.send(/*key for yaw speed*/, /*value to represent input.yaw.speed*/);
+				this.comms.send(/*key for yaw direction*/, /*value to represent input.yaw.direction*/);
 				break;
 			}
 			case "P":
@@ -110,6 +139,10 @@ class Tracker extends Neuron
 				// Pass POSITIONAL Control Parameters
 				this.model.set("pitch", {angle: input.pitch.angle});
 				this.model.set("yaw", {angle: input.pitch.yaw});
+
+				// Send to Teensy
+				this.comms.send(/*key for pitch angle*/, input.pitch.angle);
+				this.comms.send(/*key for yaw angle*/, input.yaw.angle);
 				break;
 			}
 			default:
@@ -121,6 +154,7 @@ class Tracker extends Neuron
 
 		// Zoom parameters
 		this.model.set("zoom", {zoom: input.zoom});
+		this.comms.send(/*key for zoom*/, input.zoom);
 
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
