@@ -2,8 +2,8 @@
 
 describe('Testing RandomSineWave Class', function () {
 	// Loading Libraries
-	var RandomSineWave = require('../../../modules/RandomSineWave/RandomSineWave');
-	var Model = require('../../../utilities/Model');
+	var RandomSineWave = require('../../modules/RandomSineWave/RandomSineWave');
+	var Model = require('../../utilities/Model');
 
 	describe('Testing RandomSineWave Updating model', function () {
 		this.timeout(6000);
