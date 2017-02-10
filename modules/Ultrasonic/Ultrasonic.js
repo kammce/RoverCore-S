@@ -92,6 +92,7 @@ class Ultrasonic extends Neuron
      * 
      */
     measureDistance(){
+    	var sysFsPath = "/sys/class/gpio" ;
     	var Trigger = 20
     	var Echo = 21 
     	expose(Trigger);
@@ -121,13 +122,11 @@ class Ultrasonic extends Neuron
 		        //end=now();
 		      }
 		      duration = end-start;
-		      duration=duration*12.9967
+		      var distance =(duration/1e6)*15.614; //convert ms to cm 
+		      if(distance > 170 && distance < 0 ){distance=0;}
 		      this.log.output(`start: ${this.name}`, start);
 		      this.log.output(`end: ${this.name}`, end);
-		      this.log.output(`duration: ${this.name}`, duration);
-		      //console.log("duration: " + duration*12.9967);
-		      //console.log("duration: " + duration);
-		      //if(distance>150){distance=0;}    
+		      this.log.output(`distance: ${this.name}`, distance);    
 		  },.0020);
 		}, 10);
     }
