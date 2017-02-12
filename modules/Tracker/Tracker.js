@@ -55,15 +55,33 @@ class Tracker extends Neuron
 		/*
 		Personal Notes:
 			MODEL: used as a way to communicate with MC
-			BluetoothSerial.js: used as a way to communicate with Teensy
+			BluetoothSerial.js: used as a way to communicate with Teensy, and to read from Teensy
 		*/
+
+		/* Constants/Definitions */
+		// Teensy Keys for key:value pairs to/from bluetooth
+		const LOCAL_ORIENTATION_X = 1;
+		const LOCAL_ORIENTATION_Y = 2;
+		const LOCAL_ORIENTATION_Z = 3;
+		const GLOBAL_ORIENTATION_X = 4;
+		const GLOBAL_ORIENTATION_Y = 5;
+		const GLOBAL_ORIENTATION_Z = 6;
+		const LIDAR_READING = 7;
+		const YAW_MOTOR_CURRENT = 8;
+		const PITCH_MOTOR_CURRENT = 9;
+		const MOTION_CONTROL_MODE = 128;	// key for specifying speed/dir control (val = 1) or position control (val = 2)
+		const MOTION_COMMAND_YAW = 129;		// key for specifying input to yaw motor (signed)
+		const MOTION_COMMAND_PITCH = 130;	// key for specifying input to pitch motor (signed)
+		const ACTIVE_CAMERA = 131;			// key for selecting which analog camera to receive feed from
+		const BATTERY_VOLTAGE = 132;
+
 		/* Bluetooth Serial */
 		this.comms = new BluetoothSerial(
 			{
 				mac: "21:13:710e",
 				baud: 38400,	//recommended baud rate
 				log: this.log,
-				device: 3,		//tracker
+				device: 3,		//tracker = device 3
 				callback: (data) =>
 				{
 					this.log.output(data);
@@ -71,21 +89,70 @@ class Tracker extends Neuron
 			}
 		);
 
-		/* Memory registration */
-		this.model.registerMemory("lidarState");// LIDAR activation
-		this.model.registerMemory("ctlMode");	// Control Mode; SD: Speed/Direction Control, P: Position control
-		this.model.registerMemory("preset");	// Preset (if any): for values, see MC/Tracker lobe comm. standards
-		this.model.registerMemory("pitch");		// Pitch parameters
-		this.model.registerMemory("yaw");		// Yaw parameters
-		this.model.registerMemory("zoom");		// Zoom percentage
+		/* Locals */
+		this.local = {
+			busy: false,		// prevents command bottle-necking
+			orientation: {		// orientation relative to Rover
+				X: 0,
+				Y: 0,
+				Z: 0
+			},
+			heading: {			// orientation relative to Earth
+				X: 0,
+				Y: 0,
+				Z: 0
+			},
+			distance: 0,		// Lidar distance reading (cm)
+			current: {			// current readings for the motors
+				yaw: 0,
+				pitch: 0
+			},
+			lidarState: false,	// LIDAR activation (currently not implemented; lidar is assumed always on)
+			ctlMode: "SD",		// Control Mode; SD: Speed/Direction Control, P: Position control
+			preset: "Cancel",	// Preset (if any): for values, see MC/Tracker lobe comm. standards
+			pitch: {			// Pitch parameters
+				speed: 0,
+				direction: "up"
+			},
+			yaw: {				// Yaw parameters
+				speed: 0,
+				direction: "left"
+			},
+			zoom: 0			// Zoom percentage
+		};
 
-		/* Memory initialization */
-		this.model.set("lidarState", {lidarState: false} );
-		this.model.set("ctlMode", {ctlMode: "SD"} );	// Will support only SD control for now... 2/3/17
-		this.model.set("preset", {preset: "Cancel"});	// No preset will be initiated at startup
-		this.model.set("pitch", {speed: 0, direction: "up"});	// no movement in the beginning
-		this.model.set("yaw", {speed: 0, direction: "left"});	// no movement in the beginning
-		this.model.set("zoom", {zoom: 0});				// begin with no zooming
+		/* Model Memory Registration */
+		this.model.registerMemory("Tracker");	// Tracker Database
+		this.model.set("Tracker", this.local);	// set "Tracker" to local
+
+		/* Teensy Data Listeners (to read and asynchronously update vars) */
+		this.comms.attachListener(LOCAL_ORIENTATION_X, (val) => {
+			this.local.orientation.X = val;
+		});
+		this.comms.attachListener(LOCAL_ORIENTATION_Y, (val) => {
+			this.local.orientation.Y = val;
+		});
+		this.comms.attachListener(LOCAL_ORIENTATION_Z, (val) => {
+			this.local.orientation.Z = val;
+		});
+		this.comms.attachListener(GLOBAL_ORIENTATION_X, (val) => {
+			this.local.heading.X = val;
+		});
+		this.comms.attachListener(GLOBAL_ORIENTATION_Y, (val) => {
+			this.local.heading.Y = val;
+		});
+		this.comms.attachListener(GLOBAL_ORIENTATION_Z, (val) => {
+			this.local.heading.Z = val;
+		});
+		this.comms.attachListener(LIDAR_READING, (val) => {
+			this.local.distance = val;
+		});
+		this.comms.attachListener(YAW_MOTOR_CURRENT, (val) => {
+			this.local.current.yaw = val;
+		});
+		this.comms.attachListener(PITCH_MOTOR_CURRENT, (val) => {
+			this.local.current.pitch = val;
+		});
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -94,70 +161,90 @@ class Tracker extends Neuron
      */
 	react(input)
 	{
-		// Determine Control Mode
-		var tempCtlMode = getControlMode(input);
-		if(tempCtlMode === false)
+		if(!this.local.busy)
 		{
-			this.log.output("Error", "Ambiguous control mode");
-			return false;
-		}
-		else
-		{
-			this.model.set("ctlMode", {ctlMode: tempCtlMode});
-			/*Do I need to explicitly send the type of control mode?*/
-		}
+			// Prevent bottle-neck
+			this.local.busy = true;
 
-		// Determine Preset (if any)
-		if((Object.keys(input)).indexOf("preset") !== -1)
-		{
-			this.model.set("preset", {preset: input.preset});
-			this.comms.send(/*key for preset*/, /*value to represent input.preset*/);
-		}
-
-		// Send parameters to Teensy (BluetoothSerial) and Mission Control (Model)
-
-		// Pitch/Yaw parameters
-		switch(tempCtlMode)
-		{
-			case "SD":
+			// Determine Control Mode
+			var tempCtlMode = getControlMode(input);
+			if(tempCtlMode === false)
 			{
-				// Pass SPEED/DIRECTIONAL Control Parameters
-				this.model.set("pitch", {speed: input.pitch.speed, direction: input.pitch.direction});
-				this.model.set("yaw", {speed: input.yaw.speed, direction: input.yaw.direction});
-				// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
-
-				// Send to Teensy
-				this.comms.send(/*key for pitch speed*/, /*value to represent input.pitch.speed*/);
-				this.comms.send(/*key for p
-					itch direction*/, /*value to represent input.pitch.direction*/);
-				this.comms.send(/*key for yaw speed*/, /*value to represent input.yaw.speed*/);
-				this.comms.send(/*key for yaw direction*/, /*value to represent input.yaw.direction*/);
-				break;
+				this.log.output("Error", "Ambiguous control mode");
+				reset();
+				return false;
 			}
-			case "P":
+			else
 			{
-				// Pass POSITIONAL Control Parameters
-				this.model.set("pitch", {angle: input.pitch.angle});
-				this.model.set("yaw", {angle: input.pitch.yaw});
+				this.local.ctlMode = tempCtlMode;
+			}
 
-				// Send to Teensy
-				this.comms.send(/*key for pitch angle*/, input.pitch.angle);
-				this.comms.send(/*key for yaw angle*/, input.yaw.angle);
-				break;
-			}
-			default:
+			// Determine Preset (if any)
+			if((Object.keys(input)).indexOf("preset") !== -1)
 			{
-				this.log.output("Default", "Doing Nothing...");
-				break;
+				this.local.preset = input.preset;
+				// this.comms.send(/*key for preset*/, /*value to represent input.preset*/);	// Presets are to be handled by lobe, NOT teensy, therefore NO preset variable is to be sent.
 			}
+
+			// Prepare parameters to Teensy (BluetoothSerial) and Mission Control (Model)
+
+			// Pitch/Yaw parameters
+			switch(tempCtlMode)
+			{
+				case "SD":
+				{
+					// Pass SPEED/DIRECTIONAL Control Parameters
+					this.local.pitch = {
+						speed: input.pitch.speed,
+						direction: input.pitch.direction
+					};
+					this.local.yaw = {
+						speed: input.yaw.speed,
+						direction: input.yaw.direction
+					};
+					// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
+
+					// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
+					this.comms.send(MOTION_COMMAND_PITCH,
+						(this.local.pitch.direction === "up") ? this.local.pitch.speed : (this.local.pitch.speed * (-1))
+					);
+					this.comms.send(MOTION_COMMAND_YAW,
+						(this.local.yaw.direction === "right") ? this.local.yaw.speed: (this.local.yaw.speed * (-1))
+					);
+					break;
+				}
+				case "P":
+				{
+					// Pass POSITIONAL Control Parameters
+					this.local.pitch = {
+						angle: input.pitch.angle
+					};
+					this.local.yaw = {
+						angle: input.yaw.angle
+					};
+
+					// Send to Teensy
+					this.comms.send(MOTION_COMMAND_PITCH, input.pitch.angle);
+					this.comms.send(MOTION_COMMAND_YAW, input.yaw.angle);
+					break;
+				}
+				default:
+				{
+					this.log.output("Default", "Doing Nothing...");
+					break;
+				}
+			}
+
+			// Zoom parameters
+			this.local.zoom = input.zoom;
+			this.comms.send(/*key for zoom*/, input.zoom);
+
+			this.log.output(`REACTING ${this.name}: `, input);
+			this.feedback(`REACTING ${this.name}: `, input);
+
+			// Send data to Mission Control and Reset for new input
+			reset();
 		}
-
-		// Zoom parameters
-		this.model.set("zoom", {zoom: input.zoom});
-		this.comms.send(/*key for zoom*/, input.zoom);
-
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
 		return true;
 	}
 	/**
@@ -183,6 +270,7 @@ class Tracker extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
+		reset();
 		return true;
 	}
 	/**
@@ -193,12 +281,12 @@ class Tracker extends Neuron
 	{
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
+		reset();
 		return true;
 	}
 
-	// Utility Functions
-	/* Determines if control mode is SD or P, or if received mode is invalid */
-	getControlMode(missionControlObj)
+	/* Utility Functions */
+	getControlMode(missionControlObj)	// Determines if control mode is SD or P, or if received mode is invalid
 	{
 		// Store key lists
 		var pitchList = Object.keys(missionControlObj.pitch);
@@ -219,6 +307,17 @@ class Tracker extends Neuron
 		{
 			return false;
 		}
+	}
+
+	panorama()
+	{
+
+	}
+
+	reset()		// re-opens react() for command processing
+	{
+		this.local.busy = false;
+		this.model.set("Tracker", this.local);
 	}
 }
 
