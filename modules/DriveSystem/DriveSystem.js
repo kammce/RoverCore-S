@@ -51,20 +51,12 @@ class DriveSystem extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
-		this.rfcomm = new BluetoothSerial({
+		this.rfcomm = new util.extended.BluetoothSerial({
 			mac: "30:14:06:24:01:80",
 			baud: 38400,
 			log: this.log,
-			dev: 1,
-			callback: (data) =>
-			{
-				this.log.output(data);
-			}
+			device: 1
 		});
-		// this.rfcomm.attachListener('A', function(value)
-		// {
-		// 	console.log(`key[A] = ${value}`);
-		// });
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -74,13 +66,20 @@ class DriveSystem extends Neuron
 	react(input)
 	{
 		if( "speed" 	in input &&
-			"direction" in input &&
+			"angle" in input &&
 			"mode" 		in input)
 		{
 			this.rfcomm.send("S", input.speed);
-			this.rfcomm.send("D", input.direction);
+			this.rfcomm.send("A", input.angle);
 			this.rfcomm.send("M", input.mode);
+			this.log.output(`Sending `, input, `Over BluetoothSerial`);
+			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
+		}
+		else
+		{
+			this.log.output(`Invalid Input `, input);
+			this.feedback(`Invalid Input `, input);
 		}
 	}
 	/**
