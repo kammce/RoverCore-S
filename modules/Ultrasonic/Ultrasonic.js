@@ -87,6 +87,86 @@ class Ultrasonic extends Neuron
     direction(pin,state){
     	fs.writeFileSync(sysFsPath + "/gpio" + pin + "/direction", state);
     }
+     /**
+     * Write 1 or 0 to a single GPIO pin 
+     * @param {interger} pin - GPIO pin number.
+     * @param {string} value - value to be write to.
+     */
+    writeGPIO(pin, value) {
+	    if (value === undefined) {
+	        value = 0;
+	    }
+	    var sysFsPath = "/sys/class/gpio";
+	    fs.writeFileSync(sysFsPath + "/gpio" + pin + "/value", value, "utf8");
+	}
+	 /**
+     * Write 1 or 0 to four GPIO pin 
+     * @param {interger array} pin_array - GPIOs pin nummber.
+     * @param {string} value-x - value to be write to.
+     */
+	writeGPIO_MUX(pin_array, value1, value2, value3, value4) {
+	    if (value1 === undefined && value2 === undefined && value3 === undefined && value4 === undefined) {
+	        value1 = 0;
+	        value2 = 0;
+	        value3 = 0;
+	        value4 = 0;
+	    }
+	    for (int i = 0; i < 3; i++) {
+	        fs.writeFileSync(sysFsPath + "/gpio" + pin[i] + "/value", value + i + 1, "utf8");
+	    }
+	}
+	 /**
+     * Write 1 or 0 to four GPIO pin 
+     * @param {interger } device_num - ultrasonic number.
+     */
+	muxSelect(device_num) {
+	    switch (device_num) {
+	        case 0:
+	            writeGPIO_MUX(Control_GPIO, 0, 0, 0, 0);
+	            break;
+	        case 1:
+	            writeGPIO_MUX(Control_GPIO, 0, 0, 0, 1);
+	            break;
+	        case 2:
+	            writeGPIO_MUX(Control_GPIO, 0, 0, 1, 0);
+	            break;
+	        case 3:
+	            writeGPIO_MUX(Control_GPIO, 0, 0, 1, 1);
+	            break;
+	        case 4:
+	            writeGPIO_MUX(Control_GPIO, 0, 1, 0, 0);
+	            break;
+	        case 5:
+	            writeGPIO_MUX(Control_GPIO, 0, 1, 0, 1);
+	            break;
+	        case 6:
+	            writeGPIO_MUX(Control_GPIO, 0, 1, 1, 0);
+	            break;
+	        case 7:
+	            writeGPIO_MUX(Control_GPIO, 0, 1, 1, 1);
+	            break;
+	        case 8:
+	            writeGPIO_MUX(Control_GPIO, 1, 0, 0, 0);
+	            break;
+	        case 9:
+	            writeGPIO_MUX(Control_GPIO, 1, 0, 0, 1);
+	            break;
+	        case 10:
+	            writeGPIO_MUX(Control_GPIO, 1, 0, 1, 0);
+	            break;
+	        case 11:
+	            writeGPIO_MUX(Control_GPIO, 1, 1, 0, 0);
+	            break;
+	    	}
+		}	
+	 /**
+	 * Get the Eacho pin value 
+     * return a 1 or 0  
+     */
+	muxReceive(){
+	    var value=fs.readFileSync(sysFsPath + "/gpio" + Receive_GPIO + "/value","utf8");
+	    return value; 
+	} 
     /**
      * Use to measure Distance . Note : not tested with Mux yet. Intended for testing using Rovercore with single Ultrasonic only  
      * 
