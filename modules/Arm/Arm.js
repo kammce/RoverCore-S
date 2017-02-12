@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class DriveSystem extends Neuron
+class Arm extends Neuron
 {
 	constructor(util)
 	{
@@ -28,7 +28,7 @@ class DriveSystem extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("blue");
+		this.log.setColor("red");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -52,10 +52,10 @@ class DriveSystem extends Neuron
 		// Construct Class After This Points
 		// =====================================
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:6E:A7",
+			mac: "00:21:13:00:71:a1",
 			baud: 38400,
 			log: this.log,
-			device: 1
+			device: 2
 		});
 	}
 	/**
@@ -65,13 +65,24 @@ class DriveSystem extends Neuron
      */
 	react(input)
 	{
-		if( "speed" in input &&
-			"angle" in input &&
-			"mode" 	in input)
+		if( /*"rotunda" in input &&
+			"shoulder" in input &&*/
+			"elbow" in input /*&&
+			"wrist_pitch" in input &&
+			"wrist_roll" in input &&
+			"claw" in input &&
+			"camera_select" in input &&
+			"rotunda_camera" in input*/)
 		{
-			this.rfcomm.send("S", input.speed);
-			this.rfcomm.send("A", input.angle);
-			this.rfcomm.send("M", input.mode);
+			// this.rfcomm.send('a', input.rotunda);
+			// this.rfcomm.send('b', input.shoulder);
+			this.rfcomm.send('c', input.elbow);
+			// this.rfcomm.send('d', input.wrist_pitch);
+			// this.rfcomm.send('e', input.wrist_roll);
+			// this.rfcomm.send('f', input.claw);
+			// this.rfcomm.send('g', input.camera_select);
+			// this.rfcomm.send('h', input.rotunda_camera);
+
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
@@ -119,4 +130,4 @@ class DriveSystem extends Neuron
 	}
 }
 
-module.exports = DriveSystem;
+module.exports = Arm;
