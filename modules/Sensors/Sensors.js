@@ -1,3 +1,8 @@
+const BAUD_RATE = 9600;
+const ZERO = 0;
+const DEVICE_PORT = '/dev/ttyGPS';
+//const
+
 "use strict";
 //  /dev/cu.usbmodem1411
 
@@ -66,14 +71,14 @@ class Sensors extends Neuron
 		this.feedback("longDir:");
 		this.model.registerMemory("Sensors");
 		this.model.set("Sensors", {
-			lat: 0,
-			latDir: 0,
-			long: 0,
-			longDir: 0,
-			alt: 0,
-			alt_unit: 0,
-			horiz_confidence: 0,
-			number_of_satellites: 0
+			lat: ZERO,
+			latDir: ZERO,
+			long: ZERO,
+			longDir: ZERO,
+			alt: ZERO,
+			alt_unit: ZERO,
+			horiz_confidence: ZERO,
+			number_of_satellites: ZERO
 			/**
 		 	* More variables for:
 		 	* IMU (each axis)
@@ -85,10 +90,10 @@ class Sensors extends Neuron
 		});
 		//initialize serialport
 		var port = new SerialPort("/dev/cu.usbmodem1411", {
-			baudRate: 9600,
+			baudRate: BAUD_RATE,
 			parser: SerialPort.parsers.readline('\n')
 		});
-		var self = this;
+		var self = this; //enables "self" to work like "this" inside of port.on('data')
 		//
 
 		//
@@ -121,7 +126,7 @@ class Sensors extends Neuron
 
 		// open errors will be emitted as an error event
 		port.on('error', function(err) {
-		  console.log('Error: ', err.message);
+		  console.log('Error: DEVICE_PORT ', err.message);
 		})
 		//
 		port.on('data', function (data) {

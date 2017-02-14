@@ -1,3 +1,9 @@
+#define ZERO 0
+//#define
+//#define
+//#define
+//#define
+//#define
 //GPS is currently set to update every 100ms (hardware)
 //baud set to 9600 bps
 //GPGGA
@@ -16,37 +22,37 @@ class GPS extends Neuron {
 		this.idle_time = util.idle_timeout;
 		this.i2c = util.i2c;
 		this.model = util.model;
-		
+
 		const retryLimit = 50;
 		const INTERVAL_TIME = 100;
 		const SETUP_TIME = 5000;
-		var trys = 0;
+		var trys = ZERO;
 		// Construct Class here
 		var parent = this;
 
 		/////////////////
 		this.model.registerMemory('GPS');
 		this.model.set('GPS', {
-			lat: 0,
-			latDir: 0,
-			long: 0,
-			longDir: 0,
-			alt: 0,
-			alt_unit: 0,
-			horiz_confidence: 0,
-			number_of_satellites: 0
+			lat: ZERO,
+			latDir: ZERO,
+			long: ZERO,
+			longDir: ZERO,
+			alt: ZERO,
+			alt_unit: ZERO,
+			horiz_confidence: ZERO,
+			number_of_satellites: ZERO
 		});
 		this.port = new util.serial.SerialPort("/dev/ttyGPS", {
 			baudrate: 9600,
 			parser: util.serial.parsers.readline('\r\n')
 		}, false); // false = disable auto open
 
-		/* Serial Open Routine: will continously attempt to access the 
+		/* Serial Open Routine: will continously attempt to access the
 		 * serialport until retry limit has been met. */
 		var serialOpenRoutine = (err) => {
 			if(trys >= retryLimit) {
 				return;
-			} else if (err) { 
+			} else if (err) {
 				this.log.output("Failed to open /dev/ttyGPS", trys);
 				this.feedback("Failed to open /dev/ttyGPS");
 				trys++;
@@ -152,4 +158,4 @@ class GPS extends Neuron {
 	}
 }
 
-module.exports = GPS; 
+module.exports = GPS;
