@@ -144,9 +144,8 @@ void inputSetup() {
 void morphOps(Mat &threshold) {
     //create structuring elements for matrix erosion/dialation
     //using elipse for structuring element (see openCV Docs for explanation)
-    Mat erodeElement = getStructuringElement(MORPH_ELLIPSE, Size(3,3));
+    Mat erodeElement = getStructuringElement(MORPH_ELLIPSE, Size(4,4));
     Mat dialateElement = getStructuringElement(MORPH_ELLIPSE, Size(8,8));
-    
     //double erosion to eliminate background noise from thresholded matrix
 //    erode(threshold, threshold, erodeElement);
     erode(threshold, threshold, erodeElement);
@@ -170,6 +169,7 @@ void trackFilteredObjects(Mat threshold, Mat &input) {
     bool objectFound = false;
     double  refArea = 0;
     
+//    cout << "hierarchy: " << hierarchy.size() << endl;
     if (hierarchy.size() > 0) {
         int numObjects = hierarchy.size();
         if (numObjects<MAX_NUM_OBJECTS) {
@@ -202,7 +202,10 @@ void trackFilteredObjects(Mat threshold, Mat &input) {
 void chooseDirection(Gate closestGate) {
     char direction;
     
-    if (closestGate.x >= 320) {
+    if (closestGate.x < 400 && closestGate.x > 240) {
+        direction = 'C';
+    }
+    else if (closestGate.x >= 400) {
         direction = 'R';
     } else {
         direction = 'L';
@@ -210,6 +213,7 @@ void chooseDirection(Gate closestGate) {
     
     if (directionHistory.empty() || directionHistory.back() != direction) {
         directionLog << direction << endl;
+        cout << direction << endl;
         directionHistory.push_back(direction);
     }
 }
@@ -233,6 +237,11 @@ void outlineGates(Mat &frame) {
 
         Gates.clear();
     }
+    else if (!directionHistory.empty()) {
+        char direction = 'N';
+        directionHistory.push_back(direction);
+        directionLog << direction << endl;
+        cout << direction << endl;
+    }
 }
-
 
