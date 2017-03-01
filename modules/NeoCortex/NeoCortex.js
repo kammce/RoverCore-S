@@ -58,9 +58,15 @@ class NeoCortex extends Neuron
 		this.vision_direction = '';
 		/**
 		 * Interval variable for reading from text file
-		 */
+		 */ 
 		this.read_interval = 0;
-		this.holder = "N"; 
+		this.holder = "N";
+		/** Setting Model Memory **/
+		this.model.registerMemory("NeoCortex");
+		this.model.set("NeoCortex", {
+			ai_direction: 'stop'
+		});
+		/**Function Testing Section **/ 
 		//this.openVision();
 		this.readDirection();
 		// =====================================
@@ -119,21 +125,14 @@ class NeoCortex extends Neuron
 	*/
 	readDirection()
 	{
-		//this.openVision();
-		var parent = this;
-		this.read_interval = setInterval(function(){
-			
-			fs.readFile('/home/pi/NeoCortex/rovercore-s/modules/NeoCortex/Vision/direction.txt', 'utf8', function (err,data) {
-	  		  if (err) {
-	   		    return parent.log.output(err);
-	                  }
-	        //parent.log.output(data);
-		//console.log("----");
-	        parent.vision_direction = data;
-		//parent.log.output(parent.vision_direction);
-		parent.execDrive(parent.vision_direction);
-	        });
-            	},100);
+		
+	        var parent = this;
+	        this.read_interval = setInterval(function(){
+			//parent.log.output(data);
+			//console.log("----");
+			//parent.log.output(parent.vision_direction);
+	   		  parent.openVision();
+            	},3000);
 	}
 	/*
 	* function to stop
@@ -153,48 +152,67 @@ class NeoCortex extends Neuron
 	*/
 	execDrive(direction){
 	//this.log.output("direction: " + direction);
-	
-	
-	   if(direction[0] === 'L'){
+	   if(direction === 'L'){
 	   //go Left
 	    this.log.output("Go Left");
+	    this.updateModel('left');
             this.holder = direction[0];
 	   };
 
-	   if(direction[0] ==='R'){
+	   if(direction ==='R'){
 	   //go Right
             this.log.output("Go Right");
+	    this.updateModel('right');
 	    this.holder = direction[0]; 
 	   };
  
-	   if(direction[0] === 'C'){
+	   if(direction === 'C'){
 	   //go Left or Right 
 	    if(this.holder === 'L'){
 	     this.log.output("Go Left Once Then Forward");
+	     this.updateModel('left_forward');
 	    }
 	    if(this.holder === 'R'){
 	     this.log.output("Go Right Once Then Forward");
+	     this.updateModel('right_forward');
 	    }
 	    if(this.holder === 'C'){
-	     this.log.output("A glitch Go Nowhere");
+	     this.log.output("Go Nowhere");
+	     this.updateModel('stop');
 	    }
 	    this.holder = 'C';
 	   };
 
-	   if(direction[0] === 'N'){
+	   if(direction === 'N'){
 	    this.log.output("Go Nowhere");
-	   };
-
-	
-	 
+	    this.updateModel('stop');
+	   }; 
 	}
-	
-	//running exe file but doest execute detection
+
 	openVision()
 	{
-	     exec.execFile('./modules/NeoCortex/Vision/main', function(error){ console.log(error)});
+		
+		var parent = this;
+	     	//this.log.output("Opening Vision Program");
+		exec.execFile('./modules/NeoCortex/Vision/main', function(error, stdout)
+		{
+			if(error){
+				parent.log.output(error);
+			}
+			//parent.log.output(stdout[0]);
+			//parent.log.output(direction);
+			parent.execDrive(stdout[0]); //writing Driving Logic
+			
+		});
+		
 	}
 
+	updateModel(direction_string)
+	{
+		this.model.set("NeoCortex", {
+			ai_direction: direction_string
+		});
+	}
 }
 
 module.exports = NeoCortex;
