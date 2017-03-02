@@ -57,6 +57,10 @@ class Arm extends Neuron
 			log: this.log,
 			device: 2
 		});
+		// this.mc_text_field_interval = setInterval(() =>
+		// {
+		// 	this.feedback("Mission Control Text Area Log Test Overflow");
+		// }, 50);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -65,23 +69,23 @@ class Arm extends Neuron
      */
 	react(input)
 	{
-		if( /*"rotunda" in input &&
-			"shoulder" in input &&*/
-			"elbow" in input /*&&
+		if( "rotunda" in input &&
+			"shoulder" in input &&
+			"elbow" in input &&
 			"wrist_pitch" in input &&
 			"wrist_roll" in input &&
 			"claw" in input &&
 			"camera_select" in input &&
-			"rotunda_camera" in input*/)
+			"rotunda_camera" in input)
 		{
-			// this.rfcomm.send('a', input.rotunda);
-			// this.rfcomm.send('b', input.shoulder);
+			this.rfcomm.send('a', input.rotunda);
+			this.rfcomm.send('b', input.shoulder);
 			this.rfcomm.send('c', input.elbow);
-			// this.rfcomm.send('d', input.wrist_pitch);
-			// this.rfcomm.send('e', input.wrist_roll);
-			// this.rfcomm.send('f', input.claw);
-			// this.rfcomm.send('g', input.camera_select);
-			// this.rfcomm.send('h', input.rotunda_camera);
+			this.rfcomm.send('d', input.wrist_pitch);
+			this.rfcomm.send('e', input.wrist_roll);
+			this.rfcomm.send('f', input.claw);
+			this.rfcomm.send('g', input.camera_select);
+			this.rfcomm.send('h', input.rotunda_camera);
 
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
