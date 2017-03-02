@@ -239,13 +239,13 @@ class Cortex
 
 			/**********************************************/
 			case "LEFT_AI":  // go left < 10% speed, 0 direct left , drive mode > 
-				driveAi(10, 90, 'Y')
+				driveAi(10, -90, 'Y')
 				break;
 			case "RIGHT_AI": //go right < 10% speed, 180  direct righ , drive mode > 
-				driveAi(10, 0, 'Y')
+				driveAi(10, 90, 'Y')
 				break;
 			case "FORWARD": // go forward < 10% speed, 90 straight , drive mode > 
-				driveAi(10, -90, 'Y')
+				driveAi(10, 0, 'Y')
 				break;
 			/**********************************************/
 			case "HALTALL":

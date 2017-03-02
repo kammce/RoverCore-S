@@ -72,9 +72,9 @@ class NeoCortex extends Neuron
 		});
 		/**Function Testing Section **/ 
 		//this.openVision();
-		//this.readDirection();
+		this.readDirection();
 		var parent = this;
-		setTimeout(function(){parent.upcall("LEFT_AI");},1000);
+		//setTimeout(function(){parent.upcall("LEFT_AI");},1000);
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -138,7 +138,7 @@ class NeoCortex extends Neuron
 			//console.log("----");
 			//parent.log.output(parent.vision_direction);
 	   		  parent.openVision();
-            	},3000);
+            	},1500);
 	}
 	/*
 	* function to stop
@@ -157,7 +157,7 @@ class NeoCortex extends Neuron
 	*input [string] direction, direction of tennis ball with respect to rover
 	*/
 	execDrive(direction){
-	//this.log.output("direction: " + direction);
+	this.log.output("direction: " + direction);
 	    var parent = this;
 	   if(direction === 'L') //go left
 	   { 
@@ -180,14 +180,14 @@ class NeoCortex extends Neuron
 			     this.log.output("Go Left Once Then Forward");
 			     this.updateModel('left_forward');
 			     this.upcall('LEFT_AI');
-			     SetTimeout(function(){ parent.upcall('FORWARD_AI')},500);
+			     setTimeout(function(){ parent.upcall('FORWARD_AI')},500);
 		    }
 		    if(this.holder === 'R')
 		    {
 			     this.log.output("Go Right Once Then Forward");
 			     this.updateModel('right_forward');
 			     this.upcall('RIGHT_AI');
-			     SetTimeout(function(){ parent.upcall('FORWARD_AI')},500);
+			     setTimeout(function(){ parent.upcall('FORWARD_AI')},500);
 	    	}
 		    if(this.holder === 'C')
 		    {
