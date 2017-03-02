@@ -49,6 +49,10 @@ class NeoCortex extends Neuron
 		 */
 		this.model = util.model;
 		/**
+		 * Function for calling other lobe
+		 */
+		 this.upcall = util.upcall;
+		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
@@ -68,7 +72,9 @@ class NeoCortex extends Neuron
 		});
 		/**Function Testing Section **/ 
 		//this.openVision();
-		this.readDirection();
+		//this.readDirection();
+		var parent = this;
+		setTimeout(function(){parent.upcall("LEFT_AI");},1000);
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -152,49 +158,57 @@ class NeoCortex extends Neuron
 	*/
 	execDrive(direction){
 	//this.log.output("direction: " + direction);
-	   if(direction === 'L'){
-	   //go Left
-	    this.log.output("Go Left");
-	    this.updateModel('left');
-            this.holder = direction[0];
+	    var parent = this;
+	   if(direction === 'L') //go left
+	   { 
+		    this.log.output("Go Left");
+		    this.updateModel('left');
+		    this.upcall('LEFT_AI')
+	        this.holder = direction[0];
+	   };
+	   if(direction ==='R') // go right
+	   {
+	        this.log.output("Go Right");
+		    this.updateModel('right');
+		    this.upcall('RIGHT_AI')
+		    this.holder = direction[0]; 
+	   };
+	   if(direction === 'C')   //go Left or Right 
+	   {
+		    if(this.holder === 'L')
+		    {
+			     this.log.output("Go Left Once Then Forward");
+			     this.updateModel('left_forward');
+			     this.upcall('LEFT_AI');
+			     SetTimeout(function(){ parent.upcall('FORWARD_AI')},500);
+		    }
+		    if(this.holder === 'R')
+		    {
+			     this.log.output("Go Right Once Then Forward");
+			     this.updateModel('right_forward');
+			     this.upcall('RIGHT_AI');
+			     SetTimeout(function(){ parent.upcall('FORWARD_AI')},500);
+	    	}
+		    if(this.holder === 'C')
+		    {
+			     this.log.output("Go Nowhere");
+			     this.updateModel('stop');
+		    }
+	   this.holder = 'C';
 	   };
 
-	   if(direction ==='R'){
-	   //go Right
-            this.log.output("Go Right");
-	    this.updateModel('right');
-	    this.holder = direction[0]; 
-	   };
- 
-	   if(direction === 'C'){
-	   //go Left or Right 
-	    if(this.holder === 'L'){
-	     this.log.output("Go Left Once Then Forward");
-	     this.updateModel('left_forward');
-	    }
-	    if(this.holder === 'R'){
-	     this.log.output("Go Right Once Then Forward");
-	     this.updateModel('right_forward');
-	    }
-	    if(this.holder === 'C'){
-	     this.log.output("Go Nowhere");
-	     this.updateModel('stop');
-	    }
-	    this.holder = 'C';
-	   };
-
-	   if(direction === 'N'){
-	    this.log.output("Go Nowhere");
-	    this.updateModel('stop');
+	   if(direction === 'N')
+	   {
+		    this.log.output("Go Nowhere");
+		    this.updateModel('stop');
 	   }; 
 	}
-
 	openVision()
 	{
 		
 		var parent = this;
 	     	//this.log.output("Opening Vision Program");
-		exec.execFile('./modules/NeoCortex/Vision/main', function(error, stdout)
+		exec.execFile('./modules/NeoCortex/Vision/version2_m', function(error, stdout)
 		{
 			if(error){
 				parent.log.output(error);
@@ -203,8 +217,7 @@ class NeoCortex extends Neuron
 			//parent.log.output(direction);
 			parent.execDrive(stdout[0]); //writing Driving Logic
 			
-		});
-		
+		});		
 	}
 
 	updateModel(direction_string)

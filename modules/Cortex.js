@@ -171,14 +171,16 @@ class Cortex
 			if(!this.lobe_map[data]['controller'])
 			{
 				msg = `${data} controller assigned to connection: ${spark.id}`;
+				this.lobe_map[data]['controller'] = spark.id;
+				this.log.output(msg);
+				this.feedback('Cortex', msg);
 			}
 			else
 			{
-				msg = `Reassigning ${spark.id} to lobe ${data}.`;
+				msg = `Cortex could not assign ${spark.id} to lobe ${data}, lobe does not exist.`;
+				this.log.output(msg);
+				this.feedback('Cortex', msg);
 			}
-			this.lobe_map[data]['controller'] = spark.id;
-			this.log.output(msg);
-			this.feedback('Cortex', msg);
 		}
 		else
 		{
@@ -204,25 +206,48 @@ class Cortex
 		{
 			for(var lobe in this.time_since_last_command)
 			{
-				this.lobe_map[lobe]._halt();
+				global.cortex.lobe_map[lobe]._halt();
 			}
 		};
 		var idleAll = function()
 		{
 			for(var lobe in this.time_since_last_command)
 			{
-				this.lobe_map[lobe]._idle();
+				global.cortex.lobe_map[lobe]._idle();
 			}
 		};
 		var resumeAll = function()
 		{
 			for(var lobe in this.time_since_last_command)
 			{
-				this.lobe_map[lobe]._resume();
+				global.cortex.lobe_map[lobe]._resume();
 			}
 		};
+		/**********************************************/
+		var driveAi = (speed, direction, mode) =>
+		{
+			
+			global.cortex.lobe_map['DriveSystem']._react({
+				speed: speed, 
+				angle: direction, 
+				mode: mode
+			});
+		};
+		/**********************************************/
 		switch(command)
 		{
+
+			/**********************************************/
+			case "LEFT_AI":  // go left < 10% speed, 0 direct left , drive mode > 
+				driveAi(10, 90, 'Y')
+				break;
+			case "RIGHT_AI": //go right < 10% speed, 180  direct righ , drive mode > 
+				driveAi(10, 0, 'Y')
+				break;
+			case "FORWARD": // go forward < 10% speed, 90 straight , drive mode > 
+				driveAi(10, -90, 'Y')
+				break;
+			/**********************************************/
 			case "HALTALL":
 				haltAll();
 				break;
