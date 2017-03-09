@@ -53,6 +53,7 @@ class BluetoothSerial
 		this.blue = this.blue || this;
 
 		this.log.output(`Opening connection to ${this.path}`);
+		this.blue.port.write("CONNECT");
 		this.blue.ready = true;
 	}
 	onPortData(data)
@@ -162,8 +163,8 @@ BluetoothSerial.initialize = function()
 	var execSync = require("child_process").execSync;
 	var fs = require("fs");
 
-	//// Release all bluetooth rfcomm connections
-	try { execSync('rfcomm release all'); } catch(e) {}
+	//// Kill all rfcomm processes before proceeding
+	try { execSync('killall -9 rfcomm'); } catch(e) {}
 	//// bt-agent requires two SIGTERM signals to terminate fully.
 	//// 1st SIGTERM unregisters agent
 	try { execSync('killall bt-agent'); } catch(e) {}
@@ -171,8 +172,8 @@ BluetoothSerial.initialize = function()
 	try { execSync('killall bt-agent'); } catch(e) {}
 	//// 3rd Just to make sure
 	try { execSync('killall bt-agent'); } catch(e) {}
-	//// Kill all rfcomm processes before proceeding
-	try { execSync('killall -9 rfcomm'); } catch(e) {}
+	//// Release all bluetooth rfcomm connections
+	try { execSync('rfcomm release all'); } catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,

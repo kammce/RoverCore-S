@@ -171,16 +171,14 @@ class Cortex
 			if(!this.lobe_map[data]['controller'])
 			{
 				msg = `${data} controller assigned to connection: ${spark.id}`;
-				this.lobe_map[data]['controller'] = spark.id;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
 			}
 			else
 			{
-				msg = `Cortex could not assign ${spark.id} to lobe ${data}, lobe does not exist.`;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
+				msg = `Reassigning ${spark.id} to lobe ${data}.`;
 			}
+			this.lobe_map[data]['controller'] = spark.id;
+			this.log.output(msg);
+			this.feedback('Cortex', msg);
 		}
 		else
 		{
