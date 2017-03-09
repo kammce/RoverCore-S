@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class DriveSystem extends Neuron
+class Arm extends Neuron
 {
 	constructor(util)
 	{
@@ -28,7 +28,7 @@ class DriveSystem extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("blue");
+		this.log.setColor("red");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -52,48 +52,15 @@ class DriveSystem extends Neuron
 		// Construct Class After This Points
 		// =====================================
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:6E:A7",
+			mac: "00:21:13:00:71:a1",
 			baud: 38400,
 			log: this.log,
-			device: 1
+			device: 2
 		});
-
-		// this.ai_interval = setInterval(() =>
+		// this.mc_text_field_interval = setInterval(() =>
 		// {
-		// 	this.rfcomm.send("M", 'Y'.charCodeAt(0));
-		// 	var neo = this.model.get("NeoCortex");
-		// 	if(this.state === "IDLING" && neo.ai_flag === true)
-		// 	{
-		// 		switch(neo.direction)
-		// 		{
-		// 			case "LEFT":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", -90);
-		// 				break;
-		// 			case "RIGHT":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", 90);
-		// 				break;
-		// 			case "LEFT-FORWARD":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", -90);
-		// 				break;
-		// 			case "RIGHT-FORWARD":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", 90);
-		// 				break;
-		// 			case "STOP":
-		// 				this.rfcomm.send("S", 0);
-		// 				this.rfcomm.send("A", 0);
-		// 				break;
-		// 			default:
-		// 				break;
-		// 		}
-		// 	}
-		// 	else
-		// 	{
-		// 	}
-		// }, 100);
+		// 	this.feedback("Mission Control Text Area Log Test Overflow");
+		// }, 50);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -102,13 +69,24 @@ class DriveSystem extends Neuron
      */
 	react(input)
 	{
-		if( "speed" in input &&
-			"angle" in input &&
-			"mode" 	in input)
+		if( "rotunda" in input &&
+			"shoulder" in input &&
+			"elbow" in input &&
+			"wrist_pitch" in input &&
+			"wrist_roll" in input &&
+			"claw" in input &&
+			"camera_select" in input &&
+			"rotunda_camera" in input)
 		{
-			this.rfcomm.send("S", input.speed);
-			this.rfcomm.send("A", input.angle);
-			this.rfcomm.sendraw(`@M,${input.mode.charCodeAt(0)}\r\n`);
+			this.rfcomm.send('a', input.rotunda);
+			this.rfcomm.send('b', input.shoulder);
+			this.rfcomm.send('c', input.elbow);
+			this.rfcomm.send('d', input.wrist_pitch);
+			this.rfcomm.send('e', input.wrist_roll);
+			this.rfcomm.send('f', input.claw);
+			this.rfcomm.send('g', input.camera_select);
+			this.rfcomm.send('h', input.rotunda_camera);
+
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
@@ -156,4 +134,4 @@ class DriveSystem extends Neuron
 	}
 }
 
-module.exports = DriveSystem;
+module.exports = Arm;
