@@ -60,23 +60,23 @@ class Tracker extends Neuron
 
 		/* Constants/Definitions */
 		// Teensy Keys for key:value pairs to/from bluetooth
-		const LOCAL_ORIENTATION_X = 1;
-		const LOCAL_ORIENTATION_Y = 2;
-		const LOCAL_ORIENTATION_Z = 3;
-		const GLOBAL_ORIENTATION_X = 4;
-		const GLOBAL_ORIENTATION_Y = 5;
-		const GLOBAL_ORIENTATION_Z = 6;
-		const LIDAR_READING = 7;
-		const YAW_MOTOR_CURRENT = 8;
-		const PITCH_MOTOR_CURRENT = 9;
-		const MOTION_CONTROL_MODE = 128;	// key for specifying speed/dir control (val = 1) or position control (val = 2)
-		const MOTION_COMMAND_YAW = 129;		// key for specifying input to yaw motor (signed)
-		const MOTION_COMMAND_PITCH = 130;	// key for specifying input to pitch motor (signed)
-		const ACTIVE_CAMERA = 131;			// key for selecting which analog camera to receive feed from
-		const BATTERY_VOLTAGE = 132;
+		const LOCAL_ORIENTATION_X = 97;
+		const LOCAL_ORIENTATION_Y = 98;
+		const LOCAL_ORIENTATION_Z = 99;
+		const GLOBAL_ORIENTATION_X = 100;
+		const GLOBAL_ORIENTATION_Y = 101;
+		const GLOBAL_ORIENTATION_Z = 102;
+		const LIDAR_READING = 103;
+		const YAW_MOTOR_CURRENT = 104;
+		const PITCH_MOTOR_CURRENT = 105;
+		const MOTION_CONTROL_MODE = 65;	// key for specifying speed/dir control (val = 1) or position control (val = 2)
+		const MOTION_COMMAND_YAW = 66;		// key for specifying input to yaw motor (signed)
+		const MOTION_COMMAND_PITCH = 67;	// key for specifying input to pitch motor (signed)
+		const ACTIVE_CAMERA = 68;			// key for selecting which analog camera to receive feed from
+		const BATTERY_VOLTAGE = 69;
 
 		/* Bluetooth Serial */
-		this.comms = new BluetoothSerial(
+		this.comms = new util.extended.BluetoothSerial(
 			{
 				mac: "21:13:710e",
 				baud: 38400,	//recommended baud rate
@@ -237,7 +237,7 @@ class Tracker extends Neuron
 
 			// Zoom parameters
 			this.local.zoom = input.zoom;
-			this.comms.send(/*key for zoom*/, input.zoom);
+			// this.comms.send(/*key for zoom*/, input.zoom);
 
 			this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
@@ -281,7 +281,7 @@ class Tracker extends Neuron
 	{
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
-		reset();
+		this.reset();
 		return true;
 	}
 
