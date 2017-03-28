@@ -1,8 +1,8 @@
 "use strict";
 
 var fs = require('fs');
-var exec = require('child_process');
-       
+//var exec = require('child_process');
+var spawn = require('child_process').spawn;
 
 var Neuron = require('../Neuron');
 
@@ -51,7 +51,7 @@ class NeoCortex extends Neuron
 		/**
 		 * Function for calling other lobe
 		 */
-		 this.upcall = util.upcall;
+		this.upcall = util.upcall;
 		/**
 		 * Structure containing additional extended utilities
 		 */
@@ -60,6 +60,17 @@ class NeoCortex extends Neuron
 		 * Output direction from computer vision program 
 		 */
 		this.vision_direction = '';
+		/**
+		 * variable to store GPS coordinate 
+		 */
+		this.GPS_ai = {
+			longitude : 0,
+			lattitude : 0
+		};
+		this.GPS_given = {
+			longitude : 0,
+			lattitude : 0
+		};  
 		/**
 		 * Interval variable for reading from text file
 		 */ 
@@ -72,9 +83,8 @@ class NeoCortex extends Neuron
 		});
 		/**Function Testing Section **/ 
 		//this.openVision();
-		this.readDirection();
-		var parent = this;
-		//setTimeout(function(){parent.upcall("LEFT_AI");},1000);
+		//this.readDirection();
+		this.execDrive("L");
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -103,7 +113,6 @@ class NeoCortex extends Neuron
 		this.feedback(`HALTING ${this.name}`);
 		return true;
 	}
-
 	/**
      * Cortex will attempt to resume this lobe in the following situations:
 	 *		1. If the Mission Control controller sends a manual resume signal to Cortex to resume a halted lobe.
@@ -131,14 +140,23 @@ class NeoCortex extends Neuron
 	*/
 	readDirection()
 	{
-		
-	        var parent = this;
-	        this.read_interval = setInterval(function(){
-			//parent.log.output(data);
-			//console.log("----");
-			//parent.log.output(parent.vision_direction);
-	   		  parent.openVision();
-            	},1500);
+	    var parent = this;
+  		parent.openVision();
+	    this.read_interval = setInterval(function(){
+			fs.readFile('/home/pi/NeoCortex/rovercore-s/modules/NeoCortex/Vision/direction.txt', 'utf8', function(err, data){
+				parent.log.output(data);
+				
+				if(data[0] != 'N')
+				{
+					parent.execDrive(data[0]);	
+				}
+				else
+				{
+					parent.readGPS();
+					parent.pathGPS();
+				}
+		    });	
+        },1000);
 	}
 	/*
 	* function to stop
@@ -156,68 +174,48 @@ class NeoCortex extends Neuron
 	*Logic for executing traversing
 	*input [string] direction, direction of tennis ball with respect to rover
 	*/
-	execDrive(direction){
-	this.log.output("direction: " + direction);
-	    var parent = this;
-	   if(direction === 'L') //go left
-	   { 
-		    this.log.output("Go Left");
-		    this.updateModel('left');
-		    this.upcall('LEFT_AI')
-	        this.holder = direction[0];
-	   };
-	   if(direction ==='R') // go right
+	execDrive(direction)
+	{	
+	   var parent = this;
+	   switch(direction)
 	   {
-	        this.log.output("Go Right");
-		    this.updateModel('right');
-		    this.upcall('RIGHT_AI')
-		    this.holder = direction[0]; 
-	   };
-	   if(direction === 'C')   //go Left or Right 
-	   {
-		    if(this.holder === 'L')
-		    {
-			     this.log.output("Go Left Once Then Forward");
-			     this.updateModel('left_forward');
-			     this.upcall('LEFT_AI');
-			     setTimeout(function(){ parent.upcall('FORWARD_AI')},500);
-		    }
-		    if(this.holder === 'R')
-		    {
-			     this.log.output("Go Right Once Then Forward");
-			     this.updateModel('right_forward');
-			     this.upcall('RIGHT_AI');
-			     setTimeout(function(){ parent.upcall('FORWARD_AI')},500);
-	    	}
-		    if(this.holder === 'C')
-		    {
-			     this.log.output("Go Nowhere");
-			     this.updateModel('stop');
-		    }
-	   this.holder = 'C';
-	   };
-
-	   if(direction === 'N')
-	   {
-		    this.log.output("Go Nowhere");
-		    this.updateModel('stop');
-	   }; 
+		   case 'L': //go left
+			    parent.log.output("Go Left");
+			    parent.updateModel('left');
+			    parent.upcall('LEFT_AI');
+		        //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+		        break;
+		   case 'R' : // go right
+		        parent.log.output("Go Right");
+			    parent.updateModel('right');
+			    parent.upcall('RIGHT_AI')
+			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+			    break;
+		   case 'C':   //go forward
+				parent.log.output("Go Forwad");
+				parent.updateModel('forward');
+				parent.upcall('FORWARD_AI');
+			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+			    break;
+		   case 'N' : 
+			    this.log.output("Go Nowhere");
+			    this.updateModel('stop');
+			    parent.upcall('STOP_AI');
+				break;
+			default: 
+				this.log.output("Error Input");
+				break;
+	   } 
 	}
 	openVision()
 	{
-		
 		var parent = this;
-	     	//this.log.output("Opening Vision Program");
-		exec.execFile('./modules/NeoCortex/Vision/version2_m', function(error, stdout)
-		{
-			if(error){
-				parent.log.output(error);
-			}
-			//parent.log.output(stdout[0]);
-			//parent.log.output(direction);
-			parent.execDrive(stdout[0]); //writing Driving Logic
-			
-		});		
+		var proc = spawn('./modules/NeoCortex/Vision/main');
+		/*
+		proc.stdout.on('data', function(data) {
+  			process.stdout.write("Data : " + data); 
+  			parent.execDrive(data); 
+		});*/
 	}
 
 	updateModel(direction_string)
@@ -225,6 +223,52 @@ class NeoCortex extends Neuron
 		this.model.set("NeoCortex", {
 			ai_direction: direction_string
 		});
+	}
+
+	readGPS()
+	{
+		var coordinate= this.model.get("Sensor");
+		coordinate["lat"] = this.GPS_ai.lattitude;
+		coordinate["lon"] = this.GPS_ai.longitude;
+	}
+
+	pathGPS()
+	{
+		var heading_expected = heading_GPS(this.GPS_ai.lattitude,this.GPS_ai.longitude,this.GPS_given.lattitude,this.GPS_given.longitude);
+		var heading_actual = this.model.get("Tracker");
+		var heading_differential = heading_expected - heading_actual["heading"];
+		if (heading_differential < -10 )
+		{
+			this.execDrive("SR");
+		} 
+		else if (heading_differential > 10)
+		{
+			this.execDrive("SL");
+		}
+		else
+		{
+			this.execDrive("C");
+		}
+
+	}
+
+	headingGPS(lat1,lng1,lat2,lng2){
+		 var dLon = this.toRad(lng2-lng1);
+         var y = Math.sin(dLon) * Math.cos(this.toRad(lat2));
+         var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
+         var brng = this.toDeg(Math.atan2(y, x));
+         console.log((brng+360)%360);
+         return ((brng + 360) % 360);
+	}
+
+	toRad(deg)
+	{
+		return deg * Math.PI / 180;
+	}
+
+	toDeg(rad)
+	{
+		return rad * 180 / Math.PI;
 	}
 }
 
