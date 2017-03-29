@@ -68,4 +68,4 @@ console.log("Checking Arguments COMPLETE");
 // Launching Cortex
 // =====================================
 console.log(`Launching Cortex!`);
-global.cortex = new Cortex(config);
+new Cortex(config);

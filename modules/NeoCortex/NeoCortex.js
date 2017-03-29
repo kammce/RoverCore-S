@@ -1,9 +1,6 @@
 "use strict";
-
 var fs = require('fs');
-//var exec = require('child_process');
 var spawn = require('child_process').spawn;
-
 var Neuron = require('../Neuron');
 
 class NeoCortex extends Neuron
@@ -59,7 +56,7 @@ class NeoCortex extends Neuron
 		/**
 		 * Output direction from computer vision program 
 		 */
-		this.vision_direction = '';
+		this.vision_process;
 		/**
 		 * variable to store GPS coordinate 
 		 */
@@ -82,9 +79,7 @@ class NeoCortex extends Neuron
 			ai_direction: 'stop'
 		});
 		/**Function Testing Section **/ 
-		//this.openVision();
-		//this.readDirection();
-		this.execDrive("L");
+		
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -98,6 +93,17 @@ class NeoCortex extends Neuron
 	{
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
+		switch(input)
+		{
+			case "AI_ON":
+			this.openVision();
+			break;
+
+			case "AI_OFF":
+			this.closeVision();
+			break;
+
+		}
 		return true;
 	}
 	/**
@@ -136,41 +142,6 @@ class NeoCortex extends Neuron
 		return true;
 	}
 	/*
-	*Read direction from text file and input direction into execDrive();
-	*/
-	readDirection()
-	{
-	    var parent = this;
-  		parent.openVision();
-	    this.read_interval = setInterval(function(){
-			fs.readFile('/home/pi/NeoCortex/rovercore-s/modules/NeoCortex/Vision/direction.txt', 'utf8', function(err, data){
-				parent.log.output(data);
-				
-				if(data[0] != 'N')
-				{
-					parent.execDrive(data[0]);	
-				}
-				else
-				{
-					parent.readGPS();
-					parent.pathGPS();
-				}
-		    });	
-        },1000);
-	}
-	/*
-	* function to stop
-	*/
-	clearDirection()
-	{
-		if (clearInterval(this.read_interval)){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-	/*
 	*Logic for executing traversing
 	*input [string] direction, direction of tennis ball with respect to rover
 	*/
@@ -207,34 +178,52 @@ class NeoCortex extends Neuron
 				break;
 	   } 
 	}
+	/*
+	*Running computer Vision program 
+	*/
 	openVision()
 	{
 		var parent = this;
-		var proc = spawn('./modules/NeoCortex/Vision/main');
-		/*
-		proc.stdout.on('data', function(data) {
-  			process.stdout.write("Data : " + data); 
-  			parent.execDrive(data); 
-		});*/
-	}
-
-	updateModel(direction_string)
-	{
-		this.model.set("NeoCortex", {
-			ai_direction: direction_string
+		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
+		this.vision_process.stdout.on('data', function(data) {
+  			var direction = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
+  			if(direction != 'N')
+			{
+				parent.execDrive(direction);	
+			}
+			else
+			{
+				parent.readGPS();
+				parent.pathGPS();
+			}
 		});
 	}
-
+	/*
+	*close computer Vision program
+	*/
+	closeVision()
+	{
+		this.vision_process.kill();
+	}
+	/*
+	*Read in GPS data : lattitude and altitude
+	*NOT TESTED
+	*/
 	readGPS()
 	{
 		var coordinate= this.model.get("Sensor");
 		coordinate["lat"] = this.GPS_ai.lattitude;
 		coordinate["lon"] = this.GPS_ai.longitude;
 	}
-
+	/*
+	*Calculate path using GPS data
+	*Operation go as follow : read GPS, find heading, spin rover to the calculated direction, spin to that direction.
+	*NOT TESTED 
+	*/
 	pathGPS()
 	{
-		var heading_expected = heading_GPS(this.GPS_ai.lattitude,this.GPS_ai.longitude,this.GPS_given.lattitude,this.GPS_given.longitude);
+		var heading_expected = heading_GPS(this.GPS_ai.lattitude,this.GPS_ai.longitude,
+										   this.GPS_given.lattitude,this.GPS_given.longitude);
 		var heading_actual = this.model.get("Tracker");
 		var heading_differential = heading_expected - heading_actual["heading"];
 		if (heading_differential < -10 )
@@ -249,26 +238,57 @@ class NeoCortex extends Neuron
 		{
 			this.execDrive("C");
 		}
-
 	}
-
-	headingGPS(lat1,lng1,lat2,lng2){
+	/*
+	*calculate heading between initial and final GPS coordinate
+	*/
+	headingGPS(lat1,lng1,lat2,lng2)
+	{
 		 var dLon = this.toRad(lng2-lng1);
          var y = Math.sin(dLon) * Math.cos(this.toRad(lat2));
-         var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
-         var brng = this.toDeg(Math.atan2(y, x));
-         console.log((brng+360)%360);
-         return ((brng + 360) % 360);
+         var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - 
+         		 Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
+         var heading = this.toDeg(Math.atan2(y, x));
+         console.log((heading+360)%360);
+         return ((heading + 360) % 360);
 	}
-
+	/*
+	*calculate distance between initial and final GPS coordinate
+	*/
+	distanceGPS(lat1,lng1,lat2,lng2)
+	{
+		var E_radius = 6378137; //Earth radius in meter
+		var dLat = this.toRad(lat2-lat1);
+		var dLon = this.toRad(lng2-lng1);
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);  
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var distance = E_radius * c;
+		return distance;  
+	}
+	/*
+	* conversion to radian
+	*/
 	toRad(deg)
 	{
 		return deg * Math.PI / 180;
 	}
-
+	/*
+	* conversion to degree
+	*/
 	toDeg(rad)
 	{
 		return rad * 180 / Math.PI;
+	}
+	/*
+	*function to update model
+	*/
+	updateModel(direction_string)
+	{
+		this.model.set("NeoCortex", {
+			ai_direction: direction_string
+		});
 	}
 }
 
