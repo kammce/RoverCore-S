@@ -99,16 +99,15 @@ class Cortex
 	}
 	handleIncomingData(data, spark)
 	{
-		var parent = this;
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
 			if(this.lobe_map[target]['controller'] === spark.id)
 			{
-				setImmediate(function()
+				setImmediate(() =>
 				{
-					parent.time_since_last_command[target] = Date.now();
-					parent.lobe_map[target]._react(data['command']);
+					this.time_since_last_command[target] = Date.now();
+					this.lobe_map[target]._react(data['command']);
 				});
 			}
 			else
@@ -192,7 +191,7 @@ class Cortex
 		for(var lobe in this.time_since_last_command)
 		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_timeout'])
+			if(delta >= this.lobe_map[lobe]['idle_timeout'] && this.lobe_map[lobe]['state'] !== "HALTED")
 			{
 				this.lobe_map[lobe]._idle();
 			}
