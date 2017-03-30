@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class Arm extends Neuron
+class DriveSystem extends Neuron
 {
 	constructor(util)
 	{
@@ -28,7 +28,7 @@ class Arm extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("red");
+		this.log.setColor("blue");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -52,15 +52,48 @@ class Arm extends Neuron
 		// Construct Class After This Points
 		// =====================================
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:71:a1",
+			mac: "00:21:13:00:6E:A7",
 			baud: 38400,
 			log: this.log,
-			device: 2
+			device: 1
 		});
-		// this.mc_text_field_interval = setInterval(() =>
+
+		// this.ai_interval = setInterval(() =>
 		// {
-		// 	this.feedback("Mission Control Text Area Log Test Overflow");
-		// }, 50);
+		// 	this.rfcomm.send("M", 'Y'.charCodeAt(0));
+		// 	var neo = this.model.get("NeoCortex");
+		// 	if(this.state === "IDLING" && neo.ai_flag === true)
+		// 	{
+		// 		switch(neo.direction)
+		// 		{
+		// 			case "LEFT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "LEFT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "STOP":
+		// 				this.rfcomm.send("S", 0);
+		// 				this.rfcomm.send("A", 0);
+		// 				break;
+		// 			default:
+		// 				break;
+		// 		}
+		// 	}
+		// 	else
+		// 	{
+		// 	}
+		// }, 100);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -69,24 +102,13 @@ class Arm extends Neuron
      */
 	react(input)
 	{
-		if( "rotunda" in input &&
-			"shoulder" in input &&
-			"elbow" in input &&
-			"wrist_pitch" in input &&
-			"wrist_roll" in input &&
-			"claw" in input &&
-			"camera_select" in input &&
-			"rotunda_camera" in input)
+		if( "speed" in input &&
+			"angle" in input &&
+			"mode" 	in input)
 		{
-			this.rfcomm.sendCommand('a', input.rotunda);
-			this.rfcomm.sendCommand('b', input.shoulder);
-			this.rfcomm.sendCommand('c', input.elbow);
-			this.rfcomm.sendCommand('d', input.wrist_pitch);
-			this.rfcomm.sendCommand('e', input.wrist_roll);
-			this.rfcomm.sendCommand('f', input.claw);
-			this.rfcomm.sendCommand('g', input.camera_select);
-			this.rfcomm.sendCommand('h', input.rotunda_camera);
-
+			this.rfcomm.sendCommand("S", input.speed);
+			this.rfcomm.sendCommand("A", input.angle);
+			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
@@ -134,4 +156,4 @@ class Arm extends Neuron
 	}
 }
 
-module.exports = Arm;
+module.exports = DriveSystem;

@@ -8,7 +8,7 @@ describe('Testing Cortex Class', function ()
 	var Primus = require('primus');
 	var http = require('http');
 	var fs = require('fs');
-	var Cortex = require('../../../modules/Cortex');
+	var Cortex = require('../../modules/Cortex');
 	var server = http.createServer();
 	// =====================================
 	// Construct and define Primus client
@@ -167,33 +167,32 @@ describe('Testing Cortex Class', function ()
 	});
 	describe('Testing #sendLobeStatus()', function ()
 	{
-		var status;
+		var state;
 		beforeEach(function()
 		{
 			//// Save status
-			status = cortex.lobe_map["Protolobe"].status;
+			state = cortex.lobe_map["Protolobe"].state;
 		});
-		it('Should send Protolobe status to mission control', function (done)
+		it('Should send Protolobe state to mission control', function (done)
 		{
 			var i = 0;
-			var possible_states = ["RUNNING", "IDLING", "HALTED"];
+			var possible_states = ["IDLING", "RUNNING", "HALTED"];
 			//// Check that a Primus client can connect with server.
 			cortex.lobe_map["Protolobe"].state = possible_states[i];
 			connection.on('data', (data) =>
 			{
+				console.log("I'm getting called :: ", data);
 				if(possible_states.length === i)
 				{
-					i++;
+					i++; //// This keeps the done signal from being called again
 					done();
 				}
-				else if(possible_states.length < i) {}
-				else if(data['target'] === "Cortex")
+				else if(data['target'] === "Cortex" && i < possible_states.length)
 				{
 					var message = JSON.parse(data['message']);
-					//expect(message['lobe']).to.equal('Protolobe');
-					//expect(message['state']).to.equal(possible_states[i]);
-					i++;
-					cortex.lobe_map["Protolobe"].state = possible_states[i];
+					expect(message['lobe']).to.equal('Protolobe');
+					expect(message['state']).to.equal(possible_states[i]);
+					cortex.lobe_map["Protolobe"].state = possible_states[++i];
 					console.log("=====================");
 					console.log(message);
 					console.log(cortex.lobe_map["Protolobe"].state);
@@ -204,7 +203,7 @@ describe('Testing Cortex Class', function ()
 		afterEach(function()
 		{
 			//// Restore status
-			cortex.lobe_map["Protolobe"].status = status;
+			cortex.lobe_map["Protolobe"].state = state;
 		});
 	});
 
@@ -212,7 +211,9 @@ describe('Testing Cortex Class', function ()
 	{
 		it('Protolobe state should be HALTED after halt signal sent', function (done)
 		{
-			//// This will send a signal to Cortex to assign this user as the controller of Protolobe.
+			//// Reset the timer
+			cortex.time_since_last_command["Protolobe"] = Date.now();
+			//// Set lobe as idle
 			cortex.lobe_map["Protolobe"]._idle();
 			connection.write({
 				target: "Cortex",
@@ -220,13 +221,16 @@ describe('Testing Cortex Class', function ()
 			});
 			setTimeout(() =>
 			{
+				console.log(cortex.lobe_map["Protolobe"]["state"]);
 				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("HALTED");
 				done();
-			}, 400);
+			}, 1000);
 		});
 		it('Protolobe state should be RUNNING after resume signal sent', function (done)
 		{
-			//// This will send a signal to Cortex to assign this user as the controller of Protolobe.
+			//// Reset the timer
+			cortex.time_since_last_command["Protolobe"] = Date.now();
+			//// Set lobe as idle
 			cortex.lobe_map["Protolobe"]._idle();
 			connection.write({
 				target: "Cortex",
@@ -234,9 +238,10 @@ describe('Testing Cortex Class', function ()
 			});
 			setTimeout(() =>
 			{
+				console.log(cortex.lobe_map["Protolobe"]["state"]);
 				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
 				done();
-			}, 400);
+			}, 1000);
 		});
 		it('Protolobe controller should be an empty string when controller disconnects.', function (done)
 		{
@@ -246,7 +251,7 @@ describe('Testing Cortex Class', function ()
 			{
 				expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
 				done();
-			}, 400);
+			}, 1000);
 		});
 	});
 });

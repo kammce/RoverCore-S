@@ -99,16 +99,15 @@ class Cortex
 	}
 	handleIncomingData(data, spark)
 	{
-		var parent = this;
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
 			if(this.lobe_map[target]['controller'] === spark.id)
 			{
-				setImmediate(function()
+				setImmediate(() =>
 				{
-					parent.time_since_last_command[target] = Date.now();
-					parent.lobe_map[target]._react(data['command']);
+					this.time_since_last_command[target] = Date.now();
+					this.lobe_map[target]._react(data['command']);
 				});
 			}
 			else
@@ -171,16 +170,14 @@ class Cortex
 			if(!this.lobe_map[data]['controller'])
 			{
 				msg = `${data} controller assigned to connection: ${spark.id}`;
-				this.lobe_map[data]['controller'] = spark.id;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
 			}
 			else
 			{
-				msg = `Cortex could not assign ${spark.id} to lobe ${data}, lobe does not exist.`;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
+				msg = `Reassigning ${spark.id} to lobe ${data}.`;
 			}
+			this.lobe_map[data]['controller'] = spark.id;
+			this.log.output(msg);
+			this.feedback('Cortex', msg);
 		}
 		else
 		{
@@ -194,7 +191,7 @@ class Cortex
 		for(var lobe in this.time_since_last_command)
 		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_timeout'])
+			if(delta >= this.lobe_map[lobe]['idle_timeout'] && this.lobe_map[lobe]['state'] !== "HALTED")
 			{
 				this.lobe_map[lobe]._idle();
 			}

@@ -14,7 +14,7 @@ class Model {
 	{
 		// unit is milliseconds
 		this.feedback = feedback;
-		this.epoch = (new Date()).getTime();
+		this.epoch = this.currentTime();
 		this.database = {};
 	}
 	currentTime()
@@ -49,7 +49,7 @@ class Model {
 	}
 	get(key)
 	{
-		if(this.database.hasOwnProperty(key))
+		if(key in this.database)
 		{
 			return this.database[key]['value'];
 		}
@@ -71,7 +71,7 @@ class Model {
 			{
 				if(this.database[memory]['timestamp'] >= timestamp)
 				{
-					// copy memory to latest_database
+					//// copy memory to latest_database
 					latest_database[memory] = this.database[memory];
 				}
 			}
