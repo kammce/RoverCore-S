@@ -6,6 +6,7 @@ class Cortex
 	{
 		console.log("STARTING Rover Core!");
 		this.name = "Cortex";
+		this.cortex = this;
 		this.simulate = config.simulate;
 		this.exec = require('child_process').exec;
 		this.lobe_map = {};
@@ -102,7 +103,7 @@ class Cortex
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
-			if(this.lobe_map[target]['controller'] === spark.id)
+			if(this.lobe_map[target]['controller'] === spark.id || spark === -1)
 			{
 				setImmediate(() =>
 				{
@@ -197,45 +198,46 @@ class Cortex
 			}
 		}
 	}
-	upcall(command)
+	LobeControlAll(ctrl)
 	{
-		var haltAll = function()
+		for(var lobe in this.time_since_last_command)
 		{
-			for(var lobe in this.time_since_last_command)
+			switch(ctrl)
 			{
-				this.lobe_map[lobe]._halt();
+				case "HALTALL":
+					this.lobe_map[lobe]._halt();
+					break;
+				case "IDLEALL":
+					this.lobe_map[lobe]._idle();
+					break;
+				case "RESUMEALL":
+					this.lobe_map[lobe]._resume();
+					break;
 			}
-		};
-		var idleAll = function()
-		{
-			for(var lobe in this.time_since_last_command)
-			{
-				this.lobe_map[lobe]._idle();
-			}
-		};
-		var resumeAll = function()
-		{
-			for(var lobe in this.time_since_last_command)
-			{
-				this.lobe_map[lobe]._resume();
-			}
-		};
+		}
+	}
+	upcall(command, ...params)
+	{
 		switch(command)
 		{
+			case "CALL":
+				//// param[0] = target :: param[1] = command
+				var [upcall_target, upcall_command] = params;
+				this.cortex.handleIncomingData({
+					target: upcall_target,
+					command: upcall_command
+				}, -1);
+				break;
 			case "HALTALL":
-				haltAll();
-				break;
 			case "RESUMEALL":
-				resumeAll();
-				break;
 			case "IDLEALL":
-				idleAll();
+				this.cortex.LobeControlAll(command);
 				break;
 			case "SYSTEM-SHUTDOWN":
-				this.exec("shutdown -h now");
+				this.cortex.exec("shutdown -h now");
 				break;
 			case "SYSTEM-RESTART":
-				this.exec("reboot");
+				this.cortex.exec("reboot");
 				break;
 			case "RESTART-CORTEX":
 				//// Simply end the process and allow "forever" to restart RoverCore
@@ -255,11 +257,12 @@ class Cortex
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
 			var parent = this;
+			var upcall = this.upcall;
 			var lobe_utitilites = {
 				"name": directory,
 				"log": log,
 				"model": this.Model,
-				"upcall": this.upcall,
+				"upcall": upcall,
 				"extended": this.extended_utilities,
 				"feedback": function()
 				{
@@ -270,6 +273,9 @@ class Cortex
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);
+			//// Store reference to Cortex instance in lobe object
+			//// Each module contains a reference to Cortex
+			module.cortex = this;
 			//// Log that a Lobe was loaded correctly
 			this.log.output(`Lobe ${directory} loaded SUCCESSFULLY`);
 			//// Return constructed lobe object

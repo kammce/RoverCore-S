@@ -1,5 +1,7 @@
 "use strict";
 
+var sinon = require('sinon');
+
 describe('Testing Cortex Class', function ()
 {
 	// =====================================
@@ -221,7 +223,6 @@ describe('Testing Cortex Class', function ()
 			});
 			setTimeout(() =>
 			{
-				console.log(cortex.lobe_map["Protolobe"]["state"]);
 				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("HALTED");
 				done();
 			}, 1000);
@@ -238,7 +239,6 @@ describe('Testing Cortex Class', function ()
 			});
 			setTimeout(() =>
 			{
-				console.log(cortex.lobe_map["Protolobe"]["state"]);
 				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
 				done();
 			}, 1000);
@@ -252,6 +252,68 @@ describe('Testing Cortex Class', function ()
 				expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
 				done();
 			}, 1000);
+		});
+	});
+
+	describe('Testing direct #upcall("*ALL") state control', function ()
+	{
+		it('#upcall("HALTALL") should halt all modules', function ()
+		{
+			cortex.upcall("HALTALL");
+			for(var lobes in cortex.lobe_map)
+			{
+				expect(cortex.lobe_map[lobes].state).to.equal("HALTED");
+			}
+		});
+		it('#upcall("IDLEALL") should halt all modules', function ()
+		{
+			cortex.upcall("IDLEALL");
+			for(var lobes in cortex.lobe_map)
+			{
+				expect(cortex.lobe_map[lobes].state).to.equal("IDLING");
+			}
+		});
+		it('#upcall("RESUMEALL") should halt all modules', function ()
+		{
+			cortex.upcall("RESUMEALL");
+			for(var lobes in cortex.lobe_map)
+			{
+				expect(cortex.lobe_map[lobes].state).to.equal("RUNNING");
+			}
+		});
+	});
+
+	describe('Testing direct #upcall("CALL") call', function ()
+	{
+		var spy;
+		const upcall_command = "VIA-UPCALL";
+		const upcall_loopback = "LOOPBACK-UPCALL";
+		before(function()
+		{
+			spy = sinon.spy(cortex.lobe_map["Protolobe"], "react");
+			spy.withArgs(upcall_command);
+			spy.withArgs(upcall_loopback);
+		});
+		it('#upcall("CALL", "Protolobe", "VIA-UPCALL") should halt all modules', function (done)
+		{
+			cortex.upcall("CALL", "Protolobe", upcall_command);
+			setTimeout(function() {
+				expect(cortex.lobe_map["Protolobe"].react.calledWith(upcall_command)).to.be.true;
+				done();
+			}, 200);
+		});
+		it('Protolobe should run #upcall("CALL", "Protolobe", "VIA-UPCALL") when halted', function (done)
+		{
+			//// Protolobe is setup to do a self upcall when resume is called for testing purposes
+			cortex.lobe_map["Protolobe"]._resume();
+			setTimeout(function() {
+				expect(cortex.lobe_map["Protolobe"].react.calledWith(upcall_loopback)).to.be.true;
+				done();
+			}, 200);
+		});
+		after(function()
+		{
+			spy.restore();
 		});
 	});
 });
