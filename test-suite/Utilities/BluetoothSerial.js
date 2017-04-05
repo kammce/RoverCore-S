@@ -206,7 +206,7 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#sendraw And #send', function ()
+	describe('BluetoothSerial#send And #sendCommand', function ()
 	{
 		const PORT_MESSAGE = "SENDRAW-TEST";
 		var stub_write;
@@ -220,20 +220,20 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 		it('Should write raw string with this.ready = true', function()
 		{
-			unit_test.sendraw(PORT_MESSAGE);
+			unit_test.send(PORT_MESSAGE);
 			expect(stub_write.calledWith(PORT_MESSAGE)).to.be.true;
 		});
 		it('Should NOT write raw string with this.ready = false', function()
 		{
 			unit_test.ready = false;
-			unit_test.sendraw("SENDRAW-TEST");
+			unit_test.send(PORT_MESSAGE);
 			expect(stub_write.calledWith(PORT_MESSAGE)).to.be.false;
 		});
 		it('Should write formated string', function()
 		{
-			unit_test.send('A', 100);
-			unit_test.send('B', 34.24);
-			unit_test.send('C', -1234);
+			unit_test.sendCommand('A', 100);
+			unit_test.sendCommand('B', 34.24);
+			unit_test.sendCommand('C', -1234);
 			expect(stub_write.calledWith('@A,100\r\n')).to.be.true;
 			expect(stub_write.calledWith('@B,34.24\r\n')).to.be.true;
 			expect(stub_write.calledWith('@C,-1234\r\n')).to.be.true;
@@ -310,7 +310,7 @@ describe('Testing BluetoothSerial Class', function ()
 	});
 
 	//// NOTE: THIS TEST WILL CRASH YOUR COMPUTER IF THE BLUETOOTH DEVICE DOES NOT EXIST.
-	describe('BluetoothSerial Integration Test', function ()
+	describe('BluetoothSerial Integration Test (10s)', function ()
 	{
 		this.timeout(10000);
 		it('Should send hello world via bluetooth to device', function(done)
@@ -322,7 +322,7 @@ describe('Testing BluetoothSerial Class', function ()
 					var counter = 0;
 					var interval = setInterval(() =>
 					{
-						unit_test.send('A', counter++);
+						unit_test.sendCommand('A', counter++);
 					}, 1000);
 					setTimeout(() =>
 					{
