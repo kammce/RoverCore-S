@@ -4,6 +4,10 @@ var Neuron = require('../Neuron');
 var exec = require('child_process').exec;
 var fs = require("fs");
 
+const sysFsPath = "/sys/class/gpio" ;
+const Trigger   = 29;
+const Echo      = 30;
+
 
 class Ultrasonic extends Neuron
 {
@@ -51,6 +55,11 @@ class Ultrasonic extends Neuron
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
+		this.model.registerMemory("Ultrasonic");
+		this.Control_GPIO = [19,28,31,25];
+		this.avg=0;
+		this.MaxUltrasonic = 2;
+		this.readDistance();
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -67,6 +76,33 @@ class Ultrasonic extends Neuron
 		return true;
 	}
 	/**
+     * Init all GPIO pin.
+     */
+     init(){
+     	var Trigger = 20;
+    	var Echo = 21 ;
+    	this.expose(Trigger);
+    	this.expose(Echo);
+    	this.expose(this.Control_GPIO[0]);
+    	this.expose(this.Control_GPIO[1]);
+    	this.expose(this.Control_GPIO[2]);
+    	this.expose(this.Control_GPIO[3]);
+
+    	this.direction(Trigger,"out");
+    	this.direction(this.Control_GPIO[0],"out");
+    	this.direction(this.Control_GPIO[1],"out");
+    	this.direction(this.Control_GPIO[2],"out");
+    	this.direction(this.Control_GPIO[3],"out");
+	  	this.direction(Echo,"in");
+
+    	fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 1, "utf8");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[0] + "/value", 0, "utf8");
+		fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[1] + "/value", 0, "utf8");
+		fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[2] + "/value", 0, "utf8");
+		fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[3] + "/value", 0, "utf8");
+
+     }
+     /**
      * Use to execute shellscript command line.
      */
     puts(error, stdout, stderr){
@@ -77,7 +113,7 @@ class Ultrasonic extends Neuron
      * @param {interger} input - set initially.
      */
     expose(pin){
-    	exec("echo "+Trigger+ " > /sys/class/gpio/export" , puts);
+    	exec("echo "+pin+ " > /sys/class/gpio/export" , this.puts);
     }
     /**
      * Set direction of a GPIO pin 
@@ -104,113 +140,171 @@ class Ultrasonic extends Neuron
      * @param {interger array} pin_array - GPIOs pin nummber.
      * @param {string} value-x - value to be write to.
      */
-	writeGPIO_MUX(pin_array, value1, value2, value3, value4) {
+	writeGPIO_MUX(value3, value2, value1, value0) {
 	    if (value1 === undefined && value2 === undefined && value3 === undefined && value4 === undefined) {
 	        value1 = 0;
 	        value2 = 0;
 	        value3 = 0;
 	        value4 = 0;
 	    }
-	    for (int i = 0; i < 3; i++) {
-	        fs.writeFileSync(sysFsPath + "/gpio" + pin[i] + "/value", value + i + 1, "utf8");
-	    }
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[0] + "/value", value0, "utf8");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[1] + "/value", value1, "utf8");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[2] + "/value", value2, "utf8");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[3] + "/value", value3, "utf8");
 	}
 	 /**
      * Write 1 or 0 to four GPIO pin 
      * @param {interger } device_num - ultrasonic number.
      */
 	muxSelect(device_num) {
+		var parent=this;
 	    switch (device_num) {
 	        case 0:
-	            writeGPIO_MUX(Control_GPIO, 0, 0, 0, 0);
+	            parent.writeGPIO_MUX(0, 0, 0, 0);
 	            break;
 	        case 1:
-	            writeGPIO_MUX(Control_GPIO, 0, 0, 0, 1);
+	            parent.writeGPIO_MUX(0, 0, 0, 1);
 	            break;
 	        case 2:
-	            writeGPIO_MUX(Control_GPIO, 0, 0, 1, 0);
+	            parent.writeGPIO_MUX(0, 0, 1, 0);
 	            break;
 	        case 3:
-	            writeGPIO_MUX(Control_GPIO, 0, 0, 1, 1);
+	            parent.writeGPIO_MUX(0, 0, 1, 1);
 	            break;
 	        case 4:
-	            writeGPIO_MUX(Control_GPIO, 0, 1, 0, 0);
+	            parent.writeGPIO_MUX(0, 1, 0, 0);
 	            break;
 	        case 5:
-	            writeGPIO_MUX(Control_GPIO, 0, 1, 0, 1);
+	            parent.writeGPIO_MUX(0, 1, 0, 1);
 	            break;
 	        case 6:
-	            writeGPIO_MUX(Control_GPIO, 0, 1, 1, 0);
+	            parent.writeGPIO_MUX(0, 1, 1, 0);
 	            break;
 	        case 7:
-	            writeGPIO_MUX(Control_GPIO, 0, 1, 1, 1);
+	            parent.writeGPIO_MUX(0, 1, 1, 1);
 	            break;
 	        case 8:
-	            writeGPIO_MUX(Control_GPIO, 1, 0, 0, 0);
+	            parent.writeGPIO_MUX(1, 0, 0, 0);
 	            break;
 	        case 9:
-	            writeGPIO_MUX(Control_GPIO, 1, 0, 0, 1);
+	            parent.writeGPIO_MUX(1, 0, 0, 1);
 	            break;
 	        case 10:
-	            writeGPIO_MUX(Control_GPIO, 1, 0, 1, 0);
+	            parent.writeGPIO_MUX(1, 0, 1, 0);
 	            break;
 	        case 11:
-	            writeGPIO_MUX(Control_GPIO, 1, 1, 0, 0);
+	            parent.writeGPIO_MUX(1, 1, 0, 0);
 	            break;
+	         case 11:
+	            parent.writeGPIO_MUX(1, 1, 0, 1);
+	            break;
+	        default:
+	        	parent.log.output("Invalid Input");
+	        	break;
 	    	}
 		}	
-	 /**
-	 * Get the Eacho pin value 
-     * return a 1 or 0  
-     */
-	muxReceive(){
-	    var value=fs.readFileSync(sysFsPath + "/gpio" + Receive_GPIO + "/value","utf8");
-	    return value; 
-	} 
     /**
-     * Use to measure Distance . Note : not tested with Mux yet. Intended for testing using Rovercore with single Ultrasonic only  
-     * 
+     * Cortex will attempt to halt this lobe in the following situations:
+	 *		1. If the Mission Control controller of a lobe disconnects from the rover server or server proxy.
+	 *		2. If the Mission Control controller sends a manual halt signal to Cortex to halt the lobe.
+	 *		3. If another lobe uses an UPCALL to trigger the halt of a specific lobe or all lobes.
+     * @returns {boolean} returns true if successful, returns false if halt failed.
      */
-    measureDistance(){
-    	var sysFsPath = "/sys/class/gpio" ;
-    	var Trigger = 20
-    	var Echo = 21 
-    	expose(Trigger);
-    	expose(Echo);
-    	direction(Trigger,"out");
-    	direction(Echo,"in");
+    measureDistanceMux(ultrasonicNum){
+ 		var parent = this;
+	  	var start=0;
+    	var end=0;
+    	var duration=0;
+	    var distance=0;
+	    var distnaceAvg=0;
+	    var count2=0; 
 
-		setInterval(function(){
-		  fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 1, "utf8");
-		  //console.log(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8"));
-		  setTimeout(function(){
-		      count=0;
-		      fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 0, "utf8");
-		      //console.log(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8"));
-		       while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==0){
-		        var hrTime1 = process.hrtime();
-		        //start=now();
-		        start=hrTime1[0] * 1000000000 + hrTime1[1] 
-		        count++;
-		        if(count>200){
-		         break; 
-		        }
-		      }
-		      while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==1){
-		        var hrTime2 = process.hrtime();
-		        end=hrTime2[0] * 1000000000 + hrTime2[1] 
-		        //end=now();
-		      }
-		      duration = end-start;
-		      var distance =(duration/1e6)*15.614; //convert ms to cm 
-		      if(distance > 170 && distance < 0 ){distance=0;}
-		      this.log.output(`start: ${this.name}`, start);
-		      this.log.output(`end: ${this.name}`, end);
-		      this.log.output(`distance: ${this.name}`, distance);    
-		  },.0020);
-		}, 10);
-    }
-    /**
+	        fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 1, "utf8");
+			setTimeout(function(){
+			    var count=0;
+			    fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 0, "utf8");
+			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==0){
+			        var hrTime1 = process.hrtime();
+			        start=hrTime1[0] * 1000000000 + hrTime1[1]; 
+			        count++;
+			          if(count>200){ break; }
+			    }
+
+			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==1){
+			    	var hrTime2 = process.hrtime();
+			    	end=hrTime2[0] * 1000000000 + hrTime2[1];
+			    }
+
+			    duration = end-start;
+			    distance =(duration/1e6)*15.614; //convert ms to cm 
+			    if(distance > 170 || distance < 0 ){distance= -1 ;}
+			    parent.updateModel(ultrasonicNum,distance);
+			},.0020);
+   }
+
+   	readDistance()
+   	{
+   		var parent = this;
+   		var selectNum = 0;
+   		var count = 0;
+   		this.init();
+   		setInterval(function(){
+   			parent.muxSelect(selectNum);
+   			parent.measureDistanceMux(selectNum);
+   			count++;
+			parent.average(selectNum,count);
+   			if(count == 10)
+   			{
+   				selectNum++;
+   				parent.readModel();
+   				count=0;
+   				if(selectNum==parent.MaxUltrasonic){selectNum=0;}
+   			}
+   		},10);
+   	}
+
+   	updateModel(ID,distance)
+   	{
+   		this.model.set("Ultrasonic",{
+   			ID: ID,
+   			Distance: distance
+   		})
+   	}
+
+   	average(ID,count)
+   	{
+   		var ultrasonic = this.model.get("Ultrasonic");
+   		try{
+	   		if(count<10)
+	   		{
+	   			this.avg= this.avg+ultrasonic["Distance"];
+				//this.log.output("if avg: " + this.avg);
+	   		}
+	   		else
+	   		{
+	   			this.avg=(this.avg/10);
+			        //this.log.output(this.avg);
+	   			this.model.set("Ultrasonic",{
+		   			ID: ID,
+		   			AvgDistance: this.avg
+	   			})
+				this.avg=0;
+	   		}
+	   	}
+	   	catch(err){this.log.output("Error")}
+   	}
+
+   	readModel()
+   	{
+   		var ultrasonic = this.model.get("Ultrasonic");
+   		//this.log.output(ultrasonic);
+   		try{
+   			this.log.output("ID : " + ultrasonic["ID"] + "  Distance: " + ultrasonic["Distance"] + " Avg Distance: " + ultrasonic["AvgDistance"]);
+   		}	
+   		catch(err){this.log.output("Error: " + err)};
+   	}
+
+        /**
      * Cortex will attempt to halt this lobe in the following situations:
 	 *		1. If the Mission Control controller of a lobe disconnects from the rover server or server proxy.
 	 *		2. If the Mission Control controller sends a manual halt signal to Cortex to halt the lobe.
@@ -247,4 +341,5 @@ class Ultrasonic extends Neuron
 	}
 }
 
-module.exports = ProtoLobe;
+module.exports = Ultrasonic;
+
