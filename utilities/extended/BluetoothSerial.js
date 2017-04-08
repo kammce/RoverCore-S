@@ -48,15 +48,15 @@ class BluetoothSerial extends Serial
 				 * Check will fail if regex match failed.
 				 * 		key is undefined, thus typeof will return "undefined".
 				 */
-				if(typeof this.callback_map[key] === "function")
-				{
-					value = parseFloat(value);
-					this.blue.callback_map[key](value);
-				}
-				else
-				{
-					this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
-				}
+				// if(typeof this.callback_map[key] === "function")
+				// {
+				// 	value = parseFloat(value);
+				// 	this.blue.callback_map[key](value);
+				// }
+				// else
+				// {
+				// 	this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+				// }
 			}
 			this.blue.serial_buffer = messages[messages.length-1];
 		}
