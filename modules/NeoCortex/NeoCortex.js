@@ -79,7 +79,8 @@ class NeoCortex extends Neuron
 			ai_direction: 'stop'
 		});
 		/**Function Testing Section **/ 
-		
+		//var parent = this;
+		//setTimeout(function(){parent.execDrive("L");},1000);
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -101,6 +102,7 @@ class NeoCortex extends Neuron
 
 			case "AI_OFF":
 			this.closeVision();
+			this.execDrive('N');
 			break;
 
 		}
@@ -151,27 +153,37 @@ class NeoCortex extends Neuron
 	   switch(direction)
 	   {
 		   case 'L': //go left
-			    parent.log.output("Go Left");
+			    //parent.log.output("Go Left");
 			    parent.updateModel('left');
-			    parent.upcall('LEFT_AI');
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: -90, mode: "Y"}  );
 		        //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 		        break;
 		   case 'R' : // go right
-		        parent.log.output("Go Right");
+		        //parent.log.output("Go Right");
 			    parent.updateModel('right');
-			    parent.upcall('RIGHT_AI')
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 90, mode: "Y"}  );
 			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 			    break;
 		   case 'C':   //go forward
-				parent.log.output("Go Forwad");
+				//parent.log.output("Go Forwad");
 				parent.updateModel('forward');
-				parent.upcall('FORWARD_AI');
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "Y"}  );
 			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 			    break;
 		   case 'N' : 
-			    this.log.output("Go Nowhere");
+			    //this.log.output("Go Nowhere");
 			    this.updateModel('stop');
-			    parent.upcall('STOP_AI');
+			    parent.upcall("CALL", "DriveSystem",  {speed: 0, angle: 0, mode: "Y"}  );
+				break;
+			case 'SR' : 
+			    //this.log.output("Go Nowhere");
+			    this.updateModel('spin_right');
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "O"}  );
+				break;
+			case 'SL' : 
+			    //this.log.output("Go Nowhere");
+			    this.updateModel('spin_left');
+			    parent.upcall("CALL", "DriveSystem",  {speed: -30, angle: 0, mode: "O"}  );
 				break;
 			default: 
 				this.log.output("Error Input");
@@ -186,8 +198,12 @@ class NeoCortex extends Neuron
 		var parent = this;
 		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
 		this.vision_process.stdout.on('data', function(data) {
-  			var direction = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
-  			if(direction != 'N')
+  		var direction = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
+  		var distance_differential = distanceGPS;
+
+  		if(distance_differential > 1.5 )
+  		{
+	  		if(direction != 'N')
 			{
 				parent.execDrive(direction);	
 			}
@@ -196,6 +212,15 @@ class NeoCortex extends Neuron
 				parent.readGPS();
 				parent.pathGPS();
 			}
+		}
+		else
+		{
+			this.react("AI_OFF");
+			this.model.set("NeoCortex", {
+				finish: 1
+			});
+		}
+
 		});
 	}
 	/*
@@ -226,6 +251,7 @@ class NeoCortex extends Neuron
 										   this.GPS_given.lattitude,this.GPS_given.longitude);
 		var heading_actual = this.model.get("Tracker");
 		var heading_differential = heading_expected - heading_actual["heading"];
+		
 		if (heading_differential < -10 )
 		{
 			this.execDrive("SR");
@@ -287,7 +313,8 @@ class NeoCortex extends Neuron
 	updateModel(direction_string)
 	{
 		this.model.set("NeoCortex", {
-			ai_direction: direction_string
+			ai_direction: direction_string,
+			finish: 0 
 		});
 	}
 }
