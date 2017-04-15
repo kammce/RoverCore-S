@@ -30,7 +30,7 @@ echo -e "\nInstalling Build Essentials"
 sudo apt-get install -y build-essential
 
 # Adding Node Source Repository to Apt-Get
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+wget -qO- https://deb.nodesource.com/setup_7.x | sudo bash -
 
 echo -e "\nInstalling NodeJS"
 sudo apt-get install -y nodejs
@@ -41,6 +41,8 @@ echo -e "\nNPM Install Grunt Command Line Interface"
 sudo npm install -g grunt-cli
 echo -e "\nNPM Install Mocha Command Line Interface"
 sudo npm install -g mocha-cli
+echo -e "\nNPM Instal SerialPort"
+sudo npm install serialport
 
 # Kill sudo timestamp
 sudo -k
