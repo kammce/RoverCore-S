@@ -15,7 +15,6 @@ At the heart of RoverCore-S is the **Cortex.js** which does the following:
     * Make UPCALLS to cortex to do global actions that effect the whole system or other lobes. *(see upcall function in Cortex.js)*
 
 ## Installation Instructions
-***
 ### Node Tools
 * `npm` - Package Manager
 * `grunt` - Task Runner (to run unit tests and to lint)
