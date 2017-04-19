@@ -70,7 +70,8 @@ class Cortex
 					output += arguments[i]+"\n";
 				}
 			}
-			primus.write({
+			primus.write(
+			{
 				target: lobe_name,
 				message: output
 			});
@@ -98,31 +99,26 @@ class Cortex
 			this.sendLobeStatus();
 		}, 100);
 	}
-	handleIncomingData(data, spark)
+	handleIncomingData(data)
 	{
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
-			if(this.lobe_map[target]['controller'] === spark.id || spark === -1)
+			setImmediate(() =>
 			{
-				setImmediate(() =>
-				{
-					this.time_since_last_command[target] = Date.now();
-					this.lobe_map[target]._react(data['command']);
-				});
-			}
-			else
-			{
-				this.log.output(`Connection ID is not associated with target lobe: ${target}.`);
-			}
+				this.time_since_last_command[target] = Date.now();
+				this.lobe_map[target]._react(data['command']);
+			});
 		}
 		else
 		{
 			this.log.output(`Target ${target} does not exist in lobe_map.`);
 		}
 	}
-	sendLobeStatus() {
-		for (var lobe in this.lobe_map) {
+	sendLobeStatus()
+	{
+		for (var lobe in this.lobe_map)
+		{
 			if(!this.previous_lobe_status.hasOwnProperty(lobe))
 			{
 				this.previous_lobe_status[lobe] = {};
@@ -131,22 +127,17 @@ class Cortex
 			{
 				this.previous_lobe_status[lobe] = {
 					lobe: lobe,
-					"controller": this.lobe_map[lobe]['controller'],
-					"state" : this.lobe_map[lobe]['state']
+					state : this.lobe_map[lobe]['state']
 				};
 				this.feedback(this.name, this.previous_lobe_status[lobe]);
 			}
 		}
 	}
-	handleMissionControl(data, spark)
+	handleMissionControl(data)
 	{
 		var msg;
-		//// NOTE: Lobe cannot have names 'disconnect', 'halt', or 'resume'
+		//// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
 		var actions = {
-			"disconnect": (lobe) =>
-			{
-				this.lobe_map[lobe]['controller'] = "";
-			},
 			"halt": (lobe) =>
 			{
 				this.lobe_map[lobe]._halt();
@@ -154,38 +145,25 @@ class Cortex
 			"resume": (lobe) =>
 			{
 				this.lobe_map[lobe]._resume();
+			},
+			"idle": (lobe) =>
+			{
+				this.lobe_map[lobe]._idle();
 			}
 		};
-		if(Object.keys(actions).indexOf(data) !== -1)
+
+		if("lobe" in data && "action" in data)
 		{
-			for (var lobe in this.lobe_map)
-			{
-				if(this.lobe_map[lobe]['controller'] === spark.id)
-				{
-					actions[data](lobe);
-				}
-			}
-		}
-		else if(Object.keys(this.lobe_map).indexOf(data) !== -1)
-		{
-			if(!this.lobe_map[data]['controller'])
-			{
-				msg = `${data} controller assigned to connection: ${spark.id}`;
-			}
-			else
-			{
-				msg = `Reassigning ${spark.id} to lobe ${data}.`;
-			}
-			this.lobe_map[data]['controller'] = spark.id;
-			this.log.output(msg);
-			this.feedback('Cortex', msg);
+			actions[data["action"]](data["lobe"]);
+			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
 		}
 		else
 		{
-			msg = `Cortex could not handle command: ${data}.`;
-			this.log.output(msg);
-			this.feedback('Cortex', msg);
+
+			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
 		}
+		this.log.output(msg);
+		this.feedback('Cortex', msg);
 	}
 	handleIdleStatus()
 	{
@@ -221,7 +199,6 @@ class Cortex
 		switch(command)
 		{
 			case "CALL":
-				//// param[0] = target :: param[1] = command
 				var [upcall_target, upcall_command] = params;
 				this.cortex.handleIncomingData({
 					target: upcall_target,
