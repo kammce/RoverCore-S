@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class ProtoLobe extends Neuron
+class Arm extends Neuron
 {
 	constructor(util)
 	{
@@ -45,16 +45,22 @@ class ProtoLobe extends Neuron
 		 */
 		this.model = util.model;
 		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "00:21:13:00:71:a1",
+			baud: 38400,
+			log: this.log,
+			device: 2
+		});
+		// this.mc_text_field_interval = setInterval(() =>
+		// {
+		// 	this.feedback("Mission Control Text Area Log Test Overflow");
+		// }, 50);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -63,9 +69,34 @@ class ProtoLobe extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
-		return true;
+		if( "rotunda" in input &&
+			"shoulder" in input &&
+			"elbow" in input &&
+			"wrist_pitch" in input &&
+			"wrist_roll" in input &&
+			"claw" in input &&
+			"camera_select" in input &&
+			"rotunda_camera" in input)
+		{
+
+			this.rfcomm.sendCommand('a', input.rotunda);
+			this.rfcomm.sendCommand('b', input.shoulder);
+			this.rfcomm.sendCommand('c', input.elbow);
+			this.rfcomm.sendCommand('d', input.wrist_pitch);
+			this.rfcomm.sendCommand('e', input.wrist_roll);
+			this.rfcomm.sendCommand('f', input.claw);
+			// this.rfcomm.sendCommand('g', input.camera_select);
+			// this.rfcomm.sendCommand('h', input.rotunda_camera);
+
+			this.log.output(`Sending \n`, input, `Over BluetoothSerial`);
+			this.feedback(`Sending \n`, input, `Over BluetoothSerial`);
+			return true;
+		}
+		else
+		{
+			this.log.output(`Invalid Input `, input);
+			this.feedback(`Invalid Input `, input);
+		}
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -90,7 +121,6 @@ class ProtoLobe extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		this.upcall("CALL", this.name, "LOOPBACK-UPCALL");
 		return true;
 	}
 	/**
@@ -105,4 +135,4 @@ class ProtoLobe extends Neuron
 	}
 }
 
-module.exports = ProtoLobe;
+module.exports = Arm;

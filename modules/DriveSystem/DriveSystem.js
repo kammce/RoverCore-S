@@ -51,20 +51,49 @@ class DriveSystem extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
-		this.rfcomm = new BluetoothSerial({
-			mac: "30:14:06:24:01:80",
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "00:21:13:00:6E:A7",
 			baud: 38400,
 			log: this.log,
-			dev: 1,
-			callback: (data) =>
-			{
-				this.log.output(data);
-			}
+			device: 1
 		});
-		// this.rfcomm.attachListener('A', function(value)
+
+		// this.ai_interval = setInterval(() =>
 		// {
-		// 	console.log(`key[A] = ${value}`);
-		// });
+		// 	this.rfcomm.send("M", 'Y'.charCodeAt(0));
+		// 	var neo = this.model.get("NeoCortex");
+		// 	if(this.state === "IDLING" && neo.ai_flag === true)
+		// 	{
+		// 		switch(neo.direction)
+		// 		{
+		// 			case "LEFT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "LEFT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "STOP":
+		// 				this.rfcomm.send("S", 0);
+		// 				this.rfcomm.send("A", 0);
+		// 				break;
+		// 			default:
+		// 				break;
+		// 		}
+		// 	}
+		// 	else
+		// 	{
+		// 	}
+		// }, 100);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -73,14 +102,21 @@ class DriveSystem extends Neuron
      */
 	react(input)
 	{
-		if( "speed" 	in input &&
-			"direction" in input &&
-			"mode" 		in input)
+		if( "speed" in input &&
+			"angle" in input &&
+			"mode" 	in input)
 		{
-			this.rfcomm.send("S", input.speed);
-			this.rfcomm.send("D", input.direction);
-			this.rfcomm.send("M", input.mode);
+			this.rfcomm.sendCommand("S", input.speed);
+			this.rfcomm.sendCommand("A", input.angle);
+			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
+			this.log.output(`Sending `, input, `Over BluetoothSerial`);
+			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
+		}
+		else
+		{
+			this.log.output(`Invalid Input `, input);
+			this.feedback(`Invalid Input `, input);
 		}
 	}
 	/**
