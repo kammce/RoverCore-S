@@ -45,6 +45,10 @@ class ProtoLobe extends Neuron
 		 */
 		this.model = util.model;
 		/**
+		 * A method for making up calls to cortex to control the system
+		 */
+		this.upcall = util.upcall;
+		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
@@ -86,6 +90,7 @@ class ProtoLobe extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
+		this.upcall("CALL", this.name, "LOOPBACK-UPCALL");
 		return true;
 	}
 	/**
