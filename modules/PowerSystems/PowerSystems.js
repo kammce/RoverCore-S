@@ -28,7 +28,7 @@ class ProtoLobe extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("red");
+		this.log.setColor("green");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -36,13 +36,15 @@ class ProtoLobe extends Neuron
 		this.idle_timeout = 2000;
 		/**
 		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.model.registerMemory("Proto");
-		 *		this.model.set("Proto", {
-		 *		    proto: 555
-		 *		});
-		 *		var proto = this.model.get("Proto");
+		 * 
+		 *	Usage:
 		 */
+	 	// 	this.model.registerMemory("Proto");
+			// this.model.set("Proto", {
+	 	// 	    proto: 555
+			// });
+			// var proto = this.model.get("Proto");
+		 
 		this.model = util.model;
 		/**
 		 * A method for making up calls to cortex to control the system
@@ -55,6 +57,67 @@ class ProtoLobe extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+
+		this.model.registerMemory("Power");
+
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "00:21:13:00:72:ba", //may not be correct MAC address
+			baud: 38400,
+			log: this.log,
+			device: 2
+		});	
+
+		this.rfcomm.attachListener('0', (value) => {
+			this.model.set("Power", {
+				realTimeVoltage : value
+			});
+		});
+		this.rfcomm.attachListener('1', (value) => {
+			this.model.set("Power", {
+				mAhRemaining : value,
+				batteryPercentage : value/120 //mAhRemaining / 12000 * 100
+			});
+		});
+		this.rfcomm.attachListener('2', (value) => {
+			this.model.set("Power", {
+				currentDrive : value
+			});
+		});
+		this.rfcomm.attachListener('3', (value) => {
+			this.model.set("Power", {
+				currentSteer : value
+			});
+		});
+		this.rfcomm.attachListener('4', (value) => {
+			this.model.set("Power", {
+				currentArm : value
+			});
+		});
+		this.rfcomm.attachListener('5', (value) => {
+			this.model.set("Power", {
+				currentIntel : value
+			});
+		});
+		this.rfcomm.attachListener('6', (value) => {
+			this.model.set("Power", {
+				currentMast : value
+			});
+		});
+		this.rfcomm.attachListener('7', (value) => {
+			this.model.set("Power", {
+				temp1 : value
+			});
+		});
+		this.rfcomm.attachListener('8', (value) => {
+			this.model.set("Power", {
+				temp2 : value
+			});
+		});
+		this.rfcomm.attachListener('9', (value) => {
+			this.model.set("Power", {
+				temp3 : value
+			});
+		});
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -63,8 +126,33 @@ class ProtoLobe extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
+		if ("batRelay1"  in input &&
+			"batRelay2"  in input &&
+			"batRelay3"  in input &&
+			"driveRelay" in input &&
+			"steerRelay" in input &&
+			"armRelay"   in input &&
+			"intelRelay" in input &&
+			"mastRelay"  in input)
+		{
+			this.rfcomm.sendCommand('a', input.batRelay1);
+		    this.rfcomm.sendCommand('b', input.batRelay2);
+		    this.rfcomm.sendCommand('c', input.batRelay3);
+		    this.rfcomm.sendCommand('d', input.driveRelay);
+		    this.rfcomm.sendCommand('e', input.steerRelay);
+		    this.rfcomm.sendCommand('f', input.armRelay);
+		    this.rfcomm.sendCommand('g', input.intelRelay);
+		    this.rfcomm.sendCommand('h', input.mastRelay);
+
+		    this.log.output(`REACTING ${this.name}: `, input);
+			this.feedback(`REACTING ${this.name}: `, input);
+		}
+		else
+		{
+			this.log.output(`NOT reacting ${this.name}; invalid inputs.`);
+			this.feedback(`NOT reacting ${this.name}; invalid inputs.`);
+		}
+		
 		return true;
 	}
 	/**
