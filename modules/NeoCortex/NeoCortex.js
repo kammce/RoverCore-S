@@ -146,12 +146,12 @@ class NeoCortex extends Neuron
 		this.vision_process.stdout.on('data', function(data) {
 	  		var output = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
 	  		var fields = output.split("-");
-	  		var direction_vision = field[0];
-	  		var distance_vision = field[1]*0.254;
-	  		var distance_GPS = distance_GPS(this.GPS_current.lattitude,this.GPS_current.longitude,
-										    this.GPS_gate.lattitude,this.GPS_gate.longitude);
-
-	  		this.Finish = "No";
+	  		var direction_vision = fields[0];
+	  		var distance_vision = fields[1]*0.254;
+	  		var distance_GPS = parent.distanceGPS(parent.GPS_current.lattitude,parent.GPS_current.longitude,
+										    	   parent.GPS_gate.lattitude,parent.GPS_gate.longitude);
+ 
+	  		parent.Finish = "No";
 
 		  	if(distance_vision >= 1 && distance_vision != "undefined")
 		  	{ 
