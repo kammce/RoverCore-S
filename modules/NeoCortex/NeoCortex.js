@@ -60,14 +60,18 @@ class NeoCortex extends Neuron
 		/**
 		 * variable to store GPS coordinate 
 		 */
-		this.GPS_ai = {
+		this.GPS_current = {
 			longitude : 0,
 			lattitude : 0
 		};
-		this.GPS_given = {
+		this.GPS_gate = {
 			longitude : 0,
 			lattitude : 0
-		};  
+		};
+		this.GPS_flag = 1;
+		this.Sonic_flag = 1;  
+		this.AI_direction = "Stop";
+		this.Finish = "Invalid"
 		/**
 		 * Interval variable for reading from text file
 		 */ 
@@ -75,12 +79,18 @@ class NeoCortex extends Neuron
 		this.holder = "N";
 		/** Setting Model Memory **/
 		this.model.registerMemory("NeoCortex");
-		this.model.set("NeoCortex", {
-			ai_direction: 'stop'
-		});
+		setInterval(() =>
+		{
+			this.model.set("NeoCortex", {
+				Direction: this.AI_direction,
+				Finish: this.Finish,
+				Gate_lattitude: this.GPS_gate.lattitude,
+				Gate_longitude: this.GPS_gate.longitude
+			});
+		},500);
 		/**Function Testing Section **/ 
 		//var parent = this;
-		//setTimeout(function(){parent.execDrive("L");},1000);
+		//setTimeout(function(){parent.react({mode: 'AI', flag: 1});},1000);
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -94,20 +104,237 @@ class NeoCortex extends Neuron
 	{
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
-		switch(input)
+		var parent=this;
+		switch(input.mode)
 		{
-			case "AI_ON":
-			this.openVision();
+			case "AI": // turn AI On/Off
+
+			if(input.flag==1)
+			{
+				try{parent.openVision()}
+				catch(err){parent.log.output(err)} 
+			}
+			else{parent.closeVision()}
 			break;
 
-			case "AI_OFF":
-			this.closeVision();
-			this.execDrive('N');
+			case "GPS": //turn GPS algo On/Off
+			if(input.flag==1){parent.GPS_flag=1}
+			else{parent.GPS_flag=0;}
+			break;
+
+			case "SONIC": //turn Sonic algo On/Off
+			if(input.flag==1){parent.Sonic_flag=1}
+			else{parent.Sonic_flag=0;}
+			break;
+
+			case "GATE": //write Gate GPS
+			parent.GPS_gate.lattitude = input.lattitude;
+			parent.GPS_gate.longitude = input.longitude;
 			break;
 
 		}
 		return true;
 	}
+	/*
+	*Running computer Vision program 
+	*/
+	openVision()
+	{
+		var parent = this;
+		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
+
+		this.vision_process.stdout.on('data', function(data) {
+	  		var output = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
+	  		var fields = output.split("-");
+	  		var direction_vision = field[0];
+	  		var distance_vision = field[1]*0.254;
+	  		var distance_GPS = distance_GPS(this.GPS_current.lattitude,this.GPS_current.longitude,
+										    this.GPS_gate.lattitude,this.GPS_gate.longitude);
+
+	  		this.Finish = "No";
+
+		  	if(distance_vision >= 1 && distance_vision != "undefined")
+		  	{ 
+		  		if(distance_GPS >= 1.5 && distance_GPS != -1 )
+		  		{
+			  		if(direction != 'N')
+					{
+						parent.execDrive(direction_vision);	
+					}
+					else
+					{
+						parent.readGPS();
+						parent.pathGPS();
+					}
+				}
+				else
+				{
+					parent.execDrive("N")
+					parent.closeVision();
+					parent.Finish="Yes";
+				}
+			}
+			else if (distance_vision < 1 && distance_vision >= 0 )
+			{	
+				parent.execDrive("N")
+				parent.closeVision();
+				parent.Finish="Yes";
+			}
+
+		});
+	}
+	/*
+	*close computer Vision program
+	*/
+	closeVision()
+	{
+		try
+		{
+			this.vision_process.kill();
+			return true;
+		}
+		catch(err){
+			this.log.output("Killing OpenCV Error");
+			return false;
+		}
+	}
+	/**
+    * function to drive rover 
+    * @param {char} input - command for driving.
+    */
+	execDrive(direction)
+	{	
+	   var parent = this;
+	   switch(direction)
+	   {
+		   case 'L': //go left
+			    //parent.log.output("Go Left");
+			    parent.AI_direction='Left';
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: -90, mode: "Y"}  );
+		        //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+		        break;
+		   case 'R' : // go right
+		        //parent.log.output("Go Right");
+			    parent.AI_direction='Right';
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 90, mode: "Y"}  );
+			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+			    break;
+		   case 'C':   //go forward
+				//parent.log.output("Go Forwad");
+				parent.AI_direction='Forward';
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "Y"}  );
+			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
+			    break;
+		   case 'N' : 
+			    //this.log.output("Go Nowhere");
+			    parent.AI_direction='Stop';
+			    parent.upcall("CALL", "DriveSystem",  {speed: 0, angle: 0, mode: "Y"}  );
+				break;
+			case 'SR' : 
+			    //this.log.output("Go Nowhere");
+			    parent.AI_direction='Spin_Right';
+			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "O"}  );
+				break;
+			case 'SL' : 
+			    //this.log.output("Go Nowhere");
+			    parent.AI_direction='Spin_Left';
+			    parent.upcall("CALL", "DriveSystem",  {speed: -30, angle: 0, mode: "O"}  );
+				break;
+			default: 
+				this.log.output("Error Input");
+				break;
+	   } 
+	}
+	/*
+	*Read in GPS data : lattitude and altitude
+	*NOT TESTED
+	*/
+	readGPS()
+	{
+		var coordinate= this.model.get("GPS");
+		coordinate["lat"] = this.GPS_current.lattitude;
+		coordinate["lon"] = this.GPS_current.longitude;
+	}
+	/*
+	*Calculate path using GPS data
+	*Operation go as follow : read GPS, find heading, spin rover to the calculated direction, spin to that direction.
+	*NOT TESTED 
+	*/
+	pathGPS()
+	{
+		var heading_expected = heading_GPS(this.GPS_current.lattitude,this.GPS_current.longitude,
+										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
+		var heading_actual = this.model.get("Tracker");
+		var heading_differential = heading_expected - heading_actual["heading"];
+		
+		if (heading_differential < -10 )
+		{
+			this.execDrive("SR");
+		} 
+		else if (heading_differential > 10)
+		{
+			this.execDrive("SL");
+		}
+		else
+		{
+			this.execDrive("C");
+		}
+	}
+	/*
+	*calculate heading between initial and final GPS coordinate
+	*/
+	headingGPS(lat1,lng1,lat2,lng2)
+	{
+		 var dLon = this.toRad(lng2-lng1);
+         var y = Math.sin(dLon) * Math.cos(this.toRad(lat2));
+         var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - 
+         		 Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
+         var heading = this.toDeg(Math.atan2(y, x));
+         console.log((heading+360)%360);
+         return ((heading + 360) % 360);
+	}
+	/*
+	*calculate distance between initial and final GPS coordinate
+	*/
+	distanceGPS(lat1,lng1,lat2,lng2)
+	{
+		try
+		{
+			var E_radius = 6378137; //Earth radius in meter
+			var dLat = this.toRad(lat2-lat1);
+			var dLon = this.toRad(lng2-lng1);
+			var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+	                Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * 
+	                Math.sin(dLon/2) * Math.sin(dLon/2);  
+			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+			var distance = E_radius * c;
+			return distance;
+		}
+		catch(err)
+		{
+			this.log.output(err);
+			return -1;
+		}  
+	}
+	/*
+	* conversion to radian
+	*/
+	toRad(deg)
+	{
+		return deg * Math.PI / 180;
+	}
+	/*
+	* conversion to degree
+	*/
+	toDeg(rad)
+	{
+		return rad * 180 / Math.PI;
+	}
+	/*
+	*function to update model
+	*/
+	/*
+	/*
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
 	 *		1. If the Mission Control controller of a lobe disconnects from the rover server or server proxy.
@@ -147,176 +374,6 @@ class NeoCortex extends Neuron
 	*Logic for executing traversing
 	*input [string] direction, direction of tennis ball with respect to rover
 	*/
-	execDrive(direction)
-	{	
-	   var parent = this;
-	   switch(direction)
-	   {
-		   case 'L': //go left
-			    //parent.log.output("Go Left");
-			    parent.updateModel('left');
-			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: -90, mode: "Y"}  );
-		        //setTimeout(function(){ parent.upcall('STOP_AI')},500);
-		        break;
-		   case 'R' : // go right
-		        //parent.log.output("Go Right");
-			    parent.updateModel('right');
-			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 90, mode: "Y"}  );
-			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
-			    break;
-		   case 'C':   //go forward
-				//parent.log.output("Go Forwad");
-				parent.updateModel('forward');
-			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "Y"}  );
-			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
-			    break;
-		   case 'N' : 
-			    //this.log.output("Go Nowhere");
-			    this.updateModel('stop');
-			    parent.upcall("CALL", "DriveSystem",  {speed: 0, angle: 0, mode: "Y"}  );
-				break;
-			case 'SR' : 
-			    //this.log.output("Go Nowhere");
-			    this.updateModel('spin_right');
-			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "O"}  );
-				break;
-			case 'SL' : 
-			    //this.log.output("Go Nowhere");
-			    this.updateModel('spin_left');
-			    parent.upcall("CALL", "DriveSystem",  {speed: -30, angle: 0, mode: "O"}  );
-				break;
-			default: 
-				this.log.output("Error Input");
-				break;
-	   } 
-	}
-	/*
-	*Running computer Vision program 
-	*/
-	openVision()
-	{
-		var parent = this;
-		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
-		this.vision_process.stdout.on('data', function(data) {
-  		var direction = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
-  		var distance_differential = distanceGPS;
-
-  		if(distance_differential > 1.5 )
-  		{
-	  		if(direction != 'N')
-			{
-				parent.execDrive(direction);	
-			}
-			else
-			{
-				parent.readGPS();
-				parent.pathGPS();
-			}
-		}
-		else
-		{
-			this.react("AI_OFF");
-			this.model.set("NeoCortex", {
-				finish: 1
-			});
-		}
-
-		});
-	}
-	/*
-	*close computer Vision program
-	*/
-	closeVision()
-	{
-		this.vision_process.kill();
-	}
-	/*
-	*Read in GPS data : lattitude and altitude
-	*NOT TESTED
-	*/
-	readGPS()
-	{
-		var coordinate= this.model.get("Sensor");
-		coordinate["lat"] = this.GPS_ai.lattitude;
-		coordinate["lon"] = this.GPS_ai.longitude;
-	}
-	/*
-	*Calculate path using GPS data
-	*Operation go as follow : read GPS, find heading, spin rover to the calculated direction, spin to that direction.
-	*NOT TESTED 
-	*/
-	pathGPS()
-	{
-		var heading_expected = heading_GPS(this.GPS_ai.lattitude,this.GPS_ai.longitude,
-										   this.GPS_given.lattitude,this.GPS_given.longitude);
-		var heading_actual = this.model.get("Tracker");
-		var heading_differential = heading_expected - heading_actual["heading"];
-		
-		if (heading_differential < -10 )
-		{
-			this.execDrive("SR");
-		} 
-		else if (heading_differential > 10)
-		{
-			this.execDrive("SL");
-		}
-		else
-		{
-			this.execDrive("C");
-		}
-	}
-	/*
-	*calculate heading between initial and final GPS coordinate
-	*/
-	headingGPS(lat1,lng1,lat2,lng2)
-	{
-		 var dLon = this.toRad(lng2-lng1);
-         var y = Math.sin(dLon) * Math.cos(this.toRad(lat2));
-         var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - 
-         		 Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
-         var heading = this.toDeg(Math.atan2(y, x));
-         console.log((heading+360)%360);
-         return ((heading + 360) % 360);
-	}
-	/*
-	*calculate distance between initial and final GPS coordinate
-	*/
-	distanceGPS(lat1,lng1,lat2,lng2)
-	{
-		var E_radius = 6378137; //Earth radius in meter
-		var dLat = this.toRad(lat2-lat1);
-		var dLon = this.toRad(lng2-lng1);
-		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
-                Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);  
-		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-		var distance = E_radius * c;
-		return distance;  
-	}
-	/*
-	* conversion to radian
-	*/
-	toRad(deg)
-	{
-		return deg * Math.PI / 180;
-	}
-	/*
-	* conversion to degree
-	*/
-	toDeg(rad)
-	{
-		return rad * 180 / Math.PI;
-	}
-	/*
-	*function to update model
-	*/
-	updateModel(direction_string)
-	{
-		this.model.set("NeoCortex", {
-			ai_direction: direction_string,
-			finish: 0 
-		});
-	}
 }
 
 module.exports = NeoCortex;
