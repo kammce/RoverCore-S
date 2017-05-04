@@ -77,15 +77,22 @@ class NeoCortex extends Neuron
 		 */ 
 		this.read_interval = 0;
 		this.holder = "N";
+		this.GPS_Heading =0;
+		this.Tracker_Heading=0; 
 		/** Setting Model Memory **/
 		this.model.registerMemory("NeoCortex");
 		setInterval(() =>
 		{
+
+			this.readGPS();
+			this.GPS_Heading = this.headingGPS(this.GPS_current.lattitude,this.GPS_current.longitude,
+										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
 			this.model.set("NeoCortex", {
 				Direction: this.AI_direction,
 				Finish: this.Finish,
 				Gate_lattitude: this.GPS_gate.lattitude,
-				Gate_longitude: this.GPS_gate.longitude
+				Gate_longitude: this.GPS_gate.longitude,
+				GPS_Heading: this.GPS_Heading
 			});
 		},500);
 		/**Function Testing Section **/ 
@@ -157,7 +164,7 @@ class NeoCortex extends Neuron
 		  	{ 
 		  		if(distance_GPS >= 1.5 && distance_GPS != -1 )
 		  		{
-			  		if(direction != 'N')
+			  		if(direction_vision != 'N')
 					{
 						parent.execDrive(direction_vision);	
 					}
@@ -252,8 +259,17 @@ class NeoCortex extends Neuron
 	readGPS()
 	{
 		var coordinate= this.model.get("GPS");
-		coordinate["lat"] = this.GPS_current.lattitude;
-		coordinate["lon"] = this.GPS_current.longitude;
+		try
+		{
+			coordinate["lat"] = this.GPS_current.lattitude;
+			coordinate["lon"] = this.GPS_current.longitude;
+			return true;
+		}
+		catch(err)
+		{
+			//this.log.output(err);
+			return false;
+		}
 	}
 	/*
 	*Calculate path using GPS data
@@ -262,10 +278,12 @@ class NeoCortex extends Neuron
 	*/
 	pathGPS()
 	{
-		var heading_expected = heading_GPS(this.GPS_current.lattitude,this.GPS_current.longitude,
+		this.GPS_Heading = this.headingGPS(this.GPS_current.lattitude,this.GPS_current.longitude,
 										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
-		var heading_actual = this.model.get("Tracker");
-		var heading_differential = heading_expected - heading_actual["heading"];
+
+		this.Tracker_Heading = this.model.get("Tracker");
+
+		var heading_differential = this.GPS_Heading - this.Tracker_Heading["heading"];
 		
 		if (heading_differential < -10 )
 		{
@@ -290,7 +308,7 @@ class NeoCortex extends Neuron
          var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - 
          		 Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
          var heading = this.toDeg(Math.atan2(y, x));
-         console.log((heading+360)%360);
+         //console.log((heading+360)%360);
          return ((heading + 360) % 360);
 	}
 	/*
