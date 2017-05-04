@@ -152,16 +152,15 @@ class Cortex
 			}
 		};
 
-		if("lobe" in data && "action" in data)
-		{
-			actions[data["action"]](data["lobe"]);
+		// if("lobe" in data && "action" in data)
+		// {
+		// 	actions[data["action"]](data["lobe"]);
+		// 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// }
+		// else
+		// {
 			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		}
-		else
-		{
-
-			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		}
+		// }
 		this.log.output(msg);
 		this.feedback('Cortex', msg);
 	}
