@@ -1,20 +1,18 @@
 "use strict";
 
-class BluetoothSerial
+var Serial = require('./Serial');
+
+class BluetoothSerial extends Serial
 {
 	constructor(params)
 	{
-		this.ready = false;
-		this.port;
-		this.log = params.log;
-		this.serial_buffer = "";
-		this.callback_map = {};
+		params.path = `/dev/rfcomm${params.device}`;
+		super(params);
+
 		this.device = params.device;
 		this.mac_address = params.mac;
-		this.baud_rate = params.baud;
-		this.fs = require('fs');
-		this.exec = require("child_process").exec;
-		this.SerialPort = require("serialport");
+		this.serial_buffer = "";
+		this.callback_map = {};
 
 		this.bind();
 	}
@@ -32,79 +30,46 @@ class BluetoothSerial
 			}
 		});
 	}
-	setupSerial()
-	{
-		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
-			baudRate: this.baud_rate,
-			autoOpen: false
-		});
-		this.port.on("open", this.onPortOpen);
-		this.port.on("data", this.onPortData);
-		this.port.on("error", this.onPortError);
-		//// Embed BluetoothSerial Log into SerialPort Object
-		this.port.log = this.log;
-		this.port.blue = this;
-		//// Open Serial Port
-		this.port.open();
-	}
-	//// The SerialPort 'on' events exist only in the scope of the port object with reference to THIS!
-	onPortOpen()
-	{
-		this.blue = this.blue || this;
-
-		this.log.output(`Opening connection to ${this.path}`);
-		this.blue.port.write("CONNECT");
-		this.blue.ready = true;
-	}
+	//// @Override Superclass
 	onPortData(data)
 	{
 		this.blue = this.blue || this;
 
 		this.blue.serial_buffer += data.toString();
-		var split = this.blue.serial_buffer.split('\r\n');
-		if(split.length > 1)
+		var messages = this.blue.serial_buffer.split('\r\n');
+		//// Check if messages contains something
+		if(messages.length > 1)
 		{
-			for (var i = 0; i < split.length-1; i++)
+			for (var i = 0; i < messages.length-1; i++)
 			{
-				if(/^@[a-zA-Z],[0-9\-]+$/g.test(split[i]))
+				/* Regex pattern for format @<key>,<value>
+				 * Store 1st match in key
+				 * Store 2nd match in value
+				 * Return empty array if exec fails to find matches
+				 * In the event of a failed match, key & value = undefined
+				 */
+				var [, key, value] = /^@([a-zA-Z]),([0-9\-]+)$/g.exec(messages[i]) || [];
+				/* Check if there exists a callback for this key.
+				 * Check will fail if regex match failed.
+				 * 		key is undefined, thus typeof will return "undefined".
+				 */
+				if(typeof this.callback_map[key] === "function")
 				{
-					var info = split[i].split(",");
-					var key = info[0].charAt(1);
-					var value = parseFloat(info[1]);
-					if(typeof this.callback_map[key] === "function")
-					{
-						this.blue.callback_map[key](value);
-					}
-					else
-					{
-						this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
-					}
+					value = parseFloat(value);
+					this.blue.callback_map[key](value);
+				}
+				else
+				{
+					this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
 				}
 			}
-			this.blue.serial_buffer = split[split.length-1];
+			this.blue.serial_buffer = messages[messages.length-1];
 		}
 	}
-	onPortError(err)
-	{
-		this.blue = this.blue || this;
-
-		this.blue.log.output(err);
-		if(err.toString().indexOf("Error: Port is not open") !== -1)
-		{
-			this.blue.ready = false;
-		}
-	}
-	sendraw(msg)
-	{
-		if(this.ready)
-		{
-			this.port.write(msg);
-		}
-	}
-	send(key, value)
+	sendCommand(key, value)
 	{
 		var msg = `@${key.charAt(0)},${parseFloat(value)}\r\n`;
-		this.sendraw(msg);
+		this.send(msg);
 	}
 	attachListener(key, callback)
 	{
@@ -148,13 +113,14 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	{
 		//// NOTE: Could be potentially dangerous :P
 		//// Recursion mang!
-
-		console.log("bt-agent (Bluetooth Pincode Pairing Agent) closed! RESTARTING NOW!");
-
-		BluetoothSerial.spawnBTAgent(
-			BluetoothSerial.bluetooth_agent,
-			BluetoothSerial.bluetooth_pincode_path
-		);
+		console.log("bt-agent (Bluetooth Pincode Pairing Agent) closed! RESTARTING in 1s!");
+		setTimeout(() =>
+		{
+			BluetoothSerial.spawnBTAgent(
+				BluetoothSerial.bluetooth_agent,
+				BluetoothSerial.bluetooth_pincode_path
+			);
+		}, 1000);
 	});
 };
 
@@ -185,5 +151,7 @@ BluetoothSerial.initialize = function()
 		BluetoothSerial.bluetooth_pincode_path
 	);
 };
+
+BluetoothSerial.initialize();
 
 module.exports = BluetoothSerial;
