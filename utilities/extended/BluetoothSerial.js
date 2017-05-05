@@ -33,7 +33,7 @@ class BluetoothSerial extends Serial
 	//// @Override Superclass
 	onPortData(data)
 	{
-		this.blue = this.blue || this;
+		this.reference = this.reference || this;
 
 		this.blue.serial_buffer += data.toString();
 		var messages = this.blue.serial_buffer.split('\r\n');
@@ -53,17 +53,17 @@ class BluetoothSerial extends Serial
 				 * Check will fail if regex match failed.
 				 * 		key is undefined, thus typeof will return "undefined".
 				 */
-				if(typeof this.callback_map[key] === "function")
+				if(typeof this.reference.callback_map[key] === "function")
 				{
 					value = parseFloat(value);
-					this.blue.callback_map[key](value);
+					this.reference.callback_map[key](value);
 				}
 				else
 				{
-					this.blue.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+					this.reference.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
 				}
 			}
-			this.blue.serial_buffer = messages[messages.length-1];
+			this.reference.serial_buffer = messages[messages.length-1];
 		}
 	}
 	sendCommand(key, value)
