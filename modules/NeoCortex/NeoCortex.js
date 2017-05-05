@@ -78,12 +78,13 @@ class NeoCortex extends Neuron
 		this.read_interval = 0;
 		this.holder = "N";
 		this.GPS_Heading =0;
-		this.Tracker_Heading=0; 
+		this.Tracker_Heading=0;
+		this.SampleRate = 300; 
 		/** Setting Model Memory **/
 		this.model.registerMemory("NeoCortex");
+
 		setInterval(() =>
 		{
-
 			this.readGPS();
 			this.GPS_Heading = this.headingGPS(this.GPS_current.lattitude,this.GPS_current.longitude,
 										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
@@ -94,7 +95,7 @@ class NeoCortex extends Neuron
 				Gate_longitude: this.GPS_gate.longitude,
 				GPS_Heading: this.GPS_Heading
 			});
-		},500);
+		},this.SampleRate);
 		/**Function Testing Section **/ 
 		//var parent = this;
 		//setTimeout(function(){parent.react({mode: 'AI', flag: 1});},1000);
@@ -115,7 +116,6 @@ class NeoCortex extends Neuron
 		switch(input.mode)
 		{
 			case "AI": // turn AI On/Off
-
 			if(input.flag==1)
 			{
 				try{parent.openVision()}
@@ -126,12 +126,12 @@ class NeoCortex extends Neuron
 
 			case "GPS": //turn GPS algo On/Off
 			if(input.flag==1){parent.GPS_flag=1}
-			else{parent.GPS_flag=0;}
+			else{parent.GPS_flag=0}
 			break;
 
 			case "SONIC": //turn Sonic algo On/Off
 			if(input.flag==1){parent.Sonic_flag=1}
-			else{parent.Sonic_flag=0;}
+			else{parent.Sonic_flag=0}
 			break;
 
 			case "GATE": //write Gate GPS
@@ -151,7 +151,7 @@ class NeoCortex extends Neuron
 		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
 
 		this.vision_process.stdout.on('data', function(data) {
-	  		var output = data.toString().replace(/[\n\r]/g, "") //take out hiddent char 
+	  		var output = data.toString().replace(/[\n\r]/g, ""); //take out hiddent char 
 	  		var fields = output.split("-");
 	  		var direction_vision = fields[0];
 	  		var distance_vision = fields[1]*0.254;
@@ -176,14 +176,14 @@ class NeoCortex extends Neuron
 				}
 				else
 				{
-					parent.execDrive("N")
+					parent.execDrive("N");
 					parent.closeVision();
 					parent.Finish="Yes";
 				}
 			}
 			else if (distance_vision < 1 && distance_vision >= 0 )
 			{	
-				parent.execDrive("N")
+				parent.execDrive("N");
 				parent.closeVision();
 				parent.Finish="Yes";
 			}
@@ -308,8 +308,9 @@ class NeoCortex extends Neuron
          var x = Math.cos(this.toRad(lat1))*Math.sin(this.toRad(lat2)) - 
          		 Math.sin(this.toRad(lat1))*Math.cos(this.toRad(lat2))*Math.cos(dLon);
          var heading = this.toDeg(Math.atan2(y, x));
-         //console.log((heading+360)%360);
-         return ((heading + 360) % 360);
+         heading = ((heading + 360) % 360);
+         heading = Math.round(heading*1000)/1000;
+         return heading;
 	}
 	/*
 	*calculate distance between initial and final GPS coordinate
@@ -326,12 +327,13 @@ class NeoCortex extends Neuron
 	                Math.sin(dLon/2) * Math.sin(dLon/2);  
 			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
 			var distance = E_radius * c;
+			distance = Math.round(distance*1000)/1000;
 			return distance;
 		}
 		catch(err)
 		{
 			this.log.output(err);
-			return -1;
+			return false;
 		}  
 	}
 	/*
@@ -348,10 +350,6 @@ class NeoCortex extends Neuron
 	{
 		return rad * 180 / Math.PI;
 	}
-	/*
-	*function to update model
-	*/
-	/*
 	/*
 	/**
      * Cortex will attempt to halt this lobe in the following situations:

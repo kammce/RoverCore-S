@@ -51,12 +51,12 @@ VideoCapture capture;
 
 int main() {
     inputSetup();
-    createTrackbars();
-
+//    createTrackbars();
+    
     Mat input, HSV, threshold;
-
+    
     int x,y;
-
+    
     while (1) {
         //grab frame from camera and assign to "input" matrix
         //capture.read() returns false if an error is encountered
@@ -65,56 +65,56 @@ int main() {
             cout << "Error in video capture. Exiting." << endl;
             break;
         }
-
+        
         //Smoothing Image
         //GaussianBlur(input, input, Size( 3, 3), 0, 0);
-
+        
         //RGB converstion to HSV
         cvtColor(input, HSV, CV_BGR2HSV);
-
+        
         //filter out HSV values outside of Min/Max values for HSV
         //filtered image assigned to "threshold" matrix
-
+        
         inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-
+        
         //Image refinement through morphological operations
         morphOps(threshold);
-
+        
         //Find gates
         trackFilteredObjects(threshold, input);
-
+        
         //Draw gates on input video
         outlineGates(input);
-
+        
         //display videos
-        //imshow("Original", input);
-        //imshow("HSV", HSV);
-        //imshow("threshold", threshold);
-
+//        imshow("Original", input);
+//        imshow("HSV", HSV);
+//        imshow("threshold", threshold);
+        
         //exit if escape key is held for 30ms
-//        if (waitKey(30) == 27) {
-//            cout << "Escape button held. Exiting." << endl;
-//            cout << "H Min: " << H_MIN << endl;
-//            cout << "H Max: " << H_MAX << endl;
-//            cout << "S Min: " << S_MIN << endl;
-//            cout << "S Max: " << S_MAX << endl;
-//            cout << "V Min: " << V_MIN << endl;
-//            cout << "V Max: " << V_MAX << endl;
-//            break;
-//        }
-
+        //        if (waitKey(30) == 27) {
+        //            cout << "Escape button held. Exiting." << endl;
+        //            cout << "H Min: " << H_MIN << endl;
+        //            cout << "H Max: " << H_MAX << endl;
+        //            cout << "S Min: " << S_MIN << endl;
+        //            cout << "S Max: " << S_MAX << endl;
+        //            cout << "V Min: " << V_MIN << endl;
+        //            cout << "V Max: " << V_MAX << endl;
+        //            break;
+        //        }
+        
         input.release();
         HSV.release();
         threshold.release();
     }
-
+    
     return 0;
 }
 
 void createTrackbars() {
     //declare window for trackbars
     namedWindow("Trackbars", 0);
-
+    
     //creating sliders in "Trackbars" window
     createTrackbar("H_MIN", "Trackbars", &H_MIN, 256);
     createTrackbar("H_MAX", "Trackbars", &H_MAX, 256);
@@ -122,7 +122,7 @@ void createTrackbars() {
     createTrackbar("S_MAX", "Trackbars", &S_MAX, 256);
     createTrackbar("V_MIN", "Trackbars", &V_MIN, 256);
     createTrackbar("V_MAX", "Trackbars", &V_MAX, 256);
-
+    
 }
 
 void inputSetup() {
@@ -133,6 +133,7 @@ void inputSetup() {
     capture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
     capture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
     //open direction output file
+    //directionLog.open("direction.txt");
 }
 
 void morphOps(Mat &threshold) {
@@ -141,11 +142,11 @@ void morphOps(Mat &threshold) {
     Mat erodeElement = getStructuringElement(MORPH_ELLIPSE, Size(7,7));
     Mat dialateElement = getStructuringElement(MORPH_ELLIPSE, Size(9,9));
     //double erosion to eliminate background noise from thresholded matrix
-//    erode(threshold, threshold, erodeElement);
+    //    erode(threshold, threshold, erodeElement);
     erode(threshold, threshold, erodeElement);
-
+    
     //double dilation to fill in desired areas lost from previous erosion
-//    dilate(threshold, threshold, dialateElement);
+    //    dilate(threshold, threshold, dialateElement);
     dilate(threshold, threshold, dialateElement);
 }
 
@@ -153,17 +154,17 @@ void trackFilteredObjects(Mat threshold, Mat &input) {
     //create copy of thresholded matrix
     Mat temp;
     threshold.copyTo(temp);
-
+    
     //create vectors for findContours()
     vector< vector<Point> > contours;
     vector<Vec4i> hierarchy;
-
+    
     //using moments to find objects
     findContours(temp, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
     bool objectFound = false;
     double  refArea = 0;
-
-//    cout << "hierarchy: " << hierarchy.size() << endl;
+    
+    //    cout << "hierarchy: " << hierarchy.size() << endl;
     if (hierarchy.size() > 0) {
         int numObjects = hierarchy.size();
         if (numObjects<MAX_NUM_OBJECTS) {
@@ -195,7 +196,7 @@ void trackFilteredObjects(Mat threshold, Mat &input) {
 
 void chooseDirection(Gate closestGate) {
     char direction;
-
+    
     if (closestGate.x < 400 && closestGate.x > 240) {
         direction = 'C';
     }
@@ -204,13 +205,13 @@ void chooseDirection(Gate closestGate) {
     } else {
         direction = 'L';
     }
-
+    
     if (directionHistory.empty() || directionHistory.back() != direction) {
         directionLog.open("direction.txt");
         directionLog << direction << endl;
-        directionLog.close();
-        cout << direction << endl;
+        cout << direction << "-" << closestGate.distance << endl;
         directionHistory.push_back(direction);
+        directionLog.close();
     }
 }
 
@@ -230,7 +231,7 @@ void outlineGates(Mat &frame) {
             }
         }
         chooseDirection(Gates[closestIndex]);
-
+        
         Gates.clear();
     }
     else if (!directionHistory.empty()) {
@@ -238,7 +239,7 @@ void outlineGates(Mat &frame) {
         directionLog.open("direction.txt");
         directionHistory.push_back(direction);
         directionLog << direction << endl;
-        directionLog.close();
         cout << direction << endl;
+        directionLog.close();
     }
 }

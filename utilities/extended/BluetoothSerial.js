@@ -124,6 +124,7 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	});
 };
 
+
 BluetoothSerial.initialize = function()
 {
 	var execSync = require("child_process").execSync;
