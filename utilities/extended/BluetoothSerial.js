@@ -35,8 +35,8 @@ class BluetoothSerial extends Serial
 	{
 		this.reference = this.reference || this;
 
-		this.blue.serial_buffer += data.toString();
-		var messages = this.blue.serial_buffer.split('\r\n');
+		this.reference.serial_buffer += data.toString();
+		var messages = this.reference.serial_buffer.split('\r\n');
 		//// Check if messages contains something
 		if(messages.length > 1)
 		{
