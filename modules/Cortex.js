@@ -133,37 +133,37 @@ class Cortex
 			}
 		}
 	}
-	handleMissionControl(data)
+	handleMissionControl(/*data*/)
 	{
-		var msg;
-		//// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
-		var actions = {
-			"halt": (lobe) =>
-			{
-				this.lobe_map[lobe]._halt();
-			},
-			"resume": (lobe) =>
-			{
-				this.lobe_map[lobe]._resume();
-			},
-			"idle": (lobe) =>
-			{
-				this.lobe_map[lobe]._idle();
-			}
-		};
+		// var msg;
+		// //// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
+		// var actions = {
+		// 	"halt": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._halt();
+		// 	},
+		// 	"resume": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._resume();
+		// 	},
+		// 	"idle": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._idle();
+		// 	}
+		// };
 
-		// if("lobe" in data && "action" in data)
-		// {
-		// 	actions[data["action"]](data["lobe"]);
+		// // if("lobe" in data && "action" in data)
+		// // {
+		// // 	actions[data["action"]](data["lobe"]);
+		// // 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// // }
+		// // else
+		// // {
 		// 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		// }
-		// else
-		// {
-			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		// }
+		// // }
 
-		this.log.output(msg);
-		this.feedback('Cortex', msg);
+		// this.log.output(msg);
+		// this.feedback('Cortex', msg);
 	}
 	handleIdleStatus()
 	{

@@ -7,8 +7,7 @@ class Serial
 		this.ready = false;
 		this.port;
 		this.log = params.log;
-		this.device = params.device;
-		this.mac_address = params.mac;
+		this.path = params.path;
 		this.baud_rate = params.baud;
 		this.fs = require('fs');
 		this.exec = require("child_process").exec;
@@ -16,7 +15,7 @@ class Serial
 	}
 	setupSerial()
 	{
-		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
+		this.port = new this.SerialPort(this.path, {
 			baudRate: this.baud_rate,
 			autoOpen: false
 		});
