@@ -1,5 +1,3 @@
-"use strict";
-
 var Neuron = require('../Neuron');
 var exec = require('child_process').exec;
 var fs = require("fs");
@@ -58,8 +56,7 @@ class Ultrasonic extends Neuron
 		this.model.registerMemory("Ultrasonic");
 		this.Control_GPIO = [19,28,31,25];
 		this.avg=0;
-		this.MaxUltrasonic = 2;
-		this.init();
+		this.MaxUltrasonic = 12;
 		this.readDistance();
 		// =====================================
 		// Construct Class After This Points
@@ -80,7 +77,8 @@ class Ultrasonic extends Neuron
      * Init all GPIO pin.
      */
      init(){
-     	this.log.output("Initialize Ultrasonic");
+     	var Trigger = 20;
+    	var Echo = 21 ;
     	this.expose(Trigger);
     	this.expose(Echo);
     	this.expose(this.Control_GPIO[0]);
@@ -158,22 +156,6 @@ class Ultrasonic extends Neuron
      */
 	muxSelect(device_num) {
 		var parent=this;
-		var out = "";
-		var length = 4;
-		while(length--)
-			{out += (dec >> length ) & 1;}   
-		var bits = out.split("").map(Number); // bits in reverse order
-		try
-		{
-			this.writeGPIO_MUX(bits[0],bit[1],bits[2],bits[3],bits[4]);
-			return true;
-		}
-		catch(err)
-		{
-			return false;
-		}
-
-		/*
 	    switch (device_num) {
 	        case 0:
 	            parent.writeGPIO_MUX(0, 0, 0, 0);
@@ -218,7 +200,6 @@ class Ultrasonic extends Neuron
 	        	parent.log.output("Invalid Input");
 	        	break;
 	    	}
-	    	*/
 		}	
     /**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -228,30 +209,36 @@ class Ultrasonic extends Neuron
      * @returns {boolean} returns true if successful, returns false if halt failed.
      */
     measureDistanceMux(ultrasonicNum){
- 		var parent=this;
+ 		var parent = this;
 	  	var start=0;
     	var end=0;
     	var duration=0;
 	    var distance=0;
-	    fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 1, "utf8");
-		setTimeout(function(){
+	    var distnaceAvg=0;
+	    var count2=0; 
+
+	        fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 1, "utf8");
+			setTimeout(function(){
 			    var count=0;
 			    fs.writeFileSync(sysFsPath + "/gpio" + Trigger + "/value", 0, "utf8");
-			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")===0){
+			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==0){
 			        var hrTime1 = process.hrtime();
 			        start=hrTime1[0] * 1000000000 + hrTime1[1]; 
 			        count++;
 			          if(count>200){ break; }
 			    }
-			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")===1){
+
+			    while(fs.readFileSync(sysFsPath + "/gpio" + Echo + "/value","utf8")==1){
 			    	var hrTime2 = process.hrtime();
 			    	end=hrTime2[0] * 1000000000 + hrTime2[1];
 			    }
+
 			    duration = end-start;
 			    distance =(duration/1e6)*15.614; //convert ms to cm 
 			    if(distance > 170 || distance < 0 ){distance= -1 ;}
+			    parent.log,output(distance);
 			    parent.updateModel(ultrasonicNum,distance);
-		},.0020);
+			},.0020);
    }
 
    	readDistance()
@@ -259,17 +246,18 @@ class Ultrasonic extends Neuron
    		var parent = this;
    		var selectNum = 0;
    		var count = 0;
+   		this.init();
    		setInterval(function(){
    			parent.muxSelect(selectNum);
    			parent.measureDistanceMux(selectNum);
    			count++;
 			parent.average(selectNum,count);
-   			if(count === 10)
+   			if(count == 11)
    			{
    				selectNum++;
    				parent.readModel();
    				count=0;
-   				if(selectNum===parent.MaxUltrasonic){selectNum=0;}
+   				if(selectNum==parent.MaxUltrasonic){selectNum=0;}
    			}
    		},10);
    	}
@@ -286,7 +274,7 @@ class Ultrasonic extends Neuron
    	{
    		var ultrasonic = this.model.get("Ultrasonic");
    		try{
-	   		if(count<10)
+	   		if(count<11)
 	   		{
 	   			this.avg= this.avg+ultrasonic["Distance"];
 				//this.log.output("if avg: " + this.avg);
@@ -310,7 +298,7 @@ class Ultrasonic extends Neuron
    		var ultrasonic = this.model.get("Ultrasonic");
    		//this.log.output(ultrasonic);
    		try{
-   			this.log.output("ID : " + ultrasonic["ID"] + "  Distance: " + ultrasonic["Distance"] + " Avg Distance: " + ultrasonic["AvgDistance"]);
+   			this.log.output("ID : " + ultrasonic["ID"] + " Avg Distance: " + ultrasonic["AvgDistance"]);
    		}	
    		catch(err){this.log.output("Error: " + err)};
    	}
@@ -353,4 +341,3 @@ class Ultrasonic extends Neuron
 }
 
 module.exports = Ultrasonic;
-
