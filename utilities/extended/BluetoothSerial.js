@@ -37,7 +37,7 @@ class BluetoothSerial extends Serial
 
 		this.reference.serial_buffer += data.toString();
 		var messages = this.reference.serial_buffer.split('\r\n');
-		//this.reference.log.output(this.reference.serial_buffer);
+		this.reference.log.output(this.reference.serial_buffer);
 		//// Check if messages contains something
 		if(messages.length > 1)
 		{
@@ -51,10 +51,10 @@ class BluetoothSerial extends Serial
 				 * In the event of a failed match, key & value = undefined
 				 */
 				var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages[i]) || [];
-				if(map.length !== 3) 
-				{ 
+				if(map.length !== 3)
+				{
 					//this.log.output(`FAILED ON =${messages[i]}=`);
-					continue; 
+					continue;
 				}
 				var [, key, value] = map;
 				/* Check if there exists a callback for this key.
