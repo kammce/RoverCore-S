@@ -68,7 +68,7 @@ class Serial
 	}
 	attachListener(key, callback)
 	{
-		if(/^[a-zA-Z]$/g.test(key) && typeof callback === 'function')
+		if(/^[a-zA-Z0-9]$/g.test(key) && typeof callback === 'function')
 		{
 			this.callback_map[key] = callback;
 			return true;
