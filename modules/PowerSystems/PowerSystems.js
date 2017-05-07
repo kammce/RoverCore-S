@@ -88,34 +88,44 @@ class PowerSystems extends Neuron
 
 		this.rfcomm.attachListener('0', (value) => {
 			this.locals.realTimeVoltage = value;
+			// this.log.output("WE RECIEVED 0!!!");
 		});
 		this.rfcomm.attachListener('1', (value) => {
 			this.locals.mAhRemaining = value;
 			this.locals.batteryPercentage = value/120; //mAhRemaining / (12000 / 100)
+			// this.log.output("WE RECIEVED 1!!!");
 		});
 		this.rfcomm.attachListener('2', (value) => {
 			this.locals.currents.Drive = value;
+			// this.log.output("WE RECIEVED 2!!!");
 		});
 		this.rfcomm.attachListener('3', (value) => {
 			this.locals.currents.Steer = value;
+			// this.log.output("WE RECIEVED 3!!!");
 		});
 		this.rfcomm.attachListener('4', (value) => {
 			this.locals.currents.Arm = value;
+			// this.log.output("WE RECIEVED 4!!!");
 		});
 		this.rfcomm.attachListener('5', (value) => {
 			this.locals.currents.Intel = value;
+			// this.log.output("WE RECIEVED 5!!!");
 		});
 		this.rfcomm.attachListener('6', (value) => {
 			this.locals.currents.Mast = value;
+			// this.log.output("WE RECIEVED 6!!!");
 		});
 		this.rfcomm.attachListener('7', (value) => {
 			this.locals.temperatures.Battery1 = value;
+			// this.log.output("WE RECIEVED 7!!!");
 		});
 		this.rfcomm.attachListener('8', (value) => {
 			this.locals.temperatures.Battery2 = value;
+			// this.log.output("WE RECIEVED 8!!!");
 		});
 		this.rfcomm.attachListener('9', (value) => {
 			this.locals.temperatures.Battery3 = value;
+			// this.log.output("WE RECIEVED 9!!!");
 		});
 
 		//for testing model update
@@ -126,7 +136,7 @@ class PowerSystems extends Neuron
 			// if (power != this.locals) {
 			// 	this.log.output("model not updated correctly.");
 			// }
-		}, 20);
+		}, 100);
 		// setInterval(() => {
 		// 	this.log.output(this.locals);
 		// }, 1000);
@@ -139,7 +149,10 @@ class PowerSystems extends Neuron
      * @returns {boolean} returns true if react was successful, returns false if react failed.
      */
 	react(input)
-	{
+	{		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
+			// k.forEach(function(currentkey, currentindex, returndArray){
+				
+			// })
 		if ("batRelay1"  in input &&
 			"batRelay2"  in input &&
 			"batRelay3"  in input &&
@@ -150,13 +163,13 @@ class PowerSystems extends Neuron
 			"mastRelay"  in input)
 		{
 			this.rfcomm.sendCommand('a', input.batRelay1);
-		    this.rfcomm.sendCommand('b', input.batRelay2);
-		    this.rfcomm.sendCommand('c', input.batRelay3);
-		    this.rfcomm.sendCommand('d', input.driveRelay);
-		    this.rfcomm.sendCommand('e', input.steerRelay);
-		    this.rfcomm.sendCommand('f', input.armRelay);
-		    this.rfcomm.sendCommand('g', input.intelRelay);
-		    this.rfcomm.sendCommand('h', input.mastRelay);
+			setTimeout(() => { this.rfcomm.sendCommand('b', input.batRelay2); }, 20);
+			setTimeout(() => { this.rfcomm.sendCommand('c', input.batRelay3); }, 40);
+			setTimeout(() => { this.rfcomm.sendCommand('d', input.driveRelay); }, 60);
+			setTimeout(() => { this.rfcomm.sendCommand('e', input.steerRelay); }, 80);
+			setTimeout(() => { this.rfcomm.sendCommand('f', input.armRelay); }, 100);
+			setTimeout(() => { this.rfcomm.sendCommand('g', input.intelRelay); }, 120);
+			setTimeout(() => { this.rfcomm.sendCommand('h', input.mastRelay); }, 140);
 
 		    this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
