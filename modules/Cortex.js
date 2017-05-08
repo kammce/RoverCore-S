@@ -117,21 +117,24 @@ class Cortex
 	}
 	sendLobeStatus()
 	{
+		var status = {};
 		for (var lobe in this.lobe_map)
 		{
-			if(!this.previous_lobe_status.hasOwnProperty(lobe))
-			{
-				this.previous_lobe_status[lobe] = {};
-			}
-			else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
-			{
-				this.previous_lobe_status[lobe] = {
-					lobe: lobe,
-					state : this.lobe_map[lobe]['state']
-				};
-				this.feedback(this.name, this.previous_lobe_status[lobe]);
-			}
+			status[lobe] = this.lobe_map[lobe]['state'];
+			// if(!this.previous_lobe_status.hasOwnProperty(lobe))
+			// {
+			// 	this.previous_lobe_status[lobe] = {};
+			// }
+			// else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			// {
+			// 	this.previous_lobe_status[lobe] = {
+			// 		lobe: lobe,
+			// 		state : this.lobe_map[lobe]['state']
+			// 	};
+			// 	this.feedback(this.name, this.previous_lobe_status[lobe]);
+			// }
 		}
+		this.feedback(this.name, status);
 	}
 	handleMissionControl(/*data*/)
 	{
