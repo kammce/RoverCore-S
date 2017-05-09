@@ -192,9 +192,12 @@ describe('Testing Cortex Class', function ()
 				else if(data['target'] === "Cortex" && i < possible_states.length)
 				{
 					var message = JSON.parse(data['message']);
-					expect(message['lobe']).to.equal('Protolobe');
-					expect(message['state']).to.equal(possible_states[i]);
+
+					expect(message).to.include.keys('Protolobe');
+					expect(message['Protolobe'].state).to.equal(possible_states[i]);
+
 					cortex.lobe_map["Protolobe"].state = possible_states[++i];
+
 					console.log("=====================");
 					console.log(message);
 					console.log(cortex.lobe_map["Protolobe"].state);
