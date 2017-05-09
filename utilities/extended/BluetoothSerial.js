@@ -51,10 +51,10 @@ class BluetoothSerial extends Serial
 				 * In the event of a failed match, key & value = undefined
 				 */
 				var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages[i]) || [];
-				if(map.length !== 3) 
-				{ 
+				if(map.length !== 3)
+				{
 					//this.log.output(`FAILED ON =${messages[i]}=`);
-					continue; 
+					continue;
 				}
 				var [, key, value] = map;
 				/* Check if there exists a callback for this key.
@@ -156,10 +156,10 @@ BluetoothSerial.initialize = function()
 		BluetoothSerial.bluetooth_devices
 	);
 
-	// BluetoothSerial.spawnBTAgent(
-	// 	BluetoothSerial.bluetooth_agent,
-	// 	BluetoothSerial.bluetooth_pincode_path
-	// );
+	BluetoothSerial.spawnBTAgent(
+		BluetoothSerial.bluetooth_agent,
+		BluetoothSerial.bluetooth_pincode_path
+	);
 };
 
 BluetoothSerial.initialize();
