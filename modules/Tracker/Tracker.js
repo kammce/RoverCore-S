@@ -62,7 +62,7 @@ class Tracker extends Neuron
 		// Teensy Keys for key:value pairs to/from bluetooth
 		this.RELATIVE_ORIENTATION_X = 'a'; 	// "97";	// float roll ~0, relative to rover,
 		this.RELATIVE_ORIENTATION_Y = 'b';	// "98";	// float pitch: relative to rover, +90 = straight up, -90 = straight down
-		this.RELATIVE_ORIENTATION_Z = 'c'; 	// "99";	// float yaw: relative to rover, 0 = forward, +-360 = all the forward (- = left, + = right)  
+		this.RELATIVE_ORIENTATION_Z = 'c'; 	// "99";	// float yaw: relative to rover, 0 = forward, +-360 = all the forward (- = left, + = right)
 		this.GLOBAL_ORIENTATION_X = 'd'; 	// "100";	// float roll: No on cares
 		this.GLOBAL_ORIENTATION_Y = 'e';	// "101";	// float pitch: relative to the Earth's horizon
 		this.GLOBAL_ORIENTATION_Z = 'f';	// "102";	// float heading (relative direction to Earth's Magnetic North)
@@ -79,7 +79,8 @@ class Tracker extends Neuron
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:71:0E",
+			//mac: "00:21:13:00:3B:03",	// PowerSystems BT
+			mac: "00:21:13:00:71:0E",	// Tracker BT
 			baud: 38400,
 			log: this.log,
 			device: 3
@@ -133,30 +134,39 @@ class Tracker extends Neuron
 		/* Teensy Data Listeners (to read and asynchronously update vars) */
 		this.comms.attachListener(this.RELATIVE_ORIENTATION_X, (val) => {
 			this.local.relativeOr.X = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.RELATIVE_ORIENTATION_Y, (val) => {
 			this.local.relativeOr.Y = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.RELATIVE_ORIENTATION_Z, (val) => {
 			this.local.relativeOr.Z = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.GLOBAL_ORIENTATION_X, (val) => {
 			this.local.globalOr.X = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.GLOBAL_ORIENTATION_Y, (val) => {
 			this.local.globalOr.Y = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.GLOBAL_ORIENTATION_Z, (val) => {
 			this.local.globalOr.Z = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.LIDAR_READING, (val) => {
 			this.local.distance = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.YAW_MOTOR_CURRENT, (val) => {
 			this.local.current.yaw = val;
+			this.model.set("Tracker", this.local);
 		});
 		this.comms.attachListener(this.PITCH_MOTOR_CURRENT, (val) => {
 			this.local.current.pitch = val;
+			this.model.set("Tracker", this.local);
 		});
 	}
 	/**
@@ -176,7 +186,7 @@ class Tracker extends Neuron
 			// if(tempCtlMode === false)
 			// {
 			// 	this.log.output("Error", "Ambiguous control mode");
-			// 	reset();
+			// 	this.reset();
 			// 	return false;
 			// }
 			// else
@@ -292,7 +302,7 @@ class Tracker extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		reset();
+		this.reset();
 		return true;
 	}
 	/**
@@ -339,7 +349,6 @@ class Tracker extends Neuron
 	reset()		// re-opens react() for command processing
 	{
 		this.local.busy = false;
-		this.model.set("Tracker", this.local);
 	}
 }
 
