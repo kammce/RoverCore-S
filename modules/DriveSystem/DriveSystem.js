@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class ProtoLobe extends Neuron
+class DriveSystem extends Neuron
 {
 	constructor(util)
 	{
@@ -28,7 +28,7 @@ class ProtoLobe extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("red");
+		this.log.setColor("blue");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -45,16 +45,55 @@ class ProtoLobe extends Neuron
 		 */
 		this.model = util.model;
 		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "00:21:13:00:6E:A7",
+			baud: 38400,
+			log: this.log,
+			device: 1
+		});
+
+		// this.ai_interval = setInterval(() =>
+		// {
+		// 	this.rfcomm.send("M", 'Y'.charCodeAt(0));
+		// 	var neo = this.model.get("NeoCortex");
+		// 	if(this.state === "IDLING" && neo.ai_flag === true)
+		// 	{
+		// 		switch(neo.direction)
+		// 		{
+		// 			case "LEFT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "LEFT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", -90);
+		// 				break;
+		// 			case "RIGHT-FORWARD":
+		// 				this.rfcomm.send("S", 15);
+		// 				this.rfcomm.send("A", 90);
+		// 				break;
+		// 			case "STOP":
+		// 				this.rfcomm.send("S", 0);
+		// 				this.rfcomm.send("A", 0);
+		// 				break;
+		// 			default:
+		// 				break;
+		// 		}
+		// 	}
+		// 	else
+		// 	{
+		// 	}
+		// }, 100);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -63,9 +102,22 @@ class ProtoLobe extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
-		return true;
+		if( "speed" in input &&
+			"angle" in input &&
+			"mode" 	in input)
+		{
+			this.rfcomm.sendCommand("S", input.speed);
+			this.rfcomm.sendCommand("A", input.angle);
+			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
+			// this.log.output(`Sending `, input, `Over BluetoothSerial`);
+			// this.feedback(`Sending `, input, `Over BluetoothSerial`);
+			return true;
+		}
+		else
+		{
+			this.log.output(`Invalid Input `, input);
+			this.feedback(`Invalid Input `, input);
+		}
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -90,7 +142,6 @@ class ProtoLobe extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		this.upcall("CALL", this.name, "LOOPBACK-UPCALL");
 		return true;
 	}
 	/**
@@ -105,4 +156,4 @@ class ProtoLobe extends Neuron
 	}
 }
 
-module.exports = ProtoLobe;
+module.exports = DriveSystem;

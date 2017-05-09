@@ -11,37 +11,26 @@ class Log
 		this.module = module_name;
 		this.color = (input_str) => { return input_str; };
 		this.setColor(output_color);
-		// create new property with the name of this.module
-		// set mute status for current module to false.
+		//// create new property with the name of this.module
+		//// set mute status for current module to false.
 		this.constructor._mutes[this.module] = false;
 	}
-	// Output to stdout as well as the static log file
+	//// Output to stdout as well as the static log file
 	output()
-	{ // takes infinite arguments
+	{
+		//// takes infinite arguments
 		var console_args = Array.prototype.slice.call(arguments);
 		var journal_args = Array.prototype.slice.call(arguments);
-		// Add date, module and color into the console's arguments
+		//// Add date, module and color into the console's arguments
 		console_args.unshift(
 			this.color(
 				`[${Date().slice(0,-15)}][${this.module}] ::`
 			)
 		);
-		// If 'color_in_file' is true, then add the color commands into the write stream
-		if(this.constructor.color_in_file)
-		{
-			journal_args.unshift(
-				this.color(
-					`[${Date().slice(0,-15)}][${this.module}] ::`
-				)
-			);
-		}
-		else
-		{
-			journal_args.unshift(`[${Date().slice(0,-15)}][${this.module}] ::`);
-		}
-		// Output message to journal.
+		journal_args.unshift(`[${Date().slice(0,-15)}][${this.module}] ::`);
+		//// Output message to journal.
 		this.constructor.journal.log.apply(this, journal_args);
-		// If this modules is not muted then output to console.
+		//// If this modules is not muted then output to console.
 		if(!this.constructor._mutes[this.module])
 		{
 			console.log.apply(this, console_args);
@@ -49,28 +38,28 @@ class Log
 	}
 	setColor(output_color)
 	{
-		// check to see if the color exists and it is a function
-		// use that function to color the output
+		//// check to see if the color exists and it is a function
+		//// use that function to color the output
 		if(typeof colors[output_color] === "function")
 		{
 			this.color = colors[output_color];
 		}
 	}
-	// Mute this module
+	//// Mute this module
 	mute()
 	{
 		this.constructor._mutes[this.module] = true;
 	}
-	// Unmute this module
+	//// Unmute this module
 	unmute()
 	{
 		this.constructor._mutes[this.module] = false;
 	}
 }
 
-/**** Static Field ****/
-Log.color_in_file = false;
-
+//==================================
+// 		Static Field
+//==================================
 Log.initialize = function()
 {
 	var dir = './logs';
@@ -107,21 +96,18 @@ Log._mutes = {};
 Log.mute = function(module_name)
 {
 	// Check if log module name exists in _mutes structure
-	if(Log._mutes.hasOwnProperty(module_name))
+	if(module_name in Log._mutes)
 	{
 		Log._mutes[module_name] = true;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 };
 // Static method to unmute an log
 Log.unmute = function(module_name)
 {
 	// Check if log module name exists in _mutes structure
-	if(Log._mutes.hasOwnProperty(module_name))
+	if(module_name in Log._mutes)
 	{
 		Log._mutes[module_name] = false;
 		return true;

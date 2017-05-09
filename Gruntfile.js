@@ -14,10 +14,11 @@ module.exports = function(grunt) {
 					reporter: 'spec',
 					require:
 					[
-						'test-suite/assist/config_chai.js'
+						'test-suite/config_chai.js',
+						'sinon'
 					]
 				},
-				src: ['test-suite/unit/**/*.js']
+				src: ['test-suite/**/*.js']
 			}
 		},
 		jshint:

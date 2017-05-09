@@ -1,6 +1,6 @@
 "use strict";
 
-var Protolobe = require('../../../modules/Protolobe/Protolobe');
+var Protolobe = require('../../modules/Protolobe/Protolobe');
 
 describe('Testing Protolobe Class', function () {
 	var expected_log;
@@ -36,7 +36,8 @@ describe('Testing Protolobe Class', function () {
 		name:"Protolobe",
 		feedback: feedback,
 		log: log,
-		model: model
+		model: model,
+		upcall: () => {}
 	};
 
 	var test_lobe = new Protolobe(util);
