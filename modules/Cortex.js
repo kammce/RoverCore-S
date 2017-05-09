@@ -9,9 +9,9 @@ class Cortex
 		this.cortex = this;
 		this.simulate = config.simulate;
 		this.exec = require('child_process').exec;
-		this.lobe_map = {};
-		this.time_since_last_command = {};
-		this.previous_lobe_status = {};
+		this.lobe_map = {  };
+		this.time_since_last_command = {  };
+		this.status = {  };
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -117,53 +117,60 @@ class Cortex
 	}
 	sendLobeStatus()
 	{
+		var change_flag = false;
 		for (var lobe in this.lobe_map)
 		{
-			if(!this.previous_lobe_status.hasOwnProperty(lobe))
+			if(!this.status.hasOwnProperty(lobe))
 			{
-				this.previous_lobe_status[lobe] = {};
-			}
-			else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
-			{
-				this.previous_lobe_status[lobe] = {
-					lobe: lobe,
-					state : this.lobe_map[lobe]['state']
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
 				};
-				this.feedback(this.name, this.previous_lobe_status[lobe]);
+				change_flag = true;
 			}
+			else if(this.status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			{
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
+				};
+				change_flag = true;
+			}
+		}
+		if(change_flag)
+		{
+			this.feedback(this.name, this.status);
 		}
 	}
-	handleMissionControl(data)
+	handleMissionControl(/*data*/)
 	{
-		var msg;
-		//// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
-		var actions = {
-			"halt": (lobe) =>
-			{
-				this.lobe_map[lobe]._halt();
-			},
-			"resume": (lobe) =>
-			{
-				this.lobe_map[lobe]._resume();
-			},
-			"idle": (lobe) =>
-			{
-				this.lobe_map[lobe]._idle();
-			}
-		};
+		// var msg;
+		// //// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
+		// var actions = {
+		// 	"halt": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._halt();
+		// 	},
+		// 	"resume": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._resume();
+		// 	},
+		// 	"idle": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._idle();
+		// 	}
+		// };
 
-		if("lobe" in data && "action" in data)
-		{
-			actions[data["action"]](data["lobe"]);
-			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		}
-		else
-		{
+		// // if("lobe" in data && "action" in data)
+		// // {
+		// // 	actions[data["action"]](data["lobe"]);
+		// // 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// // }
+		// // else
+		// // {
+		// 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// // }
 
-			msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
-		}
-		this.log.output(msg);
-		this.feedback('Cortex', msg);
+		// this.log.output(msg);
+		// this.feedback('Cortex', msg);
 	}
 	handleIdleStatus()
 	{

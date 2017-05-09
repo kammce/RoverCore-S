@@ -109,8 +109,8 @@ class DriveSystem extends Neuron
 			this.rfcomm.sendCommand("S", input.speed);
 			this.rfcomm.sendCommand("A", input.angle);
 			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
-			this.log.output(`Sending `, input, `Over BluetoothSerial`);
-			this.feedback(`Sending `, input, `Over BluetoothSerial`);
+			// this.log.output(`Sending `, input, `Over BluetoothSerial`);
+			// this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			return true;
 		}
 		else

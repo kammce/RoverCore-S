@@ -192,9 +192,12 @@ describe('Testing Cortex Class', function ()
 				else if(data['target'] === "Cortex" && i < possible_states.length)
 				{
 					var message = JSON.parse(data['message']);
-					expect(message['lobe']).to.equal('Protolobe');
-					expect(message['state']).to.equal(possible_states[i]);
+
+					expect(message).to.include.keys('Protolobe');
+					expect(message['Protolobe'].state).to.equal(possible_states[i]);
+
 					cortex.lobe_map["Protolobe"].state = possible_states[++i];
+
 					console.log("=====================");
 					console.log(message);
 					console.log(cortex.lobe_map["Protolobe"].state);
@@ -209,59 +212,59 @@ describe('Testing Cortex Class', function ()
 		});
 	});
 
-	describe('Testing #handleMissionControl() Controls', function ()
-	{
-		it('Protolobe state should be HALTED after halt signal sent', function (done)
-		{
-			//// Reset the timer
-			cortex.time_since_last_command["Protolobe"] = Date.now();
-			//// Set lobe as idle
-			cortex.lobe_map["Protolobe"]._idle();
-			connection.write({
-				target: "Cortex",
-				command:
-				{
-					lobe: "Protolobe",
-					action: "halt"
-				}
-			});
-			setTimeout(() =>
-			{
-				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("HALTED");
-				done();
-			}, 1000);
-		});
-		it('Protolobe state should be RUNNING after resume signal sent', function (done)
-		{
-			//// Reset the timer
-			cortex.time_since_last_command["Protolobe"] = Date.now();
-			//// Set lobe as idle
-			cortex.lobe_map["Protolobe"]._idle();
-			connection.write({
-				target: "Cortex",
-				command:
-				{
-					lobe: "Protolobe",
-					action: "resume"
-				}
-			});
-			setTimeout(() =>
-			{
-				expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
-				done();
-			}, 1000);
-		});
-		// it('Protolobe controller should be an empty string when controller disconnects.', function (done)
-		// {
-		// 	expect(cortex.lobe_map["Protolobe"]["controller"]).to.not.be.empty;
-		// 	connection.end();
-		// 	setTimeout(() =>
-		// 	{
-		// 		expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
-		// 		done();
-		// 	}, 1000);
-		// });
-	});
+	// describe('Testing #handleMissionControl() Controls', function ()
+	// {
+	// 	it('Protolobe state should be HALTED after halt signal sent', function (done)
+	// 	{
+	// 		//// Reset the timer
+	// 		cortex.time_since_last_command["Protolobe"] = Date.now();
+	// 		//// Set lobe as idle
+	// 		cortex.lobe_map["Protolobe"]._idle();
+	// 		connection.write({
+	// 			target: "Cortex",
+	// 			command:
+	// 			{
+	// 				lobe: "Protolobe",
+	// 				action: "halt"
+	// 			}
+	// 		});
+	// 		setTimeout(() =>
+	// 		{
+	// 			expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("HALTED");
+	// 			done();
+	// 		}, 1000);
+	// 	});
+	// 	it('Protolobe state should be RUNNING after resume signal sent', function (done)
+	// 	{
+	// 		//// Reset the timer
+	// 		cortex.time_since_last_command["Protolobe"] = Date.now();
+	// 		//// Set lobe as idle
+	// 		cortex.lobe_map["Protolobe"]._idle();
+	// 		connection.write({
+	// 			target: "Cortex",
+	// 			command:
+	// 			{
+	// 				lobe: "Protolobe",
+	// 				action: "resume"
+	// 			}
+	// 		});
+	// 		setTimeout(() =>
+	// 		{
+	// 			expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
+	// 			done();
+	// 		}, 1000);
+	// 	});
+	// 	// it('Protolobe controller should be an empty string when controller disconnects.', function (done)
+	// 	// {
+	// 	// 	expect(cortex.lobe_map["Protolobe"]["controller"]).to.not.be.empty;
+	// 	// 	connection.end();
+	// 	// 	setTimeout(() =>
+	// 	// 	{
+	// 	// 		expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
+	// 	// 		done();
+	// 	// 	}, 1000);
+	// 	// });
+	// });
 
 	describe('Testing direct #upcall("*ALL") state control', function ()
 	{
