@@ -78,17 +78,18 @@ class Arm extends Neuron
 			"camera_select" in input &&
 			"rotunda_camera" in input)
 		{
+
 			this.rfcomm.sendCommand('a', input.rotunda);
 			this.rfcomm.sendCommand('b', input.shoulder);
 			this.rfcomm.sendCommand('c', input.elbow);
 			this.rfcomm.sendCommand('d', input.wrist_pitch);
 			this.rfcomm.sendCommand('e', input.wrist_roll);
 			this.rfcomm.sendCommand('f', input.claw);
-			this.rfcomm.sendCommand('g', input.camera_select);
-			this.rfcomm.sendCommand('h', input.rotunda_camera);
+			// this.rfcomm.sendCommand('g', input.camera_select);
+			// this.rfcomm.sendCommand('h', input.rotunda_camera);
 
-			this.log.output(`Sending `, input, `Over BluetoothSerial`);
-			this.feedback(`Sending `, input, `Over BluetoothSerial`);
+			this.log.output(`Sending \n`, input, `Over BluetoothSerial`);
+			this.feedback(`Sending \n`, input, `Over BluetoothSerial`);
 			return true;
 		}
 		else

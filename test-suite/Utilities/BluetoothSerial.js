@@ -328,7 +328,7 @@ describe('Testing BluetoothSerial Class', function ()
 					{
 						clearInterval(interval);
 						done();
-					}, 9500);
+					}, 8000);
 				});
 			});
 		});
