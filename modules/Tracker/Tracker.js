@@ -79,7 +79,7 @@ class Tracker extends Neuron
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:3B:03",
+			mac: "00:21:13:00:71:0E",
 			baud: 38400,
 			log: this.log,
 			device: 3
@@ -188,7 +188,7 @@ class Tracker extends Neuron
 			if((Object.keys(input)).indexOf("preset") !== -1)
 			{
 				this.local.preset = input.preset;
-				// this.comms.send(/*key for preset*/, /*value to represent input.preset*/);	// Presets are to be handled by lobe, NOT teensy, therefore NO preset variable is to be sent.
+				// this.comms.sendCommand(/*key for preset*/, /*value to represent input.preset*/);	// Presets are to be handled by lobe, NOT teensy, therefore NO preset variable is to be sent.
 			}
 
 			// Prepare parameters to Teensy (BluetoothSerial) and Mission Control (Model)
@@ -206,10 +206,10 @@ class Tracker extends Neuron
 			// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
 
 			// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
-			this.comms.send(this.MOTION_COMMAND_PITCH, this.local.pitch.angle);
-			this.comms.send(this.MOTION_COMMAND_PITCH_SPEED, this.local.pitch.speed);
-			this.comms.send(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
-			this.comms.send(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
+			this.comms.sendCommand(this.MOTION_COMMAND_PITCH, this.local.pitch.angle);
+			this.comms.sendCommand(this.MOTION_COMMAND_PITCH_SPEED, this.local.pitch.speed);
+			this.comms.sendCommand(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
+			this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
 
 			// switch(tempCtlMode)
 			// {
@@ -227,10 +227,10 @@ class Tracker extends Neuron
 			// 		// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
 
 			// 		// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
-			// 		this.comms.send(this.MOTION_COMMAND_PITCH,
+			// 		this.comms.sendCommand(this.MOTION_COMMAND_PITCH,
 			// 			(this.local.pitch.direction === "up") ? this.local.pitch.speed : (this.local.pitch.speed * (-1))
 			// 		);
-			// 		this.comms.send(this.MOTION_COMMAND_YAW,
+			// 		this.comms.sendCommand(this.MOTION_COMMAND_YAW,
 			// 			(this.local.yaw.direction === "right") ? this.local.yaw.speed: (this.local.yaw.speed * (-1))
 			// 		);
 			// 		break;
@@ -246,8 +246,8 @@ class Tracker extends Neuron
 			// 		};
 
 			// 		// Send to Teensy
-			// 		this.comms.send(this.MOTION_COMMAND_PITCH, input.pitch.angle);
-			// 		this.comms.send(this.MOTION_COMMAND_YAW, input.yaw.angle);
+			// 		this.comms.sendCommand(this.MOTION_COMMAND_PITCH, input.pitch.angle);
+			// 		this.comms.sendCommand(this.MOTION_COMMAND_YAW, input.yaw.angle);
 			// 		break;
 			// 	}
 			// 	default:
@@ -259,7 +259,7 @@ class Tracker extends Neuron
 
 			// Zoom parameters
 			this.local.zoom = input.zoom;
-			// this.comms.send(/*key for zoom*/, input.zoom);
+			// this.comms.sendCommand(/*key for zoom*/, input.zoom);
 
 			this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
