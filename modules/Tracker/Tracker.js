@@ -79,7 +79,8 @@ class Tracker extends Neuron
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:3B:03",
+			//mac: "00:21:13:00:3B:03",
+			mac: "00:21:13:00:71:0E",
 			baud: 38400,
 			log: this.log,
 			device: 3
@@ -185,7 +186,7 @@ class Tracker extends Neuron
 			// if(tempCtlMode === false)
 			// {
 			// 	this.log.output("Error", "Ambiguous control mode");
-			// 	reset();
+			// 	this.reset();
 			// 	return false;
 			// }
 			// else
@@ -301,7 +302,7 @@ class Tracker extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		reset();
+		this.reset();
 		return true;
 	}
 	/**

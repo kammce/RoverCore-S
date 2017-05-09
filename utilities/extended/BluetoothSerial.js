@@ -37,7 +37,7 @@ class BluetoothSerial extends Serial
 
 		this.reference.serial_buffer += data.toString();
 		var messages = this.reference.serial_buffer.split('\r\n');
-		this.reference.log.output(this.reference.serial_buffer);
+		//this.reference.log.output(this.reference.serial_buffer);
 		//// Check if messages contains something
 		if(messages.length > 1)
 		{
@@ -156,10 +156,10 @@ BluetoothSerial.initialize = function()
 		BluetoothSerial.bluetooth_devices
 	);
 
-	// BluetoothSerial.spawnBTAgent(
-	// 	BluetoothSerial.bluetooth_agent,
-	// 	BluetoothSerial.bluetooth_pincode_path
-	// );
+	BluetoothSerial.spawnBTAgent(
+		BluetoothSerial.bluetooth_agent,
+		BluetoothSerial.bluetooth_pincode_path
+	);
 };
 
 BluetoothSerial.initialize();

@@ -9,9 +9,9 @@ class Cortex
 		this.cortex = this;
 		this.simulate = config.simulate;
 		this.exec = require('child_process').exec;
-		this.lobe_map = {};
-		this.time_since_last_command = {};
-		this.previous_lobe_status = {};
+		this.lobe_map = {  };
+		this.time_since_last_command = {  };
+		this.status = {  };
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -117,24 +117,28 @@ class Cortex
 	}
 	sendLobeStatus()
 	{
-		var status = {};
+		var change_flag = false;
 		for (var lobe in this.lobe_map)
 		{
-			status[lobe] = this.lobe_map[lobe]['state'];
-			// if(!this.previous_lobe_status.hasOwnProperty(lobe))
-			// {
-			// 	this.previous_lobe_status[lobe] = {};
-			// }
-			// else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
-			// {
-			// 	this.previous_lobe_status[lobe] = {
-			// 		lobe: lobe,
-			// 		state : this.lobe_map[lobe]['state']
-			// 	};
-			// 	this.feedback(this.name, this.previous_lobe_status[lobe]);
-			// }
+			if(!this.status.hasOwnProperty(lobe))
+			{
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
+				};
+				change_flag = true;
+			}
+			else if(this.status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			{
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
+				};
+				change_flag = true;
+			}
 		}
-		this.feedback(this.name, status);
+		if(change_flag)
+		{
+			this.feedback(this.name, this.status);
+		}
 	}
 	handleMissionControl(/*data*/)
 	{
