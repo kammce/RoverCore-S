@@ -281,7 +281,9 @@ class NeoCortex extends Neuron
 		this.GPS_Heading = this.headingGPS(this.GPS_current.lattitude,this.GPS_current.longitude,
 										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
 
-		this.Tracker_Heading = this.model.get("Tracker");
+		//Get Tracker Heading
+		var Tracker_Object  = this.model.get("Tracker"); 
+		this.Tracker_Heading = Tracker_Object.globalOr.Z;
 
 		var heading_differential = this.GPS_Heading - this.Tracker_Heading["heading"];
 		
