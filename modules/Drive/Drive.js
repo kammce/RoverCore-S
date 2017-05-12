@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class DriveSystem extends Neuron
+class Drive extends Neuron
 {
 	constructor(util)
 	{
@@ -57,43 +57,6 @@ class DriveSystem extends Neuron
 			log: this.log,
 			device: 1
 		});
-
-		// this.ai_interval = setInterval(() =>
-		// {
-		// 	this.rfcomm.send("M", 'Y'.charCodeAt(0));
-		// 	var neo = this.model.get("NeoCortex");
-		// 	if(this.state === "IDLING" && neo.ai_flag === true)
-		// 	{
-		// 		switch(neo.direction)
-		// 		{
-		// 			case "LEFT":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", -90);
-		// 				break;
-		// 			case "RIGHT":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", 90);
-		// 				break;
-		// 			case "LEFT-FORWARD":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", -90);
-		// 				break;
-		// 			case "RIGHT-FORWARD":
-		// 				this.rfcomm.send("S", 15);
-		// 				this.rfcomm.send("A", 90);
-		// 				break;
-		// 			case "STOP":
-		// 				this.rfcomm.send("S", 0);
-		// 				this.rfcomm.send("A", 0);
-		// 				break;
-		// 			default:
-		// 				break;
-		// 		}
-		// 	}
-		// 	else
-		// 	{
-		// 	}
-		// }, 100);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -156,4 +119,4 @@ class DriveSystem extends Neuron
 	}
 }
 
-module.exports = DriveSystem;
+module.exports = Drive;

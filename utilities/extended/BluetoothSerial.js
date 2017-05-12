@@ -7,6 +7,7 @@ class BluetoothSerial extends Serial
 	constructor(params)
 	{
 		params.path = `/dev/rfcomm${params.device}`;
+		params.delimiter = '\r\n';
 		super(params);
 
 		this.device = params.device;
@@ -35,43 +36,35 @@ class BluetoothSerial extends Serial
 	{
 		this.reference = this.reference || this;
 
-		this.reference.serial_buffer += data.toString();
-		var messages = this.reference.serial_buffer.split('\r\n');
+		//this.reference.serial_buffer += data.toString();
+		//var messages = this.reference.serial_buffer.split('\r\n');
+
+		var messages = data.toString();
+
 		//this.reference.log.output(this.reference.serial_buffer);
-		//// Check if messages contains something
-		if(messages.length > 1)
+		/* Regex pattern for format @<key>,<value>
+		 * Store 1st match in key
+		 * Store 2nd match in value
+		 * Return empty array if exec fails to find matches
+		 * In the event of a failed match, key & value = undefined
+		 */
+		var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages[i]) || [];
+		if(map.length === 3)
 		{
-			// this.reference.log.output(messages);
-			for (var i = 0; i < messages.length-1; i++)
+			var [, key, value] = map;
+			/* Check if there exists a callback for this key.
+			 * Check will fail if regex match failed.
+			 * 		key is undefined, thus typeof will return "undefined".
+			 */
+			if(typeof this.reference.callback_map[key] === "function")
 			{
-				/* Regex pattern for format @<key>,<value>
-				 * Store 1st match in key
-				 * Store 2nd match in value
-				 * Return empty array if exec fails to find matches
-				 * In the event of a failed match, key & value = undefined
-				 */
-				var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages[i]) || [];
-				if(map.length !== 3)
-				{
-					//this.log.output(`FAILED ON =${messages[i]}=`);
-					continue;
-				}
-				var [, key, value] = map;
-				/* Check if there exists a callback for this key.
-				 * Check will fail if regex match failed.
-				 * 		key is undefined, thus typeof will return "undefined".
-				 */
-				if(typeof this.reference.callback_map[key] === "function")
-				{
-					value = parseFloat(value);
-					this.reference.callback_map[key](value);
-				}
-				else
-				{
-					this.reference.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
-				}
+				value = parseFloat(value);
+				this.reference.callback_map[key](value);
 			}
-			this.reference.serial_buffer = messages[messages.length-1];
+			else
+			{
+				this.reference.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+			}
 		}
 	}
 	sendCommand(key, value)
