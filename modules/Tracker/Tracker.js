@@ -98,6 +98,7 @@ class Tracker extends Neuron
 		/* Locals */
 		this.local = {
 			busy: false,		// prevents command bottle-necking
+			activeCamera: 0,
 			relativeOr: {		// orientation relative to Rover
 				X: 0,
 				Y: 0,
@@ -215,11 +216,15 @@ class Tracker extends Neuron
 			};
 			// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
 
+			// Analog camera selection
+			this.local.activeCamera = input.activeCamera;	//	0 or 1
+
 			// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH, this.local.pitch.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH_SPEED, this.local.pitch.speed);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
+			this.comms.sendCommand(this.ACTIVE_CAMERA, this.local.activeCamera);
 
 			// switch(tempCtlMode)
 			// {
