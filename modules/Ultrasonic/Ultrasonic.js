@@ -55,7 +55,9 @@ class Ultrasonic extends Neuron
 		this.extended = util.extended;
 		this.model.registerMemory("Ultrasonic");
 		this.Control_GPIO = [19,28,31,25];
+		this.SonicValue = [0,0,0,0,0,0,0,0,0,0,0,0];
 		this.avg=0;
+		this.Distance=0;
 		this.MaxUltrasonic = 12;
 		this.readDistance();
 		// =====================================
@@ -77,8 +79,6 @@ class Ultrasonic extends Neuron
      * Init all GPIO pin.
      */
      init(){
-     	var Trigger = 20;
-    	var Echo = 21 ;
     	this.expose(Trigger);
     	this.expose(Echo);
     	this.expose(this.Control_GPIO[0]);
@@ -236,8 +236,8 @@ class Ultrasonic extends Neuron
 			    duration = end-start;
 			    distance =(duration/1e6)*15.614; //convert ms to cm 
 			    if(distance > 170 || distance < 0 ){distance= -1 ;}
-			    parent.log,output(distance);
-			    parent.updateModel(ultrasonicNum,distance);
+			    parent.log.output(distance);
+			    parent.Distance = distance;
 			},.0020);
    }
 
@@ -249,44 +249,36 @@ class Ultrasonic extends Neuron
    		this.init();
    		setInterval(function(){
    			parent.muxSelect(selectNum);
+
    			parent.measureDistanceMux(selectNum);
-   			count++;
-			parent.average(selectNum,count);
-   			if(count == 11)
-   			{
-   				selectNum++;
-   				parent.readModel();
-   				count=0;
-   				if(selectNum==parent.MaxUltrasonic){selectNum=0;}
-   			}
+   			
+   			setTimeout(function(){
+	   			count++;
+				parent.average(selectNum,count);
+	   			if(count == 11)
+	   			{
+	   				selectNum++;
+	   				parent.readModel();
+	   				count=0;
+	   				if(selectNum==parent.MaxUltrasonic){selectNum=0;}
+	   			}
+	   		},.0030);
    		},10);
    	}
-
-   	updateModel(ID,distance)
-   	{
-   		this.model.set("Ultrasonic",{
-   			ID: ID,
-   			Distance: distance
-   		})
-   	}
-
+   	
    	average(ID,count)
    	{
-   		var ultrasonic = this.model.get("Ultrasonic");
    		try{
 	   		if(count<11)
 	   		{
-	   			this.avg= this.avg+ultrasonic["Distance"];
+	   			this.avg= this.avg+ this.Distance;
 				//this.log.output("if avg: " + this.avg);
 	   		}
 	   		else
 	   		{
 	   			this.avg=(this.avg/10);
 			        //this.log.output(this.avg);
-	   			this.model.set("Ultrasonic",{
-		   			ID: ID,
-		   			AvgDistance: this.avg
-	   			})
+	   			this.updateModel(ID,this.avg);
 				this.avg=0;
 	   		}
 	   	}
@@ -298,9 +290,28 @@ class Ultrasonic extends Neuron
    		var ultrasonic = this.model.get("Ultrasonic");
    		//this.log.output(ultrasonic);
    		try{
-   			this.log.output("ID : " + ultrasonic["ID"] + " Avg Distance: " + ultrasonic["AvgDistance"]);
+   			this.log.output(ultrasonic);
    		}	
    		catch(err){this.log.output("Error: " + err)};
+   	}
+
+   	updateModel(ID,value)
+   	{
+   		this.SonicValue[ID] = value;
+   		this.model.set("Ultrasonic",{
+   			Sonic1:this.SonicValue[0],
+   			Sonic2:this.SonicValue[1],
+   			Sonic3:this.SonicValue[2],
+   			Sonic4:this.SonicValue[3],
+   			Sonic5:this.SonicValue[4],
+   			Sonic6:this.SonicValue[5],
+   			Sonic7:this.SonicValue[6],
+   			Sonic8:this.SonicValue[7],
+   			Sonic9:this.SonicValue[8],
+   			Sonic10:this.SonicValue[9],
+   			Sonic11:this.SonicValue[10],
+   			Sonic12:this.SonicValue[11]
+   		});
    	}
 
         /**
