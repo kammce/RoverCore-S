@@ -48,7 +48,7 @@ class BluetoothSerial extends Serial
 		 * Return empty array if exec fails to find matches
 		 * In the event of a failed match, key & value = undefined
 		 */
-		var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages[i]) || [];
+		var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages) || [];
 		if(map.length === 3)
 		{
 			var [, key, value] = map;
