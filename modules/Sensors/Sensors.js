@@ -69,8 +69,8 @@ class Sensors extends Neuron
 		this.feedback("latDir:");
 		this.feedback("Longitude:");
 		this.feedback("longDir:");
-		this.model.registerMemory("Sensors");
-		this.model.set("Sensors", {
+		this.model.registerMemory("GPS");
+		this.model.set("GPS", {
 			lat: ZERO,
 			latDir: ZERO,
 			long: ZERO,
@@ -89,16 +89,12 @@ class Sensors extends Neuron
 			*/
 		});
 		//initialize serialport
-		var port = new SerialPort("/dev/cu.usbmodem1411", {
+		var port = new SerialPort("/dev/ttySAC0", { //Odroid XU4 serial port 
 			baudRate: BAUD_RATE,
 			parser: SerialPort.parsers.readline('\n')
 		});
 		var self = this; //enables "self" to work like "this" inside of port.on('data')
-		//
 
-		//
-
-		//
 		var serialOpenRoutine = (err) => {
 			if(trys >= retryLimit) {
 				return;
@@ -157,7 +153,7 @@ class Sensors extends Neuron
 					var firstLat = lat.slice(0,2);
 					var secondLat = lat.slice(2,10);
 					var delimiter = "º";
-					var latResult = firstLat+delimiter+secondLat;
+					var latResult = parseInt(firstLat)+secondLat/60;
 					var lat = latResult;
 
 					var latDir = piece[3];
@@ -165,12 +161,18 @@ class Sensors extends Neuron
 					var long = piece[4];
 					var firstLong = long.slice(0,3);
 					var secondLong = long.slice(3,11);
-					var longResult = firstLong+delimiter+secondLong;
+					var longResult = parseInt(firstLong)+(secondLong/60);
 					var long = longResult;
 					//piece 5 = longitude number
 					var longDir = piece[5];
 					//piece 6 = longitude direction
-					self.model.set("Sensors", {
+
+					
+					//Direction 
+					if(latDir === "S" ){lat *= -1;}
+					if(longDir === "W" ) {long *= -1;}
+
+					self.model.set("GPS", {
 						lat: lat,
 						latDir: latDir,
 						long: long,
@@ -188,7 +190,7 @@ class Sensors extends Neuron
 					 	* UBNT RSSI
 						*/
 					});
-					self.log.output(self.model.get('Sensors'));
+					self.log.output(self.model.get('GPS'));
 				}
 			}
 		});
