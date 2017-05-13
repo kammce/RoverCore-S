@@ -115,8 +115,6 @@ class Tracker extends Neuron
 				pitch: 0
 			},
 			lidarState: false,	// LIDAR activation (currently not implemented; lidar is assumed always on)
-			// ctlMode: "SD",		// Control Mode; SD: Speed/Direction Control, P: Position control
-			// preset: "Cancel",	// Preset (if any): for values, see MC/Tracker lobe comm. standards
 			pitch: {			// Pitch parameters
 				speed: 0,
 				angle: 0
@@ -182,19 +180,6 @@ class Tracker extends Neuron
 			// Prevent bottle-neck
 			this.local.busy = true;
 
-			// Determine Control Mode
-			// var tempCtlMode = this.getControlMode(input);
-			// if(tempCtlMode === false)
-			// {
-			// 	this.log.output("Error", "Ambiguous control mode");
-			// 	this.reset();
-			// 	return false;
-			// }
-			// else
-			// {
-			// 	this.local.ctlMode = tempCtlMode;
-			// }
-
 			// Determine Preset (if any)
 			if((Object.keys(input)).indexOf("preset") !== -1)
 			{
@@ -225,52 +210,6 @@ class Tracker extends Neuron
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
 			this.comms.sendCommand(this.ACTIVE_CAMERA, this.local.activeCamera);
-
-			// switch(tempCtlMode)
-			// {
-			// 	case "SD":
-			// 	{
-			// 		// Pass SPEED/DIRECTIONAL Control Parameters
-			// 		this.local.pitch = {
-			// 			speed: input.pitch.speed,
-			// 			direction: input.pitch.direction
-			// 		};
-			// 		this.local.yaw = {
-			// 			speed: input.yaw.speed,
-			// 			direction: input.yaw.direction
-			// 		};
-			// 		// this.log.output(`speed = ${input.yaw.speed}`);	// an example of using ECMA script 6
-
-			// 		// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
-			// 		this.comms.sendCommand(this.MOTION_COMMAND_PITCH,
-			// 			(this.local.pitch.direction === "up") ? this.local.pitch.speed : (this.local.pitch.speed * (-1))
-			// 		);
-			// 		this.comms.sendCommand(this.MOTION_COMMAND_YAW,
-			// 			(this.local.yaw.direction === "right") ? this.local.yaw.speed: (this.local.yaw.speed * (-1))
-			// 		);
-			// 		break;
-			// 	}
-			// 	case "P":
-			// 	{
-			// 		// Pass POSITIONAL Control Parameters
-			// 		this.local.pitch = {
-			// 			angle: input.pitch.angle
-			// 		};
-			// 		this.local.yaw = {
-			// 			angle: input.yaw.angle
-			// 		};
-
-			// 		// Send to Teensy
-			// 		this.comms.sendCommand(this.MOTION_COMMAND_PITCH, input.pitch.angle);
-			// 		this.comms.sendCommand(this.MOTION_COMMAND_YAW, input.yaw.angle);
-			// 		break;
-			// 	}
-			// 	default:
-			// 	{
-			// 		this.log.output("Default", "Doing Nothing...");
-			// 		break;
-			// 	}
-			// }
 
 			// Zoom parameters
 			this.local.zoom = input.zoom;
@@ -323,29 +262,6 @@ class Tracker extends Neuron
 	}
 
 	/* Utility Functions */
-	getControlMode(missionControlObj)	// Determines if control mode is SD or P, or if received mode is invalid
-	{
-		// Store key lists
-		var pitchList = Object.keys(missionControlObj.pitch);
-		var yawList = Object.keys(missionControlObj.yaw);
-
-		// Decide control mode
-		if( (pitchList.indexOf("angle") !== -1) &&
-			(yawList.indexOf("angle") !== -1) )
-		{
-			return "P";
-		}
-		else if( ((pitchList.indexOf("speed") !== -1) && (pitchList.indexOf("direction") !== -1)) &&
-				 ((yawList.indexOf("speed") !== -1) && (yawList.indexOf("direction") !== -1)) )
-		{
-			return "SD";
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	panorama()
 	{
 
