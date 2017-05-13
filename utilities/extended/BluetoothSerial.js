@@ -100,32 +100,53 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:71:a1 1234
 00:21:13:00:6f:a7 1234
 00:21:13:00:71:57 1234
+98:D3:31:FC:4B:A9 1234
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 {
-	var spawn = require("child_process").spawn;
-
-	BluetoothSerial.bt_agent_process = spawn(agent_ps,
-	[
-		"--capability", "NoInputNoOutput",
-		"--pin", code_path
-	]);
-	BluetoothSerial.bt_agent_process.on('close', (code) =>
+	var execSync = require("child_process").execSync;
+	try
 	{
-		//// NOTE: Could be potentially dangerous :P
-		//// Recursion mang!
-		console.log("bt-agent (Bluetooth Pincode Pairing Agent) closed! RESTARTING in 1s!");
+		//// If this is successful then this method will return,
+		//// Preventing additional bt-agents from being created!
+		execSync("ps aux | grep [b]t-agent");
+		console.log("BT-AGENT EXIST: will not spawn another.");
+	}
+	catch(e)
+	{
+		console.log("BT-AGENT DOES NOT EXIST: will spawn bt-agent service.");
+		//// Execution of ps aux failed, thus the process does not exist.
+		var spawn = require("child_process").spawn;
 
-		setTimeout(() =>
+		BluetoothSerial.bt_agent_process = spawn(agent_ps,
+		[
+			"--capability", "NoInputNoOutput",
+			"--pin", code_path
+		]);
+
+		BluetoothSerial.bt_agent_process.on('close', (code) =>
 		{
-			BluetoothSerial.spawnBTAgent(
-				BluetoothSerial.bluetooth_agent,
-				BluetoothSerial.bluetooth_pincode_path
-			);
-		}, 1000);
-	});
+			//// NOTE: Could be potentially dangerous :P
+			//// Recursion mang!
+			console.log("bt-agent (Bluetooth Pincode Pairing Agent) closed! RESTARTING in 1s!");
+
+			setTimeout(() =>
+			{
+				BluetoothSerial.spawnBTAgent(
+					BluetoothSerial.bluetooth_agent,
+					BluetoothSerial.bluetooth_pincode_path
+				);
+			}, 1000);
+		});
+	}
 };
+
+function sleep(time)
+{
+    var stop = new Date().getTime();
+    while(new Date().getTime() < stop + time);
+}
 
 BluetoothSerial.initialize = function()
 {
@@ -133,16 +154,22 @@ BluetoothSerial.initialize = function()
 	var fs = require("fs");
 
 	//// Kill all rfcomm processes before proceeding
-	try { execSync('killall -9 rfcomm'); } catch(e) {}
+	// try { execSync('killall -e -9 rfcomm'); } catch(e) {}
 	//// bt-agent requires two SIGTERM signals to terminate fully.
 	//// 1st SIGTERM unregisters agent
-	try { execSync('killall bt-agent'); } catch(e) {}
-	//// 2nd SIGTERM kills bt-agent
-	try { execSync('killall bt-agent'); } catch(e) {}
-	//// 3rd Just to make sure
-	try { execSync('killall bt-agent'); } catch(e) {}
+	// try { execSync('killall -e bt-agent'); } catch(e) {}
+	// //// 2nd SIGTERM kills bt-agent
+	// try { execSync('killall -e bt-agent'); } catch(e) {}
+	// //// 3rd Just to make sure
+	// try { execSync('killall -e bt-agent'); } catch(e) {}
 	//// Release all bluetooth rfcomm connections
-	try { execSync('rfcomm release all'); } catch(e) {}
+	try
+	{
+		console.log("RUNNING: rfcomm release all");
+		sleep(3000);
+		execSync('rfcomm release all');
+		console.log("FINISHED: rfcomm release all");
+	} catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,
