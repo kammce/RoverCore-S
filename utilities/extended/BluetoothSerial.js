@@ -111,7 +111,7 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 		//// If this is successful then this method will return,
 		//// Preventing additional bt-agents from being created!
 		execSync("ps aux | grep [b]t-agent");
-		console.log("BT-AGENT EXIST: will not spawn another.");
+		console.log("BT-AGENT EXISTS: will not spawn another.");
 	}
 	catch(e)
 	{
@@ -166,10 +166,17 @@ BluetoothSerial.initialize = function()
 	try
 	{
 		console.log("RUNNING: rfcomm release all");
-		sleep(3000);
-		execSync('rfcomm release all');
+		var strerr = new Buffer("---");
+		while(strerr.toString())
+		{
+			strerr = execSync('rfcomm release all 2>&1');
+			//console.log(strerr.toString());
+			sleep(250);
+		}
 		console.log("FINISHED: rfcomm release all");
-	} catch(e) {}
+		sleep(100);
+	}
+	catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,

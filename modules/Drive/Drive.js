@@ -65,22 +65,25 @@ class Drive extends Neuron
      */
 	react(input)
 	{
+		var status = true;
 		if( "speed" in input &&
 			"angle" in input &&
 			"mode" 	in input)
 		{
+			this.log.output(input);
 			this.rfcomm.sendCommand("S", input.speed);
 			this.rfcomm.sendCommand("A", input.angle);
 			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
 			// this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			// this.feedback(`Sending `, input, `Over BluetoothSerial`);
-			return true;
 		}
 		else
 		{
 			this.log.output(`Invalid Input `, input);
 			this.feedback(`Invalid Input `, input);
+			status = false;
 		}
+		return status;
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -91,6 +94,8 @@ class Drive extends Neuron
      */
 	halt()
 	{
+		this.rfcomm.sendCommand("S", 0);
+		this.rfcomm.sendCommand("A", 0);
 		this.log.output(`HALTING ${this.name}`);
 		this.feedback(`HALTING ${this.name}`);
 		return true;
@@ -113,6 +118,8 @@ class Drive extends Neuron
      */
 	idle()
 	{
+		this.rfcomm.sendCommand("S", 0);
+		this.rfcomm.sendCommand("A", 0);
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
 		return true;

@@ -45,7 +45,7 @@ class Cortex
 						}
 						else
 						{
-							this.handleIncomingData(data['command'], spark);
+							this.handleIncomingData(data, spark);
 						}
 					}
 					else
@@ -113,6 +113,7 @@ class Cortex
 	}
 	handleIncomingData(data)
 	{
+		//this.log.output(data);
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
