@@ -10,26 +10,75 @@ class BluetoothSerial extends Serial
 		params.delimiter = '\r\n';
 		super(params);
 
+		this.fs = require('fs');
+
 		this.device = params.device;
 		this.mac_address = params.mac;
 		this.serial_buffer = "";
 		this.callback_map = {};
-
+		this.bind_interval;
+		this.busy = true;
 		this.bind();
 	}
 	bind()
 	{
-		this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
+		var rebind = () =>
 		{
-			if (error)
+			setTimeout(() =>
 			{
-				this.log.output(`Bluetooth Serial RFCOMM BIND error: ${error}`);
-			}
-			else
+				this.bind();
+			}, 1000);
+		}
+		//// Check if /dev/rfcommXX exists
+		if(!this.fs.existsSync(this.path) && !this.busy)
+		{
+			this.log.output(`${this.path} does not exist processing to bind`);
+			this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
 			{
-				this.setupSerial();
-			}
-		});
+				this.log.output(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
+				if(this.fs.existsSync(this.path))
+				{
+					this.log.output(`${this.path} exists, processing to setup serial communication.`);
+					this.setupSerial();
+				}
+				else
+				{
+					this.log.output(`${this.path} DOES NOT exist, attempting to bind again in 1s.`);
+					rebind();
+				}
+			});
+		}
+		else
+		{
+			this.log.output(`${this.path} exists, attempting to release it.`);
+			this.release();
+		}
+	}
+	release()
+	{
+		this.busy = true;
+		var release_callback = () =>
+		{
+			this.exec(`rfcomm release ${this.device}`, (error, stdout, stderr) =>
+			{
+				if(!this.fs.existsSync(this.path))
+				{
+					this.busy = false;
+					//// NOT SURE IF I WANT TO DO THIS HERE!
+					this.bind();
+				}
+			});
+		};
+		if(typeof this.port !== 'undefined')
+		{
+			this.log.output(`Serial Port exists, attempting to close it.`);
+			this.port.close(release_callback);
+		}
+		else
+		{
+			this.log.output(`Serial Port DOES NOT exists, processing to release device.`);
+			release_callback();
+		}
 	}
 	//// @Override Superclass
 	onPortData(data)
@@ -48,7 +97,7 @@ class BluetoothSerial extends Serial
 		 * Return empty array if exec fails to find matches
 		 * In the event of a failed match, key & value = undefined
 		 */
-		var map = /^@([a-zA-Z0-9]),([\.\-0-9]+)$/g.exec(messages) || [];
+		var map = /^@([a-zA-Z0-9\*]),([\.\-0-9]+)$/g.exec(messages) || [];
 		if(map.length === 3)
 		{
 			var [, key, value] = map;
@@ -75,7 +124,7 @@ class BluetoothSerial extends Serial
 	}
 	attachListener(key, callback)
 	{
-		if(/^[a-zA-Z0-9]$/g.test(key) && typeof callback === 'function')
+		if(/^[a-zA-Z0-9\*]$/g.test(key) && typeof callback === 'function')
 		{
 			this.callback_map[key] = callback;
 			return true;
@@ -142,19 +191,20 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	}
 };
 
+BluetoothSerial.glob = require('glob');
+
 BluetoothSerial.initialize = function()
 {
 	var execSync = require("child_process").execSync;
 	var fs = require("fs");
 	var sleep = require('sleep');
-	var glob = require('glob');
 
 	//// Release all bluetooth rfcomm connections
 	try
 	{
 		console.log("RUNNING: rfcomm release all");
 		var strerr = new Buffer("---");
-		while(strerr.toString() || glob.sync("/dev/rfcomm*").length !== 0)
+		while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
 		{
 			strerr = execSync('rfcomm release all 2>&1');
 			//console.log(strerr.toString());
