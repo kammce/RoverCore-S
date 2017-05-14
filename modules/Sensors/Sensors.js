@@ -153,16 +153,16 @@ class Sensors extends Neuron
 					var firstLat = lat.slice(0,2);
 					var secondLat = lat.slice(2,10);
 					var delimiter = "º";
-					var latResult = parseInt(firstLat)+secondLat/60;
-					var lat = latResult;
+					var latResult = parseFloat(firstLat)+(parseFloat(secondLat)/60);
+					lat = latResult;
 
 					var latDir = piece[3];
 					//piece 4 = latitude cardianl direction
 					var long = piece[4];
 					var firstLong = long.slice(0,3);
 					var secondLong = long.slice(3,11);
-					var longResult = parseInt(firstLong)+(secondLong/60);
-					var long = longResult;
+					var longResult = parseInt(firstLong)+(parseFloat(secondLong)/60);
+					long = longResult;
 					//piece 5 = longitude number
 					var longDir = piece[5];
 					//piece 6 = longitude direction
