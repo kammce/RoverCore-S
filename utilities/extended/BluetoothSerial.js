@@ -142,39 +142,27 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	}
 };
 
-function sleep(time)
-{
-    var stop = new Date().getTime();
-    while(new Date().getTime() < stop + time);
-}
-
 BluetoothSerial.initialize = function()
 {
 	var execSync = require("child_process").execSync;
 	var fs = require("fs");
+	var sleep = require('sleep');
+	var glob = require('glob');
 
-	//// Kill all rfcomm processes before proceeding
-	// try { execSync('killall -e -9 rfcomm'); } catch(e) {}
-	//// bt-agent requires two SIGTERM signals to terminate fully.
-	//// 1st SIGTERM unregisters agent
-	// try { execSync('killall -e bt-agent'); } catch(e) {}
-	// //// 2nd SIGTERM kills bt-agent
-	// try { execSync('killall -e bt-agent'); } catch(e) {}
-	// //// 3rd Just to make sure
-	// try { execSync('killall -e bt-agent'); } catch(e) {}
 	//// Release all bluetooth rfcomm connections
 	try
 	{
 		console.log("RUNNING: rfcomm release all");
 		var strerr = new Buffer("---");
-		while(strerr.toString())
+		while(strerr.toString() || glob.sync("/dev/rfcomm*").length !== 0)
 		{
 			strerr = execSync('rfcomm release all 2>&1');
 			//console.log(strerr.toString());
-			sleep(250);
+
+			sleep.msleep(250);
 		}
 		console.log("FINISHED: rfcomm release all");
-		sleep(100);
+		sleep.msleep(500);
 	}
 	catch(e) {}
 
