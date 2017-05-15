@@ -4,7 +4,7 @@
 //
 //  Created by Aris Koumis on 1/18/17.
 //  Made in collaboration with SJSU Robotics
-//  Copyright © 2017 Aris. All rights reserved.
+//  Copyright Â© 2017 Aris. All rights reserved.
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -207,11 +207,11 @@ void chooseDirection(Gate closestGate) {
     }
     
     if (directionHistory.empty() || directionHistory.back() != direction) {
-        directionLog.open("direction.txt");
+        //directionLog.open("direction.txt");
         directionLog << direction << endl;
         cout << direction << "-" << closestGate.distance << endl;
         directionHistory.push_back(direction);
-        directionLog.close();
+        //directionLog.close();
     }
 }
 
@@ -236,10 +236,14 @@ void outlineGates(Mat &frame) {
     }
     else if (!directionHistory.empty()) {
         char direction = 'N';
-        directionLog.open("direction.txt");
+        //directionLog.open("direction.txt");
         directionHistory.push_back(direction);
         directionLog << direction << endl;
         cout << direction << endl;
-        directionLog.close();
+        //directionLog.close();
+    }
+
+    else{
+        cout <<"N"<< endl;
     }
 }

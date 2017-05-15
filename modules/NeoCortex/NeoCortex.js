@@ -79,7 +79,8 @@ class NeoCortex extends Neuron
 		this.holder = "N";
 		this.GPS_Heading =0;
 		this.Tracker_Heading=0;
-		this.SampleRate = 300; 
+		this.SampleRate = 50;
+		this.Distance_differential=0; 
 		/** Setting Model Memory **/
 		this.model.registerMemory("NeoCortex");
 
@@ -93,7 +94,8 @@ class NeoCortex extends Neuron
 				Finish: this.Finish,
 				Gate_lattitude: this.GPS_gate.lattitude,
 				Gate_longitude: this.GPS_gate.longitude,
-				GPS_Heading: this.GPS_Heading
+				GPS_Heading: this.GPS_Heading,
+				Distance: this.Distance_differential 
 			});
 		},this.SampleRate);
 		/**Function Testing Section **/ 
@@ -154,13 +156,12 @@ class NeoCortex extends Neuron
 	  		var output = data.toString().replace(/[\n\r]/g, ""); //take out hiddent char 
 	  		var fields = output.split("-");
 	  		var direction_vision = fields[0];
-	  		var distance_vision = fields[1]*0.254;
+	  		var distance_vision = fields[1]*0.0254;
 	  		var distance_GPS = parent.distanceGPS(parent.GPS_current.lattitude,parent.GPS_current.longitude,
 										    	   parent.GPS_gate.lattitude,parent.GPS_gate.longitude);
- 
 	  		parent.Finish = "No";
-
-		  	if(distance_vision >= 1 && distance_vision != "undefined")
+	  		parent.Distance_differential = distance_GPS;
+		  	if(distance_vision >= 1 || isNaN(distance_vision) === true)
 		  	{ 
 		  		if(distance_GPS >= 1.5 && distance_GPS != -1 )
 		  		{
@@ -215,35 +216,35 @@ class NeoCortex extends Neuron
 	   switch(direction)
 	   {
 		   case 'L': //go left
-			    //parent.log.output("Go Left");
+			    parent.log.output("Go Left");
 			    parent.AI_direction='Left';
 			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: -90, mode: "Y"}  );
 		        //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 		        break;
 		   case 'R' : // go right
-		        //parent.log.output("Go Right");
+		        parent.log.output("Go Right");
 			    parent.AI_direction='Right';
 			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 90, mode: "Y"}  );
 			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 			    break;
 		   case 'C':   //go forward
-				//parent.log.output("Go Forwad");
+				parent.log.output("Go Forwad");
 				parent.AI_direction='Forward';
 			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "Y"}  );
 			    //setTimeout(function(){ parent.upcall('STOP_AI')},500);
 			    break;
 		   case 'N' : 
-			    //this.log.output("Go Nowhere");
+			    this.log.output("Go Nowhere");
 			    parent.AI_direction='Stop';
 			    parent.upcall("CALL", "DriveSystem",  {speed: 0, angle: 0, mode: "Y"}  );
 				break;
 			case 'SR' : 
-			    //this.log.output("Go Nowhere");
+			    this.log.output("Spin Right");
 			    parent.AI_direction='Spin_Right';
 			    parent.upcall("CALL", "DriveSystem",  {speed: 30, angle: 0, mode: "O"}  );
 				break;
 			case 'SL' : 
-			    //this.log.output("Go Nowhere");
+			    this.log.output("Spin Left ");
 			    parent.AI_direction='Spin_Left';
 			    parent.upcall("CALL", "DriveSystem",  {speed: -30, angle: 0, mode: "O"}  );
 				break;
@@ -261,8 +262,8 @@ class NeoCortex extends Neuron
 		var coordinate= this.model.get("GPS");
 		try
 		{
-			coordinate["lat"] = this.GPS_current.lattitude;
-			coordinate["lon"] = this.GPS_current.longitude;
+			this.GPS_current.lattitude  = coordinate["lat"] ;
+			 this.GPS_current.longitude = coordinate["long"]  ;
 			return true;
 		}
 		catch(err)
@@ -282,10 +283,16 @@ class NeoCortex extends Neuron
 										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
 
 		//Get Tracker Heading
-		var Tracker_Object  = this.model.get("Tracker"); 
-		this.Tracker_Heading = Tracker_Object.globalOr.Z;
 
-		var heading_differential = this.GPS_Heading - this.Tracker_Heading["heading"];
+	
+		var Tracker_Object  = this.model.get("Tracker"); 
+		try{
+			this.Tracker_Heading = Tracker_Object["globalOr"];
+		}
+		catch(err){
+			this.log.output(err);
+		}
+		var heading_differential = this.GPS_Heading - this.Tracker_Heading;
 		
 		if (heading_differential < -10 )
 		{
