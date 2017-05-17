@@ -6,10 +6,31 @@ var Neuron = require('../Neuron');
 
 //original starting time in unix for when each pod starts. In milliseconds 
 var initTimestamp = [0, 0, 0, 0, 0];
-var podDataKey = ["","pod1_data", "pod2_data", "pod3_data", "pod4_data"];
+var podTempDataKey = ["","pod1_TempData", "pod2_TempData", "pod3_TempData", "pod4_TempData"];
+var podMoistDataKey = ["","pod1_MoistData", "pod2_MoistData", "pod3_MoistData", "pod4_MoistData"]
 var podTimestampKey = ["", "pod1_timestamp", "pod2_timestamp", "pod3_timestamp", "pod4_timestamp"];
 
-
+var listenerType = ["INIT_START", "BASELINE_TEMP", "BASELINE_HUM", "READY_FOR_DEPLOYMENT", "DRILL_START",
+					"DRILL_COMPLETE", "READY_FOR_RETRIEVAL","SD_CARD_ERROR","DRILL_COMM_ERROR", "DRILL_DOWN_ERROR",
+					"DRILL_UP_ERROR","REEL_COMM_ERROR","REEL_DOWN_ERROR","REEL_UP_ERROR","TEMPERATURE","HUMIDITY"];
+/*
+0    uint8_t INIT_START;              // a -- request start time from MC
+1    uint32_t BASELINE_TEMP;          // b
+2    uint32_t BASELINE_HUM;           // c
+3    uint32_t READY_FOR_DEPLOYMENT;   // d
+4    uint32_t DRILL_START;            // e
+5    uint32_t DRILL_COMPLETE;         // f
+6    uint32_t READY_FOR_RETRIEVAL;    // g
+7    uint32_t SD_CARD_ERROR;          // h
+8    uint32_t DRILL_COMM_ERROR;       // i
+9    uint32_t DRILL_DOWN_ERROR;       // j
+10    uint32_t DRILL_UP_ERROR;         // k
+11    uint32_t REEL_COMM_ERROR;        // l
+12    uint32_t REEL_DOWN_ERROR;        // m
+13    uint32_t REEL_UP_ERROR;          // n
+14    uint32_t TEMPERATURE;            // o
+15    uint32_t HUMIDITY;               // p
+*/
 
 class Pods extends Neuron
 {
@@ -195,26 +216,69 @@ class Pods extends Neuron
 	
 	attachListeners()
 	{
-		//time sync/starting initialization 
-		this.rfcomm_pod1.attachListener('a', (data) => 
-		{
-			this.set("message", input.message);
-			parseMessage(1, input.message);
-		});
-		this.rfcomm_pod2.attachListener('a', (data) => 
-		{
-			this.set("message", input.message);
-		});
-		this.rfcomm_pod3.attachListener('a', (data) => 
-		{
-			this.set("message", input.message);
-		});
-		this.rfcomm_pod4.attachListener('a', (data) => 
-		{
-			this.set("message", input.message);
-		});	
+		//add listener for request start time 
 		
 		
+		//add listeners for errors (i - n)
+		attachAllListener('i');
+		attachAllListeners('j');
+		attachAllListeners('k');
+		attachAllListener('l');
+		attachAllListeners('m');
+		attachAllListeners('n');		
+		
+		//attach listeners for temp 
+		attachDataListener('o', "temp");
+		//attach listeners for humidity
+		attachDataListener('p', "moist");
+		
+		
+	}
+	
+	attachDataListener(var key, var type)
+	{
+		if(type == "temp")
+		{
+			this.rfcomm_pod1.attachListener(key, (data)=>
+			{
+				
+			});
+			this.rfcomm_pod2.attachListener(key, (data)=>
+			{
+				
+			});
+			this.rfcomm_pod3.attachListener(key, (data)=>
+			{
+				
+			});
+			this.rfcomm_pod4.attachListener(key, (data)=>
+			{
+				
+			});
+		}
+		else 
+		{
+			
+		}
+	}
+	attachAllListeners(var key)
+	{
+		this.rfcomm_pod1.attachListener(key, (data)=>
+		{
+			
+		});
+		this.rfcomm_pod2.attachListener(key, (data)=>
+		{
+			
+		});
+		this.rfcomm_pod3.attachListener(key, (data)=>
+		{
+			
+		});
+		this.rfcomm_pod4.attachListener(key, (data)=>
+		{
+			
+		});
 	}
 }
 
