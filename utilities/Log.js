@@ -66,7 +66,8 @@ class Log
 	{
 		//// check to see if the color exists and it is a function
 		//// use that function to color the output
-		if(typeof colors[output_color] === "function")
+		if(typeof colors[output_color] === "function" &&
+			this.constructor.disable_colors !== true)
 		{
 			this.color = colors[output_color];
 		}
@@ -113,6 +114,8 @@ Log.deleteLogs = function()
 		fs.unlinkSync(Log.error_file);
 	}
 };
+
+Log.disable_colors = false;
 
 // Initialize Log write streams and console outputs
 Log.initialize();

@@ -93,6 +93,7 @@ class Cortex
 		// Setting up Logs and Model
 		// =====================================
 		this.LOG = require('../utilities/Log');
+		this.LOG.disable_colors = config.no_color;
 		this.MODEL = require('../utilities/Model');
 
 		this.log = new this.LOG(this.name, "white", this.debug_level);
