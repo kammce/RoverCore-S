@@ -13,6 +13,7 @@ class Cortex
 		this.time_since_last_command = {  };
 		this.status = {  };
 		this.mission_controllers = {  };
+		this.debug_level = config.debug_level || 0;
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -45,7 +46,7 @@ class Cortex
 						}
 						else
 						{
-							this.handleIncomingData(data['command'], spark);
+							this.handleIncomingData(data, spark);
 						}
 					}
 					else
@@ -94,7 +95,7 @@ class Cortex
 		this.LOG = require('../utilities/Log');
 		this.MODEL = require('../utilities/Model');
 
-		this.log = new this.LOG(this.name, "white");
+		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback);
 
 		this.extended_utilities = require("../utilities/Extended.js");
@@ -113,6 +114,7 @@ class Cortex
 	}
 	handleIncomingData(data)
 	{
+		//this.log.output(data);
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
@@ -286,7 +288,7 @@ class Cortex
 			//// Adding source code path to config object
 			var source_path = `./${directory}/${directory}`;
 			//// Generate Logger
-			var log = new this.LOG(directory);
+			var log = new this.LOG(directory, "white", this.debug_level);
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
