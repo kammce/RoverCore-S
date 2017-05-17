@@ -57,6 +57,50 @@ class Drive extends Neuron
 			log: this.log,
 			device: 1
 		});
+				//Feedback variables
+		this.locals = {
+			currentTrajectory: 	[0, 0, 0, 0],
+			currentPropulsion: 	[0, 0, 0, 0],
+			tacho_rpm: 			[0, 0, 0, 0]
+		};
+
+		//Attach lister to update feedback
+		this.rfcomm.attachListener('0', (val) => {
+			this.local.tacho_rpm[0] = val;
+		});
+		this.rfcomm.attachListener('1', (val) => {
+			this.local.tacho_rpm[1] = val;
+		});
+		this.rfcomm.attachListener('2', (val) => {
+			this.local.tacho_rpm[2] = val;
+		});
+		this.rfcomm.attachListener('3', (val) => {
+			this.local.tacho_rpm[3] = val;
+		});
+		this.rfcomm.attachListener('4', (val) => {
+			this.local.currentTrajectory[0] = val;
+		});
+		this.rfcomm.attachListener('5', (val) => {
+			this.local.currentTrajectory[1] = val;
+		});
+		this.rfcomm.attachListener('6', (val) => {
+			this.local.currentTrajectory[2] = val;
+		});
+		this.rfcomm.attachListener('7', (val) => {
+			this.local.currentTrajectory[3] = val;
+		});
+		this.rfcomm.attachListener('8', (val) => {
+			this.local.tacho_rpm[0] = val;
+		});
+		this.rfcomm.attachListener('9', (val) => {
+			this.local.tacho_rpm[1] = val;
+		});
+		this.rfcomm.attachListener('Z', (val) => {
+			this.local.tacho_rpm[2] = val;
+		});
+		this.rfcomm.attachListener('Y', (val) => {
+			this.local.tacho_rpm[3] = val;
+		});
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -74,8 +118,8 @@ class Drive extends Neuron
 			this.rfcomm.sendCommand("S", input.speed);
 			this.rfcomm.sendCommand("A", input.angle);
 			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
-			// this.log.output(`Sending `, input, `Over BluetoothSerial`);
-			// this.feedback(`Sending `, input, `Over BluetoothSerial`);
+			this.log.debug2(`Sending `, input, `Over BluetoothSerial`);
+			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 		}
 		else
 		{

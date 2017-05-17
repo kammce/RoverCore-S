@@ -57,6 +57,11 @@ class BluetoothSerialTest extends Neuron
 			log: this.log,
 			device: 99
 		});
+		this.rfcomm.attachListener("k", (value) =>
+		{
+			this.log.debug2(`Key ${k} = ${value}`);
+		});
+		this.rfcomm.sendCommand("k",5);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe

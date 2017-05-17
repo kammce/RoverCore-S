@@ -32,25 +32,25 @@ class BluetoothSerial extends Serial
 		//// Check if /dev/rfcommXX exists
 		if(!this.fs.existsSync(this.path) && !this.busy)
 		{
-			this.log.output(`${this.path} does not exist processing to bind`);
+			this.log.debug1(`${this.path} does not exist processing to bind`);
 			this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
 			{
-				this.log.output(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
+				this.log.debug1(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
 				if(this.fs.existsSync(this.path))
 				{
-					this.log.output(`${this.path} exists, processing to setup serial communication.`);
+					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
 					this.setupSerial();
 				}
 				else
 				{
-					this.log.output(`${this.path} DOES NOT exist, attempting to bind again in 1s.`);
+					this.log.debug1(`${this.path} DOES NOT exist, attempting to bind again in 1s.`);
 					rebind();
 				}
 			});
 		}
 		else
 		{
-			this.log.output(`${this.path} exists, attempting to release it.`);
+			this.log.debug1(`${this.path} exists, attempting to release it.`);
 			this.release();
 		}
 	}
@@ -71,12 +71,12 @@ class BluetoothSerial extends Serial
 		};
 		if(typeof this.port !== 'undefined')
 		{
-			this.log.output(`Serial Port exists, attempting to close it.`);
+			this.log.debug1(`Serial Port exists, attempting to close it.`);
 			this.port.close(release_callback);
 		}
 		else
 		{
-			this.log.output(`Serial Port DOES NOT exists, processing to release device.`);
+			this.log.debug1(`Serial Port DOES NOT exists, processing to release device.`);
 			release_callback();
 		}
 	}
@@ -112,7 +112,7 @@ class BluetoothSerial extends Serial
 			}
 			else
 			{
-				this.reference.log.output("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
+				this.reference.log.debug1("ERROR: COULD NOT BLUETOOTHSERIAL CALL FUNCTION HANDLER FOR 'KEY' = ", key);
 			}
 		}
 	}
@@ -120,10 +120,11 @@ class BluetoothSerial extends Serial
 	{
 		var msg = `@${key.charAt(0)},${parseFloat(value)}\r\n`;
 		this.send(msg);
-		// this.log.output(msg);
+		this.log.debug2(`Bluetooth Send =`, msg);
 	}
 	attachListener(key, callback)
 	{
+		this.log.debug3(`Attaching listener to key ${key}`);
 		if(/^[a-zA-Z0-9\*]$/g.test(key) && typeof callback === 'function')
 		{
 			this.callback_map[key] = callback;

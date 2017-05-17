@@ -46,7 +46,8 @@ var config = {
 	"target": 'http://localhost:9000',
 	"connection": undefined,
 	"simulate": false,
-	"isolation": false
+	"isolation": false,
+	"debug_level": 0
 };
 if(process.argv.indexOf("-s") != -1)
 {
@@ -63,6 +64,25 @@ if(process.argv.indexOf("-i") != -1)
 	config.isolation = process.argv[process.argv.indexOf("-i")+1];
 	console.log(`Attempting to isolate ${config.isolation}`);
 }
+
+if(process.argv.indexOf("-v") != -1)
+{
+	config.debug_level = 1;
+	console.log(`Debug Level set to ${config.debug_level}`);
+}
+
+if(process.argv.indexOf("-vv") != -1)
+{
+	config.debug_level = 2;
+	console.log(`Debug Level set to ${config.debug_level}`);
+}
+
+if(process.argv.indexOf("-vvv") != -1)
+{
+	config.debug_level = 3;
+	console.log(`Debug Level set to ${config.debug_level}`);
+}
+
 console.log("Checking Arguments COMPLETE");
 // =====================================
 // Launching Cortex
