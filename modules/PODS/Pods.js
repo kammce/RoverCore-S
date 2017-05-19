@@ -104,7 +104,7 @@ class Pods extends Neuron
 		
 	
 		this.rfcomm_pod1 = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:71:a1", //get relevant MAC address 
+			mac: "00:21:13:00:6F:01", //pod 1 MAC address  
 			baud: 38400,
 			log: this.log,
 			device: 2
@@ -228,7 +228,7 @@ class Pods extends Neuron
 		return true;
 	}
 	
-	parseMessage( var podNum, var messagebits, var type)
+	parseMessage(podNum, messagebits, type)
 	{
 
 		var dataMask = 4294901760; //1111 1111 1111 1111  0000 0000 0000 0000 
@@ -266,7 +266,7 @@ class Pods extends Neuron
 		
 	}
 	
-	sendInitStartTime(var podNum, var timestampOffsetInMilliseconds)
+	sendInitStartTime(podNum, timestampOffsetInMilliseconds)
 	{
 		//get current timestamp and subtract the timestampOffsetInMilliseconds from that 
 		var currentTime = new Date();
@@ -334,7 +334,7 @@ class Pods extends Neuron
 		
 	}
 	
-	attachDataListener(var key, var type)
+	attachDataListener(key, type)
 	{
 
 		//attach listener. Call data parsing function when message sent over key 
@@ -357,7 +357,7 @@ class Pods extends Neuron
 
 
 	}
-	attachAllListeners(var key)
+	attachAllListeners(key)
 	{
 		this.rfcomm_pod1.attachListener(key, (data)=>
 		{
