@@ -4,8 +4,10 @@ var Neuron = require('../Neuron');
 
 //place holder in 0th element 
 
-//original starting time in unix for when each pod starts. In milliseconds 
-var initTimestamp = [0, 0, 0, 0, 0];
+//original starting time in unix for when each pod starts. Stored as a Date 
+var placeholderDate = new Date();
+var initTimestamp = [placeholderDate, placeholderDate, placeholderDate, placeholderDate, placeholderDate];
+var lastSentTimestamp = [placeholderDate, placeholderDate, placeholderDate, placeholderDate, placeholderDate];
 var podTempDataKey = ["","pod1_TempData", "pod2_TempData", "pod3_TempData", "pod4_TempData"];
 var podMoistDataKey = ["","pod1_MoistData", "pod2_MoistData", "pod3_MoistData", "pod4_MoistData"]
 var podTimestampKey = ["", "pod1_timestamp", "pod2_timestamp", "pod3_timestamp", "pod4_timestamp"];
@@ -76,16 +78,20 @@ class Pods extends Neuron
 		this.model = util.model;
 		
 		//prob register memories for each unique pod (for MC use when parsing the 32 bit message for relevant values)
-			this.model.registerMemory("pod1_data");
+			this.model.registerMemory("pod1_TempData");
+			this.model.registerMemory("pod1_MoistData");
 			this.model.registerMemory("pod1_timestamp");
 			
-			this.model.registerMemory("pod2_data");
+			this.model.registerMemory("pod2_TempData");
+			this.model.registerMemory("pod2_MoistData");
 			this.model.registerMemory("pod2_timestamp");	
 			
-			this.model.registerMemory("pod3_data");
+			this.model.registerMemory("pod3_TempData");
+			this.model.registerMemory("pod3_MoistData");
 			this.model.registerMemory("pod3_timestamp");
 			
-			this.model.registerMemory("pod4_data");
+			this.model.registerMemory("pod4_TempData");
+			this.model.registerMemory("pod4_MoistData");
 			this.model.registerMemory("pod4_timestamp");
 
 		/**
@@ -144,14 +150,37 @@ class Pods extends Neuron
 	 //work on this
 	react(input)
 	{
-		if( "start_time" in input &&
+		//MC user actually only send start_stop_message
+		//start_time automatically sent in form of UNIX 32 bit timestamp when CS send's via 'a'
+		if( //"start_time" in input &&
 			"start_stop_message" in input && 
-			"message" in input)
+			"podNum" in input)
 		{
-			this.rfcomm.sendCommand('a', input.start_time);
-			this.rfcomm.sendCommand('b', input.start_stop_message); 
-			this.rfcomm.sendCommand('c', input.message);
+			//TODO
+			//how exactly do I specify which pod I want to send the command to?
 			
+			//TODO: 'q' sent automatically in response to 'a' sent by CS 
+			if(input.podNum == 1)
+			{
+				//this.rfcomm_pod1.sendCommand('q', input.start_time);
+				this.rfcomm_pod1.sendCommand('r', input.start_stop_message);
+			}
+			else if(input.podNum == 2)
+			{
+				//this.rfcomm_pod2.sendCommand('q', input.start_time);
+				this.rfcomm_pod2.sendCommand('r', input.start_stop_message);
+			}
+			else if(input.podNum == 3)
+			{
+				//this.rfcomm_pod3.sendCommand('q', input.start_time);
+				this.rfcomm_pod3.sendCommand('r', input.start_stop_message);
+			}
+			else 
+			{
+				//this.rfcomm_pod4.sendCommand('q', input.start_time);
+				this.rfcomm_pod4.sendCommand('r', input.start_stop_message);
+			}
+		
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			
@@ -198,26 +227,95 @@ class Pods extends Neuron
 		this.feedback(`IDLING ${this.name}`);
 		return true;
 	}
-	parseMessage( var podNum, var messagebits)
+	parseMessage( var podNum, var messagebits, var type)
 	{
-		var dataMask = 1099510579200; //1111 1111 1111 1111 1111 0000 0000 0000 0000 0000 
-		var timestampMask = 1048575;  //0000 0000 0000 0000 0000 1111 1111 1111 1111 1111
+
+		var dataMask = 4294901760; //1111 1111 1111 1111  0000 0000 0000 0000 
+		var timestampMask = 65535;  //0000 0000 0000 0000  1111 1111 1111 1111
 		
 		var data = messageBits & dataMask;
-		this.model.set(podDataKey[podNum], data);
-		
+
 		var timestampOffsetInSec = messageBits & timestampMask;
 		var timestampOffsetInMilliseconds = timestampOffsetInSec * 1000;
 		
-		var updatedTimestamp = initTimestamp[podNum] + timestampOffsetInMilliseconds;
+		if(type == "init")
+		{
+			
+			
+			//get current timestamp and subtract the timestampOffsetInMilliseconds from that 
+			var currentTime = new Date();
+			var currentTimeInMilli = currentTime.getTime();
+			
+			var timeStarted = currentTimeInMilli - timestampOffsetInMilliseconds;
+			
+			var initDate = new Date(timeStarted); //store this as the init start time of the rover 
+			initTimestamp[podNum] = initDate;
+			lastSentTimestamp[podNum] = initDate;
+			
+			var initDateInSec = Math.floor(initDate/1000); //what we send over 
+			
+			//send over to CS 
+			if(input.podNum == 1)
+			{
+				this.rfcomm_pod1.sendCommand('q', initDateInSec);
+				
+			}
+			else if(input.podNum == 2)
+			{
+				this.rfcomm_pod2.sendCommand('q', initDateInSec);
+				
+			}
+			else if(input.podNum == 3)
+			{
+				this.rfcomm_pod3.sendCommand('q', initDateInSec);
+				
+			}
+			else 
+			{
+				this.rfcomm_pod4.sendCommand('q', initDateInSec);
+				
+			}
+			
+		}
+		//TODO 
+		//Else, update lastSentTimestamp and send if needed for error 
+			lastSentTimestamp = Math.floor((initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds)/1000);
+		
+		//put data into specific temp/moisture key for that pod 
+		if(type == "temp")
+		{
+			//this.model.set(podTempDataKey[podNum], data);
+			convertToTemp();
+		}
+		else if(type == "moist")
+		{
+			//this.model.set(podMoistDataKey[podNum], data);
+			convertToMoist();
+		}
+		//update milliseconds elapsed 
 		this.model.set(podTimestampKey[podNum], updatedTimestamp);
 		
 	}
 	
 	attachListeners()
 	{
-		//add listener for request start time 
-		
+		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
+		this.rfcomm_pod1.attachListener('a', (data)=>
+		{
+			parseMessage(1, data, "init");
+		});
+		this.rfcomm_pod2.attachListener('a', (data)=>
+		{
+			parseMessage(2, data, "init");
+		});
+		this.rfcomm_pod3.attachListener('a', (data)=>
+		{
+			parseMessage(3, data, "init");
+		});
+		this.rfcomm_pod4.attachListener('a', (data)=>
+		{
+			parseMessage(4, data, "init");
+		});
 		
 		//add listeners for errors (i - n)
 		attachAllListener('i');
@@ -237,29 +335,26 @@ class Pods extends Neuron
 	
 	attachDataListener(var key, var type)
 	{
-		if(type == "temp")
+
+		//attach listener. Call data parsing function when message sent over key 
+		this.rfcomm_pod1.attachListener(key, (data)=>
 		{
-			this.rfcomm_pod1.attachListener(key, (data)=>
-			{
-				
-			});
-			this.rfcomm_pod2.attachListener(key, (data)=>
-			{
-				
-			});
-			this.rfcomm_pod3.attachListener(key, (data)=>
-			{
-				
-			});
-			this.rfcomm_pod4.attachListener(key, (data)=>
-			{
-				
-			});
-		}
-		else 
+			parseMessage(1, data, type);
+		});
+		this.rfcomm_pod2.attachListener(key, (data)=>
 		{
-			
-		}
+			parseMessage(2, data, type);
+		});
+		this.rfcomm_pod3.attachListener(key, (data)=>
+		{
+			parseMessage(3, data, type);
+		});
+		this.rfcomm_pod4.attachListener(key, (data)=>
+		{
+			parseMessage(4, data, type);
+		});
+
+
 	}
 	attachAllListeners(var key)
 	{
