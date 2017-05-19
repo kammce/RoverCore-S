@@ -61,11 +61,17 @@ class PowerSystems extends Neuron
 		this.model.registerMemory("Power");
 
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:3b:03", //may not be correct MAC address
+			mac: "00:21:13:00:3b:03",
 			baud: 38400,
 			log: this.log,
 			device: 2
 		});
+		// this.rfcomm = new util.extended.BluetoothSerial({
+		// 	mac: "98:d3:31:fc:50:00",
+		// 	baud: 38400,
+		// 	log: this.log,
+		// 	device: 2
+		// });
 
 		this.locals = {
 			realTimeVoltage: 0,
@@ -137,18 +143,8 @@ class PowerSystems extends Neuron
 			this.model.set("Power", this.locals);
 		});
 
-		//for testing model update
-		setInterval(() => {
-			this.model.set("Power", this.locals);
-			// var power = this.model.get("Power");
-
-			// if (power != this.locals) {
-			// 	this.log.output("model not updated correctly.");
-			// }
-		}, 100);
-		// setInterval(() => {
-		// 	this.log.output(this.locals);
-		// }, 1000);
+		//update model
+		setInterval(() => { this.model.set("Power", this.locals); }, 100);
 
 	}
 
@@ -171,7 +167,7 @@ class PowerSystems extends Neuron
 			"intelRelay" in input &&
 			"mastRelay"  in input)
 		{
-			this.rfcomm.sendCommand('a', input.batRelay1);
+		    this.rfcomm.sendCommand('a', input.batRelay1);
 			setTimeout(() => { this.rfcomm.sendCommand('b', input.batRelay2); }, 20);
 			setTimeout(() => { this.rfcomm.sendCommand('c', input.batRelay3); }, 40);
 			setTimeout(() => { this.rfcomm.sendCommand('d', input.driveRelay); }, 60);
