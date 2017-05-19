@@ -269,13 +269,13 @@ class Pods extends Neuron
 	convertToTemp(podNum, data)
 	{
 		var degC = -66.875 + 218.75 * (data * (5/1023))/3.3;
-		var tempRegisterKey = "pod" + podNum + "TempData";
+		var tempRegisterKey = "pod" + podNum + "_TempData";
 		this.model.set(tempRegisterKey, degC);
 	}
 	convertToMoist(podNum, data)
 	{
 		var relativeHumididty = -12.5 + 125 * (raw * (5/1023))/3.3;
-		var moistRegisterKey = "pod" + podNum + "TempData";
+		var moistRegisterKey = "pod" + podNum + "_MoistData";
 		this.model.set(moistRegisterKey, relativeHumidity);
 	}
 	
