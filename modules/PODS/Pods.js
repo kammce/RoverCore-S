@@ -227,6 +227,7 @@ class Pods extends Neuron
 		this.feedback(`IDLING ${this.name}`);
 		return true;
 	}
+	
 	parseMessage( var podNum, var messagebits, var type)
 	{
 
@@ -240,46 +241,14 @@ class Pods extends Neuron
 		
 		if(type == "init")
 		{
-			
-			
-			//get current timestamp and subtract the timestampOffsetInMilliseconds from that 
-			var currentTime = new Date();
-			var currentTimeInMilli = currentTime.getTime();
-			
-			var timeStarted = currentTimeInMilli - timestampOffsetInMilliseconds;
-			
-			var initDate = new Date(timeStarted); //store this as the init start time of the rover 
-			initTimestamp[podNum] = initDate;
-			lastSentTimestamp[podNum] = initDate;
-			
-			var initDateInSec = Math.floor(initDate/1000); //what we send over 
-			
-			//send over to CS 
-			if(input.podNum == 1)
-			{
-				this.rfcomm_pod1.sendCommand('q', initDateInSec);
-				
-			}
-			else if(input.podNum == 2)
-			{
-				this.rfcomm_pod2.sendCommand('q', initDateInSec);
-				
-			}
-			else if(input.podNum == 3)
-			{
-				this.rfcomm_pod3.sendCommand('q', initDateInSec);
-				
-			}
-			else 
-			{
-				this.rfcomm_pod4.sendCommand('q', initDateInSec);
-				
-			}
-			
+			sendInitStartTime(podNum, timestampOffsetInMilliseconds);
 		}
-		//TODO 
-		//Else, update lastSentTimestamp and send if needed for error 
+		else //already initialized start time, just update when we last got sent something 
+		{
+			//TODO 
+			//Else, update lastSentTimestamp and send if needed for error 
 			lastSentTimestamp = Math.floor((initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds)/1000);
+		}
 		
 		//put data into specific temp/moisture key for that pod 
 		if(type == "temp")
@@ -297,6 +266,38 @@ class Pods extends Neuron
 		
 	}
 	
+	sendInitStartTime(var podNum, var timestampOffsetInMilliseconds)
+	{
+		//get current timestamp and subtract the timestampOffsetInMilliseconds from that 
+		var currentTime = new Date();
+		var currentTimeInMilli = currentTime.getTime();
+		
+		var timeStarted = currentTimeInMilli - timestampOffsetInMilliseconds;
+		
+		var initDate = new Date(timeStarted); //store this as the init start time of the rover 
+		initTimestamp[podNum] = initDate;
+		lastSentTimestamp[podNum] = initDate;
+		
+		var initDateInSec = Math.floor(initDate/1000); //what we send over 
+		
+		//send over to CS 
+		if(input.podNum == 1)
+		{
+			this.rfcomm_pod1.sendCommand('q', initDateInSec);
+		}
+		else if(input.podNum == 2)
+		{
+			this.rfcomm_pod2.sendCommand('q', initDateInSec);
+		}
+		else if(input.podNum == 3)
+		{
+			this.rfcomm_pod3.sendCommand('q', initDateInSec);
+		}
+		else 
+		{
+			this.rfcomm_pod4.sendCommand('q', initDateInSec);
+		}
+	}
 	attachListeners()
 	{
 		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
