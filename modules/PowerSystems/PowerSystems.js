@@ -36,7 +36,7 @@ class PowerSystems extends Neuron
 		this.idle_timeout = 2000;
 		/**
 		 * as writing debug information to file periodically.
-		 * 
+		 *
 		 *	Usage:
 		 */
 	 	// 	this.model.registerMemory("Proto");
@@ -44,7 +44,7 @@ class PowerSystems extends Neuron
 	 	// 	    proto: 555
 			// });
 			// var proto = this.model.get("Proto");
-		 
+
 		this.model = util.model;
 		/**
 		 * A method for making up calls to cortex to control the system
@@ -65,7 +65,7 @@ class PowerSystems extends Neuron
 			baud: 38400,
 			log: this.log,
 			device: 2
-		});	
+		});
 
 		this.locals = {
 			realTimeVoltage: 0,
@@ -85,47 +85,56 @@ class PowerSystems extends Neuron
 			}
 		};
 
-
 		this.rfcomm.attachListener('0', (value) => {
 			this.locals.realTimeVoltage = value;
-			// this.log.output("WE RECIEVED 0!!!");
+			this.log.debug3("WE RECIEVED 0!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('1', (value) => {
 			this.locals.mAhRemaining = value;
 			this.locals.batteryPercentage = value/120; //mAhRemaining / (12000 / 100)
-			// this.log.output("WE RECIEVED 1!!!");
+			this.log.debug3("WE RECIEVED 1!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('2', (value) => {
 			this.locals.currents.Drive = value;
-			// this.log.output("WE RECIEVED 2!!!");
+			this.log.debug3("WE RECIEVED 2!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('3', (value) => {
 			this.locals.currents.Steer = value;
-			// this.log.output("WE RECIEVED 3!!!");
+			this.log.debug3("WE RECIEVED 3!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('4', (value) => {
 			this.locals.currents.Arm = value;
-			// this.log.output("WE RECIEVED 4!!!");
+			this.log.debug3("WE RECIEVED 4!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('5', (value) => {
 			this.locals.currents.Intel = value;
-			// this.log.output("WE RECIEVED 5!!!");
+			this.log.debug3("WE RECIEVED 5!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('6', (value) => {
 			this.locals.currents.Mast = value;
-			// this.log.output("WE RECIEVED 6!!!");
+			this.log.debug3("WE RECIEVED 6!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('7', (value) => {
 			this.locals.temperatures.Battery1 = value;
-			// this.log.output("WE RECIEVED 7!!!");
+			this.log.debug3("WE RECIEVED 7!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('8', (value) => {
 			this.locals.temperatures.Battery2 = value;
-			// this.log.output("WE RECIEVED 8!!!");
+			this.log.debug3("WE RECIEVED 8!!!");
+			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('9', (value) => {
 			this.locals.temperatures.Battery3 = value;
-			// this.log.output("WE RECIEVED 9!!!");
+			this.log.debug3("WE RECIEVED 9!!!");
+			this.model.set("Power", this.locals);
 		});
 
 		//for testing model update
@@ -151,7 +160,7 @@ class PowerSystems extends Neuron
 	react(input)
 	{		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
 			// k.forEach(function(currentkey, currentindex, returndArray){
-				
+
 			// })
 		if ("batRelay1"  in input &&
 			"batRelay2"  in input &&
@@ -180,7 +189,7 @@ class PowerSystems extends Neuron
 			this.feedback(`NOT reacting ${this.name}; invalid inputs.`);
 			return false;
 		}
-		
+
 		return true;
 	}
 	/**
