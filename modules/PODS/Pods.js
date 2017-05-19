@@ -254,16 +254,29 @@ class Pods extends Neuron
 		if(type == "temp")
 		{
 			//this.model.set(podTempDataKey[podNum], data);
-			convertToTemp();
+			convertToTemp(podNum, data);
 		}
 		else if(type == "moist")
 		{
 			//this.model.set(podMoistDataKey[podNum], data);
-			convertToMoist();
+			convertToMoist(podNum, data);
 		}
 		//update milliseconds elapsed 
 		this.model.set(podTimestampKey[podNum], updatedTimestamp);
 		
+	}
+
+	convertToTemp(podNum, data)
+	{
+		var degC = -66.875 + 218.75 * (data * (5/1023))/3.3;
+		var tempRegisterKey = "pod" + podNum + "TempData";
+		this.model.set(tempRegisterKey, degC);
+	}
+	convertToMoist(podNum, data)
+	{
+		var relativeHumididty = -12.5 + 125 * (raw * (5/1023))/3.3;
+		var moistRegisterKey = "pod" + podNum + "TempData";
+		this.model.set(moistRegisterKey, relativeHumidity);
 	}
 	
 	sendInitStartTime(podNum, timestampOffsetInMilliseconds)
