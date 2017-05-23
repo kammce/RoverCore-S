@@ -350,46 +350,6 @@ class Pods extends Neuron
 		}
 	}
 
-	/*attachListeners()
-	{
-		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
-		this.rfcomm_pod1.attachListener('a', (data)=>
-		{
-			parseMessage(1, data, "init");
-		});
-		this.rfcomm_pod2.attachListener('a', (data)=>
-		{
-			parseMessage(2, data, "init");
-		});
-		this.rfcomm_pod3.attachListener('a', (data)=>
-		{
-			parseMessage(3, data, "init");
-		});
-		this.rfcomm_pod4.attachListener('a', (data)=>
-		{
-			parseMessage(4, data, "init");
-		});
-		
-		//add listeners for errors (i - n)
-		attachAllListeners('g'); //ready for retrieval
-
-		attachAllListener('i');
-		attachAllListeners('j');
-		attachAllListeners('k');
-		attachAllListener('l');
-		attachAllListeners('m');
-		attachAllListeners('n');		
-		
-		//attach listeners for temp 
-		attachDataListener('b', "temp");
-		attachDataListener('o', "temp");
-
-		//attach listeners for humidity
-		attachDataListener('c', "moist");
-		attachDataListener('p', "moist");
-		
-		
-	}*/
 	
 	attachDataListener(key, type)
 	{
