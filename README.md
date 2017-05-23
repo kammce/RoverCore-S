@@ -61,35 +61,43 @@ To get more information about the command line arguments run:
 
 ##### RoverCore-S manual output:
 
-    SYNOPSIS
-         node RoverCore [-h]
-         node RoverCore [-t http://address:port] [-s]
-         node RoverCore [--no-color]
-         node RoverCore -i "Protolobe,DriveSystem"
+NAME
+    RoverCore - Start RoverCore
 
-    OPTIONS
-         -h
-            this parameter returns manual information
+SYNOPSIS
+    node RoverCore [-h]
+    node RoverCore [-t http://address:port] [-s]
 
-         -t, --target   http://address:port
-            This parameter sets the address of the Primus.js server that
-            RoverCore-S will communicate with. Otherwise RoverCore-S will create its own server and clients connect directly to RoverCore-S.
+OPTIONS
+    -h
+        this parameter returns manual information
 
-         -s, --simulate
-            This parameter will replace every module with empty version
-            in the modules folder with a Protolobe module. The Protolobe
-            will have the name and idle characteristics of the module it
-            is replacing. This is useful for testing communication
-            between interface and modules. Data sent to protolobe will
-            be echoed back to the server and sent to STDOUT (console).
+    -t, --target    http://address:port
+        This parameter sets the address of the Primus.js server that
+        RoverCore will communicate with.
+        Defaults to http://localhost:9000.
 
-         -i, --isolate "module" | "module1,moduel2,..."
-            Isolate a particular lobe. For a single module, you need
-            only put in the name. List of lobes must be comma
-            separated list without spaces.
+    -s, --simulate
+        This parameter will replace every module with empty version
+        in the modules folder with a Protolobe module. The Protolobe
+        will have the name and idle charateristics of the module it
+        is replacing. This is useful for testing communication
+        between interface and modules. Data sent to protolobe will
+        be echoed back to the server and sent to stdout (console).
 
-        --no-color
-            Disable log coloring in RoverCore.
+    -i, --isolate "module" | "module1,moduel2,..."
+        Isolate a particular lobe. For a single module, you need
+        only put in the name. List of lobes must be comma
+        seperated list without spaces.
+
+    --no-color
+        Disable log coloring in RoverCore.
+
+    -v, -vv, -vvv
+        Verbose output.
+        -v will show debug level 1 messages.
+        -vv will show debug level 1 and 2 messages.
+        -vvv will show debug levels 1, 2 and 3 messages.
 
 ## **Getting Started with RoverCore-S**
 ### **Lobes in RoverCore-S and What They Do**
