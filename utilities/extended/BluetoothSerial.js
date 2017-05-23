@@ -18,11 +18,8 @@ class BluetoothSerial extends Serial
 		this.callback_map = {};
 		this.bind_interval;
 		this.busy = true;
-<<<<<<< HEAD
-=======
 		this.channel = BluetoothSerial.bt_channel_iterator++;
 		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
->>>>>>> kammce/bluetoothserial
 		this.bind();
 	}
 	bind()
@@ -38,15 +35,9 @@ class BluetoothSerial extends Serial
 		if(!this.fs.existsSync(this.path) && !this.busy)
 		{
 			this.log.debug1(`${this.path} does not exist processing to bind`);
-<<<<<<< HEAD
-			this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
-			{
-				this.log.debug1(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
-=======
 			this.exec(this.bind_command, (error, stdout, stderr) =>
 			{
 				this.log.debug1(`RFCOMM BIND successfully (ch=${this.channel}). Checking if ${this.path} exists.`);
->>>>>>> kammce/bluetoothserial
 				if(this.fs.existsSync(this.path))
 				{
 					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
