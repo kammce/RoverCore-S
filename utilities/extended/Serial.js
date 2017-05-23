@@ -7,19 +7,26 @@ class Serial
 		this.ready = false;
 		this.port;
 		this.log = params.log;
-		this.device = params.device;
-		this.mac_address = params.mac;
+		this.path = params.path;
 		this.baud_rate = params.baud;
+		this.delimiter = params.delimiter;
 		this.fs = require('fs');
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
 	}
 	setupSerial()
 	{
-		this.port = new this.SerialPort(`/dev/rfcomm${this.device}`, {
+		var options = {
 			baudRate: this.baud_rate,
 			autoOpen: false
-		});
+		};
+
+		if(typeof this.delimiter === "string")
+		{
+			options['parser'] = this.SerialPort.parsers.readline(this.delimiter);
+		}
+
+		this.port = new this.SerialPort(this.path, options);
 		this.port.on("open",  this.onPortOpen);
 		this.port.on("data",  this.onPortData);
 		this.port.on("error", this.onPortError);
@@ -69,7 +76,7 @@ class Serial
 	}
 	attachListener(key, callback)
 	{
-		if(/^[a-zA-Z]$/g.test(key) && typeof callback === 'function')
+		if(/^[a-zA-Z0-9]$/g.test(key) && typeof callback === 'function')
 		{
 			this.callback_map[key] = callback;
 			return true;
