@@ -78,11 +78,7 @@ class BluetoothSerial extends Serial
 		}
 		else
 		{
-<<<<<<< HEAD
-			this.log.debug1(`Serial Port DOES NOT exists, processing to release device.`);
-=======
 			this.log.debug1(`Serial Port DOES NOT exists, proceeding to release device.`);
->>>>>>> kammce/bluetoothserial
 			release_callback();
 		}
 	}
