@@ -42,5 +42,12 @@ sudo npm install -g grunt-cli
 echo -e "\nNPM Install Mocha Command Line Interface"
 sudo npm install -g mocha-cli
 
+echo -e "\nInstalling Lib udev development library"
+sudo apt-get install libudev-dev
+
+echo -e "\nCompiling camera control command line interface"
+gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
+
+
 # Kill sudo timestamp
 sudo -k

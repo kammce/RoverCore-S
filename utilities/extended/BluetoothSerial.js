@@ -153,17 +153,13 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:6f:a7 1234
 00:21:13:00:71:57 1234
 98:D3:31:FC:4B:A9 1234
-<<<<<<< HEAD
-=======
 98:D3:31:FC:50:00 1234
->>>>>>> kammce/bluetoothserial
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 {
 	var execSync = require("child_process").execSync;
 	try
-<<<<<<< HEAD
 	{
 		//// If this is successful then this method will return,
 		//// Preventing additional bt-agents from being created!
@@ -172,16 +168,6 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	}
 	catch(e)
 	{
-=======
-	{
-		//// If this is successful then this method will return,
-		//// Preventing additional bt-agents from being created!
-		execSync("ps aux | grep [b]t-agent");
-		console.log("BT-AGENT EXISTS: will not spawn another.");
-	}
-	catch(e)
-	{
->>>>>>> kammce/bluetoothserial
 		console.log("BT-AGENT DOES NOT EXIST: will spawn bt-agent service.");
 		//// Execution of ps aux failed, thus the process does not exist.
 		var spawn = require("child_process").spawn;

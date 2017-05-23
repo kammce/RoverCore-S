@@ -59,6 +59,17 @@ class VideoServer extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		this.spawn = require("child_process").spawn;
+		this.exec = require("child_process").exec;
+		this.video = undefined;
+		//this.killAllVideoServers();
+		this.model.registerMemory("VideoServer");
+
+		this.local = {
+			restart_counter: 0,
+		};
+
+		this.model.set("VideoServer", this.local);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -67,8 +78,22 @@ class VideoServer extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
+		switch(input["mode"])
+		{
+			case "start":
+				this.startVideoServer();
+				break;
+			case "stop":
+				this.stopVideoServer();
+				break;
+			case "kill":
+				this.killAllVideoServers();
+				break;
+			case "zoom":
+				this.setZoom(input["zoom"]);
+			default:
+				break;
+		}
 		return true;
 	}
 	/**
@@ -106,14 +131,85 @@ class VideoServer extends Neuron
 		this.feedback(`IDLING ${this.name}`);
 		return true;
 	}
-	checkIfVLCExists() {
-
-	}
-	startMJPEGVLCServer()
+	setZoom(zoom)
 	{
-
+		//zoom = zoom || 0;
+		zoom = (0 <= zoom && zoom <= 43) ? zoom : 0;
+		this.exec(`./install/See3CAMx10-CL/camera-control optical-zoom ${zoom}`);
 	}
+	isVideoServerOn()
+	{
+		if(typeof this.video === "undefined")
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	startVideoServer()
+	{
+		this.video = this.spawn('vlc-wrapper',
+		[
+			'-I', ' dummy',
+			'v4l2://',
+			':v4l2-dev=/dev/video-tracker',
+			':v4l2-width=1280',
+			':v4l2-height=720',
+			'--live-caching=0',
+			'--network-caching=0',
+			':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+		]);
+		this.video.stdout.on('data', (data) =>
+		{
+			this.log.debug3(data.toString());
+		});
+		this.video.stderr.on('data', (data) =>
+		{
+			this.log.debug3(data.toString());
+		});
+		this.video.on('close', (code) =>
+		{
+			var msg = `VIDEO CLOSED WITH CODE ${code}`;
+			this.log.output(msg);
+			this.feedback(msg);
+		});
 
+		this.local["restart_counter"]++;
+
+		this.model.set("VideoServer", this.local);
+	}
+	stopVideoServer()
+	{
+		if(this.isVideoServerOn())
+		{
+			this.video.kill();
+			this.video = undefined;
+		}
+		else
+		{
+			var msg = "Video Server is already off";
+			this.log.debug1(msg);
+			this.feedback(msg);
+		}
+	}
+	killAllVideoServers()
+	{
+		this.video = undefined;
+		this.exec('killall vlc', (err) =>
+		{
+			if(err)
+			{
+				this.log.debug1(err);
+				this.feedback(err);
+				return;
+			}
+			var msg = "ATTEMPTING TO KILL ALL INSTANCES OF VLC.";
+			this.log.debug1(msg);
+			this.feedback(msg);
+		});
+	}
 }
 
 module.exports = VideoServer;
