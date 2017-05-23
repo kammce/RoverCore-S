@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class ProtoLobe extends Neuron
+class Drive extends Neuron
 {
 	constructor(util)
 	{
@@ -28,7 +28,7 @@ class ProtoLobe extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("grey");
+		this.log.setColor("blue");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
@@ -45,16 +45,62 @@ class ProtoLobe extends Neuron
 		 */
 		this.model = util.model;
 		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "00:21:13:00:6E:A7",
+			baud: 38400,
+			log: this.log,
+			device: 1
+		});
+				//Feedback variables
+		this.locals = {
+			currentTrajectory: 	[0, 0, 0, 0],
+			currentPropulsion: 	[0, 0, 0, 0],
+			tacho_rpm: 			[0, 0, 0, 0]
+		};
+
+		//Attach lister to update feedback
+		this.rfcomm.attachListener('0', (val) => {
+			this.local.tacho_rpm[0] = val;
+		});
+		this.rfcomm.attachListener('1', (val) => {
+			this.local.tacho_rpm[1] = val;
+		});
+		this.rfcomm.attachListener('2', (val) => {
+			this.local.tacho_rpm[2] = val;
+		});
+		this.rfcomm.attachListener('3', (val) => {
+			this.local.tacho_rpm[3] = val;
+		});
+		this.rfcomm.attachListener('4', (val) => {
+			this.local.currentTrajectory[0] = val;
+		});
+		this.rfcomm.attachListener('5', (val) => {
+			this.local.currentTrajectory[1] = val;
+		});
+		this.rfcomm.attachListener('6', (val) => {
+			this.local.currentTrajectory[2] = val;
+		});
+		this.rfcomm.attachListener('7', (val) => {
+			this.local.currentTrajectory[3] = val;
+		});
+		this.rfcomm.attachListener('8', (val) => {
+			this.local.tacho_rpm[0] = val;
+		});
+		this.rfcomm.attachListener('9', (val) => {
+			this.local.tacho_rpm[1] = val;
+		});
+		this.rfcomm.attachListener('Z', (val) => {
+			this.local.tacho_rpm[2] = val;
+		});
+		this.rfcomm.attachListener('Y', (val) => {
+			this.local.tacho_rpm[3] = val;
+		});
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -63,9 +109,25 @@ class ProtoLobe extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
-		return true;
+		var status = true;
+		if( "speed" in input &&
+			"angle" in input &&
+			"mode" 	in input)
+		{
+			this.log.output(input);
+			this.rfcomm.sendCommand("S", input.speed);
+			this.rfcomm.sendCommand("A", input.angle);
+			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
+			this.log.debug2(`Sending `, input, `Over BluetoothSerial`);
+			this.feedback(`Sending `, input, `Over BluetoothSerial`);
+		}
+		else
+		{
+			this.log.output(`Invalid Input `, input);
+			this.feedback(`Invalid Input `, input);
+			status = false;
+		}
+		return status;
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -76,6 +138,8 @@ class ProtoLobe extends Neuron
      */
 	halt()
 	{
+		this.rfcomm.sendCommand("S", 0);
+		this.rfcomm.sendCommand("A", 0);
 		this.log.output(`HALTING ${this.name}`);
 		this.feedback(`HALTING ${this.name}`);
 		return true;
@@ -90,7 +154,6 @@ class ProtoLobe extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		this.upcall("CALL", this.name, "LOOPBACK-UPCALL");
 		return true;
 	}
 	/**
@@ -99,10 +162,12 @@ class ProtoLobe extends Neuron
      */
 	idle()
 	{
+		this.rfcomm.sendCommand("S", 0);
+		this.rfcomm.sendCommand("A", 0);
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
 		return true;
 	}
 }
 
-module.exports = ProtoLobe;
+module.exports = Drive;

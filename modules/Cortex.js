@@ -6,11 +6,14 @@ class Cortex
 	{
 		console.log("STARTING Rover Core!");
 		this.name = "Cortex";
+		this.cortex = this;
 		this.simulate = config.simulate;
 		this.exec = require('child_process').exec;
-		this.lobe_map = {};
-		this.time_since_last_command = {};
-		this.previous_lobe_status = {};
+		this.lobe_map = {  };
+		this.time_since_last_command = {  };
+		this.status = {  };
+		this.mission_controllers = {  };
+		this.debug_level = config.debug_level || 0;
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -18,7 +21,11 @@ class Cortex
 		var http = require('http');
 		console.log(`Setting up Primus (Websockets) Server`);
 		var server = http.createServer();
-		var primus = new Primus(server, { transformer: 'websockets' });
+		var primus = new Primus(server,
+		{
+			transformer: 'websockets',
+
+		});
 
 		server.listen(9000);
 
@@ -29,20 +36,27 @@ class Cortex
 			this.log.output('Connection id', spark.id);
 			spark.on('data', (data) =>
 			{
-				if(data.hasOwnProperty('target') && data.hasOwnProperty('command'))
+				try
 				{
-					if(data["target"] === this.name)
+					if('target' in data && 'command' in data)
 					{
-						this.handleMissionControl(data['command'], spark);
+						if(data["target"] === this.name)
+						{
+							this.handleMissionControl(data['command'], spark);
+						}
+						else
+						{
+							this.handleIncomingData(data, spark);
+						}
 					}
 					else
 					{
-						this.handleIncomingData(data, spark);
+						this.log.output('INVALID Data: Incoming data did not contain target and command properties.');
 					}
 				}
-				else
+				catch(e)
 				{
-					this.log.output('INVALID Data: Incoming data did not contain target and command/connection properties.');
+					this.log.output('INVALID: Failed to evaluate incoming data.');
 				}
 			});
 			spark.on('end', (/*data*/) =>
@@ -69,7 +83,8 @@ class Cortex
 					output += arguments[i]+"\n";
 				}
 			}
-			primus.write({
+			primus.write(
+			{
 				target: lobe_name,
 				message: output
 			});
@@ -78,9 +93,10 @@ class Cortex
 		// Setting up Logs and Model
 		// =====================================
 		this.LOG = require('../utilities/Log');
+		this.LOG.disable_colors = config.no_color;
 		this.MODEL = require('../utilities/Model');
 
-		this.log = new this.LOG(this.name, "white");
+		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback);
 
 		this.extended_utilities = require("../utilities/Extended.js");
@@ -97,148 +113,168 @@ class Cortex
 			this.sendLobeStatus();
 		}, 100);
 	}
-	handleIncomingData(data, spark)
+	handleIncomingData(data)
 	{
-		var parent = this;
+		//this.log.output(data);
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
-			if(this.lobe_map[target]['controller'] === spark.id)
+			setImmediate(() =>
 			{
-				setImmediate(function()
-				{
-					parent.time_since_last_command[target] = Date.now();
-					parent.lobe_map[target]._react(data['command']);
-				});
-			}
-			else
-			{
-				this.log.output(`Connection ID is not associated with target lobe: ${target}.`);
-			}
+				this.time_since_last_command[target] = Date.now();
+				this.lobe_map[target]._react(data['command']);
+			});
 		}
 		else
 		{
 			this.log.output(`Target ${target} does not exist in lobe_map.`);
 		}
 	}
-	sendLobeStatus() {
-		for (var lobe in this.lobe_map) {
-			if(!this.previous_lobe_status.hasOwnProperty(lobe))
+	sendLobeStatus()
+	{
+		var change_flag = false;
+		for (var lobe in this.lobe_map)
+		{
+			if(!this.status.hasOwnProperty(lobe))
 			{
-				this.previous_lobe_status[lobe] = {};
-			}
-			else if(this.previous_lobe_status[lobe]['state'] !== this.lobe_map[lobe]['state'])
-			{
-				this.previous_lobe_status[lobe] = {
-					lobe: lobe,
-					"controller": this.lobe_map[lobe]['controller'],
-					"state" : this.lobe_map[lobe]['state']
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
 				};
-				this.feedback(this.name, this.previous_lobe_status[lobe]);
+				change_flag = true;
+			}
+			else if(this.status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			{
+				this.status[lobe] = {
+					state: this.lobe_map[lobe]['state']
+				};
+				change_flag = true;
+			}
+		}
+		if(change_flag)
+		{
+			this.feedback(this.name,
+			{
+				type: "status",
+				data: this.status
+			});
+		}
+	}
+	sendInterfaceStatus()
+	{
+		this.feedback(this.name,
+		{
+			type: "mission_controllers",
+			data: this.mission_controllers
+		});
+	}
+	removeInterface(spark)
+	{
+		for(var controller in this.mission_controllers)
+		{
+			if(this.mission_controllers[controller] === spark.id)
+			{
+				this.feedback(this.name, `${controller}: Interface Disconnected!`);
+				this.mission_controllers[controller] = "";
+				break;
 			}
 		}
 	}
+	addInterface(controller, spark)
+	{
+		this.feedback(this.name, `${controller}: Interface Connected!`);
+		this.mission_controllers[controller] = spark.id;
+	}
 	handleMissionControl(data, spark)
 	{
-		var msg;
-		//// NOTE: Lobe cannot have names 'disconnect', 'halt', or 'resume'
-		var actions = {
-			"disconnect": (lobe) =>
-			{
-				this.lobe_map[lobe]['controller'] = "";
-			},
-			"halt": (lobe) =>
-			{
-				this.lobe_map[lobe]._halt();
-			},
-			"resume": (lobe) =>
-			{
-				this.lobe_map[lobe]._resume();
-			}
-		};
-		if(Object.keys(actions).indexOf(data) !== -1)
+		if(data === "disconnect")
 		{
-			for (var lobe in this.lobe_map)
-			{
-				if(this.lobe_map[lobe]['controller'] === spark.id)
-				{
-					actions[data](lobe);
-				}
-			}
+			this.removeInterface(spark);
 		}
-		else if(Object.keys(this.lobe_map).indexOf(data) !== -1)
+		else if(typeof data["controller"] === "string")
 		{
-			if(!this.lobe_map[data]['controller'])
-			{
-				msg = `${data} controller assigned to connection: ${spark.id}`;
-				this.lobe_map[data]['controller'] = spark.id;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
-			}
-			else
-			{
-				msg = `Cortex could not assign ${spark.id} to lobe ${data}, lobe does not exist.`;
-				this.log.output(msg);
-				this.feedback('Cortex', msg);
-			}
+			this.addInterface(data["controller"], spark);
 		}
-		else
-		{
-			msg = `Cortex could not handle command: ${data}.`;
-			this.log.output(msg);
-			this.feedback('Cortex', msg);
-		}
+		this.sendInterfaceStatus();
+		// var msg;
+		// //// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
+		// var actions = {
+		// 	"halt": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._halt();
+		// 	},
+		// 	"resume": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._resume();
+		// 	},
+		// 	"idle": (lobe) =>
+		// 	{
+		// 		this.lobe_map[lobe]._idle();
+		// 	}
+		// };
+
+		// // if("lobe" in data && "action" in data)
+		// // {
+		// // 	actions[data["action"]](data["lobe"]);
+		// // 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// // }
+		// // else
+		// // {
+		// 	msg = `Cortex DOES NOT DO ANYTHING WITH THIS ANYMORE.`;
+		// // }
+
+		// this.log.output(msg);
+		// this.feedback('Cortex', msg);
 	}
 	handleIdleStatus()
 	{
 		for(var lobe in this.time_since_last_command)
 		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_timeout'])
+			if(delta >= this.lobe_map[lobe]['idle_timeout'] && this.lobe_map[lobe]['state'] !== "HALTED")
 			{
 				this.lobe_map[lobe]._idle();
 			}
 		}
 	}
-	upcall(command)
+	LobeControlAll(ctrl)
 	{
-		var haltAll = function()
+		for(var lobe in this.time_since_last_command)
 		{
-			for(var lobe in this.time_since_last_command)
+			switch(ctrl)
 			{
-				this.lobe_map[lobe]._halt();
+				case "HALTALL":
+					this.lobe_map[lobe]._halt();
+					break;
+				case "IDLEALL":
+					this.lobe_map[lobe]._idle();
+					break;
+				case "RESUMEALL":
+					this.lobe_map[lobe]._resume();
+					break;
 			}
-		};
-		var idleAll = function()
-		{
-			for(var lobe in this.time_since_last_command)
-			{
-				this.lobe_map[lobe]._idle();
-			}
-		};
-		var resumeAll = function()
-		{
-			for(var lobe in this.time_since_last_command)
-			{
-				this.lobe_map[lobe]._resume();
-			}
-		};
+		}
+	}
+	upcall(command, ...params)
+	{
 		switch(command)
 		{
+			case "CALL":
+				var [upcall_target, upcall_command] = params;
+				this.cortex.handleIncomingData({
+					target: upcall_target,
+					command: upcall_command
+				}, -1);
+				break;
 			case "HALTALL":
-				haltAll();
-				break;
 			case "RESUMEALL":
-				resumeAll();
-				break;
 			case "IDLEALL":
-				idleAll();
+				this.cortex.LobeControlAll(command);
 				break;
 			case "SYSTEM-SHUTDOWN":
-				this.exec("shutdown -h now");
+				this.cortex.exec("shutdown -h now");
 				break;
 			case "SYSTEM-RESTART":
-				this.exec("reboot");
+				this.cortex.exec("reboot");
 				break;
 			case "RESTART-CORTEX":
 				//// Simply end the process and allow "forever" to restart RoverCore
@@ -253,16 +289,17 @@ class Cortex
 			//// Adding source code path to config object
 			var source_path = `./${directory}/${directory}`;
 			//// Generate Logger
-			var log = new this.LOG(directory);
+			var log = new this.LOG(directory, "white", this.debug_level);
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
 			var parent = this;
+			var upcall = this.upcall;
 			var lobe_utitilites = {
 				"name": directory,
 				"log": log,
 				"model": this.Model,
-				"upcall": this.upcall,
+				"upcall": upcall,
 				"extended": this.extended_utilities,
 				"feedback": function()
 				{
@@ -273,6 +310,9 @@ class Cortex
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);
+			//// Store reference to Cortex instance in lobe object
+			//// Each module contains a reference to Cortex
+			module.cortex = this;
 			//// Log that a Lobe was loaded correctly
 			this.log.output(`Lobe ${directory} loaded SUCCESSFULLY`);
 			//// Return constructed lobe object

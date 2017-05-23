@@ -2,7 +2,7 @@
 
 var Neuron = require('../Neuron');
 
-class ProtoLobe extends Neuron
+class BluetoothSerialTest extends Neuron
 {
 	constructor(util)
 	{
@@ -33,7 +33,7 @@ class ProtoLobe extends Neuron
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
 		 */
-		this.idle_timeout = 2000;
+		this.idle_timeout = 10000;
 		/**
 		 * as writing debug information to file periodically.
 		 * Usage:
@@ -45,16 +45,23 @@ class ProtoLobe extends Neuron
 		 */
 		this.model = util.model;
 		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
 		 * Structure containing additional extended utilities
 		 */
 		this.extended = util.extended;
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		this.rfcomm = new util.extended.BluetoothSerial({
+			mac: "98:D3:31:FC:4B:A9",
+			baud: 38400,
+			log: this.log,
+			device: 99
+		});
+		this.rfcomm.attachListener("k", (value) =>
+		{
+			this.log.debug2(`Key ${k} = ${value}`);
+		});
+		this.rfcomm.sendCommand("k",5);
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -63,8 +70,8 @@ class ProtoLobe extends Neuron
      */
 	react(input)
 	{
-		this.log.output(`REACTING ${this.name}: `, input);
-		this.feedback(`REACTING ${this.name}: `, input);
+		this.log.output(`REACTING ${this.name}`, input);
+		this.feedback(`REACTING ${this.name}`, input);
 		return true;
 	}
 	/**
@@ -90,7 +97,6 @@ class ProtoLobe extends Neuron
 	{
 		this.log.output(`RESUMING ${this.name}`);
 		this.feedback(`RESUMING ${this.name}`);
-		this.upcall("CALL", this.name, "LOOPBACK-UPCALL");
 		return true;
 	}
 	/**
@@ -105,4 +111,4 @@ class ProtoLobe extends Neuron
 	}
 }
 
-module.exports = ProtoLobe;
+module.exports = BluetoothSerialTest;

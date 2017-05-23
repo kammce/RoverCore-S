@@ -1,7 +1,8 @@
 {
   "name": "RoverCore",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "engine": "node >= 4.0.0",
+  "license": "MIT",
   "devDependencies": {
     "chai": "",
     "chai-spies": "",
@@ -9,14 +10,16 @@
     "grunt-contrib-jshint": "",
     "grunt-mocha-test": "",
     "jshint-stylish": "",
-    "mocha": ""
+    "mocha": "",
+    "sinon": ">=1.17.7"
   },
   "dependencies": {
     "colors": "",
     "forever-monitor": "",
-    "primus": "^4.0.1",
-    "ws": "^0.8.0",
-    "serialport": "",
-    "i2c-bus": ""
+    "i2c-bus": "",
+    "primus": ">=4.0.1",
+    "serialport": "^4.0.7",
+    "sleep": "^5.1.1",
+    "ws": ">=0.8.0"
   }
 }
