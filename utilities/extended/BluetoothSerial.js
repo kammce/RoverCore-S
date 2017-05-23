@@ -18,6 +18,11 @@ class BluetoothSerial extends Serial
 		this.callback_map = {};
 		this.bind_interval;
 		this.busy = true;
+<<<<<<< HEAD
+=======
+		this.channel = BluetoothSerial.bt_channel_iterator++;
+		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
+>>>>>>> kammce/bluetoothserial
 		this.bind();
 	}
 	bind()
@@ -33,9 +38,15 @@ class BluetoothSerial extends Serial
 		if(!this.fs.existsSync(this.path) && !this.busy)
 		{
 			this.log.debug1(`${this.path} does not exist processing to bind`);
+<<<<<<< HEAD
 			this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
 			{
 				this.log.debug1(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
+=======
+			this.exec(this.bind_command, (error, stdout, stderr) =>
+			{
+				this.log.debug1(`RFCOMM BIND successfully (ch=${this.channel}). Checking if ${this.path} exists.`);
+>>>>>>> kammce/bluetoothserial
 				if(this.fs.existsSync(this.path))
 				{
 					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
@@ -76,7 +87,11 @@ class BluetoothSerial extends Serial
 		}
 		else
 		{
+<<<<<<< HEAD
 			this.log.debug1(`Serial Port DOES NOT exists, processing to release device.`);
+=======
+			this.log.debug1(`Serial Port DOES NOT exists, proceeding to release device.`);
+>>>>>>> kammce/bluetoothserial
 			release_callback();
 		}
 	}
@@ -136,7 +151,7 @@ class BluetoothSerial extends Serial
 
 
 BluetoothSerial.bt_agent_process = undefined;
-
+BluetoothSerial.bt_channel_iterator = 1;
 //// For BlueZ5 bt-agent, for BlueZ4 bluetooth-agent
 //// NOTE: Bluetooth-agent has different arguments
 BluetoothSerial.bluetooth_agent = "bt-agent";
@@ -151,12 +166,17 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:6f:a7 1234
 00:21:13:00:71:57 1234
 98:D3:31:FC:4B:A9 1234
+<<<<<<< HEAD
+=======
+98:D3:31:FC:50:00 1234
+>>>>>>> kammce/bluetoothserial
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 {
 	var execSync = require("child_process").execSync;
 	try
+<<<<<<< HEAD
 	{
 		//// If this is successful then this method will return,
 		//// Preventing additional bt-agents from being created!
@@ -165,6 +185,16 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	}
 	catch(e)
 	{
+=======
+	{
+		//// If this is successful then this method will return,
+		//// Preventing additional bt-agents from being created!
+		execSync("ps aux | grep [b]t-agent");
+		console.log("BT-AGENT EXISTS: will not spawn another.");
+	}
+	catch(e)
+	{
+>>>>>>> kammce/bluetoothserial
 		console.log("BT-AGENT DOES NOT EXIST: will spawn bt-agent service.");
 		//// Execution of ps aux failed, thus the process does not exist.
 		var spawn = require("child_process").spawn;
