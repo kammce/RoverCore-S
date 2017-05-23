@@ -81,9 +81,6 @@ class Pods extends Neuron
 			this.model.registerMemory("pod1_TempData");
 			this.model.registerMemory("pod1_MoistData");
 			this.model.registerMemory("pod1_timestamp");
-			
-			this.model.set("pod1_tempData", 100);
-			this.model.registerMemory("pod2_timestamp", new Date());
 
 			this.model.registerMemory("pod2_TempData");
 			this.model.registerMemory("pod2_MoistData");
@@ -135,8 +132,46 @@ class Pods extends Neuron
 		});
 		
 		//then attach the 16 listeners to each of the bluetooth instantiations 
-		attachListeners();	
-		
+		this.tryAttach = function attachListeners()
+		{
+			//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
+				this.rfcomm_pod1.attachListener('a', (data)=>
+				{
+					parseMessage(1, data, "init");
+				});
+				this.rfcomm_pod2.attachListener('a', (data)=>
+				{
+					parseMessage(2, data, "init");
+				});
+				this.rfcomm_pod3.attachListener('a', (data)=>
+				{
+					parseMessage(3, data, "init");
+				});
+				this.rfcomm_pod4.attachListener('a', (data)=>
+				{
+					parseMessage(4, data, "init");
+				});
+				
+				//add listeners for errors (i - n)
+				attachAllListeners('g'); //ready for retrieval
+
+				attachAllListener('i');
+				attachAllListeners('j');
+				attachAllListeners('k');
+				attachAllListener('l');
+				attachAllListeners('m');
+				attachAllListeners('n');		
+				
+				//attach listeners for temp 
+				attachDataListener('b', "temp");
+				attachDataListener('o', "temp");
+
+				//attach listeners for humidity
+				attachDataListener('c', "moist");
+				attachDataListener('p', "moist");
+		};
+		this.tryAttach;
+				
 		//prob call funct to split into data and timestamp
 		
 		// this.mc_text_field_interval = setInterval(() =>
@@ -314,7 +349,8 @@ class Pods extends Neuron
 			this.rfcomm_pod4.sendCommand('q', initDateInSec);
 		}
 	}
-	attachListeners()
+
+	/*attachListeners()
 	{
 		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
 		this.rfcomm_pod1.attachListener('a', (data)=>
@@ -353,7 +389,7 @@ class Pods extends Neuron
 		attachDataListener('p', "moist");
 		
 		
-	}
+	}*/
 	
 	attachDataListener(key, type)
 	{
@@ -387,7 +423,7 @@ class Pods extends Neuron
 	{
 		this.log.output(`Pod  `, podNum, `: error related to key `, errorKey);
 		this.feedback(`Pod  `, podNum, `: error related to key `, errorKey);
-	}
+	} 
 
 	attachAllListeners(key)
 	{
@@ -431,6 +467,8 @@ class Pods extends Neuron
 		}
 		
 	}
+	
 }
+
 
 module.exports = Pods;
