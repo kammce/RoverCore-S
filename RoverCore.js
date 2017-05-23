@@ -57,7 +57,7 @@ var config = {
 	"simulate": false,
 	"isolation": false,
 	"debug_level": 0,
-	"no_color": false,
+	"no_color": false
 };
 if(process.argv.indexOf("-s") != -1)
 {
