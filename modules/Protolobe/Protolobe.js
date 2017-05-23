@@ -28,7 +28,7 @@ class ProtoLobe extends Neuron
 		 *		this.log.output("HELLO WORLD", { foo: "bar" });
 		 */
 		this.log = util.log;
-		this.log.setColor("red");
+		this.log.setColor("grey");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING

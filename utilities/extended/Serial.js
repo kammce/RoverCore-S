@@ -9,16 +9,24 @@ class Serial
 		this.log = params.log;
 		this.path = params.path;
 		this.baud_rate = params.baud;
+		this.delimiter = params.delimiter;
 		this.fs = require('fs');
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
 	}
 	setupSerial()
 	{
-		this.port = new this.SerialPort(this.path, {
+		var options = {
 			baudRate: this.baud_rate,
 			autoOpen: false
-		});
+		};
+
+		if(typeof this.delimiter === "string")
+		{
+			options['parser'] = this.SerialPort.parsers.readline(this.delimiter);
+		}
+
+		this.port = new this.SerialPort(this.path, options);
 		this.port.on("open",  this.onPortOpen);
 		this.port.on("data",  this.onPortData);
 		this.port.on("error", this.onPortError);
