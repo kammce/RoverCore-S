@@ -12,6 +12,8 @@ class Cortex
 		this.lobe_map = {  };
 		this.time_since_last_command = {  };
 		this.status = {  };
+		this.mission_controllers = {  };
+		this.debug_level = config.debug_level || 0;
 		// =====================================
 		// Setting up Primus server
 		// =====================================
@@ -19,7 +21,11 @@ class Cortex
 		var http = require('http');
 		console.log(`Setting up Primus (Websockets) Server`);
 		var server = http.createServer();
-		var primus = new Primus(server, { transformer: 'websockets' });
+		var primus = new Primus(server,
+		{
+			transformer: 'websockets',
+
+		});
 
 		server.listen(9000);
 
@@ -30,20 +36,27 @@ class Cortex
 			this.log.output('Connection id', spark.id);
 			spark.on('data', (data) =>
 			{
-				if(data.hasOwnProperty('target') && data.hasOwnProperty('command'))
+				try
 				{
-					if(data["target"] === this.name)
+					if('target' in data && 'command' in data)
 					{
-						this.handleMissionControl(data['command'], spark);
+						if(data["target"] === this.name)
+						{
+							this.handleMissionControl(data['command'], spark);
+						}
+						else
+						{
+							this.handleIncomingData(data, spark);
+						}
 					}
 					else
 					{
-						this.handleIncomingData(data, spark);
+						this.log.output('INVALID Data: Incoming data did not contain target and command properties.');
 					}
 				}
-				else
+				catch(e)
 				{
-					this.log.output('INVALID Data: Incoming data did not contain target and command/connection properties.');
+					this.log.output('INVALID: Failed to evaluate incoming data.');
 				}
 			});
 			spark.on('end', (/*data*/) =>
@@ -80,9 +93,10 @@ class Cortex
 		// Setting up Logs and Model
 		// =====================================
 		this.LOG = require('../utilities/Log');
+		this.LOG.disable_colors = config.no_color;
 		this.MODEL = require('../utilities/Model');
 
-		this.log = new this.LOG(this.name, "white");
+		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback);
 
 		this.extended_utilities = require("../utilities/Extended.js");
@@ -101,6 +115,7 @@ class Cortex
 	}
 	handleIncomingData(data)
 	{
+		//this.log.output(data);
 		var target = data['target'];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
@@ -137,11 +152,49 @@ class Cortex
 		}
 		if(change_flag)
 		{
-			this.feedback(this.name, this.status);
+			this.feedback(this.name,
+			{
+				type: "status",
+				data: this.status
+			});
 		}
 	}
-	handleMissionControl(/*data*/)
+	sendInterfaceStatus()
 	{
+		this.feedback(this.name,
+		{
+			type: "mission_controllers",
+			data: this.mission_controllers
+		});
+	}
+	removeInterface(spark)
+	{
+		for(var controller in this.mission_controllers)
+		{
+			if(this.mission_controllers[controller] === spark.id)
+			{
+				this.feedback(this.name, `${controller}: Interface Disconnected!`);
+				this.mission_controllers[controller] = "";
+				break;
+			}
+		}
+	}
+	addInterface(controller, spark)
+	{
+		this.feedback(this.name, `${controller}: Interface Connected!`);
+		this.mission_controllers[controller] = spark.id;
+	}
+	handleMissionControl(data, spark)
+	{
+		if(data === "disconnect")
+		{
+			this.removeInterface(spark);
+		}
+		else if(typeof data["controller"] === "string")
+		{
+			this.addInterface(data["controller"], spark);
+		}
+		this.sendInterfaceStatus();
 		// var msg;
 		// //// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
 		// var actions = {
@@ -236,7 +289,7 @@ class Cortex
 			//// Adding source code path to config object
 			var source_path = `./${directory}/${directory}`;
 			//// Generate Logger
-			var log = new this.LOG(directory);
+			var log = new this.LOG(directory, "white", this.debug_level);
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
