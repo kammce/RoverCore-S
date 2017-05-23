@@ -70,6 +70,7 @@ class Cortex
 		    var f = function()
 		    {
 		        var output = "";
+
 		        for (var i = 0; i < arguments.length; i++)
 		        {
 		            if(typeof arguments[i] === "object")

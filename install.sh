@@ -48,6 +48,5 @@ sudo apt-get install libudev-dev
 echo -e "\nCompiling camera control command line interface"
 gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
 
-
 # Kill sudo timestamp
 sudo -k
