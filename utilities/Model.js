@@ -42,7 +42,7 @@ class Model {
 			};
 			realtime_reply[key] = this.database[key];
 
-			this.feedback("model", realtime_reply);
+			this.feedback(realtime_reply);
 			return true;
 		}
 		else

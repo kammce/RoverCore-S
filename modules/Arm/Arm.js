@@ -88,13 +88,13 @@ class Arm extends Neuron
 			// this.rfcomm.sendCommand('g', input.camera_select);
 			// this.rfcomm.sendCommand('h', input.rotunda_camera);
 
-			this.log.output(`Sending \n`, input, `Over BluetoothSerial`);
+			this.log.debug2(`Sending \n`, input, `Over BluetoothSerial`);
 			this.feedback(`Sending \n`, input, `Over BluetoothSerial`);
 			return true;
 		}
 		else
 		{
-			this.log.output(`Invalid Input `, input);
+			this.log.debug1(`Invalid Input `, input);
 			this.feedback(`Invalid Input `, input);
 		}
 	}
