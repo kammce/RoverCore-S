@@ -82,6 +82,9 @@ class Pods extends Neuron
 			this.model.registerMemory("pod1_MoistData");
 			this.model.registerMemory("pod1_timestamp");
 			
+			this.model.set("pod1_tempData", 100);
+			this.model.registerMemory("pod2_timestamp", new Date());
+
 			this.model.registerMemory("pod2_TempData");
 			this.model.registerMemory("pod2_MoistData");
 			this.model.registerMemory("pod2_timestamp");	
@@ -332,6 +335,8 @@ class Pods extends Neuron
 		});
 		
 		//add listeners for errors (i - n)
+		attachAllListeners('g'); //ready for retrieval
+
 		attachAllListener('i');
 		attachAllListeners('j');
 		attachAllListeners('k');
@@ -340,8 +345,11 @@ class Pods extends Neuron
 		attachAllListeners('n');		
 		
 		//attach listeners for temp 
+		attachDataListener('b', "temp");
 		attachDataListener('o', "temp");
+
 		//attach listeners for humidity
+		attachDataListener('c', "moist");
 		attachDataListener('p', "moist");
 		
 		
@@ -370,24 +378,58 @@ class Pods extends Neuron
 
 
 	}
+	sendPickupLog(podNum)
+	{
+		this.log.output(`Pod  `, podNum, `ready for retrieval`);
+		this.feedback(`Pod  `, podNum, `ready for retrieval`);
+	}
+	sendErrorLog(podNum, errorKey)
+	{
+		this.log.output(`Pod  `, podNum, `: error related to key `, errorKey);
+		this.feedback(`Pod  `, podNum, `: error related to key `, errorKey);
+	}
+
 	attachAllListeners(key)
 	{
-		this.rfcomm_pod1.attachListener(key, (data)=>
+		if(key == "g")
 		{
-			
-		});
-		this.rfcomm_pod2.attachListener(key, (data)=>
+			this.rfcomm_pod1.attachListener(key, (data)=>
+			{
+				sendPickupLog(1);
+			});
+			this.rfcomm_pod2.attachListener(key, (data)=>
+			{
+				sendPickupLog(2);
+			});
+			this.rfcomm_pod3.attachListener(key, (data)=>
+			{
+				sendPickupLog(3);
+			});
+			this.rfcomm_pod4.attachListener(key, (data)=>
+			{
+				sendPickupLog(4);
+			});
+		}
+		else
 		{
-			
-		});
-		this.rfcomm_pod3.attachListener(key, (data)=>
-		{
-			
-		});
-		this.rfcomm_pod4.attachListener(key, (data)=>
-		{
-			
-		});
+			this.rfcomm_pod1.attachListener(key, (data)=>
+			{
+				sendErrorLog(1, key);
+			});
+			this.rfcomm_pod2.attachListener(key, (data)=>
+			{
+				sendErrorLog(2, key);
+			});
+			this.rfcomm_pod3.attachListener(key, (data)=>
+			{
+				sendErrorLog(3, key);
+			});
+			this.rfcomm_pod4.attachListener(key, (data)=>
+			{
+				sendErrorLog(4, key);
+			});
+		}
+		
 	}
 }
 
