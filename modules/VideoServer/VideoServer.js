@@ -160,7 +160,7 @@ class VideoServer extends Neuron
 			'--live-caching=0',
 			'--network-caching=0',
 			'--sout-transcode-threads', '16',
-			':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+			':sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
 		]);
 		this.video.stdout.on('data', (data) =>
 		{
