@@ -78,22 +78,16 @@ class Pods extends Neuron
 		this.model = util.model;
 		
 		//prob register memories for each unique pod (for MC use when parsing the 32 bit message for relevant values)
-			this.model.registerMemory("pod1_TempData");
-			this.model.registerMemory("pod1_MoistData");
-			this.model.registerMemory("pod1_timestamp");
+		//first element in locals is a placeholder so can call by pod num (1 - 4)
+		this.locals = {
+			TempData:  [0, 0, 0, 0, 0],
+			MoistData: [0, 0, 0, 0, 0],
+			timestamp: [0, 0, 0, 0, 0]
+		};
 
-			this.model.registerMemory("pod2_TempData");
-			this.model.registerMemory("pod2_MoistData");
-			this.model.registerMemory("pod2_timestamp");	
-			
-			this.model.registerMemory("pod3_TempData");
-			this.model.registerMemory("pod3_MoistData");
-			this.model.registerMemory("pod3_timestamp");
-			
-			this.model.registerMemory("pod4_TempData");
-			this.model.registerMemory("pod4_MoistData");
-			this.model.registerMemory("pod4_timestamp");
-
+		//this.locals.TempData === this.locals["TempData"][0]
+		this.model.registerMemory("PODS");
+		this.model.set("PODS", this.locals);
 		/**
 		 * Structure containing additional extended utilities
 		 */
@@ -114,63 +108,60 @@ class Pods extends Neuron
 			mac: "00:21:13:00:71:a1", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 2
+			device: 10
 		});
 
 		this.rfcomm_pod3 = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:71:a1", //get relevant MAC address 
+			mac: "00:21:13:00:71:a2", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 2
+			device: 11
 		});
 		
 		this.rfcomm_pod4 = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:71:a1", //get relevant MAC address 
+			mac: "00:21:13:00:71:a3", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 2
+			device: 12
 		});
 		
 		//then attach the 16 listeners to each of the bluetooth instantiations 
-		this.tryAttach = function attachListeners()
+		this.rfcomm_pod1.attachListener('a', (data)=>
 		{
-			//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
-				this.rfcomm_pod1.attachListener('a', (data)=>
-				{
-					parseMessage(1, data, "init");
-				});
-				this.rfcomm_pod2.attachListener('a', (data)=>
-				{
-					parseMessage(2, data, "init");
-				});
-				this.rfcomm_pod3.attachListener('a', (data)=>
-				{
-					parseMessage(3, data, "init");
-				});
-				this.rfcomm_pod4.attachListener('a', (data)=>
-				{
-					parseMessage(4, data, "init");
-				});
-				
-				//add listeners for errors (i - n)
-				attachAllListeners('g'); //ready for retrieval
+			parseMessage(1, data, "init");
+		});
+		this.rfcomm_pod2.attachListener('a', (data)=>
+		{
+			parseMessage(2, data, "init");
+		});
+		this.rfcomm_pod3.attachListener('a', (data)=>
+		{
+			parseMessage(3, data, "init");
+		});
+		this.rfcomm_pod4.attachListener('a', (data)=>
+		{
+			parseMessage(4, data, "init");
+		});
 
-				attachAllListener('i');
-				attachAllListeners('j');
-				attachAllListeners('k');
-				attachAllListener('l');
-				attachAllListeners('m');
-				attachAllListeners('n');		
+		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
 				
-				//attach listeners for temp 
-				attachDataListener('b', "temp");
-				attachDataListener('o', "temp");
+		//add listeners for errors (i - n)
+		this.attachAllListeners('g'); //ready for retrieval
 
-				//attach listeners for humidity
-				attachDataListener('c', "moist");
-				attachDataListener('p', "moist");
-		};
-		this.tryAttach;
+		this.attachAllListeners('i');
+		this.attachAllListeners('j');
+		this.attachAllListeners('k');
+		this.attachAllListeners('l');
+		this.attachAllListeners('m');
+		this.attachAllListeners('n');		
+		
+		//attach listeners for temp 
+		this.attachDataListener('b', "temp");
+		this.attachDataListener('o', "temp");
+
+		//attach listeners for humidity
+		this.attachDataListener('c', "moist");
+		this.attachDataListener('p', "moist");
 				
 		//prob call funct to split into data and timestamp
 		
@@ -178,6 +169,10 @@ class Pods extends Neuron
 		// {
 		// 	this.feedback("Mission Control Text Area Log Test Overflow");
 		// }, 50);
+		this.log.output("PODS class constructed");
+		this.log.debug1("DEBUG 1");
+		this.log.debug2("DEBUG 2");
+		this.log.debug3("DEGUB 3");
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -291,16 +286,15 @@ class Pods extends Neuron
 		//put data into specific temp/moisture key for that pod 
 		if(type == "temp")
 		{
-			//this.model.set(podTempDataKey[podNum], data);
 			convertToTemp(podNum, data);
 		}
 		else if(type == "moist")
 		{
-			//this.model.set(podMoistDataKey[podNum], data);
 			convertToMoist(podNum, data);
 		}
 		//update milliseconds elapsed 
-		this.model.set(podTimestampKey[podNum], updatedTimestamp);
+		//this.model.set(podTimestampKey[podNum], updatedTimestamp);
+		this.locals.timestamp[podNum] = updatedTimestamp;
 		
 	}
 
@@ -308,13 +302,15 @@ class Pods extends Neuron
 	{
 		var degC = -66.875 + 218.75 * (data * (5/1023))/3.3;
 		var tempRegisterKey = "pod" + podNum + "_TempData";
-		this.model.set(tempRegisterKey, degC);
+		//this.model.set(tempRegisterKey, degC);
+		this.locals.TempData[podNum] = degC;
 	}
 	convertToMoist(podNum, data)
 	{
 		var relativeHumididty = -12.5 + 125 * (raw * (5/1023))/3.3;
 		var moistRegisterKey = "pod" + podNum + "_MoistData";
-		this.model.set(moistRegisterKey, relativeHumidity);
+		//this.model.set(moistRegisterKey, relativeHumidity);
+		this.locals.MoistData[podNum] = relativeHumidity;
 	}
 	
 	sendInitStartTime(podNum, timestampOffsetInMilliseconds)
