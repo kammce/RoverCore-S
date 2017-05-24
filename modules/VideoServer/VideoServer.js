@@ -4,7 +4,7 @@ var Neuron = require('../Neuron');
 
 /*
 
-cvlc -I dummy v4l2:// :v4l2-dev=/dev/video-tracker :v4l2-width=1280 :v4l2-height=720 --live-caching=0 --network-caching=0 ':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+cvlc -I dummy v4l2:// :v4l2-dev=/dev/video-tracker :v4l2-width=1280 :v4l2-height=720 --live-caching=0 --sout-transcode-threads 8 --network-caching=0 ':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
 
 cvlc -I dummy http://localhost:9001 --live-caching=0 --network-caching=0 ':sout=#standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9002}}'
 
@@ -155,10 +155,11 @@ class VideoServer extends Neuron
 			'-I', ' dummy',
 			'v4l2://',
 			':v4l2-dev=/dev/video-tracker',
-			':v4l2-width=1280',
-			':v4l2-height=720',
+			':v4l2-width=640',
+			':v4l2-height=360',
 			'--live-caching=0',
 			'--network-caching=0',
+			'--sout-transcode-threads', '16',
 			':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
 		]);
 		this.video.stdout.on('data', (data) =>

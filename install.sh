@@ -48,5 +48,8 @@ sudo apt-get install libudev-dev
 echo -e "\nCompiling camera control command line interface"
 gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
 
+echo -i "\nInstalling Rover Video UDev rules"
+sudo cp install/udev-rules/rover.rules /etc/udev/rules.d
+
 # Kill sudo timestamp
 sudo -k
