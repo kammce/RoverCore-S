@@ -8,9 +8,6 @@ var Neuron = require('../Neuron');
 var placeholderDate = new Date();
 var initTimestamp = [placeholderDate, placeholderDate, placeholderDate, placeholderDate, placeholderDate];
 var lastSentTimestamp = [placeholderDate, placeholderDate, placeholderDate, placeholderDate, placeholderDate];
-var podTempDataKey = ["","pod1_TempData", "pod2_TempData", "pod3_TempData", "pod4_TempData"];
-var podMoistDataKey = ["","pod1_MoistData", "pod2_MoistData", "pod3_MoistData", "pod4_MoistData"]
-var podTimestampKey = ["", "pod1_timestamp", "pod2_timestamp", "pod3_timestamp", "pod4_timestamp"];
 
 var listenerType = ["INIT_START", "BASELINE_TEMP", "BASELINE_HUM", "READY_FOR_DEPLOYMENT", "DRILL_START",
 					"DRILL_COMPLETE", "READY_FOR_RETRIEVAL","SD_CARD_ERROR","DRILL_COMM_ERROR", "DRILL_DOWN_ERROR",
@@ -280,7 +277,7 @@ class Pods extends Neuron
 		{
 			//TODO 
 			//Else, update lastSentTimestamp and send if needed for error 
-			lastSentTimestamp = Math.floor((initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds)/1000);
+			lastSentTimestamp = initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds);
 		}
 		
 		//put data into specific temp/moisture key for that pod 
@@ -294,6 +291,8 @@ class Pods extends Neuron
 		}
 		//update milliseconds elapsed 
 		//this.model.set(podTimestampKey[podNum], updatedTimestamp);
+
+		var updatedTimestamp = new Date(lastSentTimestamp);
 		this.locals.timestamp[podNum] = updatedTimestamp;
 		
 	}
