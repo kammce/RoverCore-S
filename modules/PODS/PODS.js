@@ -1,3 +1,5 @@
+//run in command line with "sudo node RoverCore.js -i "PODS" -v 
+
 "use strict";
 
 var Neuron = require('../Neuron');
@@ -170,6 +172,46 @@ class Pods extends Neuron
 		this.log.debug1("DEBUG 1");
 		this.log.debug2("DEBUG 2");
 		this.log.debug3("DEGUB 3");
+		var test = 1;
+		if(test == 1)
+		{
+			setInterval(() =>
+			{
+				//// generate sinewave signal
+				//next_value = amp*Math.sin(time);
+				//// injecting noise
+				//next_value += (Math.random() * noise_amp*2 + 1) - noise_amp;
+				//time += Math.PI/freq_multiplier;
+				//// set model random value
+				//this.model.set("Random", next_value);
+
+				//this.locals.TempData[1] = this.locals.TempData[1] + 1;
+				//var msg = 01111001001100010000000001111101;
+				var dataBits = 1;//132; //bits = 01100111
+				this.log.output("original data bits = " + dataBits.toString(2));
+
+				var shiftedDataBits = dataBits<<16;
+				this.log.output("shifted data bits by 16: " + shiftedDataBits.toString(2));
+				var mask = 4294901760;
+
+				shiftedDataBits = shiftedDataBits & mask;
+				this.log.output("databits after masking " + shiftedDataBits.toString(2));
+
+				//var timestamp = new Date();
+				//var timestampBits = Math.floor(timestamp.getTime()/1000);
+				var seconds = 2; 
+				var milliseconds = 2*1000;
+
+				this.log.output("timestamp bits = " + milliseconds.toString(2));
+				var msg = shiftedDataBits + milliseconds;//timestampBits;
+				this.parseMessage(1, msg + 2, "temp");
+				//this.locals.MoistData[1] = this.locals.MoistData[1] + 2;
+				this.model.set("PODS", this.locals);
+				//this.log.output("updating data");
+
+			}, 500);
+		}
+		
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -258,14 +300,17 @@ class Pods extends Neuron
 		return true;
 	}
 	
-	parseMessage(podNum, messagebits, type)
+	parseMessage(podNum, messageBits, type)
 	{
-
+		this.log.output("now entering the parseMessage function \n");
+		this.log.output("     entire messageBits = " + messageBits.toString(2));
 		var dataMask = 4294901760; //1111 1111 1111 1111  0000 0000 0000 0000 
 		var timestampMask = 65535;  //0000 0000 0000 0000  1111 1111 1111 1111
-		
-		var data = messageBits & dataMask;
 
+		var data = messageBits>>16;//messageBits & dataMask;
+		//data = data>>16; 
+		this.log.output("     getting actual databits: " + data.toString(2));
+ 
 		var timestampOffsetInSec = messageBits & timestampMask;
 		var timestampOffsetInMilliseconds = timestampOffsetInSec * 1000;
 		
@@ -277,39 +322,49 @@ class Pods extends Neuron
 		{
 			//TODO 
 			//Else, update lastSentTimestamp and send if needed for error 
-			lastSentTimestamp = initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds);
+			lastSentTimestamp = initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds;
 		}
 		
 		//put data into specific temp/moisture key for that pod 
 		if(type == "temp")
 		{
-			convertToTemp(podNum, data);
+			
+			
+			this.log.output("raw temp bits = " + data);
+			this.convertToTemp(podNum, data);
 		}
 		else if(type == "moist")
 		{
-			convertToMoist(podNum, data);
+			
+			this.convertToMoist(podNum, data);
 		}
 		//update milliseconds elapsed 
 		//this.model.set(podTimestampKey[podNum], updatedTimestamp);
 
 		var updatedTimestamp = new Date(lastSentTimestamp);
 		this.locals.timestamp[podNum] = updatedTimestamp;
+		this.model.set("PODS", this.locals);
 		
 	}
 
 	convertToTemp(podNum, data)
 	{
+
 		var degC = -66.875 + 218.75 * (data * (5/1023))/3.3;
 		var tempRegisterKey = "pod" + podNum + "_TempData";
 		//this.model.set(tempRegisterKey, degC);
 		this.locals.TempData[podNum] = degC;
+		this.model.set("PODS", this.locals);
+		this.log.output("converted Temp for podNum " + podNum + " and data = " + degC);
 	}
+
 	convertToMoist(podNum, data)
 	{
-		var relativeHumididty = -12.5 + 125 * (raw * (5/1023))/3.3;
+		var relativeHumididty = -12.5 + 125 * (data * (5/1023))/3.3;
 		var moistRegisterKey = "pod" + podNum + "_MoistData";
 		//this.model.set(moistRegisterKey, relativeHumidity);
 		this.locals.MoistData[podNum] = relativeHumidity;
+		this.model.set("PODS", this.locals);
 	}
 	
 	sendInitStartTime(podNum, timestampOffsetInMilliseconds)
@@ -322,7 +377,9 @@ class Pods extends Neuron
 		
 		var initDate = new Date(timeStarted); //store this as the init start time of the rover 
 		initTimestamp[podNum] = initDate;
-		lastSentTimestamp[podNum] = initDate;
+		//lastSentTimestamp[podNum] = initDate;
+		this.locals.timestamp[podNum] = initDate;
+		this.model.set("PODS", this.locals);
 		
 		var initDateInSec = Math.floor(initDate/1000); //what we send over 
 		
