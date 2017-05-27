@@ -1,6 +1,7 @@
 "use strict";
 
 var Neuron = require('../Neuron');
+var MjpegCamera = require('mjpeg-camera');
 
 /*
 
@@ -61,15 +62,30 @@ class VideoServer extends Neuron
 		// =====================================
 		this.spawn = require("child_process").spawn;
 		this.exec = require("child_process").exec;
+		this.fs = require('fs');
+
 		this.video = undefined;
 		//this.killAllVideoServers();
 		this.model.registerMemory("VideoServer");
 
 		this.local = {
 			restart_counter: 0,
+			snapshots: 0
 		};
 
+		this.boundary = "--7b3cc56e5f51db803f790dad720ed50a";
+		// this.video_source = "/dev/video-tracker";
+		this.video_source = "/dev/video0";
+
 		this.model.set("VideoServer", this.local);
+		//// Create an MjpegCamera instance
+		this.camera = new MjpegCamera({
+			url: 'http://localhost:9001',
+			motion: true
+		});
+
+		//// killall vlc instances
+		this.exec("killall vlc");
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -91,6 +107,10 @@ class VideoServer extends Neuron
 				break;
 			case "zoom":
 				this.setZoom(input["zoom"]);
+				break;
+			case "snapshot":
+				this.generateSnapshot();
+				break;
 			default:
 				break;
 		}
@@ -154,14 +174,15 @@ class VideoServer extends Neuron
 		[
 			'-I', ' dummy',
 			'v4l2://',
-			':v4l2-dev=/dev/video-tracker',
+			`:v4l2-dev=${this.video_source}`,
 			':v4l2-width=640',
 			':v4l2-height=360',
 			'--live-caching=0',
 			'--network-caching=0',
 			'--sout-transcode-threads', '16',
-			':sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+			`:sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=${this.boundary}},mux=mpjpeg,dst=:9001}}`
 		]);
+
 		this.video.stdout.on('data', (data) =>
 		{
 			this.log.debug3(data.toString());
@@ -209,6 +230,24 @@ class VideoServer extends Neuron
 			var msg = "ATTEMPTING TO KILL ALL INSTANCES OF VLC.";
 			this.log.debug1(msg);
 			this.feedback(msg);
+		});
+	}
+	generateSnapshot()
+	{
+		this.camera.getScreenshot((err, frame) =>
+		{
+			if(err)
+			{
+				this.feedback("COULD NOT GET CAMERA SNAPSHOT :", err);
+			}
+			else
+			{
+				this.fs.writeFile('./modules/VideoServer/snapshot.jpg', frame, () =>
+				{
+					++this.local.snapshots;
+					this.model.set(this.local);
+				});
+			}
 		});
 	}
 }
