@@ -4,7 +4,7 @@
 //
 //  Created by Aris Koumis on 1/18/17.
 //  Made in collaboration with SJSU Robotics
-//  Copyright Â© 2017 Aris. All rights reserved.
+//  Copyright Ã‚Â© 2017 Aris. All rights reserved.
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -26,17 +26,17 @@ void chooseDirection(Gate closestGate);
 void outlineGates(Mat &frame);
 
 //personal prefrence - adjust these at will
-int FRAME_HEIGHT = 480;
-int FRAME_WIDTH = 640;
+int FRAME_HEIGHT = 720;
+int FRAME_WIDTH = 1280;
 
 //adjusting these values changes filtered image
 //I found these values to be sufficient for tennis ball detection
-int H_MIN = 23;
-int H_MAX = 72;
-int S_MIN = 79;
+int H_MIN = 18;
+int H_MAX = 127;
+int S_MIN = 153;
 int S_MAX = 256;
-int V_MIN = 53;
-int V_MAX = 157;
+int V_MIN = 22;
+int V_MAX = 256;
 
 //used to ignore objects too large/small and incorrect object detection
 int MIN_OBJECT_AREA = 10*10;
@@ -51,21 +51,23 @@ VideoCapture capture;
 
 int main() {
     inputSetup();
-//    createTrackbars();
+    //createTrackbars();
     
     Mat input, HSV, threshold;
-    
+    int flag=0;
     int x,y;
     
     while (1) {
         //grab frame from camera and assign to "input" matrix
         //capture.read() returns false if an error is encountered
-        bool bSuccess = capture.read(input);
-        if (!bSuccess) {
+        //while(flag==0){
+	bool bSuccess = capture.read(input);
+         if (!bSuccess) {
             cout << "Error in video capture. Exiting." << endl;
-            break;
-        }
-        
+            flag=1; 
+	    //break;
+         }
+        //}
         //Smoothing Image
         //GaussianBlur(input, input, Size( 3, 3), 0, 0);
         
@@ -82,14 +84,15 @@ int main() {
         
         //Find gates
         trackFilteredObjects(threshold, input);
-        
+	
+	 //waitKey(30);
         //Draw gates on input video
         outlineGates(input);
         
         //display videos
-//        imshow("Original", input);
+        //imshow("Original", input);
 //        imshow("HSV", HSV);
-//        imshow("threshold", threshold);
+        //imshow("threshold", threshold);
         
         //exit if escape key is held for 30ms
         //        if (waitKey(30) == 27) {
@@ -103,9 +106,9 @@ int main() {
         //            break;
         //        }
         
-        input.release();
-        HSV.release();
-        threshold.release();
+        //input.release();
+        //HSV.release();
+        //threshold.release();
     }
     
     return 0;
@@ -127,8 +130,11 @@ void createTrackbars() {
 
 void inputSetup() {
     //open default webcam
-    capture.open(0);
-    capture.set(CV_CAP_PROP_FPS, 10);
+    bool openStream  = capture.open("http://192.168.1.12:9001");
+    if (!openStream) {
+	cout << "ERROR: Unable to retreive video stream." << endl;
+    } 
+    capture.set(CV_CAP_PROP_FPS, 40);
     //set video frame dimensions
     capture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
     capture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
@@ -142,7 +148,7 @@ void morphOps(Mat &threshold) {
     Mat erodeElement = getStructuringElement(MORPH_ELLIPSE, Size(7,7));
     Mat dialateElement = getStructuringElement(MORPH_ELLIPSE, Size(9,9));
     //double erosion to eliminate background noise from thresholded matrix
-    //    erode(threshold, threshold, erodeElement);
+     erode(threshold, threshold, erodeElement);
     erode(threshold, threshold, erodeElement);
     
     //double dilation to fill in desired areas lost from previous erosion
@@ -196,11 +202,11 @@ void trackFilteredObjects(Mat threshold, Mat &input) {
 
 void chooseDirection(Gate closestGate) {
     char direction;
-    
-    if (closestGate.x < 400 && closestGate.x > 240) {
+    //cout << closestGate.x ;
+    if (closestGate.x < 868 && closestGate.x > 360) {
         direction = 'C';
     }
-    else if (closestGate.x >= 400) {
+    else if (closestGate.x >= 868) {
         direction = 'R';
     } else {
         direction = 'L';

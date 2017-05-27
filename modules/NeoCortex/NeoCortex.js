@@ -68,6 +68,7 @@ class NeoCortex extends Neuron
 			longitude : 0,
 			lattitude : 0
 		};
+		this.Sonic = [0,0,0,0,0,0,0,0,0,0,0,0]; //front,front,back,back,left,left,right,right,right_top wheel,left_top wheel,right bottom wheel, left bottom wheel 
 		this.GPS_flag = 1;
 		this.Sonic_flag = 1;  
 		this.AI_direction = "Stop";
@@ -151,7 +152,6 @@ class NeoCortex extends Neuron
 	{
 		var parent = this;
 		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
-
 		this.vision_process.stdout.on('data', function(data) {
 	  		var output = data.toString().replace(/[\n\r]/g, ""); //take out hiddent char 
 	  		var fields = output.split("-");
@@ -255,7 +255,6 @@ class NeoCortex extends Neuron
 	}
 	/*
 	*Read in GPS data : lattitude and altitude
-	*NOT TESTED
 	*/
 	readGPS()
 	{
@@ -275,19 +274,15 @@ class NeoCortex extends Neuron
 	/*
 	*Calculate path using GPS data
 	*Operation go as follow : read GPS, find heading, spin rover to the calculated direction, spin to that direction.
-	*NOT TESTED 
 	*/
 	pathGPS()
 	{
 		this.GPS_Heading = this.headingGPS(this.GPS_current.lattitude,this.GPS_current.longitude,
 										   this.GPS_gate.lattitude,this.GPS_gate.longitude);
-
-		//Get Tracker Heading
-
-	
+		//Get Tracker Headind	
 		var Tracker_Object  = this.model.get("Tracker"); 
 		try{
-			this.Tracker_Heading = Tracker_Object["globalOr"];
+			this.Tracker_Heading = Tracker_Object.globalOr.Z;
 		}
 		catch(err){
 			this.log.output(err);
@@ -304,6 +299,7 @@ class NeoCortex extends Neuron
 		}
 		else
 		{
+			this.pathSonic();
 			this.execDrive("C");
 		}
 	}
@@ -360,8 +356,33 @@ class NeoCortex extends Neuron
 		return rad * 180 / Math.PI;
 	}
 	/*
-	/**
-     * Cortex will attempt to halt this lobe in the following situations:
+	* get Sonic distance value 
+	/**/
+	getSonic()
+	{
+		var SonicObject = this.model.get("Ultrasonic");
+		for(i=0; i<12 ; i++){
+			this.Sonic[0] = SonicObject["Sonic"+(1+i)];
+		}
+	}
+	/*
+	Ultrasonic Automation Logic
+	*/
+	pathSonic()
+	{	
+		this.getSonic();
+		while(this.Sonic[0] > 40 || this.Sonic[1] > 40 ){
+			if(this.Sonic[4] > 40 || this.Sonic[5] > 40)
+			{
+				this.execDrive("R");
+			}
+			else
+			{
+				this.execDrive("L")
+			}
+		}
+	}
+     /* Cortex will attempt to halt this lobe in the following situations:
 	 *		1. If the Mission Control controller of a lobe disconnects from the rover server or server proxy.
 	 *		2. If the Mission Control controller sends a manual halt signal to Cortex to halt the lobe.
 	 *		3. If another lobe uses an UPCALL to trigger the halt of a specific lobe or all lobes.
