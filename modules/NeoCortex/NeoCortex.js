@@ -151,7 +151,7 @@ class NeoCortex extends Neuron
 	openVision()
 	{
 		var parent = this;
-		this.vision_process = spawn('./modules/NeoCortex/Vision/main');
+		this.vision_process = spawn('./modules/NeoCortex/Vision/mainV2');
 		this.vision_process.stdout.on('data', function(data) {
 	  		var output = data.toString().replace(/[\n\r]/g, ""); //take out hiddent char 
 	  		var fields = output.split("-");
