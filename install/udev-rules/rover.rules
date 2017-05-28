@@ -1,6 +1,6 @@
 # SJSU Robotics Rover Cameras
 # This file should be installed to /etc/udev/rules.d so that RoverCore's video module can locate the approprate webcams for mission use.
 #
-# type this at the command prompt: sudo cp rover-video.rules /etc/udev/rules.d
+# type this at the command prompt: sudo cp rover.rules /etc/udev/rules.d
 
 KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="See3CAM_30Z10X", SYMLINK+="video-tracker"
