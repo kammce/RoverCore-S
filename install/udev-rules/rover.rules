@@ -1,17 +1,6 @@
 # SJSU Robotics Rover Cameras
 # This file should be installed to /etc/udev/rules.d so that RoverCore's video module can locate the approprate webcams for mission use.
 #
-# type this at the command prompt: sudo cp rover-video.rules /etc/udev/rules.d
+# type this at the command prompt: sudo cp rover.rules /etc/udev/rules.d
 
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="0BFD493F", SYMLINK+="video-backup"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="8574D65F", SYMLINK+="video-navi"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{serial}=="9FB1593F", SYMLINK+="video-tracker"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="Mobius", SYMLINK+="video-claw"
-KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="eb1a", ATTRS{idProduct}=="299f", ATTRS{product}=="USB 2.0 PC Cam", SYMLINK+="video-science"
-
-KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1b4f", ATTRS{idProduct}=="1b4f", SYMLINK+="ttyBATT"
-KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0010", ATTRS{serial}=="5533034383135190C012", SYMLINK+="ttyFIST"
-KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a7", ATTRS{product}=="u-blox 7 - GPS/GNSS Receiver", SYMLINK+="ttyGPS"
-KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{idProduct}=="8d21", ATTRS{product}=="SFE SAMD21", SYMLINK+="ttyARM"
-KERNEL=="ttyUSB[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{serial}=="AI02L49F", ATTRS{product}=="FT232R USB UART", SYMLINK+="ttySCIENCE"
-KERNEL=="ttyACM[0-9]", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", SUBSYSTEMS=="usb", ATTRS{serial}=="9314036423335131E170", ATTRS{idProduct}=="0043", SYMLINK+="ttyLID"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{name}=="See3CAM_30Z10X", SYMLINK+="video-tracker"

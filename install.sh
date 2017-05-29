@@ -35,9 +35,6 @@ curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 echo -e "\nInstalling NodeJS"
 sudo apt-get install -y nodejs
 
-echo -e "\nNPM Installing Bluetooth BlueZ toolset"
-sudo apt-get install -y bluez-tools
-
 echo -e "\nInstall RoverCore NPM Dependencies"
 npm install .
 echo -e "\nNPM Install Grunt Command Line Interface"
@@ -45,6 +42,14 @@ sudo npm install -g grunt-cli
 echo -e "\nNPM Install Mocha Command Line Interface"
 sudo npm install -g mocha-cli
 
+echo -e "\nInstalling Lib udev development library"
+sudo apt-get install libudev-dev
+
+echo -e "\nCompiling camera control command line interface"
+gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
+
+echo -i "\nInstalling Rover Video UDev rules"
+sudo cp install/udev-rules/rover.rules /etc/udev/rules.d
 
 # Kill sudo timestamp
 sudo -k

@@ -18,6 +18,20 @@ class BluetoothSerial extends Serial
 		this.callback_map = {};
 		this.bind_interval;
 		this.busy = true;
+		this.channel = BluetoothSerial.bt_channel_iterator++;
+		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
+		this.bound = false;
+		this.poll_counter = 0;
+
+		this.pollling = setInterval(() =>
+		{
+			if(!this.busy)
+			{
+				this.log.debug3("polling :: ", this.poll_counter++);
+				this.sendCommand('~', this.poll_counter++);
+			}
+		}, 100);
+
 		this.bind();
 	}
 	bind()
@@ -33,13 +47,14 @@ class BluetoothSerial extends Serial
 		if(!this.fs.existsSync(this.path) && !this.busy)
 		{
 			this.log.debug1(`${this.path} does not exist processing to bind`);
-			this.exec(`rfcomm bind ${this.device} ${this.mac_address}`, (error, stdout, stderr) =>
+			this.exec(this.bind_command, (error, stdout, stderr) =>
 			{
-				this.log.debug1(`RFCOMM BIND successful. Checking if ${this.path} exists.`);
+				this.log.debug1(`RFCOMM BIND successfully (ch=${this.channel}). Checking if ${this.path} exists.`);
 				if(this.fs.existsSync(this.path))
 				{
 					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
 					this.setupSerial();
+					this.bound = true;
 				}
 				else
 				{
@@ -76,7 +91,7 @@ class BluetoothSerial extends Serial
 		}
 		else
 		{
-			this.log.debug1(`Serial Port DOES NOT exists, processing to release device.`);
+			this.log.debug1(`Serial Port DOES NOT exists, proceeding to release device.`);
 			release_callback();
 		}
 	}
@@ -136,7 +151,7 @@ class BluetoothSerial extends Serial
 
 
 BluetoothSerial.bt_agent_process = undefined;
-
+BluetoothSerial.bt_channel_iterator = 1;
 //// For BlueZ5 bt-agent, for BlueZ4 bluetooth-agent
 //// NOTE: Bluetooth-agent has different arguments
 BluetoothSerial.bluetooth_agent = "bt-agent";
@@ -151,6 +166,7 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:6f:a7 1234
 00:21:13:00:71:57 1234
 98:D3:31:FC:4B:A9 1234
+98:D3:31:FC:50:00 1234
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
