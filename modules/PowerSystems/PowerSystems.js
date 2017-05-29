@@ -61,11 +61,32 @@ class PowerSystems extends Neuron
 		this.model.registerMemory("Power");
 
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:3b:03", //may not be correct MAC address
+			mac: "00:21:13:00:3b:03",
 			baud: 38400,
 			log: this.log,
 			device: 2
 		});
+		// this.rfcomm = new util.extended.BluetoothSerial({
+		// 	mac: "98:d3:31:fc:50:00",
+		// 	baud: 38400,
+		// 	log: this.log,
+		// 	device: 2
+		// });
+
+		var errors =   [
+						"No Error",
+						"DRIVE MODULE OVER-CURRENT.",
+						"STEER MODULE OVER-CURRENT.",
+						"ARM MODULE OVER-CURRENT.",
+						"INTELLIGENCE MODULE OVER-CURRENT.",
+						"MAST AND TRACKER MODULE OVER-CURRENT.",
+						"BATTERY 1 APPROACHING CRITICAL TEMPERATURE",
+						"BATTERY 2 APPROACHING CRITICAL TEMPERATURE",
+						"BATTERY 3 APPROACHING CRITICAL TEMPERATURE",
+						"BATTERY 1 TEMPERATURE CRITICAL",
+						"BATTERY 2 TEMPERATURE CRITICAL",
+						"BATTERY 3 TEMPERATURE CRITICAL"
+					   ];
 
 		this.locals = {
 			realTimeVoltage: 0,
@@ -136,21 +157,21 @@ class PowerSystems extends Neuron
 			this.log.debug3("WE RECIEVED 9!!!");
 			this.model.set("Power", this.locals);
 		});
+		this.rfcomm.attachListener('A', (value) => {
+			// this.locals.temperatures.Battery3 = value;
+			this.log.debug3("WE RECIEVED A!!!");
+			// this.model.set("Power", this.locals);
+			if (value) {
+				this.log.output(errors[value]);
+			}
+		});
 
-		//for testing model update
 		setInterval(() => {
-			this.model.set("Power", this.locals);
-			// var power = this.model.get("Power");
-
-			// if (power != this.locals) {
-			// 	this.log.output("model not updated correctly.");
-			// }
-		}, 100);
-		// setInterval(() => {
-		// 	this.log.output(this.locals);
-		// }, 1000);
-
+			this.log.debug2(errors[9]);
+		}, 1000);
 	}
+
+
 
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -158,39 +179,60 @@ class PowerSystems extends Neuron
      * @returns {boolean} returns true if react was successful, returns false if react failed.
      */
 	react(input)
-	{		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
-			// k.forEach(function(currentkey, currentindex, returndArray){
+	{
+		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
+		// k.forEach(function(currentkey, currentindex, returndArray){})
 
-			// })
-		if ("batRelay1"  in input &&
-			"batRelay2"  in input &&
-			"batRelay3"  in input &&
-			"driveRelay" in input &&
-			"steerRelay" in input &&
-			"armRelay"   in input &&
-			"intelRelay" in input &&
-			"mastRelay"  in input)
+		var signal_sent_flag = false;
+
+<<<<<<< HEAD
+		if("batRelay1"  in input)
 		{
-			this.rfcomm.sendCommand('a', input.batRelay1);
-			setTimeout(() => { this.rfcomm.sendCommand('b', input.batRelay2); }, 20);
-			setTimeout(() => { this.rfcomm.sendCommand('c', input.batRelay3); }, 40);
-			setTimeout(() => { this.rfcomm.sendCommand('d', input.driveRelay); }, 60);
-			setTimeout(() => { this.rfcomm.sendCommand('e', input.steerRelay); }, 80);
-			setTimeout(() => { this.rfcomm.sendCommand('f', input.armRelay); }, 100);
-			setTimeout(() => { this.rfcomm.sendCommand('g', input.intelRelay); }, 120);
-			setTimeout(() => { this.rfcomm.sendCommand('h', input.mastRelay); }, 140);
-
-		    this.log.output(`REACTING ${this.name}: `, input);
-			this.feedback(`REACTING ${this.name}: `, input);
+		    this.rfcomm.sendCommand('a', input.batRelay1);
+		    signal_sent_flag = true;
 		}
-		else
+		if("batRelay2"  in input)
 		{
-			this.log.output(`NOT reacting ${this.name}; invalid inputs.`);
-			this.feedback(`NOT reacting ${this.name}; invalid inputs.`);
-			return false;
+			this.rfcomm.sendCommand('b', input.batRelay2);
+			signal_sent_flag = true;
+		}
+		if("batRelay3"  in input)
+		{
+			this.rfcomm.sendCommand('c', input.batRelay3);
+			signal_sent_flag = true;
+		}
+		if("driveRelay" in input)
+		{
+			this.rfcomm.sendCommand('d', input.driveRelay);
+			signal_sent_flag = true;
+		}
+		if("steerRelay" in input)
+		{
+			this.rfcomm.sendCommand('e', input.steerRelay);
+			signal_sent_flag = true;
+		}
+		if("armRelay"   in input)
+		{
+			this.rfcomm.sendCommand('f', input.armRelay);
+			signal_sent_flag = true;
+		}
+		if("intelRelay" in input)
+		{
+			this.rfcomm.sendCommand('g', input.intelRelay);
+			signal_sent_flag = true;
+		}
+		if("mastRelay"  in input)
+		{
+			this.rfcomm.sendCommand('h', input.mastRelay);
+			signal_sent_flag = true;
+		}
+		if("killAll"  in input)
+		{
+			this.rfcomm.sendCommand('i', input.killAll);
+			signal_sent_flag = true;
 		}
 
-		return true;
+		return signal_sent_flag;
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
@@ -242,6 +284,7 @@ MC struct
   "steerRelay": 1,
   "armRelay": 1,
   "intelRelay": 1,
-  "mastRelay": 1
+  "mastRelay": 1,
+  "allPower" : 1
 }
 */
