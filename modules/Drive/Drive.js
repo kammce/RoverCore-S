@@ -57,49 +57,97 @@ class Drive extends Neuron
 			log: this.log,
 			device: 1
 		});
-				//Feedback variables
+		// Feedback variables
 		this.locals = {
-			currentTrajectory: 	[0, 0, 0, 0],
-			currentPropulsion: 	[0, 0, 0, 0],
-			tacho_rpm: 			[0, 0, 0, 0]
+			currentTrajectory: 	[undefined, undefined, undefined, undefined],
+			currentPropulsion: 	[undefined, undefined, undefined, undefined],
+			trajectoryAngle: 	[undefined, undefined, undefined, undefined],
+			tachoRPM: 			[undefined, undefined, undefined, undefined]
 		};
+
+		this.model.registerMemory("Drive", this.locals);
 
 		//Attach lister to update feedback
 		this.rfcomm.attachListener('0', (val) => {
-			this.local.tacho_rpm[0] = val;
+			this.locals.tachoRPM[0] = val;
+			this.log.debug2(`Tachometer RPM 0 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('1', (val) => {
-			this.local.tacho_rpm[1] = val;
+			this.locals.tachoRPM[1] = val;
+			this.log.debug2(`Tachometer RPM 1 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('2', (val) => {
-			this.local.tacho_rpm[2] = val;
+			this.locals.tachoRPM[2] = val;
+			this.log.debug2(`Tachometer RPM 2 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('3', (val) => {
-			this.local.tacho_rpm[3] = val;
+			this.locals.tachoRPM[3] = val;
+			this.log.debug2(`Tachometer RPM 3 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('4', (val) => {
-			this.local.currentTrajectory[0] = val;
+			this.locals.currentTrajectory[0] = val;
+			this.log.debug2(`Trajectory Current 0 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('5', (val) => {
-			this.local.currentTrajectory[1] = val;
+			this.locals.currentTrajectory[1] = val;
+			this.log.debug2(`Trajectory Current 1 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('6', (val) => {
-			this.local.currentTrajectory[2] = val;
+			this.locals.currentTrajectory[2] = val;
+			this.log.debug2(`Trajectory Current 2 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('7', (val) => {
-			this.local.currentTrajectory[3] = val;
+			this.locals.currentTrajectory[3] = val;
+			this.log.debug2(`Trajectory Current 3 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('8', (val) => {
-			this.local.tacho_rpm[0] = val;
+			this.locals.currentPropulsion[0] = val;
+			this.log.debug2(`Propulsion Current 0 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('9', (val) => {
-			this.local.tacho_rpm[1] = val;
+			this.locals.currentPropulsion[1] = val;
+			this.log.debug2(`Propulsion Current 1 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('Z', (val) => {
-			this.local.tacho_rpm[2] = val;
+			this.locals.currentPropulsion[2] = val;
+			this.log.debug2(`Propulsion Current 2 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 		this.rfcomm.attachListener('Y', (val) => {
-			this.local.tacho_rpm[3] = val;
+			this.locals.currentPropulsion[3] = val;
+			this.log.debug2(`Propulsion Current 3 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
+		});
+
+		this.rfcomm.attachListener('X', (val) => {
+			this.locals.trajectoryAngle[0] = val;
+			this.log.debug2(`Wheel Position 2 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
+		});
+		this.rfcomm.attachListener('W', (val) => {
+			this.locals.trajectoryAngle[1] = val;
+			this.log.debug2(`Wheel Position 3 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
+		});
+		this.rfcomm.attachListener('V', (val) => {
+			this.locals.trajectoryAngle[2] = val;
+			this.log.debug2(`Wheel Position 2 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
+		});
+		this.rfcomm.attachListener('U', (val) => {
+			this.locals.trajectoryAngle[3] = val;
+			this.log.debug2(`Wheel Position 3 = ${val}`);
+			this.model.registerMemory("Drive", this.locals);
 		});
 	}
 	/**
@@ -118,8 +166,7 @@ class Drive extends Neuron
 			this.rfcomm.sendCommand("S", input.speed);
 			this.rfcomm.sendCommand("A", input.angle);
 			this.rfcomm.send(`@M,${input.mode.charCodeAt(0)}\r\n`);
-			this.log.debug2(`Sending `, input, `Over BluetoothSerial`);
-			this.feedback(`Sending `, input, `Over BluetoothSerial`);
+			this.log.debug1(`Sending `, input, `Over BluetoothSerial`);
 		}
 		else
 		{

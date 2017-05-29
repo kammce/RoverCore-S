@@ -29,6 +29,9 @@ sudo echo "" || SystemExit
 echo -e "\nInstalling Build Essentials"
 sudo apt-get install -y build-essential
 
+echo -e "\nInstalling curl"
+sudo apt-get install curl
+
 # Adding Node Source Repository to Apt-Get
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 
@@ -43,10 +46,16 @@ echo -e "\nNPM Install Mocha Command Line Interface"
 sudo npm install -g mocha-cli
 
 echo -e "\nInstalling Lib udev development library"
-sudo apt-get install libudev-dev
+sudo apt-get install -y libudev-dev
+
+echo -e "\nInstalling BlueZ-tools"
+sudo apt-get install -y bluez-tools
 
 echo -e "\nCompiling camera control command line interface"
 gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
+
+echo -i "\nInstalling Rover Video UDev rules"
+sudo cp install/udev-rules/rover.rules /etc/udev/rules.d
 
 # Kill sudo timestamp
 sudo -k
