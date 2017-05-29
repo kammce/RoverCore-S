@@ -91,9 +91,16 @@ class Serial
 	}
 	send(msg)
 	{
-		if(this.port.isOpen())
+		try
 		{
-			this.port.write(msg);
+			if(this.port.isOpen())
+			{
+				this.port.write(msg);
+			}
+		}
+		catch(e)
+		{
+			this.log.debug1(e);
 		}
 	}
 	attachListener(key, callback)
