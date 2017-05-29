@@ -73,7 +73,7 @@ class PowerSystems extends Neuron
 		// 	device: 2
 		// });
 
-		var errors[] = {
+		var errors =   [
 						"No Error", 
 						"DRIVE MODULE OVER-CURRENT.", 
 						"STEER MODULE OVER-CURRENT.",
@@ -86,7 +86,7 @@ class PowerSystems extends Neuron
 						"BATTERY 1 TEMPERATURE CRITICAL", 
 						"BATTERY 2 TEMPERATURE CRITICAL", 
 						"BATTERY 3 TEMPERATURE CRITICAL"
-						};
+					   ];
 
 		this.locals = {
 			realTimeVoltage: 0,
@@ -165,7 +165,13 @@ class PowerSystems extends Neuron
 				this.log.output(errors[value]);
 			}
 		});
+		
+		setInterval(() => {
+			this.log.debug2(errors[9]);
+		}, 1000);
 	}
+
+	
 
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
