@@ -4,7 +4,7 @@ class Serial
 {
 	constructor(params)
 	{
-		this.ready = false;
+		// this.connected = false;
 		this.port;
 		this.log = params.log;
 		this.path = params.path;
@@ -13,6 +13,8 @@ class Serial
 		this.fs = require('fs');
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
+		this.connection_interval = undefined;
+		this.initial_setup = false;
 	}
 	setupSerial()
 	{
@@ -40,15 +42,36 @@ class Serial
 		this.port.reference = this;
 		//// Open Serial Port
 		this.port.open();
+
+		this.initial_setup = true;
+
+		this.connection_interval = setInterval(() =>
+		{
+			try
+			{
+				if(!this.port.isOpen() && this.initial_setup)
+				{
+					this.log.debug1(`Connection failed, attempting to open connection to ${this.path}`);
+					this.port.open();
+				}
+				if(this.port.isOpen())
+				{
+
+				}
+			}
+			catch(e)
+			{
+				this.log.debug1(e);
+			}
+		}, 2000);
 	}
 	//// Children should override this function
 	onPortOpen()
 	{
 		this.reference = this.reference || this;
-
 		this.log.output(`Opening connection to ${this.path}`);
-		this.reference.port.write("CONNECT");
-		this.reference.ready = true;
+		// this.log.port.write("CONNECT");
+		// this.reference.ready = true;
 	}
 	//// Children should override this function
 	onPortData(data)
@@ -60,18 +83,24 @@ class Serial
 	onPortError(err)
 	{
 		this.reference = this.reference || this;
-
 		this.reference.log.output(err);
-		if(err.toString().indexOf("Error: Port is not open") !== -1)
-		{
-			this.reference.ready = false;
-		}
+		// if(err.toString().indexOf("Error: Port is not open") !== -1)
+		// {
+		// 	this.reference.ready = false;
+		// }
 	}
 	send(msg)
 	{
-		if(this.ready)
+		try
 		{
-			this.port.write(msg);
+			if(this.port.isOpen())
+			{
+				this.port.write(msg);
+			}
+		}
+		catch(e)
+		{
+			this.log.debug1(e);
 		}
 	}
 	attachListener(key, callback)

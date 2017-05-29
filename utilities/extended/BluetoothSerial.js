@@ -18,18 +18,26 @@ class BluetoothSerial extends Serial
 		this.callback_map = {};
 		this.bind_interval;
 		this.busy = true;
-		this.channel = BluetoothSerial.bt_channel_iterator++;
+
+		// BluetoothSerial.bt_channel_iterator += 6;
+		this.channel = 1;
+
 		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
 		this.bound = false;
 		this.poll_counter = 0;
 
 		this.pollling = setInterval(() =>
 		{
-			if(!this.busy)
+			try
 			{
-				this.log.debug3("polling :: ", this.poll_counter++);
-				this.sendCommand('~', this.poll_counter++);
+				this.log.debug3(`this.port.isOpen = ${this.port.isOpen()}`);
+				if(!this.busy && this.port.isOpen())
+				{
+					this.log.debug3("polling :: ", this.poll_counter++);
+					this.sendCommand('~', this.poll_counter++);
+				}
 			}
+			catch(e) {}
 		}, 100);
 
 		this.bind();
@@ -44,30 +52,54 @@ class BluetoothSerial extends Serial
 			}, 1000);
 		}
 		//// Check if /dev/rfcommXX exists
-		if(!this.fs.existsSync(this.path) && !this.busy)
+		this.exec(`rfcomm show ${this.device}`, (error, stdout, stderr) =>
 		{
-			this.log.debug1(`${this.path} does not exist processing to bind`);
-			this.exec(this.bind_command, (error, stdout, stderr) =>
+			//// Binding already exists, just use it!
+			var bind_match = `rfcomm${this.device}: ${this.mac_address} channel ${this.channel} `;
+			this.log.debug2(bind_match);
+			this.log.debug2(stdout);
+			if(stdout.indexOf(bind_match) !== -1)
 			{
-				this.log.debug1(`RFCOMM BIND successfully (ch=${this.channel}). Checking if ${this.path} exists.`);
-				if(this.fs.existsSync(this.path))
+				this.log.debug1(`RFCOMM BIND already exists, reusing port.`);
+				this.setupSerial();
+			}
+			//// If stderr exists, then rfcomm devices does not exist
+			else if(stderr)
+			{
+				this.exec(this.bind_command, (error, stdout, stderr) =>
 				{
-					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
-					this.setupSerial();
-					this.bound = true;
-				}
-				else
-				{
-					this.log.debug1(`${this.path} DOES NOT exist, attempting to bind again in 1s.`);
-					rebind();
-				}
-			});
-		}
-		else
-		{
-			this.log.debug1(`${this.path} exists, attempting to release it.`);
-			this.release();
-		}
+					if(error)
+					{
+						rebind();
+					}
+					else
+					{
+						this.log.debug1(`RFCOMM BIND successfully (ch=${this.channel}). Checking if ${this.path} exists.`);
+						if(this.fs.existsSync(this.path))
+						{
+							this.log.debug1(`${this.path} exists, processing to setup serial communication in 1s.`);
+							setTimeout(() =>
+							{
+								this.setupSerial();
+								this.bound = true;
+							}, 1000);
+						}
+						else
+						{
+							this.log.debug1(`${this.path} DOES NOT exist, attempting to bind again in 1s.`);
+							rebind();
+						}
+					}
+				});
+			}
+			//// If the rfcomm pattern did not match and stderr does not exist, then the rfcomm
+			//// device exists but is wrong, thus release it to rebind it for this instance.
+			else
+			{
+				this.log.debug1(`RFCOMM port does not match this one and exists. Releasing ${this.path}.`);
+				this.release();
+			}
+		});
 	}
 	release()
 	{
@@ -86,7 +118,7 @@ class BluetoothSerial extends Serial
 		};
 		if(typeof this.port !== 'undefined')
 		{
-			this.log.debug1(`Serial Port exists, attempting to close it.`);
+			this.log.debug1(`Serial Port connection exists, attempting to close it, and release device.`);
 			this.port.close(release_callback);
 		}
 		else
@@ -167,6 +199,7 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:71:57 1234
 98:D3:31:FC:4B:A9 1234
 98:D3:31:FC:50:00 1234
+98:D3:31:FC:4C:F5 1234
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
@@ -217,21 +250,21 @@ BluetoothSerial.initialize = function()
 	var sleep = require('sleep');
 
 	//// Release all bluetooth rfcomm connections
-	try
-	{
-		console.log("RUNNING: rfcomm release all");
-		var strerr = new Buffer("---");
-		while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
-		{
-			strerr = execSync('rfcomm release all 2>&1');
-			//console.log(strerr.toString());
+	// try
+	// {
+	// 	console.log("RUNNING: rfcomm release all");
+	// 	var strerr = new Buffer("---");
+	// 	while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
+	// 	{
+	// 		strerr = execSync('rfcomm release all 2>&1');
+	// 		//console.log(strerr.toString());
 
-			sleep.msleep(250);
-		}
-		console.log("FINISHED: rfcomm release all");
-		sleep.msleep(500);
-	}
-	catch(e) {}
+	// 		sleep.msleep(250);
+	// 	}
+	// 	console.log("FINISHED: rfcomm release all");
+	// 	sleep.msleep(500);
+	// }
+	// catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,
