@@ -8,6 +8,9 @@ const DEVICE_PORT = '/dev/ttyGPS';
 
 var Neuron = require('../Neuron');
 var SerialPort = require("serialport");
+var sysFsPath = "/sys/class/gpio";
+var fs = require('fs')
+var exec = require('child_process').exec;
 
 class Sensors extends Neuron
 {
@@ -64,11 +67,21 @@ class Sensors extends Neuron
 		//	baudrate: 9600,
 		//	parser: util.serial.parsers.readline('\r\n')
 		//}, false); // false = disable auto open
-
+		
 		this.feedback("Latitude:");
 		this.feedback("latDir:");
 		this.feedback("Longitude:");
 		this.feedback("longDir:");
+		this.CMP = 0;
+		this.Dose = 0;
+		this.VCC = 0;
+		this.O2 = {	
+			Pressure: 0,
+			Oxygen : 0
+		};
+		this.device_num = 0;
+		this.Control_GPIO = [209,210];
+		this.MuxInterval = 0; 
 		this.model.registerMemory("GPS");
 		this.model.set("GPS", {
 			lat: ZERO,
@@ -87,6 +100,15 @@ class Sensors extends Neuron
 		 	* barometer (altitude)
 		 	* UBNT RSSI
 			*/
+		});
+		this.init();
+		this.model.registerMemory("Science");
+		this.model.set("Science", {
+			Pressure: ZERO,
+			Oxygen: ZERO,
+			CMP:ZERO,
+			Dose:ZERO,
+			VCC:ZERO 
 		});
 		//initialize serialport
 		var port = new SerialPort("/dev/ttySAC0", { //Odroid XU4 serial port 
@@ -152,7 +174,7 @@ class Sensors extends Neuron
 					var horiz_confidence= piece[8];
 					var firstLat = lat.slice(0,2);
 					var secondLat = lat.slice(2,10);
-					var delimiter = "º";
+					var delimiter = "Âº";
 					var latResult = parseFloat(firstLat)+(parseFloat(secondLat)/60);
 					lat = latResult;
 
@@ -190,8 +212,36 @@ class Sensors extends Neuron
 					 	* UBNT RSSI
 						*/
 					});
-					self.log.output(self.model.get('GPS'));
+					//self.log.output(self.model.get('GPS'));
 				}
+			}
+			//select 
+			else{
+				var flag = parseInt(data.substring(0,1));
+				if(data.substring(0,1) === "O")
+				{
+					var object = data.split(" ");
+					self.O2.Pressure = object[5];
+					self.O2.Oxygen = object[7];
+					//self.log.output(self.O2);			
+				}
+				//select
+				else if(Number.isInteger(flag))
+				{
+					var geiger = data.split(",");
+					self.CMP = geiger[0];
+					self.Dose = geiger[1];
+					self.VCC = geiger[2];
+
+				}
+				self.model.set("Science", {
+					Oxygen: self.O2.Oxygen,
+					Pressure: self.O2.Pressure,
+					CMP: self.CMP,
+					Dose: self.Dose,
+					VCC: self.VCC
+				});
+				self.log.output(self.model.get('Science'));
 			}
 		});
 		//
@@ -207,6 +257,18 @@ class Sensors extends Neuron
      */
 	react(input)
 	{
+		var parent = this;
+		switch(input.mode){
+			case "MUXON" : 
+				parent.muxOn();
+				break;
+			case "MUXOFF" : 
+				parent.muxOff();
+				break;
+			default: 
+				parent.log.output("Error Mission Control Input");
+				break;
+		}
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
 		return true;
@@ -249,6 +311,115 @@ class Sensors extends Neuron
 		this.feedback('test');
 		return true;
 	}
+
+	
+ 	/******************************Science Stuff******************************************/
+ 	init(){
+ 		var sysFsPath = "/sys/class/gpio";
+    	this.expose(this.Control_GPIO[0]);
+    	this.expose(this.Control_GPIO[1]);
+    	this.direction(this.Control_GPIO[0],"out");
+    	this.direction(this.Control_GPIO[1],"out");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[0] + "/value", 0, "utf8");
+		fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[1] + "/value", 0, "utf8");
+
+     }
+     /**
+     * Use to execute shellscript command line.
+     */
+    puts(error, stdout, stderr){
+    	console.log(stdout) 
+    }
+	/**
+     * Use to expose GPIO pin for usage
+     * @param {interger} input - set initially.
+     */
+    expose(pin){
+    	exec("echo "+pin+ " > /sys/class/gpio/export" , this.puts);
+    }
+    /**
+     * Set direction of a GPIO pin 
+     * @param {interger} input - set initially.
+     * @param {string} state - set initially.
+     */
+    direction(pin,state){
+    	var sysFsPath = "/sys/class/gpio";
+    	fs.writeFileSync(sysFsPath + "/gpio" + pin + "/direction", state);
+    }
+     /**
+     * Write 1 or 0 to a single GPIO pin 
+     * @param {interger} pin - GPIO pin number.
+     * @param {string} value - value to be write to.
+     */
+    writeGPIO(pin, value) {
+	    if (value === undefined) {
+	        value = 0;
+	    }
+	    var sysFsPath = "/sys/class/gpio";
+	    fs.writeFileSync(sysFsPath + "/gpio" + pin + "/value", value, "utf8");
+	}
+	 /**
+     * Write 1 or 0 to four GPIO pin 
+     * @param {interger array} pin_array - GPIOs pin nummber.
+     * @param {string} value-x - value to be write to.
+     */
+	writeGPIO_MUX(value1, value0) {
+		var sysFsPath = "/sys/class/gpio";
+
+	    if (value1 === undefined && value2 === undefined && value3 === undefined && value4 === undefined) {
+	        value0= 0;
+	        value1 = 0;
+	    }
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[0] + "/value", value0, "utf8");
+	    fs.writeFileSync(sysFsPath + "/gpio" + this.Control_GPIO[1] + "/value", value1, "utf8");
+	}
+	 /**
+     * Write 1 or 0 to four GPIO pin 
+     * @param {interger } device_num - ultrasonic number.
+     */
+	muxSelect(device_num) {
+		var parent=this;
+	    switch (device_num) {
+	        case 0:
+	            parent.writeGPIO_MUX(0, 0);
+	            parent.DeviceID=0;
+	            break;
+	        case 1:
+	            parent.writeGPIO_MUX(0, 1);
+	            parent.DeviceID=1;
+	            break;
+	        case 2:
+	            parent.writeGPIO_MUX(1, 0);
+	            parent.DeviceID=2;
+	            break;
+	        default:
+	        	parent.log.output("Invalid Input");
+	        	break;
+	    	}
+	}
+	/**
+	* turn on the mux  
+	*/
+	muxOn(){
+		var parent = this; 
+		this.MuxInterval = setInterval(function()
+		{
+			parent.muxSelect(parent.device_num); //0 , 1 , 2
+			parent.device_num++; // 1 , 2 , 3
+			if(parent.device_num ===  3)
+			{
+				parent.device_num = 0;
+			}
+		},5000);	
+ 	}
+ 	/**
+ 	* turn off the mux 
+ 	*/
+ 	muxOff(){
+ 		clearInterval(this.MuxInterval);
+ 		this.device_num=0;
+ 		this.muxSelect(this.device_num); 
+ 	}	
 }
 
 module.exports = Sensors;
