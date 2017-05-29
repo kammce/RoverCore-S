@@ -172,7 +172,7 @@ class Pods extends Neuron
 		this.log.debug1("DEBUG 1");
 		this.log.debug2("DEBUG 2");
 		this.log.debug3("DEGUB 3");
-		var test = 1;
+		var test = 0;
 		if(test == 1)
 		{
 			setInterval(() =>
