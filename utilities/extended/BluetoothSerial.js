@@ -199,6 +199,7 @@ BluetoothSerial.bluetooth_devices = `
 00:21:13:00:71:57 1234
 98:D3:31:FC:4B:A9 1234
 98:D3:31:FC:50:00 1234
+98:D3:31:FC:4C:F5 1234
 `;
 
 BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
