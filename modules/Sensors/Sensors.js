@@ -174,7 +174,7 @@ class Sensors extends Neuron
 					var horiz_confidence= piece[8];
 					var firstLat = lat.slice(0,2);
 					var secondLat = lat.slice(2,10);
-					var delimiter = "Âº";
+					var delimiter = "º";
 					var latResult = parseFloat(firstLat)+(parseFloat(secondLat)/60);
 					lat = latResult;
 
@@ -212,7 +212,7 @@ class Sensors extends Neuron
 					 	* UBNT RSSI
 						*/
 					});
-					//self.log.output(self.model.get('GPS'));
+					self.log.debug1(self.model.get('GPS'));
 				}
 			}
 			//select 
@@ -241,7 +241,7 @@ class Sensors extends Neuron
 					Dose: self.Dose,
 					VCC: self.VCC
 				});
-				self.log.output(self.model.get('Science'));
+				self.log.debug1(self.model.get('Science'));
 			}
 		});
 		//
