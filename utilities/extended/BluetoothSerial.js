@@ -20,6 +20,18 @@ class BluetoothSerial extends Serial
 		this.busy = true;
 		this.channel = BluetoothSerial.bt_channel_iterator++;
 		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
+		this.bound = false;
+		this.poll_counter = 0;
+
+		this.pollling = setInterval(() =>
+		{
+			if(!this.busy)
+			{
+				this.log.debug3("polling :: ", this.poll_counter++);
+				this.sendCommand('~', this.poll_counter++);
+			}
+		}, 100);
+
 		this.bind();
 	}
 	bind()
@@ -42,6 +54,7 @@ class BluetoothSerial extends Serial
 				{
 					this.log.debug1(`${this.path} exists, processing to setup serial communication.`);
 					this.setupSerial();
+					this.bound = true;
 				}
 				else
 				{

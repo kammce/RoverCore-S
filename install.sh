@@ -45,8 +45,14 @@ sudo npm install -g mocha-cli
 echo -e "\nInstalling Lib udev development library"
 sudo apt-get install libudev-dev
 
+echo -e "\nInstalling BlueZ-tools"
+sudo apt-get install bluez-tools
+
 echo -e "\nCompiling camera control command line interface"
 gcc ./install/See3CAMx10-CL/camera-control.c -o ./install/See3CAMx10-CL/camera-control -ludev
+
+echo -i "\nInstalling Rover Video UDev rules"
+sudo cp install/udev-rules/rover.rules /etc/udev/rules.d
 
 # Kill sudo timestamp
 sudo -k
