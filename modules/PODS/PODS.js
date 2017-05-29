@@ -100,48 +100,48 @@ class Pods extends Neuron
 			mac: "00:21:13:00:6F:01", //pod 1 MAC address  
 			baud: 38400,
 			log: this.log,
-			device: 2
+			device: 10
 		});
 		
 		/*this.rfcomm_pod2 = new util.extended.BluetoothSerial({
 			mac: "00:21:13:00:71:a1", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 10
+			device: 11
 		});
 
 		this.rfcomm_pod3 = new util.extended.BluetoothSerial({
 			mac: "00:21:13:00:71:a2", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 11
+			device: 12
 		});
 		
 		this.rfcomm_pod4 = new util.extended.BluetoothSerial({
 			mac: "00:21:13:00:71:a3", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
-			device: 12
+			device: 13
 		});
 		*/
 		
 		//then attach the 16 listeners to each of the bluetooth instantiations 
 		this.rfcomm_pod1.attachListener('a', (data)=>
 		{
-			parseMessage(1, data, "init");
+			this.parseMessage(1, data, "init");
 		});
 		/*
 		this.rfcomm_pod2.attachListener('a', (data)=>
 		{
-			parseMessage(2, data, "init");
+			this.parseMessage(2, data, "init");
 		});
 		this.rfcomm_pod3.attachListener('a', (data)=>
 		{
-			parseMessage(3, data, "init");
+			this.parseMessage(3, data, "init");
 		});
 		this.rfcomm_pod4.attachListener('a', (data)=>
 		{
-			parseMessage(4, data, "init");
+			this.parseMessage(4, data, "init");
 		});
 
 */
@@ -320,7 +320,7 @@ class Pods extends Neuron
 		
 		if(type == "init")
 		{
-			sendInitStartTime(podNum, timestampOffsetInMilliseconds);
+			this.sendInitStartTime(podNum, timestampOffsetInMilliseconds);
 		}
 		else //already initialized start time, just update when we last got sent something 
 		{
@@ -415,7 +415,7 @@ class Pods extends Neuron
 		//attach listener. Call data parsing function when message sent over key 
 		this.rfcomm_pod1.attachListener(key, (data)=>
 		{
-			parseMessage(1, data, type);
+			this.parseMessage(1, data, type);
 		});
 		
 		/*this.rfcomm_pod2.attachListener(key, (data)=>
@@ -450,7 +450,7 @@ class Pods extends Neuron
 		{
 			this.rfcomm_pod1.attachListener(key, (data)=>
 			{
-				sendPickupLog(1);
+				this.sendPickupLog(1);
 			});
 			/*this.rfcomm_pod2.attachListener(key, (data)=>
 			{
@@ -471,7 +471,7 @@ class Pods extends Neuron
 		{
 			this.rfcomm_pod1.attachListener(key, (data)=>
 			{
-				sendErrorLog(1, key);
+				this.sendErrorLog(1, key);
 			});
 			/*
 			this.rfcomm_pod2.attachListener(key, (data)=>
