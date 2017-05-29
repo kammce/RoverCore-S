@@ -154,39 +154,59 @@ class PowerSystems extends Neuron
      * @returns {boolean} returns true if react was successful, returns false if react failed.
      */
 	react(input)
-	{		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
-			// k.forEach(function(currentkey, currentindex, returndArray){
+	{
+		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
+		// k.forEach(function(currentkey, currentindex, returndArray){})
 
-			// })
-		if ("batRelay1"  in input &&
-			"batRelay2"  in input &&
-			"batRelay3"  in input &&
-			"driveRelay" in input &&
-			"steerRelay" in input &&
-			"armRelay"   in input &&
-			"intelRelay" in input &&
-			"mastRelay"  in input)
+		var signal_sent_flag = false;
+
+		if("batRelay1"  in input)
 		{
 		    this.rfcomm.sendCommand('a', input.batRelay1);
-			setTimeout(() => { this.rfcomm.sendCommand('b', input.batRelay2); }, 20);
-			setTimeout(() => { this.rfcomm.sendCommand('c', input.batRelay3); }, 40);
-			setTimeout(() => { this.rfcomm.sendCommand('d', input.driveRelay); }, 60);
-			setTimeout(() => { this.rfcomm.sendCommand('e', input.steerRelay); }, 80);
-			setTimeout(() => { this.rfcomm.sendCommand('f', input.armRelay); }, 100);
-			setTimeout(() => { this.rfcomm.sendCommand('g', input.intelRelay); }, 120);
-			setTimeout(() => { this.rfcomm.sendCommand('h', input.mastRelay); }, 140);
-
-		    this.log.output(`REACTING ${this.name}: `, input);
-			this.feedback(`REACTING ${this.name}: `, input);
+		    signal_sent_flag = true;
 		}
-		else
+		if("batRelay2"  in input)
 		{
-			this.log.output(`NOT reacting ${this.name}; invalid inputs.`);
-			this.feedback(`NOT reacting ${this.name}; invalid inputs.`);
-			return false;
+			this.rfcomm.sendCommand('b', input.batRelay2);
+			signal_sent_flag = true;
+		}
+		if("batRelay3"  in input)
+		{
+			this.rfcomm.sendCommand('c', input.batRelay3);
+			signal_sent_flag = true;
+		}
+		if("driveRelay" in input)
+		{
+			this.rfcomm.sendCommand('d', input.driveRelay);
+			signal_sent_flag = true;
+		}
+		if("steerRelay" in input)
+		{
+			this.rfcomm.sendCommand('e', input.steerRelay);
+			signal_sent_flag = true;
+		}
+		if("armRelay"   in input)
+		{
+			this.rfcomm.sendCommand('f', input.armRelay);
+			signal_sent_flag = true;
+		}
+		if("intelRelay" in input)
+		{
+			this.rfcomm.sendCommand('g', input.intelRelay);
+			signal_sent_flag = true;
+		}
+		if("mastRelay"  in input)
+		{
+			this.rfcomm.sendCommand('h', input.mastRelay);
+			signal_sent_flag = true;
+		}
+		if("killAll"  in input)
+		{
+			this.rfcomm.sendCommand('i', input.killAll);
+			signal_sent_flag = true;
 		}
 
-		return true;
+		return signal_sent_flag;
 	}
 	/**
      * Cortex will attempt to halt this lobe in the following situations:
