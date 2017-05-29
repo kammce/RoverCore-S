@@ -18,18 +18,26 @@ class BluetoothSerial extends Serial
 		this.callback_map = {};
 		this.bind_interval;
 		this.busy = true;
-		this.channel = BluetoothSerial.bt_channel_iterator++;
+
+		BluetoothSerial.bt_channel_iterator += 5;
+		this.channel = BluetoothSerial.bt_channel_iterator;
+
 		this.bind_command = `rfcomm bind ${this.device} ${this.mac_address} ${this.channel}`;
 		this.bound = false;
 		this.poll_counter = 0;
 
 		this.pollling = setInterval(() =>
 		{
-			if(!this.busy)
+			try
 			{
-				this.log.debug3("polling :: ", this.poll_counter++);
-				this.sendCommand('~', this.poll_counter++);
+				this.log.debug2(`this.port.isOpen = ${this.port.isOpen()}`);
+				if(!this.busy && this.port.isOpen())
+				{
+					this.log.debug3("polling :: ", this.poll_counter++);
+					this.sendCommand('~', this.poll_counter++);
+				}
 			}
+			catch(e) {}
 		}, 100);
 
 		this.bind();
@@ -217,21 +225,21 @@ BluetoothSerial.initialize = function()
 	var sleep = require('sleep');
 
 	//// Release all bluetooth rfcomm connections
-	try
-	{
-		console.log("RUNNING: rfcomm release all");
-		var strerr = new Buffer("---");
-		while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
-		{
-			strerr = execSync('rfcomm release all 2>&1');
-			//console.log(strerr.toString());
+	// try
+	// {
+	// 	console.log("RUNNING: rfcomm release all");
+	// 	var strerr = new Buffer("---");
+	// 	while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
+	// 	{
+	// 		strerr = execSync('rfcomm release all 2>&1');
+	// 		//console.log(strerr.toString());
 
-			sleep.msleep(250);
-		}
-		console.log("FINISHED: rfcomm release all");
-		sleep.msleep(500);
-	}
-	catch(e) {}
+	// 		sleep.msleep(250);
+	// 	}
+	// 	console.log("FINISHED: rfcomm release all");
+	// 	sleep.msleep(500);
+	// }
+	// catch(e) {}
 
 	fs.writeFileSync(
 		BluetoothSerial.bluetooth_pincode_path,
