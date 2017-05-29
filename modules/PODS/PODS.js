@@ -103,7 +103,7 @@ class Pods extends Neuron
 			device: 2
 		});
 		
-		this.rfcomm_pod2 = new util.extended.BluetoothSerial({
+		/*this.rfcomm_pod2 = new util.extended.BluetoothSerial({
 			mac: "00:21:13:00:71:a1", //get relevant MAC address 
 			baud: 38400,
 			log: this.log,
@@ -123,12 +123,14 @@ class Pods extends Neuron
 			log: this.log,
 			device: 12
 		});
+		*/
 		
 		//then attach the 16 listeners to each of the bluetooth instantiations 
 		this.rfcomm_pod1.attachListener('a', (data)=>
 		{
 			parseMessage(1, data, "init");
 		});
+		/*
 		this.rfcomm_pod2.attachListener('a', (data)=>
 		{
 			parseMessage(2, data, "init");
@@ -142,6 +144,7 @@ class Pods extends Neuron
 			parseMessage(4, data, "init");
 		});
 
+*/
 		//add listener for request start time. Immediately send back current timestamp - milliseconds specified in data.
 				
 		//add listeners for errors (i - n)
@@ -237,7 +240,8 @@ class Pods extends Neuron
 				//this.rfcomm_pod1.sendCommand('q', input.start_time);
 				this.rfcomm_pod1.sendCommand('r', input.start_stop_message);
 			}
-			else if(input.podNum == 2)
+			
+			/*else if(input.podNum == 2)
 			{
 				//this.rfcomm_pod2.sendCommand('q', input.start_time);
 				this.rfcomm_pod2.sendCommand('r', input.start_stop_message);
@@ -252,7 +256,7 @@ class Pods extends Neuron
 				//this.rfcomm_pod4.sendCommand('q', input.start_time);
 				this.rfcomm_pod4.sendCommand('r', input.start_stop_message);
 			}
-		
+		*/
 			this.log.output(`Sending `, input, `Over BluetoothSerial`);
 			this.feedback(`Sending `, input, `Over BluetoothSerial`);
 			
@@ -388,7 +392,8 @@ class Pods extends Neuron
 		{
 			this.rfcomm_pod1.sendCommand('q', initDateInSec);
 		}
-		else if(input.podNum == 2)
+		
+		/*else if(input.podNum == 2)
 		{
 			this.rfcomm_pod2.sendCommand('q', initDateInSec);
 		}
@@ -400,6 +405,7 @@ class Pods extends Neuron
 		{
 			this.rfcomm_pod4.sendCommand('q', initDateInSec);
 		}
+		*/
 	}
 
 	
@@ -411,7 +417,8 @@ class Pods extends Neuron
 		{
 			parseMessage(1, data, type);
 		});
-		this.rfcomm_pod2.attachListener(key, (data)=>
+		
+		/*this.rfcomm_pod2.attachListener(key, (data)=>
 		{
 			parseMessage(2, data, type);
 		});
@@ -423,7 +430,7 @@ class Pods extends Neuron
 		{
 			parseMessage(4, data, type);
 		});
-
+*/
 
 	}
 	sendPickupLog(podNum)
@@ -445,7 +452,7 @@ class Pods extends Neuron
 			{
 				sendPickupLog(1);
 			});
-			this.rfcomm_pod2.attachListener(key, (data)=>
+			/*this.rfcomm_pod2.attachListener(key, (data)=>
 			{
 				sendPickupLog(2);
 			});
@@ -457,13 +464,16 @@ class Pods extends Neuron
 			{
 				sendPickupLog(4);
 			});
+			*/
 		}
+
 		else
 		{
 			this.rfcomm_pod1.attachListener(key, (data)=>
 			{
 				sendErrorLog(1, key);
 			});
+			/*
 			this.rfcomm_pod2.attachListener(key, (data)=>
 			{
 				sendErrorLog(2, key);
@@ -476,6 +486,7 @@ class Pods extends Neuron
 			{
 				sendErrorLog(4, key);
 			});
+			*/
 		}
 		
 	}
