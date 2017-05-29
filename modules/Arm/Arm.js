@@ -75,6 +75,7 @@ class Arm extends Neuron
 			"wrist_pitch" in input &&
 			"wrist_roll" in input &&
 			"claw" in input &&
+			"claw_torque" in input &&
 			"camera_select" in input &&
 			"rotunda_camera" in input)
 		{
@@ -85,8 +86,9 @@ class Arm extends Neuron
 			this.rfcomm.sendCommand('d', input.wrist_pitch);
 			this.rfcomm.sendCommand('e', input.wrist_roll);
 			this.rfcomm.sendCommand('f', input.claw);
-			// this.rfcomm.sendCommand('g', input.camera_select);
-			// this.rfcomm.sendCommand('h', input.rotunda_camera);
+			this.rfcomm.sendCommand('g', input.claw_torque);
+			this.rfcomm.sendCommand('h', input.camera_select);
+			this.rfcomm.sendCommand('i', input.rotunda_camera);
 
 			this.log.debug2(`Sending \n`, input, `Over BluetoothSerial`);
 			this.feedback(`Sending \n`, input, `Over BluetoothSerial`);
