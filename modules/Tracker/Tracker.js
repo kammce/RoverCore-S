@@ -216,6 +216,9 @@ class Tracker extends Neuron
 			this.local.zoom = input.zoom;
 			// this.comms.sendCommand(/*key for zoom*/, input.zoom);
 
+			// Lidar parameters
+			this.local.lidarState = input.lidar;
+
 			this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
 
