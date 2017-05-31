@@ -175,7 +175,7 @@ class Pods extends Neuron
 		this.log.debug1("DEBUG 1");
 		this.log.debug2("DEBUG 2");
 		this.log.debug3("DEGUB 3");
-		var test = 2;
+		var test = 0;
 		if(test == 1)
 		{
 			setInterval(() =>
@@ -331,6 +331,7 @@ class Pods extends Neuron
 		{
 			//TODO 
 			//Else, update lastSentTimestamp and send if needed for error 
+			this.log.output("	initial timestamp already initialized");
 			lastSentTimestamp = initTimestamp[podNum].getTime() + timestampOffsetInMilliseconds;
 		}
 		
@@ -344,7 +345,7 @@ class Pods extends Neuron
 		}
 		else if(type == "moist")
 		{
-			
+			this.log.output("raw moist bits = " + data);
 			this.convertToMoist(podNum, data);
 		}
 		//update milliseconds elapsed 
