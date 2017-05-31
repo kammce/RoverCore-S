@@ -165,7 +165,7 @@ class BluetoothSerial extends Serial
 	}
 	sendCommand(key, value)
 	{
-		var msg = `@${key.charAt(0)},${parseFloat(value)}\r\n`;
+		var msg = `@${key.charAt(0)},${parseFloat(value)}|\r\n`;
 		this.send(msg);
 		this.log.debug2(`Bluetooth Send =`, msg);
 	}
