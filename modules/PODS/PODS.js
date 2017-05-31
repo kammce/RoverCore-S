@@ -175,7 +175,7 @@ class Pods extends Neuron
 		this.log.debug1("DEBUG 1");
 		this.log.debug2("DEBUG 2");
 		this.log.debug3("DEGUB 3");
-		var test = 0;
+		var test = 2;
 		if(test == 1)
 		{
 			setInterval(() =>
@@ -213,6 +213,10 @@ class Pods extends Neuron
 				//this.log.output("updating data");
 
 			}, 500);
+		}
+		else if(test==2)
+		{
+			this.parseMessage(1, 58, "moist");
 		}
 		
 	}
@@ -320,6 +324,7 @@ class Pods extends Neuron
 		
 		if(type == "init")
 		{
+			this.log.output("	message type is init");
 			this.sendInitStartTime(podNum, timestampOffsetInMilliseconds);
 		}
 		else //already initialized start time, just update when we last got sent something 
@@ -364,16 +369,19 @@ class Pods extends Neuron
 
 	convertToMoist(podNum, data)
 	{
-		var relativeHumididty = -12.5 + 125 * (data * (5/1023))/3.3;
-		var moistRegisterKey = "pod" + podNum + "_MoistData";
+		this.log.output("entered the convertToMoist function");
+		var relativeHumidity = -12.5 + 125 * (data * (5/1023))/3.3;
+		//var moistRegisterKey = "pod" + podNum + "_MoistData";
 		//this.model.set(moistRegisterKey, relativeHumidity);
 		this.locals.MoistData[podNum] = relativeHumidity;
 		this.model.set("PODS", this.locals);
+		this.log.output("converted moist for podNum " + podNum + " and data = " + relativeHumidity);
 	}
 	
 	sendInitStartTime(podNum, timestampOffsetInMilliseconds)
 	{
 		//get current timestamp and subtract the timestampOffsetInMilliseconds from that 
+		this.log.output("inside sendInitStartTime function");
 		var currentTime = new Date();
 		var currentTimeInMilli = currentTime.getTime();
 		
@@ -388,16 +396,16 @@ class Pods extends Neuron
 		var initDateInSec = Math.floor(initDate/1000); //what we send over 
 		
 		//send over to CS 
-		if(input.podNum == 1)
+		if(podNum == 1)
 		{
 			this.rfcomm_pod1.sendCommand('q', initDateInSec);
 		}
 		
-		/*else if(input.podNum == 2)
+		/*else if(podNum == 2)
 		{
 			this.rfcomm_pod2.sendCommand('q', initDateInSec);
 		}
-		else if(input.podNum == 3)
+		else if(podNum == 3)
 		{
 			this.rfcomm_pod3.sendCommand('q', initDateInSec);
 		}
