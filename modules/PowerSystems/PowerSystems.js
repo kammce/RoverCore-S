@@ -92,6 +92,7 @@ class PowerSystems extends Neuron
 			realTimeVoltage: 0,
 			mAhRemaining: 0,
 			batteryPercentage: 0,
+			error: "",
 			currents: {
 				Drive: 0,
 				Steer: 0,
@@ -158,17 +159,14 @@ class PowerSystems extends Neuron
 			this.model.set("Power", this.locals);
 		});
 		this.rfcomm.attachListener('A', (value) => {
-			// this.locals.temperatures.Battery3 = value;
 			this.log.debug3("WE RECIEVED A!!!");
-			// this.model.set("Power", this.locals);
-			if (value) {
-				this.log.output(errors[value]);
-			}
+			this.locals.error = errors[value];
+			this.model.set("Power", this.locals);
+			setTimeout(() => {
+				this.locals.error = "";
+				this.model.set("Power", this.locals);
+			}, 10000)
 		});
-
-		setInterval(() => {
-			this.log.debug2(errors[9]);
-		}, 1000);
 	}
 
 
@@ -180,12 +178,8 @@ class PowerSystems extends Neuron
      */
 	react(input)
 	{
-		// var k = Object.keys(someJsonOrJSobj) = array of the keys of the object
-		// k.forEach(function(currentkey, currentindex, returndArray){})
-
 		var signal_sent_flag = false;
 
-<<<<<<< HEAD
 		if("batRelay1"  in input)
 		{
 		    this.rfcomm.sendCommand('a', input.batRelay1);
