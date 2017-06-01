@@ -79,8 +79,9 @@ class Tracker extends Neuron
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
-            mac: "98:D3:31:FC:4C:F5",
-			//mac: "00:21:13:00:71:0E",	// Tracker BT
+			//mac: "00:21:13:00:3B:03",	// PowerSystems BT
+			// mac: "00:21:13:00:71:0E",	// Tracker BT
+			mac: "98:d3:31:fc:4c:f5",	// Tracker BT2
 			baud: 38400,
 			log: this.log,
 			device: 3
@@ -214,6 +215,9 @@ class Tracker extends Neuron
 			// Zoom parameters
 			this.local.zoom = input.zoom;
 			// this.comms.sendCommand(/*key for zoom*/, input.zoom);
+
+			// Lidar parameters
+			this.local.lidarState = input.lidar;
 
 			this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
