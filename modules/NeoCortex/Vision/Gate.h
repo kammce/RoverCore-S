@@ -16,6 +16,7 @@ using namespace std;
 class Gate {
 public:
     Gate();
+    Gate(int x_in, int y_in);
     Gate(int x_in, int y_in, int area_in);
     Gate(int x_in, int y_in, int radius_in, int area_in);
     Gate(const Gate& gate_object);

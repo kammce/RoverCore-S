@@ -12,6 +12,7 @@
 using namespace std;
 
 Gate::Gate() : x(0), y(0), radius(0), area(0), distance(0) {};
+Gate::Gate(int x_in, int y_in) : x(x_in), y(y_in) {};
 Gate::Gate(int x_in, int y_in, int area_in) : x(x_in), y(y_in), area(area_in) {
     radius = pow(area/(3.14) , .5);
     calculate_distance();

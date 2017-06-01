@@ -100,8 +100,8 @@ class NeoCortex extends Neuron
 			});
 		},this.SampleRate);
 		/**Function Testing Section **/ 
-		//var parent = this;
-		//setTimeout(function(){parent.react({mode: 'AI', flag: 1});},1000);
+		var parent = this;
+		setTimeout(function(){parent.pathGPS},1000);
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -289,17 +289,17 @@ class NeoCortex extends Neuron
 		}
 		var heading_differential = this.GPS_Heading - this.Tracker_Heading;
 		
-		if (heading_differential < -10 )
+		if ( ((heading_differential+360)%360) < 180 && Math.abs(heading_differential) > 10 )
 		{
 			this.execDrive("SR");
 		} 
-		else if (heading_differential > 10)
+		else if ( ((heading_differential+360)%360) >= 180 &&  Math.abs(heading_differential) > 10)
 		{
 			this.execDrive("SL");
 		}
-		else
+		else 
 		{
-			this.pathSonic();
+			//this.pathSonic();
 			this.execDrive("C");
 		}
 	}
