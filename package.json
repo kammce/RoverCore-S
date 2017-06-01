@@ -17,6 +17,7 @@
     "colors": "",
     "forever-monitor": "",
     "i2c-bus": "",
+    "mjpeg-camera": "^1.7.2",
     "primus": ">=4.0.1",
     "serialport": "^4.0.7",
     "sleep": "^5.1.1",
