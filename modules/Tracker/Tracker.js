@@ -80,8 +80,9 @@ class Tracker extends Neuron
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
 			//mac: "00:21:13:00:3B:03",	// PowerSystems BT
-			// mac: "00:21:13:00:71:0E",	// Tracker BT
-			mac: "98:d3:31:fc:4c:f5",	// Tracker BT2
+			// mac: "00:21:13:00:71:0E",	// Old Tracker BT
+			// mac: "98:d3:31:fc:4c:f5",	// New Tracker BT
+			mac: "98:d3:31:fd:4d:3e",	// Tracker2 BT
 			baud: 38400,
 			log: this.log,
 			device: 3
