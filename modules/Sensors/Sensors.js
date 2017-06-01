@@ -101,7 +101,7 @@ class Sensors extends Neuron
 		 	* UBNT RSSI
 			*/
 		});
-		this.init();
+		//this.init();
 		this.model.registerMemory("Science");
 		this.model.set("Science", {
 			Pressure: ZERO,
@@ -256,7 +256,7 @@ class Sensors extends Neuron
      * @returns {boolean} returns true if react was successful, returns false if react failed.
      */
 	react(input)
-	{
+	{	/*
 		var parent = this;
 		switch(input.mode){
 			case "MUXON" : 
@@ -268,7 +268,7 @@ class Sensors extends Neuron
 			default: 
 				parent.log.output("Error Mission Control Input");
 				break;
-		}
+		}*/
 		this.log.output(`REACTING ${this.name}: `, input);
 		this.feedback(`REACTING ${this.name}: `, input);
 		return true;
