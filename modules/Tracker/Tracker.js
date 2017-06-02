@@ -69,6 +69,7 @@ class Tracker extends Neuron
 		this.LIDAR_READING = 'g';			// "103";
 		this.YAW_MOTOR_CURRENT = 'h';		// "104";
 		this.PITCH_MOTOR_CURRENT = 'i';		// "105";
+		this.RAW_MAST_Z = 'j';		// "106";
 		// this.MOTION_CONTROL_MODE = 'A';		// "65"; key for specifying speed/dir control (val = 1) or position control (val = 2)
 		this.MOTION_COMMAND_YAW = 'B';		// "66"; key for specifying angle to yaw motor (signed)
 		this.MOTION_COMMAND_PITCH = 'C';	// "67"; key for specifying angle to pitch motor (signed)
@@ -112,6 +113,7 @@ class Tracker extends Neuron
 				Y: 0,
 				Z: 0
 			},
+			heading: 0.0,			// heading (a conversion of globalOr.Z's values from +-180 to 0-360 degrees)
 			distance: 0,		// Lidar distance reading (cm)
 			current: {			// current readings for the motors
 				yaw: 0,
@@ -169,6 +171,12 @@ class Tracker extends Neuron
 		});
 		this.comms.attachListener(this.PITCH_MOTOR_CURRENT, (val) => {
 			this.local.current.pitch = val;
+			this.model.set("Tracker", this.local);
+		});
+		this.comms.attachListener(this.RAW_MAST_Z, (val) => {
+			this.local.heading = this.getHeading(val);
+			// this.local.heading = val;
+			// console.log(val);
 			this.model.set("Tracker", this.local);
 		});
 	}
@@ -276,6 +284,16 @@ class Tracker extends Neuron
 	panorama()
 	{
 
+	}
+
+	getHeading(zVal){
+		var temp = 0;
+		if (zVal < 0) {
+			temp = -zVal;
+		} else if (zVal > 0) {
+			temp = 360-zVal;
+		}
+		return temp;
 	}
 
 	reset()		// re-opens react() for command processing
