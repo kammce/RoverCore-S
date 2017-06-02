@@ -14,6 +14,14 @@ var lastSentTimestamp = [placeholderDate, placeholderDate, placeholderDate, plac
 var listenerType = ["INIT_START", "BASELINE_TEMP", "BASELINE_HUM", "READY_FOR_DEPLOYMENT", "DRILL_START",
 					"DRILL_COMPLETE", "READY_FOR_RETRIEVAL","SD_CARD_ERROR","DRILL_COMM_ERROR", "DRILL_DOWN_ERROR",
 					"DRILL_UP_ERROR","REEL_COMM_ERROR","REEL_DOWN_ERROR","REEL_UP_ERROR","TEMPERATURE","HUMIDITY"];
+var msgDescription = ["Time sync/Starting initialization", "Baseline temp reading from temp/hum sensor",
+"Baseline hum reading from temp/hum sensor", "Completed initialization/ready for deployment", "Starting drilling/START ACK", "Completed drilling/Starting temp/hum reading", "Ready for retrieval/STOP ACK", "SD Card Error", "Drill Error: No Response", "Drill Error: During Descent", "Drill Error: During ascent", "Reel Error: No Response", "Reel Error: During Descent", "Reel Error: During ascent", "Temperature sensor reading", "Humidity sensor reading", "Time sync ACK", "Start/stop signal for data collection"];
+//errors for h - n 
+// ascii code for h = 104, 7th element of listenerType array 
+// ascii code for n = 110
+	//need to subtract 97 from ascii code 
+
+
 /*
 0    uint8_t INIT_START;              // a -- request start time from MC
 1    uint32_t BASELINE_TEMP;          // b
@@ -128,6 +136,8 @@ class Pods extends Neuron
 		//then attach the 16 listeners to each of the bluetooth instantiations 
 		this.rfcomm_pod1.attachListener('a', (data)=>
 		{
+			//var listenerTypeIndex = 'a'.charCodeAt(0) - 97;
+			//this.log.output("listener for key a: ", listenerType[listenerTypeIndex], "has been activated" );
 			this.parseMessage(1, data, "init");
 		});
 		/*
@@ -216,7 +226,32 @@ class Pods extends Neuron
 		}
 		else if(test==2)
 		{
-			this.parseMessage(1, 58, "moist");
+			this.convertToMoist(1, 58, "moist");
+			this.convertToTemp(1, 58, "temp");
+			//this.sendInitStartTime(1, 2000);
+			this.sendPickupLog(1);
+			this.sendErrorLog(1, "h");
+			this.sendErrorLog(1, "i");
+			this.sendErrorLog(1, "j");
+			this.sendErrorLog(1, "k");
+			this.sendErrorLog(1, "l");
+			this.sendErrorLog(1, "m");
+			this.sendErrorLog(1, "n");
+		
+		}
+		else if (test ==3)
+		{
+			setInterval(() =>
+			{
+				this.sendErrorLog(1, "h");
+			this.sendErrorLog(1, "i");
+			this.sendErrorLog(1, "j");
+			this.sendErrorLog(1, "k");
+			this.sendErrorLog(1, "l");
+			this.sendErrorLog(1, "m");
+			this.sendErrorLog(1, "n");
+
+			}, 500);
 		}
 		
 	}
@@ -359,7 +394,9 @@ class Pods extends Neuron
 
 	convertToTemp(podNum, data)
 	{
-
+		this.log.output("************************************");
+		this.log.output("entered the convertToTemp function")
+		this.log.output("original raw temp = " + data);
 		var degC = -66.875 + 218.75 * (data * (5/1023))/3.3;
 		var tempRegisterKey = "pod" + podNum + "_TempData";
 		//this.model.set(tempRegisterKey, degC);
@@ -370,7 +407,9 @@ class Pods extends Neuron
 
 	convertToMoist(podNum, data)
 	{
+		this.log.output("************************************");
 		this.log.output("entered the convertToMoist function");
+		this.log.output("original raw temp = " + data);
 		var relativeHumidity = -12.5 + 125 * (data * (5/1023))/3.3;
 		//var moistRegisterKey = "pod" + podNum + "_MoistData";
 		//this.model.set(moistRegisterKey, relativeHumidity);
@@ -399,6 +438,7 @@ class Pods extends Neuron
 		//send over to CS 
 		if(podNum == 1)
 		{
+			this.log.output("	sending original timestamp over to pod 1: " + initDate);
 			this.rfcomm_pod1.sendCommand('q', initDateInSec);
 		}
 		
@@ -449,8 +489,9 @@ class Pods extends Neuron
 	}
 	sendErrorLog(podNum, errorKey)
 	{
-		this.log.output(`Pod  `, podNum, `: error related to key `, errorKey);
-		this.feedback(`Pod  `, podNum, `: error related to key `, errorKey);
+		var errorIndex = errorKey.charCodeAt(0) - 97;
+		this.log.output(`Pod  `, podNum, `: error related to key `, errorKey, `error is : `, msgDescription[errorIndex]);
+		this.feedback(`Pod  `, podNum, `: error related to key `, errorKey, `error is : `, msgDescription[errorIndex]);
 	} 
 
 	attachAllListeners(key)
