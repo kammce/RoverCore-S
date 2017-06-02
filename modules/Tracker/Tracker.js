@@ -76,6 +76,7 @@ class Tracker extends Neuron
 		this.MOTION_COMMAND_PITCH_SPEED = 'E';// "69";	// 0 - 255
 		this.ACTIVE_CAMERA = 'F';	// "?" key for selecting which analog camera to receive feed from
 		this.BATTERY_VOLTAGE = 'G';
+		this.YAW_DIR = 'H';	// RJ
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
@@ -125,7 +126,8 @@ class Tracker extends Neuron
 				speed: 0,
 				angle: 0
 			},
-			zoom: 0			// Zoom percentage
+			zoom: 0,			// Zoom percentage
+			yawDir: 0.0 		// RJ
 		};
 
 		/* Model Memory Registration */
@@ -206,12 +208,16 @@ class Tracker extends Neuron
 			// Analog camera selection
 			this.local.activeCamera = input.activeCamera;	//	0 or 1
 
+			// RJ - push-release yaw
+			this.local.yawDir = input.yawMotion;
+
 			// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH, this.local.pitch.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH_SPEED, this.local.pitch.speed);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
 			this.comms.sendCommand(this.ACTIVE_CAMERA, this.local.activeCamera);
+			this.comms.sendCommand(this.YAW_DIR, this.local.yawDir); // RJ
 
 			// Zoom parameters
 			this.local.zoom = input.zoom;
