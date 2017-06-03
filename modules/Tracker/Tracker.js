@@ -274,6 +274,8 @@ class Tracker extends Neuron
      */
 	idle()
 	{
+		this.comms.sendCommand(this.MOTION_COMMAND_PITCH_SPEED, 0);
+		this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, 0);
 		this.log.output(`IDLING ${this.name}`);
 		this.feedback(`IDLING ${this.name}`);
 		this.model.set("Tracker", this.local);
