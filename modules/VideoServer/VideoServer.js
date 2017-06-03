@@ -5,7 +5,9 @@ var MjpegCamera = require('mjpeg-camera');
 
 /*
 
-cvlc -I dummy v4l2:// :v4l2-dev=/dev/video-tracker :v4l2-width=1280 :v4l2-height=720 --live-caching=0 --sout-transcode-threads 8 --network-caching=0 ':sout=#transcode{vcodec=MJPG,fps=30}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+cvlc -I dummy v4l2:// :v4l2-dev=/dev/video-tracker :v4l2-width=1280 :v4l2-height=720 --live-caching=0 --sout-transcode-threads 8 --network-caching=0 ':sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
+
+cvlc -I dummy v4l2:// :v4l2-dev=/dev/video-tracker :v4l2-width=640 :v4l2-height=360 --live-caching=0 --sout-transcode-threads 8 --network-caching=0 ':sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9001}}'
 
 cvlc -I dummy http://localhost:9001 --live-caching=0 --network-caching=0 ':sout=#standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9002}}'
 
@@ -64,6 +66,8 @@ class VideoServer extends Neuron
 		this.exec = require("child_process").exec;
 		this.fs = require('fs');
 
+		this.port = "3-1.2";
+
 		this.video = undefined;
 		//this.killAllVideoServers();
 		this.model.registerMemory("VideoServer");
@@ -74,8 +78,8 @@ class VideoServer extends Neuron
 		};
 
 		this.boundary = "--7b3cc56e5f51db803f790dad720ed50a";
-		// this.video_source = "/dev/video-tracker";
-		this.video_source = "/dev/video0";
+		this.video_source = "/dev/video-tracker";
+		// this.video_source = "/dev/video0";
 
 		this.model.set("VideoServer", this.local);
 		//// Create an MjpegCamera instance
@@ -104,6 +108,12 @@ class VideoServer extends Neuron
 				break;
 			case "kill":
 				this.killAllVideoServers();
+				break;
+			case "unbind":
+				this.unbind();
+				break;
+			case "bind":
+				this.bind();
 				break;
 			case "zoom":
 				this.setZoom(input["zoom"]);
@@ -179,7 +189,7 @@ class VideoServer extends Neuron
 			':v4l2-height=360',
 			'--live-caching=0',
 			'--network-caching=0',
-			'--sout-transcode-threads', '16',
+			'--sout-transcode-threads', '8',
 			`:sout=#transcode{vcodec=MJPG,fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=${this.boundary}},mux=mpjpeg,dst=:9001}}`
 		]);
 
@@ -228,6 +238,36 @@ class VideoServer extends Neuron
 				return;
 			}
 			var msg = "ATTEMPTING TO KILL ALL INSTANCES OF VLC.";
+			this.log.debug1(msg);
+			this.feedback(msg);
+		});
+	}
+	unbind()
+	{
+		this.exec(`echo ${this.port} > /sys/bus/usb/drivers/usb/unbind`, (err) =>
+		{
+			if(err)
+			{
+				this.log.debug1(err);
+				this.feedback(err);
+				return;
+			}
+			var msg = "ATTEMPTING TO UNBIND CAMERA.";
+			this.log.debug1(msg);
+			this.feedback(msg);
+		});
+	}
+	bind()
+	{
+		this.exec(`echo ${this.port} > /sys/bus/usb/drivers/usb/bind`, (err) =>
+		{
+			if(err)
+			{
+				this.log.debug1(err);
+				this.feedback(err);
+				return;
+			}
+			var msg = "ATTEMPTING TO UNBIND CAMERA.";
 			this.log.debug1(msg);
 			this.feedback(msg);
 		});
