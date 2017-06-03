@@ -105,7 +105,7 @@ class Pods extends Neuron
 		
 	
 		this.rfcomm_pod1 = new util.extended.BluetoothSerial({
-			mac: "00:21:13:00:6F:01", //pod 1 MAC address  
+			mac: "98:D3:36:00:B3:40", //pod 1 MAC address  aka Sonic 
 			baud: 38400,
 			log: this.log,
 			device: 10
