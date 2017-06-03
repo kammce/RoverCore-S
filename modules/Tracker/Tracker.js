@@ -69,6 +69,7 @@ class Tracker extends Neuron
 		this.LIDAR_READING = 'g';			// "103";
 		this.YAW_MOTOR_CURRENT = 'h';		// "104";
 		this.PITCH_MOTOR_CURRENT = 'i';		// "105";
+		this.RAW_MAST_Z = 'j';		// "106";
 		// this.MOTION_CONTROL_MODE = 'A';		// "65"; key for specifying speed/dir control (val = 1) or position control (val = 2)
 		this.MOTION_COMMAND_YAW = 'B';		// "66"; key for specifying angle to yaw motor (signed)
 		this.MOTION_COMMAND_PITCH = 'C';	// "67"; key for specifying angle to pitch motor (signed)
@@ -76,11 +77,14 @@ class Tracker extends Neuron
 		this.MOTION_COMMAND_PITCH_SPEED = 'E';// "69";	// 0 - 255
 		this.ACTIVE_CAMERA = 'F';	// "?" key for selecting which analog camera to receive feed from
 		this.BATTERY_VOLTAGE = 'G';
+		this.YAW_DIR = 'H';	// RJ
 
 		/* Bluetooth Serial */
 		this.comms = new util.extended.BluetoothSerial({
-            mac: "98:D3:31:FC:4C:F5",
-			//mac: "00:21:13:00:71:0E",	// Tracker BT
+			//mac: "00:21:13:00:3B:03",	// PowerSystems BT
+			// mac: "00:21:13:00:71:0E",	// Old Tracker BT
+			// mac: "98:d3:31:fc:4c:f5",	// New Tracker BT
+			mac: "98:d3:31:fd:4d:3e",	// Tracker2 BT
 			baud: 38400,
 			log: this.log,
 			device: 3
@@ -109,6 +113,7 @@ class Tracker extends Neuron
 				Y: 0,
 				Z: 0
 			},
+			heading: 0.0,			// heading (a conversion of globalOr.Z's values from +-180 to 0-360 degrees)
 			distance: 0,		// Lidar distance reading (cm)
 			current: {			// current readings for the motors
 				yaw: 0,
@@ -123,7 +128,8 @@ class Tracker extends Neuron
 				speed: 0,
 				angle: 0
 			},
-			zoom: 0			// Zoom percentage
+			zoom: 0,			// Zoom percentage
+			yawDir: 0.0 		// RJ
 		};
 
 		/* Model Memory Registration */
@@ -167,6 +173,12 @@ class Tracker extends Neuron
 			this.local.current.pitch = val;
 			this.model.set("Tracker", this.local);
 		});
+		this.comms.attachListener(this.RAW_MAST_Z, (val) => {
+			this.local.heading = this.getHeading(val);
+			// this.local.heading = val;
+			// console.log(val);
+			this.model.set("Tracker", this.local);
+		});
 	}
 	/**
      * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
@@ -204,16 +216,23 @@ class Tracker extends Neuron
 			// Analog camera selection
 			this.local.activeCamera = input.activeCamera;	//	0 or 1
 
+			// RJ - push-release yaw
+			this.local.yawDir = input.yawMotion;
+
 			// Send to Teensy (i.e. pitch -8.45 = CCW 8.45, yaw 12.4 = CW 12.4)
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH, this.local.pitch.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_PITCH_SPEED, this.local.pitch.speed);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW, this.local.yaw.angle);
 			this.comms.sendCommand(this.MOTION_COMMAND_YAW_SPEED, this.local.yaw.speed);
 			this.comms.sendCommand(this.ACTIVE_CAMERA, this.local.activeCamera);
+			this.comms.sendCommand(this.YAW_DIR, this.local.yawDir); // RJ
 
 			// Zoom parameters
 			this.local.zoom = input.zoom;
 			// this.comms.sendCommand(/*key for zoom*/, input.zoom);
+
+			// Lidar parameters
+			this.local.lidarState = input.lidar;
 
 			this.log.output(`REACTING ${this.name}: `, input);
 			this.feedback(`REACTING ${this.name}: `, input);
@@ -265,6 +284,16 @@ class Tracker extends Neuron
 	panorama()
 	{
 
+	}
+
+	getHeading(zVal){
+		var temp = 0;
+		if (zVal < 0) {
+			temp = -zVal;
+		} else if (zVal > 0) {
+			temp = 360-zVal;
+		}
+		return temp;
 	}
 
 	reset()		// re-opens react() for command processing

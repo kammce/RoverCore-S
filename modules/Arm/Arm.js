@@ -51,8 +51,9 @@ class Arm extends Neuron
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
+		//98:D3:31:FC:50:00
 		this.rfcomm = new util.extended.BluetoothSerial({
-			mac: "98:D3:31:FC:50:00",
+			mac: "98:D3:31:FC:50:B0",
 			baud: 38400,
 			log: this.log,
 			device: 2
@@ -69,35 +70,69 @@ class Arm extends Neuron
      */
 	react(input)
 	{
-		if( "rotunda" in input &&
-			"shoulder" in input &&
-			"elbow" in input &&
-			"wrist_pitch" in input &&
-			"wrist_roll" in input &&
-			"claw" in input &&
-			"claw_torque" in input &&
-			"camera_select" in input &&
-			"rotunda_camera" in input)
+		if(!this.busy)
 		{
+			this.busy = true;
+			if( "rotunda" in input &&
+				"shoulder" in input &&
+				"elbow" in input &&
+				"wrist_pitch" in input &&
+				"wrist_roll" in input &&
+				"claw" in input &&
+				"claw_torque" in input &&
+				"camera_select" in input &&
+				"rotunda_camera" in input)
+			{
 
+				
 			this.rfcomm.sendCommand('a', input.rotunda);
-			this.rfcomm.sendCommand('b', input.shoulder);
-			this.rfcomm.sendCommand('c', input.elbow);
-			this.rfcomm.sendCommand('d', input.wrist_pitch);
-			this.rfcomm.sendCommand('e', input.wrist_roll);
-			this.rfcomm.sendCommand('f', input.claw);
-			this.rfcomm.sendCommand('g', input.claw_torque);
-			this.rfcomm.sendCommand('h', input.camera_select);
-			this.rfcomm.sendCommand('i', input.rotunda_camera);
+			setTimeout(() =>{ 
+				this.rfcomm.sendCommand('b', input.shoulder);
+				setTimeout(() =>{ 
+					this.rfcomm.sendCommand('c', input.elbow);
+					setTimeout(() =>{ 
+						this.rfcomm.sendCommand('d', input.wrist_pitch);
+						setTimeout(() =>{ 
+							this.rfcomm.sendCommand('e', input.wrist_roll);
+							setTimeout(() =>{ 
+								this.rfcomm.sendCommand('f', input.claw);
+								setTimeout(() =>{ 
+									this.rfcomm.sendCommand('g', input.claw_torque);
+									setTimeout(() =>{ 
+										this.rfcomm.sendCommand('h', input.camera_select);
+										setTimeout(() =>{ 
+											this.rfcomm.sendCommand('i', input.rotunda_camera);
+											setTimeout(() =>{ 
+												this.busy = false;
+											}, 15);
+										}, 15);
+									}, 15);
+								}, 15);
+							}, 15);
+						}, 15);
+					}, 15);
+				}, 15);
+			}, 15);
 
-			this.log.debug2(`Sending \n`, input, `Over BluetoothSerial`);
-			this.feedback(`Sending \n`, input, `Over BluetoothSerial`);
-			return true;
-		}
-		else
-		{
-			this.log.debug1(`Invalid Input `, input);
-			this.feedback(`Invalid Input `, input);
+				// this.rfcomm.sendCommand('a', input.rotunda);
+				// this.rfcomm.sendCommand('b', input.shoulder);
+				// this.rfcomm.sendCommand('c', input.elbow);
+				// this.rfcomm.sendCommand('d', input.wrist_pitch);
+				// this.rfcomm.sendCommand('e', input.wrist_roll);
+				// this.rfcomm.sendCommand('f', input.claw);
+				// this.rfcomm.sendCommand('i', input.rotunda_camera);
+				// this.rfcomm.sendCommand('g', input.claw_torque);
+				// this.rfcomm.sendCommand('h', input.camera_select);
+
+				
+
+				return true;
+			}
+			else
+			{
+				this.log.debug1(`Invalid Input `, input);
+				this.feedback(`Invalid Input `, input);
+			}
 		}
 	}
 	/**
