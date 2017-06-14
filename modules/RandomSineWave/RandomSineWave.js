@@ -70,11 +70,6 @@ class RandomSineWave extends Neuron
 			this.model.set("Random", next_value);
 		}, sample_rate);
 	}
-
-	react()     { return true; }
-	halt()      { return true; }
-	resume()    { return true; }
-	idle()      { return true; }
 }
 
 module.exports = RandomSineWave;
