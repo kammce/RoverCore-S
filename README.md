@@ -353,7 +353,7 @@ To run the whole system's worth of unit tests run the following command with the
 
 To run the unit test make sure you are at the *root* of the repo and run the following:
 
-    mocha --require test-suite/assist/config_chai.js test-suite/unit/<unit test folder>/<unit test file>.js
+    mocha --require test/config_chai.js test/modules/<unit test file>.js
 
 ### Example Unit Tests
 Example unit tests can found in the **test-suite/unit/cortex/** folder.

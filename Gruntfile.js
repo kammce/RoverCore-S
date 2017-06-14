@@ -40,12 +40,12 @@ module.exports = function(grunt) {
 					reporter: 'spec',
 					require:
 					[
-						'tests/config_chai.js',
+						'test/config_chai.js',
 						'sinon'
 					]
 				},
 				//// Removed libraries because those tests are system specific
-				src: ['tests/core/*.js', /*'tests/libraries/*.js',*/ 'tests/modules/**/*.js']
+				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'tests/module/**/*.js']
 			}
 		}
 	});

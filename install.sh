@@ -46,6 +46,8 @@ echo -e "\nNPM Install Mocha Command Line Interface"
 sudo npm install -g mocha-cli
 echo -e "\nNode Debug Inspector"
 sudo npm install -g node-inspector
+echo -e "\Node Code Coverage Tool"
+sudo npm install -g istanbul
 
 #echo -e "\nInstalling Lib udev development library"
 #sudo apt-get install -y libudev-dev
