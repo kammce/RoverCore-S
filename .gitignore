@@ -5,20 +5,22 @@ logs/
 install/See3CAMx10-CL/camera-control
 
 modules/**
-!modules/Protolobe
+!modules/Protolobe/
+!modules/Protolobe/Protolobe.js
 !modules/Cortex.js
 !modules/Neuron.js
-!modules/RandomSineWave
+!modules/RandomSineWave/
+!modules/RandomSineWave/RandomSineWave.js
 
-test-suite/**
-!test-suite/Cortex
-!test-suite/Protolobe
-!test-suite/RandomSineWave
-!test-suite/Utilities
-!test-suite/client-integration-test.js
-!test-suite/primus.js
-!test-suite/config_chai.js
-!test-suite/html-client-integration.html
+tests/**
+!tests/Cortex
+!tests/Protolobe
+!tests/RandomSineWave
+!tests/Utilities
+!tests/client-integration-test.js
+!tests/primus.js
+!tests/config_chai.js
+!tests/html-client-integration.html
 
 experiments/
 

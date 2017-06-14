@@ -1,0 +1,7 @@
+{
+  "files": {
+    "included": [
+      "modules/**/*.js"
+    ]
+  }
+}

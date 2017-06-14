@@ -5,23 +5,6 @@ module.exports = function(grunt) {
 	// Configure a mochaTest task.
 	grunt.initConfig(
 	{
-		mochaTest:
-		{
-			test:
-			{
-				options:
-				{
-					reporter: 'spec',
-					require:
-					[
-						'tests/config_chai.js',
-						'sinon'
-					]
-				},
-				src: ['tests/core/*.js', 'tests/libraries/*.js', 'tests/modules/**/*.js']
-				// src: [ 'tests/core/Cortex.js' ]
-			}
-		},
 		jshint:
 		{
 			options:
@@ -47,6 +30,23 @@ module.exports = function(grunt) {
 				}
 			},
 		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js']
+		},
+		mochaTest:
+		{
+			test:
+			{
+				options:
+				{
+					reporter: 'spec',
+					require:
+					[
+						'tests/config_chai.js',
+						'sinon'
+					]
+				},
+				src: ['tests/core/*.js', 'tests/libraries/*.js', 'tests/modules/**/*.js']
+				// src: [ 'tests/core/Cortex.js' ]
+			}
 		}
 	});
 	grunt.registerTask('default', ['jshint','mochaTest']);
