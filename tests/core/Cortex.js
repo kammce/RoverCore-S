@@ -47,7 +47,10 @@ describe('Testing Cortex Class', function()
                 "target": 'http://localhost:9000',
                 "connection": undefined,
                 "simulate": false,
-                "isolation": "Protolobe"
+                "isolation": "Protolobe",
+                "debug_level": 0,
+                "no_color": false,
+                "under_test": true
             };
             cortex = new Cortex(config);
         });

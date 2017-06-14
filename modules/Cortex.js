@@ -103,7 +103,10 @@ class Cortex
 		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback_generator("model"));
 
-		this.extended_utilities = require("../utilities/Extended.js");
+		if(!config.under_test)
+		{
+			this.extended_utilities = require("../utilities/Extended.js");
+		}
 		// =====================================
 		// Loading modules
 		// =====================================
