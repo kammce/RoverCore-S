@@ -171,6 +171,7 @@ class Cortex
 			});
 		}
 	}
+	//// TODO: Create a unit test for this method
 	sendInterfaceStatus()
 	{
 		this.feedback({
@@ -178,6 +179,7 @@ class Cortex
 			data: this.mission_controllers
 		});
 	}
+	//// TODO: Create a unit test for this method
 	removeInterface(spark)
 	{
 		for(var controller in this.mission_controllers)
@@ -190,11 +192,14 @@ class Cortex
 			}
 		}
 	}
+	//// TODO: Create a unit test for this method
 	addInterface(controller, spark)
 	{
 		this.feedback(`${controller}: Interface Connected!`);
 		this.mission_controllers[controller] = spark.id;
 	}
+	//// TODO: Create a unit test for this method
+	//// ADD: The ability to invoke lobe state changes through this method
 	handleMissionControl(data, spark)
 	{
 		if(data === "disconnect")
@@ -265,6 +270,7 @@ class Cortex
 			}
 		}
 	}
+	//// TODO: Create a unit test for this method
 	upcall(command, ...params)
 	{
 		switch(command)

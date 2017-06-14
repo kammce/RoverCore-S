@@ -44,8 +44,8 @@ module.exports = function(grunt) {
 						'sinon'
 					]
 				},
-				src: ['tests/core/*.js', 'tests/libraries/*.js', 'tests/modules/**/*.js']
-				// src: [ 'tests/core/Cortex.js' ]
+				//// Removed libraries because those tests are system specific
+				src: ['tests/core/*.js', /*'tests/libraries/*.js',*/ 'tests/modules/**/*.js']
 			}
 		}
 	});
