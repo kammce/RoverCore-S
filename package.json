@@ -22,5 +22,8 @@
     "serialport": "^4.0.7",
     "sleep": "^5.1.1",
     "ws": ">=0.8.0"
+  },
+  "scripts": {
+    "test": "sudo grunt unittest"
   }
 }
