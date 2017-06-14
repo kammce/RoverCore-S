@@ -132,7 +132,7 @@ class Cortex
 				}
 				catch(e)
 				{
-					var msg = `_react failure: ${e}`
+					var msg = `_react failure: ${e}`;
 					this.log.debug1(msg);
 					this.feedback(msg);
 				}
@@ -304,7 +304,6 @@ class Cortex
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
-			var parent = this;
 			var upcall = this.upcall;
 			var lobe_utitilites = {
 				"name": directory,
@@ -313,12 +312,6 @@ class Cortex
 				"upcall": upcall,
 				"extended": this.extended_utilities,
 				"feedback": this.feedback_generator(directory)
-				// function()
-				// {
-				// 	var args = Array.from(arguments);
-				// 	args.unshift(directory);
-				// 	parent.feedback.apply(null, args);
-				// }
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);

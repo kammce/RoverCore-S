@@ -43,8 +43,8 @@ class OdroidGPIODriver
 		// =====================================
 		// RoverCore Blink Led Indicator
 		// =====================================
-		console.log(`System Hostname is on ${os.hostname()}`);
 		var os = require('os');
+		console.log(`System Hostname is on ${os.hostname()}`);
 		if(os.hostname() === 'odroid')
 		{
 			console.log("RoverCore Blink Led Indicator.");

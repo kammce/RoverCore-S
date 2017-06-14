@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 					"module": true
 				}
 			},
-		    target: ['Gruntfile.js', 'modules/Cortex.js', 'modules/**/*.js']
+		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js']
 		}
 	});
 	grunt.registerTask('default', ['jshint','mochaTest']);
