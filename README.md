@@ -1,4 +1,9 @@
 # RoverCore-S: The Mind of the Mars Rover
+
+[![Documentation Status](https://readthedocs.org/projects/rovercore-s/badge/?version=latest)](http://rovercore-s.readthedocs.io/en/latest/?badge=latest)
+
+[![Dependency Status](https://david-dm.org/kammce/RoverCore-S.svg)](https://david-dm.org/kammce/RoverCore-S.svg)
+
 RoverCore-S is a framework written in node.js for organizing code written for robotics systems as well as setting up mechanisms for communicate between mission control and itself. RoverCore-S is modular and built to communicate between hardware peripherals (RoverCore-F) and a mission control interface (RoverCore-MC). The modules in RoverCore-S are called Lobes.
 
 At the heart of RoverCore-S is the **Cortex.js** which does the following:
