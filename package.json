@@ -23,6 +23,6 @@
     "ws": "^3.0.0"
   },
   "scripts": {
-    "test": "sudo istanbul cover --report lcovonly grunt unittest"
+    "test": "sudo istanbul cover --report lcovonly grunt unittest && codecovq"
   }
 }
