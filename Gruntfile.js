@@ -45,7 +45,7 @@ module.exports = function(grunt) {
 					]
 				},
 				//// Removed libraries because those tests are system specific
-				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'tests/modules/**/*.js']
+				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'test/modules/**/*.js']
 			}
 		}
 	});
