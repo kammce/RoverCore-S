@@ -1,8 +1,11 @@
 language: node_js
 node_js:
-	- "node"
-	- "6"
+  - "6"
 sudo: true
 dist: trusty
-install: ./install.sh
-after_success: bash <(curl -s https://codecov.io/bash)
+install:
+  - ./install.sh
+script:
+  - npm test
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
