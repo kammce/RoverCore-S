@@ -1,5 +1,6 @@
 # RoverCore-S: The Mind of the Mars Rover
 
+[![RoverCore-S Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](https://github.com/kammce/RoverCore-S/)
 [![Documentation Status](https://readthedocs.org/projects/rovercore-s/badge/?version=latest)](http://rovercore-s.readthedocs.io/en/latest/?badge=latest)
 [![Dependency Status](https://david-dm.org/kammce/RoverCore-S.svg)](https://david-dm.org/kammce/RoverCore-S)
 [![Development Tools Dependency Status](https://david-dm.org/kammce/RoverCore-S/dev-status.svg)](https://david-dm.org/kammce/RoverCore-S?type=dev)
@@ -46,11 +47,11 @@ Need to be running recent LTS (L.ong T.erm S.ervice) Ubuntu on your machine or i
 ## Installation
 **Step 1:** Clone the repository (prefered method is to use the SSH git clone)
 
-    git@bitbucket.org:sjsurobotics/rovercore-s.git
+    git clone https://github.com/kammce/RoverCore-S.git
 
 **Step 2:** change directories into **rovercore-s**
 
-    cd rovercore-s
+    cd RoverCore-S
 
 **Step 3:** Install  RoverCore-S using `install.sh` script. The script will install the latest `node.js@6.x.x`, `npm`,   node dependencies according to *package.json*. DO NOT INSTALL THE SCRIPT USING **SUDO**. The script will ask you for **sudo** permissions once it runs.
 

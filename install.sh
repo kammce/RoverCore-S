@@ -48,6 +48,8 @@ echo -e "\nNode Debug Inspector"
 sudo npm install -g node-inspector
 echo -e "\Node Code Coverage Tool"
 sudo npm install -g istanbul
+echo -e "\NYC istanbul command line interface"
+sudo npm install -g nyc
 echo -e "\Node Code Coverage Reporting Tool"
 npm install -g codecov
 
