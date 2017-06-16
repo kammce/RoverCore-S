@@ -5,7 +5,7 @@ class Serial
 	constructor(params)
 	{
 		// this.connected = false;
-		this.port;
+		// this.port;
 		this.log = params.log;
 		this.path = params.path;
 		this.baud_rate = params.baud;

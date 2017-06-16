@@ -1,6 +1,11 @@
 # RoverCore-S: The Mind of the Mars Rover
 
-[![Documentation Status](https://readthedocs.org/projects/rovercore-s/badge/?version=latest)](http://rovercore-s.readthedocs.io/en/latest/?badge=latest) [![Dependency Status](https://david-dm.org/kammce/RoverCore-S.svg)](https://david-dm.org/kammce/RoverCore-S.svg)
+[![RoverCore-S Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](https://github.com/kammce/RoverCore-S/)
+[![Documentation Status](https://readthedocs.org/projects/rovercore-s/badge/?version=latest)](http://rovercore-s.readthedocs.io/en/latest/?badge=latest)
+[![Dependency Status](https://david-dm.org/kammce/RoverCore-S.svg)](https://david-dm.org/kammce/RoverCore-S)
+[![Development Tools Dependency Status](https://david-dm.org/kammce/RoverCore-S/dev-status.svg)](https://david-dm.org/kammce/RoverCore-S?type=dev)
+[![Build Status](https://travis-ci.org/kammce/RoverCore-S.svg?branch=docs)](https://travis-ci.org/kammce/RoverCore-S)
+[![Code Coverage by codecov](https://codecov.io/gh/kammce/RoverCore-S/branch/docs/graph/badge.svg)](https://codecov.io/gh/kammce/RoverCore-S)
 
 RoverCore-S is a framework written in node.js for organizing code written for robotics systems as well as setting up mechanisms for communicate between mission control and itself. RoverCore-S is modular and built to communicate between hardware peripherals (RoverCore-F) and a mission control interface (RoverCore-MC). The modules in RoverCore-S are called Lobes.
 
@@ -42,11 +47,11 @@ Need to be running recent LTS (L.ong T.erm S.ervice) Ubuntu on your machine or i
 ## Installation
 **Step 1:** Clone the repository (prefered method is to use the SSH git clone)
 
-    git@bitbucket.org:sjsurobotics/rovercore-s.git
+    git clone https://github.com/kammce/RoverCore-S.git
 
 **Step 2:** change directories into **rovercore-s**
 
-    cd rovercore-s
+    cd RoverCore-S
 
 **Step 3:** Install  RoverCore-S using `install.sh` script. The script will install the latest `node.js@6.x.x`, `npm`,   node dependencies according to *package.json*. DO NOT INSTALL THE SCRIPT USING **SUDO**. The script will ask you for **sudo** permissions once it runs.
 
@@ -349,7 +354,7 @@ To run the whole system's worth of unit tests run the following command with the
 
 To run the unit test make sure you are at the *root* of the repo and run the following:
 
-    mocha --require test-suite/assist/config_chai.js test-suite/unit/<unit test folder>/<unit test file>.js
+    mocha --require test/config_chai.js test/modules/<unit test file>.js
 
 ### Example Unit Tests
 Example unit tests can found in the **test-suite/unit/cortex/** folder.

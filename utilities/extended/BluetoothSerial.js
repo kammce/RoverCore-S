@@ -16,7 +16,6 @@ class BluetoothSerial extends Serial
 		this.mac_address = params.mac;
 		this.serial_buffer = "";
 		this.callback_map = {};
-		this.bind_interval;
 		this.busy = true;
 
 		// BluetoothSerial.bt_channel_iterator += 6;
@@ -50,7 +49,7 @@ class BluetoothSerial extends Serial
 			{
 				this.bind();
 			}, 1000);
-		}
+		};
 		//// Check if /dev/rfcommXX exists
 		this.exec(`rfcomm show ${this.device}`, (error, stdout, stderr) =>
 		{
@@ -66,7 +65,7 @@ class BluetoothSerial extends Serial
 			//// If stderr exists, then rfcomm devices does not exist
 			else if(stderr)
 			{
-				this.exec(this.bind_command, (error, stdout, stderr) =>
+				this.exec(this.bind_command, (error) =>
 				{
 					if(error)
 					{
@@ -106,7 +105,7 @@ class BluetoothSerial extends Serial
 		this.busy = true;
 		var release_callback = () =>
 		{
-			this.exec(`rfcomm release ${this.device}`, (error, stdout, stderr) =>
+			this.exec(`rfcomm release ${this.device}`, () =>
 			{
 				if(!this.fs.existsSync(this.path))
 				{
@@ -224,7 +223,7 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 			"--pin", code_path
 		]);
 
-		BluetoothSerial.bt_agent_process.on('close', (code) =>
+		BluetoothSerial.bt_agent_process.on('close', (/*code*/) =>
 		{
 			//// NOTE: Could be potentially dangerous :P
 			//// Recursion mang!
@@ -241,20 +240,20 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 	}
 };
 
-BluetoothSerial.glob = require('glob');
-
 BluetoothSerial.initialize = function()
 {
-	var execSync = require("child_process").execSync;
 	var fs = require("fs");
-	var sleep = require('sleep');
+
+	// var execSync = require("child_process").execSync;
+	// var sleep = require('sleep');
+	// var glob = require('glob');
 
 	//// Release all bluetooth rfcomm connections
 	// try
 	// {
 	// 	console.log("RUNNING: rfcomm release all");
 	// 	var strerr = new Buffer("---");
-	// 	while(strerr.toString() || BluetoothSerial.glob.sync("/dev/rfcomm*").length !== 0)
+	// 	while(strerr.toString() || glob.sync("/dev/rfcomm*").length !== 0)
 	// 	{
 	// 		strerr = execSync('rfcomm release all 2>&1');
 	// 		//console.log(strerr.toString());

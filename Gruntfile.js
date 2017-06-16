@@ -5,22 +5,6 @@ module.exports = function(grunt) {
 	// Configure a mochaTest task.
 	grunt.initConfig(
 	{
-		mochaTest:
-		{
-			test:
-			{
-				options:
-				{
-					reporter: 'spec',
-					require:
-					[
-						'test-suite/config_chai.js',
-						'sinon'
-					]
-				},
-				src: ['test-suite/**/*.js']
-			}
-		},
 		jshint:
 		{
 			options:
@@ -36,8 +20,8 @@ module.exports = function(grunt) {
 				eqeqeq: true, 	// Prohibits the use of == and != in favor of === and !==
 				esnext: true, 	// Tells JSHint that your code uses ECMAScript 6 specific syntax
 				node: true, 	// Defines globals available when your code is running inside of the Node
-				sub: true, 		// suppresses warnings about using [] notation when it can be expressed in dot notation: person['name'] vs. person.name.
-				globals:  		// Predefine these so that JSHint does not complain about them
+				sub: true, 	// suppresses warnings about using [] notation when it can be expressed in dot notation: person['name'] vs. person.name.
+				globals:  	// Predefine these so that JSHint does not complain about them
 				{
 					"process": true,
 					"require": true,
@@ -45,10 +29,27 @@ module.exports = function(grunt) {
 					"module": true
 				}
 			},
-		    target: ['Gruntfile.js', 'modules/Cortex.js', 'modules/**/*.js']
+		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js']
+		},
+		mochaTest:
+		{
+			test:
+			{
+				options:
+				{
+					reporter: 'spec',
+					require:
+					[
+						'test/config_chai.js',
+						'sinon'
+					]
+				},
+				//// Removed libraries because those tests are system specific
+				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'test/modules/**/*.js']
+			}
 		}
 	});
 	grunt.registerTask('default', ['jshint','mochaTest']);
-	grunt.registerTask('unittest', ['mochaUnitTest']);
+	grunt.registerTask('unittest', ['mochaTest']);
 	grunt.registerTask('lint', ['jshint']);
 };

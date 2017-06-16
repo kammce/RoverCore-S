@@ -103,7 +103,10 @@ class Cortex
 		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback_generator("model"));
 
-		this.extended_utilities = require("../utilities/Extended.js");
+		if(!config.under_test)
+		{
+			this.extended_utilities = require("../utilities/Extended.js");
+		}
 		// =====================================
 		// Loading modules
 		// =====================================
@@ -132,7 +135,7 @@ class Cortex
 				}
 				catch(e)
 				{
-					var msg = `_react failure: ${e}`
+					var msg = `_react failure: ${e}`;
 					this.log.debug1(msg);
 					this.feedback(msg);
 				}
@@ -171,6 +174,7 @@ class Cortex
 			});
 		}
 	}
+	//// TODO: Create a unit test for this method
 	sendInterfaceStatus()
 	{
 		this.feedback({
@@ -178,6 +182,7 @@ class Cortex
 			data: this.mission_controllers
 		});
 	}
+	//// TODO: Create a unit test for this method
 	removeInterface(spark)
 	{
 		for(var controller in this.mission_controllers)
@@ -190,11 +195,14 @@ class Cortex
 			}
 		}
 	}
+	//// TODO: Create a unit test for this method
 	addInterface(controller, spark)
 	{
 		this.feedback(`${controller}: Interface Connected!`);
 		this.mission_controllers[controller] = spark.id;
 	}
+	//// TODO: Create a unit test for this method
+	//// ADD: The ability to invoke lobe state changes through this method
 	handleMissionControl(data, spark)
 	{
 		if(data === "disconnect")
@@ -265,6 +273,7 @@ class Cortex
 			}
 		}
 	}
+	//// TODO: Create a unit test for this method
 	upcall(command, ...params)
 	{
 		switch(command)
@@ -304,7 +313,6 @@ class Cortex
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
 			var Lobe = (this.simulate) ? require("./Protolobe/Protolobe") : require(source_path);
 			//// Generate lobe utilities object
-			var parent = this;
 			var upcall = this.upcall;
 			var lobe_utitilites = {
 				"name": directory,
@@ -313,12 +321,6 @@ class Cortex
 				"upcall": upcall,
 				"extended": this.extended_utilities,
 				"feedback": this.feedback_generator(directory)
-				// function()
-				// {
-				// 	var args = Array.from(arguments);
-				// 	args.unshift(directory);
-				// 	parent.feedback.apply(null, args);
-				// }
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);

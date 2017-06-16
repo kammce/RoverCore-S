@@ -20,7 +20,9 @@
     "mjpeg-camera": "^1.7.2",
     "primus": ">=4.0.1",
     "serialport": "^4.0.7",
-    "sleep": "^5.1.1",
-    "ws": ">=0.8.0"
+    "ws": "^3.0.0"
+  },
+  "scripts": {
+    "test": "nyc --reporter=lcov --reporter=html grunt"
   }
 }
