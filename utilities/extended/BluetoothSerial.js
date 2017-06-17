@@ -36,7 +36,10 @@ class BluetoothSerial extends Serial
 					this.sendCommand("~", this.poll_counter++);
 				}
 			}
-			catch(e) {}
+			catch(e)
+			{
+				// ignore exceptions by Serial Port sending
+			}
 		}, 100);
 
 		this.bind();
@@ -181,7 +184,7 @@ class BluetoothSerial extends Serial
 }
 
 
-BluetoothSerial.bt_agent_process = undefined;
+BluetoothSerial.bt_agent_process = null;
 BluetoothSerial.bt_channel_iterator = 1;
 //// For BlueZ5 bt-agent, for BlueZ4 bluetooth-agent
 //// NOTE: Bluetooth-agent has different arguments

@@ -11,47 +11,15 @@ class ProtoLobe extends Neuron
 		// =====================================
 		//// Calls parent class constructor
 		super(util);
-		////Assigns class's name
-		this.name = util.name;
-		/**
-		 * Feedback mechanism for sending information back to mission control.
-		 * Usage:
-		 *		this.feedback(msg_to_output, ...);
-		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
-		 */
-		this.feedback = util.feedback;
-		/**
-		 * Abstraction library for printing to standard out in color as well
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.log.output(msg_to_output, ...);
-		 *		this.log.output("HELLO WORLD", { foo: "bar" });
-		 */
-		this.log = util.log;
-		this.log.setColor("grey");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
 		 */
 		this.idle_timeout = 2000;
 		/**
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.model.registerMemory("Proto");
-		 *		this.model.set("Proto", {
-		 *		    proto: 555
-		 *		});
-		 *		var proto = this.model.get("Proto");
+		 * Set output color
 		 */
-		this.model = util.model;
-		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
-		 * Structure containing additional extended utilities
-		 */
-		this.extended = util.extended;
+		this.log.setColor("grey");
 		// =====================================
 		// Construct Class After This Points
 		// =====================================

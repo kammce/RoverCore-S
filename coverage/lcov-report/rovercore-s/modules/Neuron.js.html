@@ -22,12 +22,12 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>46/46</span>
+        <span class='fraction'>47/47</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">90.48% </span>
+        <span class="strong">87.5% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>19/21</span>
+        <span class='fraction'>14/16</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>46/46</span>
+        <span class='fraction'>47/47</span>
       </div>
     </div>
   </div>
@@ -137,10 +137,39 @@
 92
 93
 94
-95</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -150,14 +179,41 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -240,15 +296,43 @@ class Neuron
 {
 	constructor(util)
 	{
-		if( typeof util.name !== "string" ||
-			typeof util.feedback !== "function" ||
-			typeof util.log !== "function" )
-		{
-			return false;
-		}
+		////Assigns class's name
 		this.name = util.name;
+		/**
+		 * Feedback mechanism for sending information back to mission control.
+		 * Usage:
+		 *		this.feedback(msg_to_output, ...);
+		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
+		 */
 		this.feedback = util.feedback;
+		/**
+		 * Abstraction library for printing to standard out in color as well
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.log.output(msg_to_output, ...);
+		 *		this.log.output("HELLO WORLD", { foo: "bar" });
+		 */
 		this.log = util.log;
+		/**
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.model.registerMemory("Proto");
+		 *		this.model.set("Proto", {
+		 *		    proto: 555
+		 *		});
+		 *		var proto = this.model.get("Proto");
+		 */
+		this.model = util.model;
+		/**
+		 * A method for making up calls to cortex to control the system
+		 */
+		this.upcall = util.upcall;
+&nbsp;
+		/**
+		 * Structure containing additional extended utilities
+		 */
+		this.extended = util.extended;
+&nbsp;
 		this.controller = "";
 		this.idle_timeout = 1000;
 		this.state = "RUNNING";
@@ -331,7 +415,7 @@ module.exports = Neuron;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sat Jun 17 2017 11:24:02 GMT-0700 (PDT)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sat Jun 17 2017 16:03:59 GMT-0700 (PDT)
 </div>
 </div>
 <script src="../../prettify.js"></script>

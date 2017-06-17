@@ -325,11 +325,11 @@ class Cortex
 			var upcall = this.upcall;
 			var lobe_utitilites = {
 				"name": directory,
-				"log": log,
 				"model": this.Model,
-				"upcall": upcall,
 				"extended": this.extended_utilities,
-				"feedback": this.feedback_generator(directory)
+				"feedback": this.feedback_generator(directory),
+				upcall,
+				log
 			};
 			//// Construct Lobe module
 			var module = new Lobe(lobe_utitilites);

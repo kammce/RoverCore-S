@@ -53,7 +53,6 @@ console.log("Loading Libaries COMPLETE");
 console.log("Checking Arguments");
 var config = {
 	"target": "http://localhost:9000",
-	"connection": undefined,
 	"simulate": false,
 	"isolation": false,
 	"debug_level": 0,

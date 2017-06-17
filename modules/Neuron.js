@@ -7,15 +7,43 @@ class Neuron
 {
 	constructor(util)
 	{
-		if( typeof util.name !== "string" ||
-			typeof util.feedback !== "function" ||
-			typeof util.log !== "function" )
-		{
-			return false;
-		}
+		////Assigns class's name
 		this.name = util.name;
+		/**
+		 * Feedback mechanism for sending information back to mission control.
+		 * Usage:
+		 *		this.feedback(msg_to_output, ...);
+		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
+		 */
 		this.feedback = util.feedback;
+		/**
+		 * Abstraction library for printing to standard out in color as well
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.log.output(msg_to_output, ...);
+		 *		this.log.output("HELLO WORLD", { foo: "bar" });
+		 */
 		this.log = util.log;
+		/**
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.model.registerMemory("Proto");
+		 *		this.model.set("Proto", {
+		 *		    proto: 555
+		 *		});
+		 *		var proto = this.model.get("Proto");
+		 */
+		this.model = util.model;
+		/**
+		 * A method for making up calls to cortex to control the system
+		 */
+		this.upcall = util.upcall;
+
+		/**
+		 * Structure containing additional extended utilities
+		 */
+		this.extended = util.extended;
+
 		this.controller = "";
 		this.idle_timeout = 1000;
 		this.state = "RUNNING";

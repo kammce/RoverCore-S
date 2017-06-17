@@ -43,7 +43,7 @@ describe("Testing BluetoothSerial Class", function ()
 			execSync("killall bt-agent");
 			execSync("killall bt-agent");
 			var stdout = execSync(`ps aux | grep "[b]t-agent"`);
- 			setTimeout(() =>
+			setTimeout(() =>
 			{
 				expect(stdout.toString()).to.contain("bt-agent");
 				done();
