@@ -105,4 +105,5 @@ console.log("Checking Arguments COMPLETE");
 // Launching Cortex
 // =====================================
 console.log(`Launching Cortex!`);
-new Cortex(config);
+
+var cortex = new Cortex(config); // jshint unused: false

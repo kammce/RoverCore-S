@@ -67,30 +67,30 @@ class Cortex
 		// =====================================
 		this.feedback_generator = function(lobe_name)
 		{
-		    var f = function()
-		    {
-		        var output = "";
+			var f = function()
+			{
+				var output = "";
 
-		        for (var argument of arguments)
-		        {
-		        	// console.log(argument, JSON.stringify(argument));
-		            if(typeof argument === "object")
-		            {
-		                output += JSON.stringify(argument)+"\n";
-		            }
-		            else
-		            {
-		                output += argument+"\n";
-		            }
-		        }
-		        primus.write(
-		        {
-		            target: lobe_name,
-		            message: output
-		        });
-		    };
+				for (var argument of arguments)
+				{
+					// console.log(argument, JSON.stringify(argument));
+					if(typeof argument === "object")
+					{
+						output += JSON.stringify(argument)+"\n";
+					}
+					else
+					{
+						output += argument+"\n";
+					}
+				}
+				primus.write(
+				{
+					target: lobe_name,
+					message: output
+				});
+			};
 
-		    return f;
+			return f;
 		};
 
 		this.feedback = this.feedback_generator(this.name);

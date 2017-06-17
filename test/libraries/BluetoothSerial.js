@@ -43,7 +43,7 @@ describe("Testing BluetoothSerial Class", function ()
 			execSync("killall bt-agent");
 			execSync("killall bt-agent");
 			var stdout = execSync(`ps aux | grep "[b]t-agent"`);
-			setTimeout(()=>
+ 			setTimeout(() =>
 			{
 				expect(stdout.toString()).to.contain("bt-agent");
 				done();
@@ -79,10 +79,10 @@ describe("Testing BluetoothSerial Class", function ()
 		it("Should initialize without failure", function()
 		{
 			unit_test = new BluetoothSerial({
-				mac: mac,
 				baud: 38400,
-				log: log,
-				device: device
+				mac,
+				log,
+				device
 			});
 			expect(unit_test).to.exist;
 			expect(unit_test).to.be.a("object");

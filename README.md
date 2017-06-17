@@ -6,6 +6,7 @@
 [![Development Tools Dependency Status](https://david-dm.org/kammce/RoverCore-S/dev-status.svg)](https://david-dm.org/kammce/RoverCore-S?type=dev)
 [![Build Status](https://travis-ci.org/kammce/RoverCore-S.svg?branch=docs)](https://travis-ci.org/kammce/RoverCore-S)
 [![Code Coverage by codecov](https://codecov.io/gh/kammce/RoverCore-S/branch/docs/graph/badge.svg)](https://codecov.io/gh/kammce/RoverCore-S)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b96745c6fe2f4a638bf67d22a4cdf72e)](https://www.codacy.com/app/kammce/RoverCore-S?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kammce/RoverCore-S&amp;utm_campaign=Badge_Grade)
 
 RoverCore-S is a framework written in node.js for organizing code written for robotics systems as well as setting up mechanisms for communicate between mission control and itself. RoverCore-S is modular and built to communicate between hardware peripherals (RoverCore-F) and a mission control interface (RoverCore-MC). The modules in RoverCore-S are called Lobes.
 
