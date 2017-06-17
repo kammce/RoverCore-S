@@ -21,15 +21,24 @@ module.exports = function(grunt) {
 				esnext: true, 	// Tells JSHint that your code uses ECMAScript 6 specific syntax
 				node: true, 	// Defines globals available when your code is running inside of the Node
 				sub: true, 	// suppresses warnings about using [] notation when it can be expressed in dot notation: person['name'] vs. person.name.
+				expr: true,
 				globals:  	// Predefine these so that JSHint does not complain about them
 				{
 					"process": true,
 					"require": true,
 					"global": true,
-					"module": true
+					"module": true,
+					"should": true,
+					"expect": true,
+					"describe": true,
+					"it": true,
+					"before": true,
+					"after": true,
+					"beforeEach": true,
+					"afterEach": true
 				}
 			},
-		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js']
+		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js', 'test/core/*.js', 'test/modules/*.js', 'test/libraries/*.js']
 		},
 		mochaTest:
 		{

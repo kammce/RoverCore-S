@@ -1,16 +1,15 @@
 "use strict";
 
-var sinon = require('sinon');
+var sinon = require("sinon");
 
-describe('Testing Cortex Class', function()
+describe("Testing Cortex Class", function()
 {
     // =====================================
     // Loading Libraries
     // =====================================
-    var Primus = require('primus');
-    var http = require('http');
-    var fs = require('fs');
-    var Cortex = require('../../modules/Cortex');
+    var Primus = require("primus");
+    var http = require("http");
+    var Cortex = require("../../modules/Cortex");
     var server = http.createServer();
     // =====================================
     // Construct and define Primus client
@@ -22,13 +21,13 @@ describe('Testing Cortex Class', function()
     // =====================================
     // Unit test global variables
     // =====================================
-    var connection, cortex, spark;
+    var connection, cortex;
 
-    describe('Cortex should initialize', function()
+    describe("Cortex should initialize", function()
     {
-        it('Should connect to RoverCore server on port 9000', function(done)
+        it("Should connect to RoverCore server on port 9000", function(done)
         {
-            connection = Socket('http://localhost:9000',
+            connection = Socket("http://localhost:9000",
             {
                 reconnect:
                 {
@@ -38,13 +37,13 @@ describe('Testing Cortex Class', function()
                 }
             });
             //// Check that a Primus client can connect with server.
-            connection.on('open', () =>
+            connection.on("open", () =>
             {
                 done();
             });
             //// Setup Cortex configuration structure
             var config = {
-                "target": 'http://localhost:9000',
+                "target": "http://localhost:9000",
                 "connection": undefined,
                 "simulate": false,
                 "isolation": "Protolobe",
@@ -54,7 +53,7 @@ describe('Testing Cortex Class', function()
             };
             cortex = new Cortex(config);
         });
-        it('#loadLobes should load modules found in modules folder', function(done)
+        it("#loadLobes should load modules found in modules folder", function(done)
         {
             this.timeout(4000);
             //// Check if protolobe is in the lobe_map
@@ -68,9 +67,9 @@ describe('Testing Cortex Class', function()
         });
     });
 
-    // describe('Testing #handleMissionControl() Assignment', function ()
+    // describe("Testing #handleMissionControl() Assignment", function ()
     // {
-    // 	it('Should send assign current connection as Protolobe controller', function (done)
+    // 	it("Should send assign current connection as Protolobe controller", function (done)
     // 	{
     // 		//// This will send a signal to Cortex to assign this user as the controller of Protolobe.
     // 		connection.write({
@@ -85,7 +84,7 @@ describe('Testing Cortex Class', function()
     // 	});
     // });
 
-    describe('Testing #handleIncomingData()', function()
+    describe("Testing #handleIncomingData()", function()
     {
         var react, halt, resume, idle;
         beforeEach(function()
@@ -96,17 +95,17 @@ describe('Testing Cortex Class', function()
             resume = cortex.lobe_map["Protolobe"]._resume;
             idle = cortex.lobe_map["Protolobe"]._idle;
         });
-        it('Lobe should receive target data from server', function(done)
+        it("Lobe should receive target data from server", function(done)
         {
             cortex.lobe_map["Protolobe"]._react = function(data)
             {
                 expect(data).to.equal("coldfustion");
                 done();
-            }
+            };
             connection.write(
             {
-                "target": 'Protolobe',
-                "command": 'coldfustion'
+                "target": "Protolobe",
+                "command": "coldfustion"
             });
         });
         afterEach(function()
@@ -118,7 +117,7 @@ describe('Testing Cortex Class', function()
             cortex.lobe_map["Protolobe"]._idle = idle;
         });
     });
-    describe('Testing #handleIdleStatus()', function()
+    describe("Testing #handleIdleStatus()", function()
     {
         var react, halt, resume, idle;
         this.timeout(4000);
@@ -130,41 +129,42 @@ describe('Testing Cortex Class', function()
             resume = cortex.lobe_map["Protolobe"]._resume;
             idle = cortex.lobe_map["Protolobe"]._idle;
         });
-        it('Should idle Protolobe after 2000ms of time', function(done)
+        it("Should idle Protolobe after 2000ms of time", function(done)
         {
             cortex.lobe_map["Protolobe"].state = "RUNNING";
             connection.write(
             {
-                "target": 'Protolobe',
-                "command": 'ONLY ONE MESSAGE... SHOULD IDLE SOON.'
+                "target": "Protolobe",
+                "command": "ONLY ONE MESSAGE... SHOULD IDLE SOON."
             });
             cortex.lobe_map["Protolobe"]._idle = function()
             {
                 cortex.lobe_map["Protolobe"].state = "IDLING";
                 done();
-            }
+            };
         });
-        it('Should NOT idle Protolobe after 4000ms of time if signal is sent to it', function(done)
+        it("Should NOT idle Protolobe after 4000ms of time if signal is sent to it", function(done)
         {
             cortex.time_since_last_command["Protolobe"] = Date.now();
             cortex.lobe_map["Protolobe"].state = "RUNNING";
             cortex.lobe_map["Protolobe"]._idle = function()
             {
-                throw new Error('Idle was executed!');
-            }
+                throw new Error("Idle was executed!");
+            };
+            var send_continuously = setInterval(function()
+            {
+                connection.write(
+                {
+                    "target": "Protolobe",
+                    "command": "STAY UP! DO NOT IDLE!"
+                });
+            }, 500);
+
             setTimeout(function()
             {
                 clearInterval(send_continuously);
                 done();
             }, 3000);
-            var send_continuously = setInterval(function()
-            {
-                connection.write(
-                {
-                    "target": 'Protolobe',
-                    "command": 'STAY UP! DO NOT IDLE!'
-                });
-            }, 500);
         });
         afterEach(function()
         {
@@ -175,7 +175,7 @@ describe('Testing Cortex Class', function()
             cortex.lobe_map["Protolobe"]._idle = idle;
         });
     });
-    describe('Testing #sendLobeStatus()', function()
+    describe("Testing #sendLobeStatus()", function()
     {
         var state;
         beforeEach(function()
@@ -183,26 +183,28 @@ describe('Testing Cortex Class', function()
             //// Save status
             state = cortex.lobe_map["Protolobe"].state;
         });
-        it('Should send Protolobe state to mission control', function(done)
+        it("Should send Protolobe state to mission control", function(done)
         {
             var i = 0;
             var possible_states = ["IDLING", "RUNNING", "HALTED"];
             //// Check that a Primus client can connect with server.
             cortex.lobe_map["Protolobe"].state = possible_states[i];
-            connection.on('data', (data) =>
+            connection.on("data", (data) =>
             {
-                //console.log("I'm getting called :: ", data);
+                //console.log("I"m getting called :: ", data);
                 if (possible_states.length === i)
                 {
                     i++; //// This keeps the done signal from being called again
                     done();
                 }
-                else if (data['target'] === "Cortex" && i < possible_states.length)
+                else if (data["target"] === "Cortex" && i < possible_states.length)
                 {
-                    var message = JSON.parse(data['message']);
+                    //console.log(data["message"]);
 
-                    expect(message.data).to.include.keys('Protolobe');
-                    expect(message.data['Protolobe'].state).to.equal(possible_states[i]);
+                    var message = JSON.parse(data["message"]);
+
+                    expect(message.data).to.include.keys("Protolobe");
+                    expect(message.data["Protolobe"].state).to.equal(possible_states[i]);
 
                     cortex.lobe_map["Protolobe"].state = possible_states[++i];
 
@@ -220,9 +222,9 @@ describe('Testing Cortex Class', function()
         });
     });
 
-    // describe('Testing #handleMissionControl() Controls', function ()
+    // describe("Testing #handleMissionControl() Controls", function ()
     // {
-    // 	it('Protolobe state should be HALTED after halt signal sent', function (done)
+    // 	it("Protolobe state should be HALTED after halt signal sent", function (done)
     // 	{
     // 		//// Reset the timer
     // 		cortex.time_since_last_command["Protolobe"] = Date.now();
@@ -242,7 +244,7 @@ describe('Testing Cortex Class', function()
     // 			done();
     // 		}, 1000);
     // 	});
-    // 	it('Protolobe state should be RUNNING after resume signal sent', function (done)
+    // 	it("Protolobe state should be RUNNING after resume signal sent", function (done)
     // 	{
     // 		//// Reset the timer
     // 		cortex.time_since_last_command["Protolobe"] = Date.now();
@@ -262,7 +264,7 @@ describe('Testing Cortex Class', function()
     // 			done();
     // 		}, 1000);
     // 	});
-    // 	// it('Protolobe controller should be an empty string when controller disconnects.', function (done)
+    // 	// it("Protolobe controller should be an empty string when controller disconnects.", function (done)
     // 	// {
     // 	// 	expect(cortex.lobe_map["Protolobe"]["controller"]).to.not.be.empty;
     // 	// 	connection.end();
@@ -274,9 +276,9 @@ describe('Testing Cortex Class', function()
     // 	// });
     // });
 
-    describe('Testing direct #upcall("*ALL") state control', function()
+    describe("Testing direct #upcall('*ALL') state control", function()
     {
-        it('#upcall("HALTALL") should halt all modules', function()
+        it("#upcall('HALTALL') should halt all modules", function()
         {
             cortex.upcall("HALTALL");
             for (var lobes in cortex.lobe_map)
@@ -284,7 +286,7 @@ describe('Testing Cortex Class', function()
                 expect(cortex.lobe_map[lobes].state).to.equal("HALTED");
             }
         });
-        it('#upcall("IDLEALL") should halt all modules', function()
+        it("#upcall('IDLEALL') should halt all modules", function()
         {
             cortex.upcall("IDLEALL");
             for (var lobes in cortex.lobe_map)
@@ -292,7 +294,7 @@ describe('Testing Cortex Class', function()
                 expect(cortex.lobe_map[lobes].state).to.equal("IDLING");
             }
         });
-        it('#upcall("RESUMEALL") should halt all modules', function()
+        it("#upcall('RESUMEALL') should halt all modules", function()
         {
             cortex.upcall("RESUMEALL");
             for (var lobes in cortex.lobe_map)
@@ -302,7 +304,7 @@ describe('Testing Cortex Class', function()
         });
     });
 
-    describe('Testing direct #upcall("CALL") call', function()
+    describe("Testing direct #upcall('CALL') call", function()
     {
         var spy;
         const upcall_command = "VIA-UPCALL";
@@ -313,7 +315,7 @@ describe('Testing Cortex Class', function()
             spy.withArgs(upcall_command);
             spy.withArgs(upcall_loopback);
         });
-        it('#upcall("CALL", "Protolobe", "VIA-UPCALL") should halt all modules', function(done)
+        it("#upcall('CALL', 'Protolobe', 'VIA-UPCALL') should halt all modules", function(done)
         {
             cortex.upcall("CALL", "Protolobe", upcall_command);
             setTimeout(function()
@@ -322,7 +324,7 @@ describe('Testing Cortex Class', function()
                 done();
             }, 200);
         });
-        it('Protolobe should run #upcall("CALL", "Protolobe", "VIA-UPCALL") when halted', function(done)
+        it("Protolobe should run #upcall('CALL', 'Protolobe', 'VIA-UPCALL') when halted", function(done)
         {
             //// Protolobe is setup to do a self upcall when resume is called for testing purposes
             cortex.lobe_map["Protolobe"]._resume();

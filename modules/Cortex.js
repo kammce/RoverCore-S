@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 class Cortex
 {
@@ -8,7 +8,7 @@ class Cortex
 		this.name = "Cortex";
 		this.cortex = this;
 		this.simulate = config.simulate;
-		this.exec = require('child_process').exec;
+		this.exec = require("child_process").exec;
 		this.lobe_map = {  };
 		this.time_since_last_command = {  };
 		this.status = {  };
@@ -17,28 +17,28 @@ class Cortex
 		// =====================================
 		// Setting up Primus server
 		// =====================================
-		var Primus = require('primus');
-		var http = require('http');
+		var Primus = require("primus");
+		var http = require("http");
 		console.log(`Setting up Primus (Websockets) Server`);
 		var server = http.createServer();
-		var primus = new Primus(server, { transformer: 'websockets' });
+		var primus = new Primus(server, { transformer: "websockets" });
 
 		server.listen(9000);
 
 		console.log(`Setting up Primus (Websockets) Server COMPLETE`);
-		primus.on('connection', (spark) =>
+		primus.on("connection", (spark) =>
 		{
-			this.log.output('Connection was made from', spark.address);
-			this.log.output('Connection id', spark.id);
-			spark.on('data', (data) =>
+			this.log.output("Connection was made from", spark.address);
+			this.log.output("Connection id", spark.id);
+			spark.on("data", (data) =>
 			{
 				try
 				{
-					if('target' in data && 'command' in data)
+					if("target" in data && "command" in data)
 					{
 						if(data["target"] === this.name)
 						{
-							this.handleMissionControl(data['command'], spark);
+							this.handleMissionControl(data["command"], spark);
 						}
 						else
 						{
@@ -47,18 +47,18 @@ class Cortex
 					}
 					else
 					{
-						this.log.output('INVALID Data: Incoming data did not contain target and command properties.');
+						this.log.output("INVALID Data: Incoming data did not contain target and command properties.");
 					}
 				}
 				catch(e)
 				{
-					this.log.output('INVALID: Failed to evaluate incoming data.');
+					this.log.output("INVALID: Failed to evaluate incoming data.");
 				}
 			});
-			spark.on('end', (/*data*/) =>
+			spark.on("end", (/*data*/) =>
 			{
-				this.log.output('Disconnect from', spark.address);
-				this.log.output('Disconnect id', spark.id);
+				this.log.output("Disconnect from", spark.address);
+				this.log.output("Disconnect id", spark.id);
 				this.handleMissionControl("disconnect", spark);
 			});
 		});
@@ -71,15 +71,16 @@ class Cortex
 		    {
 		        var output = "";
 
-		        for (var i = 0; i < arguments.length; i++)
+		        for (var argument of arguments)
 		        {
-		            if(typeof arguments[i] === "object")
+		        	// console.log(argument, JSON.stringify(argument));
+		            if(typeof argument === "object")
 		            {
-		                output += JSON.stringify(arguments[i])+"\n";
+		                output += JSON.stringify(argument)+"\n";
 		            }
 		            else
 		            {
-		                output += arguments[i]+"\n";
+		                output += argument+"\n";
 		            }
 		        }
 		        primus.write(
@@ -96,9 +97,9 @@ class Cortex
 		// =====================================
 		// Setting up Logs and Model
 		// =====================================
-		this.LOG = require('../utilities/Log');
+		this.LOG = require("../utilities/Log");
 		this.LOG.disable_colors = config.no_color;
-		this.MODEL = require('../utilities/Model');
+		this.MODEL = require("../utilities/Model");
 
 		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback_generator("model"));
@@ -114,16 +115,24 @@ class Cortex
 		// =====================================
 		// Setup Cortex Timer
 		// =====================================
-		this.cortex_loop = setInterval(() =>
+		this.cortex_loop_timeout = null;
+		this.cortex_loop = () =>
 		{
 			this.handleIdleStatus();
 			this.sendLobeStatus();
-		}, 100);
+			//// Add next cortex loop into event loop
+			this.cortex_loop_timeout = setTimeout(() =>
+			{
+				this.cortex_loop();
+			}, 100);
+		};
+
+		this.cortex_loop();
 	}
 	handleIncomingData(data)
 	{
 		this.log.debug2(data);
-		var target = data['target'];
+		var target = data["target"];
 		if(this.lobe_map.hasOwnProperty(target))
 		{
 			setImmediate(() =>
@@ -131,7 +140,7 @@ class Cortex
 				try
 				{
 					this.time_since_last_command[target] = Date.now();
-					this.lobe_map[target]._react(data['command']);
+					this.lobe_map[target]._react(data["command"]);
 				}
 				catch(e)
 				{
@@ -154,14 +163,14 @@ class Cortex
 			if(!this.status.hasOwnProperty(lobe))
 			{
 				this.status[lobe] = {
-					state: this.lobe_map[lobe]['state']
+					state: this.lobe_map[lobe]["state"]
 				};
 				change_flag = true;
 			}
-			else if(this.status[lobe]['state'] !== this.lobe_map[lobe]['state'])
+			else if(this.status[lobe]["state"] !== this.lobe_map[lobe]["state"])
 			{
 				this.status[lobe] = {
-					state: this.lobe_map[lobe]['state']
+					state: this.lobe_map[lobe]["state"]
 				};
 				change_flag = true;
 			}
@@ -215,7 +224,7 @@ class Cortex
 		}
 		this.sendInterfaceStatus();
 		// var msg;
-		// //// NOTE: Lobe cannot have names 'disconnect', 'halt', 'resume', or 'idle'
+		// //// NOTE: Lobe cannot have names "disconnect", "halt", "resume", or "idle"
 		// var actions = {
 		// 	"halt": (lobe) =>
 		// 	{
@@ -249,7 +258,7 @@ class Cortex
 		for(var lobe in this.time_since_last_command)
 		{
 			var delta = Date.now()-this.time_since_last_command[lobe];
-			if(delta >= this.lobe_map[lobe]['idle_timeout'] && this.lobe_map[lobe]['state'] !== "HALTED")
+			if(delta >= this.lobe_map[lobe]["idle_timeout"] && this.lobe_map[lobe]["state"] !== "HALTED")
 			{
 				this.lobe_map[lobe]._idle();
 			}
@@ -340,8 +349,8 @@ class Cortex
 	}
 	loadLobes(isolation)
 	{
-		var fs = require('fs');
-		var path = require('path');
+		var fs = require("fs");
+		var path = require("path");
 		//// Utility functions
 		function getDirectories(srcpath)
 		{
@@ -354,7 +363,7 @@ class Cortex
 		// Take the intersection of the modules in the modules folder and the isolation arguments
 		if(typeof isolation === "string")
 		{
-			isolation = isolation.replace(/ /g,'').split(',');
+			isolation = isolation.replace(/ /g,"").split(",");
 			// Using filter and indexOf to create a
 			// set intersection between isolation and modules
 			modules = isolation.filter(function(n)
@@ -372,9 +381,9 @@ class Cortex
 			var lobe = this.loadLobe(modules[i]);
 			// skip lobe if it returns undefined
 			if(typeof lobe === "undefined") { continue; }
-			this.lobe_map[lobe['name']] = lobe;
+			this.lobe_map[lobe["name"]] = lobe;
 			// Set time since last command to zero to IDLE all lobes in the beginning
-			this.time_since_last_command[lobe['name']] = 0;
+			this.time_since_last_command[lobe["name"]] = 0;
 		}
 	}
 }

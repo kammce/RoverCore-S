@@ -1,14 +1,14 @@
 "use strict";
 
-var sinon = require('sinon');
+var sinon = require("sinon");
 
-describe('Testing BluetoothSerial Class', function ()
+describe("Testing BluetoothSerial Class", function ()
 {
 	// =====================================
 	// Loading Libraries
 	// =====================================
-	var BluetoothSerial = require('../../utilities/extended/BluetoothSerial');
-	var Log = require('../../utilities/Log');
+	var BluetoothSerial = require("../../utilities/extended/BluetoothSerial");
+	var Log = require("../../utilities/Log");
 	var log = new Log("BluetoothSerial", "blue");
 	// =====================================
 	// Unit test global variables
@@ -16,33 +16,33 @@ describe('Testing BluetoothSerial Class', function ()
 	var unit_test;
 	var device = 1;
 	var mac = "00:21:13:00:6F:A7";
-	var fs = require('fs');
+	var fs = require("fs");
 	var execSync = require("child_process").execSync;
 
 	// =====================================
 	// Static methods tests
 	// =====================================
 
-	describe('BluetoothSerial.spawnBTAgent Test', function ()
+	describe("BluetoothSerial.spawnBTAgent Test", function ()
 	{
-		it('Should spawn process bt-agent', function(done)
+		it("Should spawn process bt-agent", function(done)
 		{
 			BluetoothSerial.spawnBTAgent(
 				BluetoothSerial.bluetooth_agent,
 				BluetoothSerial.bluetooth_pincode_path
 			);
-			var stdout = execSync('ps aux | grep "[b]t-agent"');
-			setTimeout(()=>
+			var stdout = execSync(`ps aux | grep "[b]t-agent"`);
+			setTimeout(() =>
 			{
 				expect(stdout.toString()).to.contain("bt-agent");
 				done();
 			}, 1000);
 		});
-		it('Should respawn bt-agent on bt-agent close', function(done)
+		it("Should respawn bt-agent on bt-agent close", function(done)
 		{
-			execSync('killall bt-agent');
-			execSync('killall bt-agent');
-			var stdout = execSync('ps aux | grep "[b]t-agent"');
+			execSync("killall bt-agent");
+			execSync("killall bt-agent");
+			var stdout = execSync(`ps aux | grep "[b]t-agent"`);
 			setTimeout(()=>
 			{
 				expect(stdout.toString()).to.contain("bt-agent");
@@ -51,14 +51,14 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial.initialize Test', function ()
+	describe("BluetoothSerial.initialize Test", function ()
 	{
 		var spy;
 		before(function()
 		{
 			spy = sinon.spy(BluetoothSerial, "spawnBTAgent");
 		});
-		it('Should create /tmp/BluetoothPincodes and run spawnBTAgent', function()
+		it("Should create /tmp/BluetoothPincodes and run spawnBTAgent", function()
 		{
 			BluetoothSerial.initialize();
 			var read = fs.readFileSync("/tmp/BluetoothPincodes").toString();
@@ -74,9 +74,9 @@ describe('Testing BluetoothSerial Class', function ()
 	// =====================================
 	// Object methods test
 	// =====================================
-	describe('BluetoothSerial#constructor', function ()
+	describe("BluetoothSerial#constructor", function ()
 	{
-		it('Should initialize without failure', function()
+		it("Should initialize without failure", function()
 		{
 			unit_test = new BluetoothSerial({
 				mac: mac,
@@ -85,9 +85,9 @@ describe('Testing BluetoothSerial Class', function ()
 				device: device
 			});
 			expect(unit_test).to.exist;
-			expect(unit_test).to.be.a('object');
+			expect(unit_test).to.be.a("object");
 		});
-		it('RFCOMM should exist ', function(done)
+		it("RFCOMM should exist ", function(done)
 		{
 			setTimeout(function() {
 				fs.access(`/dev/rfcomm${device}`, fs.constants.R_OK | fs.constants.W_OK, (err) =>
@@ -99,13 +99,13 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#bind', function () {
+	describe("BluetoothSerial#bind", function () {
 		//// TODO: MAKE A TEST FOR THIS!s
 	});
 
-	describe('BluetoothSerial#onPortOpen', function ()
+	describe("BluetoothSerial#onPortOpen", function ()
 	{
-		it('Should set ready flag to true after being called"', function ()
+		it("Should set ready flag to true after being called", function ()
 		{
 			unit_test.ready = false;
 			unit_test.onPortOpen();
@@ -113,7 +113,7 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#onPortData', function ()
+	describe("BluetoothSerial#onPortData", function ()
 	{
 		var store_callback_map;
 		var Aflag, Avalue, Bflag, Bvalue;
@@ -121,17 +121,17 @@ describe('Testing BluetoothSerial Class', function ()
 		{
 			store_callback_map = unit_test.callback_map;
 			unit_test.callback_map = {
-				"A": function(value) { Aflag = true; Avalue = value; },
-				"B": function(value) { Bflag = true; Bvalue = value; }
-			}
+				A(value) { Aflag = true; Avalue = value; },
+				B(value) { Bflag = true; Bvalue = value; }
+			};
 		});
 		beforeEach(function() {
 			Aflag = false;
 			Avalue = 0;
 			Bflag = false;
 			Bvalue = 0;
-		})
-		it('Should call A and B function in map given complete single message', function ()
+		});
+		it("Should call A and B function in map given complete single message", function ()
 		{
 			unit_test.onPortData("@A,512\r\n");
 			unit_test.onPortData("@B,1024\r\n");
@@ -142,7 +142,7 @@ describe('Testing BluetoothSerial Class', function ()
 			expect(Bflag).to.be.true;
 			expect(Bvalue).to.equal(1024);
 		});
-		it('Should call A and B function in map given combined message', function()
+		it("Should call A and B function in map given combined message", function()
 		{
 			unit_test.onPortData("@A,123\r\n@B,1024\r\n@B,200\r\n");
 			expect(Aflag).to.be.true;
@@ -151,7 +151,7 @@ describe('Testing BluetoothSerial Class', function ()
 			//// BValue should contain the last value sent.
 			expect(Bvalue).to.equal(200);
 		});
-		it('Should call A and B function in map given fragmented combined message', function()
+		it("Should call A and B function in map given fragmented combined message", function()
 		{
 
 			unit_test.onPortData("@");
@@ -181,7 +181,7 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#onPortError', function ()
+	describe("BluetoothSerial#onPortError", function ()
 	{
 		var error_message = "";
 		var stub;
@@ -192,7 +192,7 @@ describe('Testing BluetoothSerial Class', function ()
 				error_message = string;
 			});
 		});
-		it('Should log error message', function()
+		it("Should log error message", function()
 		{
 			unit_test.onPortError("COULDN'T DO THE THING!!");
 
@@ -206,7 +206,7 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#send And #sendCommand', function ()
+	describe("BluetoothSerial#send And #sendCommand", function ()
 	{
 		const PORT_MESSAGE = "SENDRAW-TEST";
 		var stub_write;
@@ -215,28 +215,28 @@ describe('Testing BluetoothSerial Class', function ()
 		{
 			previous_ready_state = unit_test.ready;
 			previous_port = unit_test.port;
-			unit_test.port = { 'write': function() {} };
+			unit_test.port = { write() {} };
 			stub_write = sinon.stub(unit_test.port, "write");
 		});
-		it('Should write raw string with this.ready = true', function()
+		it("Should write raw string with this.ready = true", function()
 		{
 			unit_test.send(PORT_MESSAGE);
 			expect(stub_write.calledWith(PORT_MESSAGE)).to.be.true;
 		});
-		it('Should NOT write raw string with this.ready = false', function()
+		it("Should NOT write raw string with this.ready = false", function()
 		{
 			unit_test.ready = false;
 			unit_test.send(PORT_MESSAGE);
 			expect(stub_write.calledWith(PORT_MESSAGE)).to.be.false;
 		});
-		it('Should write formated string', function()
+		it("Should write formated string", function()
 		{
-			unit_test.sendCommand('A', 100);
-			unit_test.sendCommand('B', 34.24);
-			unit_test.sendCommand('C', -1234);
-			expect(stub_write.calledWith('@A,100\r\n')).to.be.true;
-			expect(stub_write.calledWith('@B,34.24\r\n')).to.be.true;
-			expect(stub_write.calledWith('@C,-1234\r\n')).to.be.true;
+			unit_test.sendCommand("A", 100);
+			unit_test.sendCommand("B", 34.24);
+			unit_test.sendCommand("C", -1234);
+			expect(stub_write.calledWith("@A,100\r\n")).to.be.true;
+			expect(stub_write.calledWith("@B,34.24\r\n")).to.be.true;
+			expect(stub_write.calledWith("@C,-1234\r\n")).to.be.true;
 		});
 		afterEach(function()
 		{
@@ -251,69 +251,69 @@ describe('Testing BluetoothSerial Class', function ()
 		});
 	});
 
-	describe('BluetoothSerial#attachListener', function ()
+	describe("BluetoothSerial#attachListener", function ()
 	{
 		var EXPECTED_A_VALUE = 100.02;
 		var EXPECTED_B_VALUE = -142341;
 		var EXPECTED_C_VALUE = 7847;
 		var EXPECTED_S_VALUE = 9999.8765;
 
-		it('Should create callback function map', function(done)
+		it("Should create callback function map", function(done)
 		{
 			//// Create Spy Map
 			var spy = {
-				'A': sinon.spy(function(value)
+				"A": sinon.spy(function(value)
 				{
 					expect(value).to.equal(EXPECTED_A_VALUE);
 				}),
-				'B': sinon.spy(function(value)
+				"B": sinon.spy(function(value)
 				{
 					expect(value).to.equal(EXPECTED_B_VALUE);
 				}),
-				'C': sinon.spy(function(value)
+				"C": sinon.spy(function(value)
 				{
 					expect(value).to.equal(EXPECTED_C_VALUE);
 				}),
-				'S': sinon.spy(function(value)
+				"S": sinon.spy(function(value)
 				{
 					expect(value).to.equal(EXPECTED_S_VALUE);
 				})
 			};
 
-			unit_test.attachListener('A', spy['A']);
-			unit_test.attachListener('B', spy['B']);
-			unit_test.attachListener('C', spy['C']);
-			unit_test.attachListener('S', spy['S']);
+			unit_test.attachListener("A", spy["A"]);
+			unit_test.attachListener("B", spy["B"]);
+			unit_test.attachListener("C", spy["C"]);
+			unit_test.attachListener("S", spy["S"]);
 
 			//// Check that attachListener created a callback function map
-			expect(unit_test.callback_map['A']).to.be.a('function');
-			expect(unit_test.callback_map['B']).to.be.a('function');
-			expect(unit_test.callback_map['C']).to.be.a('function');
-			expect(unit_test.callback_map['S']).to.be.a('function');
+			expect(unit_test.callback_map["A"]).to.be.a("function");
+			expect(unit_test.callback_map["B"]).to.be.a("function");
+			expect(unit_test.callback_map["C"]).to.be.a("function");
+			expect(unit_test.callback_map["S"]).to.be.a("function");
 
 			//// Run callback map functions
-			unit_test.callback_map['A'](EXPECTED_A_VALUE);
-			unit_test.callback_map['B'](EXPECTED_B_VALUE);
-			unit_test.callback_map['C'](EXPECTED_C_VALUE);
-			unit_test.callback_map['S'](EXPECTED_S_VALUE);
+			unit_test.callback_map["A"](EXPECTED_A_VALUE);
+			unit_test.callback_map["B"](EXPECTED_B_VALUE);
+			unit_test.callback_map["C"](EXPECTED_C_VALUE);
+			unit_test.callback_map["S"](EXPECTED_S_VALUE);
 
 			setTimeout(function()
 			{
-				//// Check if spy's were placed in map by checking if they were called
-				expect(spy['A'].called).to.be.true;
-				expect(spy['B'].called).to.be.true;
-				expect(spy['C'].called).to.be.true;
-				expect(spy['S'].called).to.be.true;
+				//// Check if spy"s were placed in map by checking if they were called
+				expect(spy["A"].called).to.be.true;
+				expect(spy["B"].called).to.be.true;
+				expect(spy["C"].called).to.be.true;
+				expect(spy["S"].called).to.be.true;
 				done();
 			}, 250);
 		});
 	});
 
 	//// NOTE: THIS TEST WILL CRASH YOUR COMPUTER IF THE BLUETOOTH DEVICE DOES NOT EXIST.
-	describe('BluetoothSerial Integration Test (10s)', function ()
+	describe("BluetoothSerial Integration Test (10s)", function ()
 	{
 		this.timeout(10000);
-		it('Should send hello world via bluetooth to device', function(done)
+		it("Should send hello world via bluetooth to device", function(done)
 		{
 			unit_test.port.close(() =>
 			{
@@ -322,7 +322,7 @@ describe('Testing BluetoothSerial Class', function ()
 					var counter = 0;
 					var interval = setInterval(() =>
 					{
-						unit_test.sendCommand('A', counter++);
+						unit_test.sendCommand("A", counter++);
 					}, 1000);
 					setTimeout(() =>
 					{
@@ -337,7 +337,7 @@ describe('Testing BluetoothSerial Class', function ()
 	after(function()
 	{
 		execSync(`rfcomm release all`);
-		execSync('killall bt-agent');
-		execSync('killall bt-agent');
+		execSync("killall bt-agent");
+		execSync("killall bt-agent");
 	});
 });

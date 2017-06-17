@@ -1,17 +1,17 @@
 "use strict";
 
-var Model = require('../../utilities/Model');
+var Model = require("../../utilities/Model");
 
-describe('Testing Model Class', function()
+describe("Testing Model Class", function()
 {
     // Loading Libraries
-    var Primus = require('primus');
-    var http = require('http');
+    var Primus = require("primus");
+    var http = require("http");
     var server = http.createServer();
 
     var primus = new Primus(server,
     {
-        transformer: 'websockets'
+        transformer: "websockets"
     });
 
     server.listen(9998);
@@ -20,39 +20,39 @@ describe('Testing Model Class', function()
 
     var test_unit = new Model(feedback);
 
-    describe('Testing Methods', function()
+    describe("Testing Methods", function()
     {
-        it('#registerMemory("TEST_UNIT") should have key "TEST_UNIT" in database', function(done)
+        it("#registerMemory(\"TEST_UNIT\") should have key \"TEST_UNIT\" in database", function(done)
         {
             test_unit.registerMemory("TEST_UNIT");
             setTimeout(function()
             {
-                expect(test_unit.database['TEST_UNIT']).to.be.ok;
-                expect(test_unit.database['TEST_UNIT']['timestamp']).to.be.a('number');
-                expect(test_unit.database['TEST_UNIT']['timestamp']).to.be.above(test_unit.epoch);
+                expect(test_unit.database["TEST_UNIT"]).to.be.ok;
+                expect(test_unit.database["TEST_UNIT"]["timestamp"]).to.be.a("number");
+                expect(test_unit.database["TEST_UNIT"]["timestamp"]).to.be.above(test_unit.epoch);
                 done();
             }, 50);
         });
-        it('#set() sets internal database to appropriate value', function()
+        it("#set() sets internal database to appropriate value", function()
         {
-            test_unit.set("TEST_UNIT", 'SET_TEST_VALUE');
-            expect(test_unit.database['TEST_UNIT']['value']).to.equal('SET_TEST_VALUE');
-            expect(test_unit.database['TEST_UNIT']['timestamp']).to.be.above(test_unit.epoch);
+            test_unit.set("TEST_UNIT", "SET_TEST_VALUE");
+            expect(test_unit.database["TEST_UNIT"]["value"]).to.equal("SET_TEST_VALUE");
+            expect(test_unit.database["TEST_UNIT"]["timestamp"]).to.be.above(test_unit.epoch);
         });
-        it('#get() returns expected value from database', function()
+        it("#get() returns expected value from database", function()
         {
-            test_unit.set("TEST_UNIT", 'GET_TEST_VALUE');
-            var time_before_get = test_unit.database['TEST_UNIT']['timestamp'];
+            test_unit.set("TEST_UNIT", "GET_TEST_VALUE");
+            var time_before_get = test_unit.database["TEST_UNIT"]["timestamp"];
             var result = test_unit.get("TEST_UNIT");
-            var time_after_get = test_unit.database['TEST_UNIT']['timestamp'];
+            var time_after_get = test_unit.database["TEST_UNIT"]["timestamp"];
             // Expect returned value to be equal to value in database
-            expect(result).to.equal(test_unit.database['TEST_UNIT']['value']);
-            // Expect returned value to be equal to what was 'set' in database
-            expect(result).to.equal('GET_TEST_VALUE');
+            expect(result).to.equal(test_unit.database["TEST_UNIT"]["value"]);
+            // Expect returned value to be equal to what was "set" in database
+            expect(result).to.equal("GET_TEST_VALUE");
             // Timestamp should not be altered by get operation
             expect(time_after_get).to.equal(time_before_get);
         });
-        it('#getMemory() returns the full database', function()
+        it("#getMemory() returns the full database", function()
         {
             // Flush database
             test_unit.database = {};
@@ -60,32 +60,32 @@ describe('Testing Model Class', function()
             test_unit.registerMemory("TEST_UNIT0");
             test_unit.registerMemory("TEST_UNIT1");
             // Values to be set
-            test_unit.set("TEST_UNIT0", 'SET_TEST_VALUE0');
-            test_unit.set("TEST_UNIT1", 'SET_TEST_VALUE1');
+            test_unit.set("TEST_UNIT0", "SET_TEST_VALUE0");
+            test_unit.set("TEST_UNIT1", "SET_TEST_VALUE1");
             // Force timestamp to 0 (otherwise timestamp is not determinate)
-            test_unit.database['TEST_UNIT0']['timestamp'] = 0;
-            test_unit.database['TEST_UNIT1']['timestamp'] = 0;
+            test_unit.database["TEST_UNIT0"]["timestamp"] = 0;
+            test_unit.database["TEST_UNIT1"]["timestamp"] = 0;
 
             expect(test_unit.database).to.eql(
             {
                 "TEST_UNIT0":
                 {
                     timestamp: 0,
-                    value: 'SET_TEST_VALUE0'
+                    value: "SET_TEST_VALUE0"
                 },
                 "TEST_UNIT1":
                 {
                     timestamp: 0,
-                    value: 'SET_TEST_VALUE1'
+                    value: "SET_TEST_VALUE1"
                 }
             });
         });
     });
 
-    describe('Testing #getMemory() with input timestamping', function()
+    describe("Testing #getMemory() with input timestamping", function()
     {
 
-        it('#getMemory() returns full database with 0 timestamp', function()
+        it("#getMemory() returns full database with 0 timestamp", function()
         {
             // Flush database
             test_unit.database = {};
@@ -93,11 +93,11 @@ describe('Testing Model Class', function()
             test_unit.registerMemory("TEST_UNIT0");
             test_unit.registerMemory("TEST_UNIT1");
             // Values to be set
-            test_unit.set("TEST_UNIT0", 'SET_TEST_VALUE0');
-            test_unit.set("TEST_UNIT1", 'SET_TEST_VALUE1');
+            test_unit.set("TEST_UNIT0", "SET_TEST_VALUE0");
+            test_unit.set("TEST_UNIT1", "SET_TEST_VALUE1");
             // Force timestamp to 0 (otherwise timestamp is not determinate)
-            test_unit.database['TEST_UNIT0']['timestamp'] = 0;
-            test_unit.database['TEST_UNIT1']['timestamp'] = 0;
+            test_unit.database["TEST_UNIT0"]["timestamp"] = 0;
+            test_unit.database["TEST_UNIT1"]["timestamp"] = 0;
 
             var full_database = test_unit.getMemory(0);
 
@@ -106,16 +106,16 @@ describe('Testing Model Class', function()
                 "TEST_UNIT0":
                 {
                     timestamp: 0,
-                    value: 'SET_TEST_VALUE0'
+                    value: "SET_TEST_VALUE0"
                 },
                 "TEST_UNIT1":
                 {
                     timestamp: 0,
-                    value: 'SET_TEST_VALUE1'
+                    value: "SET_TEST_VALUE1"
                 }
             });
         });
-        it('#getMemory() returns empty with timestamp 1 day in the future', function()
+        it("#getMemory() returns empty with timestamp 1 day in the future", function()
         {
             // Flush database
             test_unit.database = {};
@@ -123,18 +123,18 @@ describe('Testing Model Class', function()
             test_unit.registerMemory("TEST_UNIT0");
             test_unit.registerMemory("TEST_UNIT1");
             // Values to be set
-            test_unit.set("TEST_UNIT0", 'SET_TEST_VALUE0');
-            test_unit.set("TEST_UNIT1", 'SET_TEST_VALUE1');
+            test_unit.set("TEST_UNIT0", "SET_TEST_VALUE0");
+            test_unit.set("TEST_UNIT1", "SET_TEST_VALUE1");
             // Force timestamp to 0 (otherwise timestamp is not determinate)
-            test_unit.database['TEST_UNIT0']['timestamp'] = test_unit.epoch;
-            test_unit.database['TEST_UNIT1']['timestamp'] = test_unit.epoch;
+            test_unit.database["TEST_UNIT0"]["timestamp"] = test_unit.epoch;
+            test_unit.database["TEST_UNIT1"]["timestamp"] = test_unit.epoch;
             // One day in milliseconds = 86400000
             var empty_structure = test_unit.getMemory((new Date()) + 86400000);
             // Returned value is empty structure
             expect(empty_structure).to.eql(
             {});
         });
-        it('#getMemory() should only return updated items', function()
+        it("#getMemory() should only return updated items", function()
         {
             // Flush database
             test_unit.database = {};
@@ -142,11 +142,11 @@ describe('Testing Model Class', function()
             test_unit.registerMemory("TEST_UNIT0");
             test_unit.registerMemory("TEST_UNIT1");
             // Values to be set
-            test_unit.set("TEST_UNIT0", 'SET_TEST_VALUE0');
-            test_unit.set("TEST_UNIT1", 'SET_TEST_VALUE1');
+            test_unit.set("TEST_UNIT0", "SET_TEST_VALUE0");
+            test_unit.set("TEST_UNIT1", "SET_TEST_VALUE1");
             // Force timestamp to 0 (otherwise timestamp is not determinate)
-            test_unit.database['TEST_UNIT0']['timestamp'] = test_unit.epoch;
-            test_unit.database['TEST_UNIT1']['timestamp'] = test_unit.epoch - 100;
+            test_unit.database["TEST_UNIT0"]["timestamp"] = test_unit.epoch;
+            test_unit.database["TEST_UNIT1"]["timestamp"] = test_unit.epoch - 100;
             // One day in milliseconds = 86400000
             var empty_structure = test_unit.getMemory(test_unit.epoch);
             // Returned value should be
@@ -155,32 +155,25 @@ describe('Testing Model Class', function()
                 "TEST_UNIT0":
                 {
                     timestamp: test_unit.epoch,
-                    value: 'SET_TEST_VALUE0'
+                    value: "SET_TEST_VALUE0"
                 }
             });
         });
     });
 
-    describe('Testing Realtime feedback', function()
+    describe("Testing Realtime feedback", function()
     {
-        it('#set() should send message to server', function(done)
+        it("#set() should send message to server", function(done)
         {
             // setup primus connection
-            primus.on('connection', function connection(spark)
+            primus.on("connection", function connection(spark)
             {
-            	console.log("============MODEL===============");
-            	console.log(spark);
-            	console.log("=============MODEL==============");
-
-                spark.on('data', function(data)
+                spark.on("data", function(data)
                 {
-                	console.log("============MODEL===============");
-                	console.log(data);
-                	console.log("=============MODEL==============");
-                    // FORCE set timestamp to 0 for consistancy
-                    data['message'] = JSON.parse(data['message']);
-                    data['message']['TEST_UNIT0']['timestamp'] = 0;
-                    data['message'] = JSON.stringify(data['message']);
+                	// FORCE set timestamp to 0 for consistancy
+                    data["message"] = JSON.parse(data["message"]);
+                    data["message"]["TEST_UNIT0"]["timestamp"] = 0;
+                    data["message"] = JSON.stringify(data["message"]);
                     expect(data).to.eql(
                     {
                         target: "model",
@@ -190,7 +183,7 @@ describe('Testing Model Class', function()
                             "TEST_UNIT0":
                             {
                                 timestamp: 0,
-                                value: 'SET_TEST_VALUE0'
+                                value: "SET_TEST_VALUE0"
                             }
                         })
                     });
@@ -200,7 +193,7 @@ describe('Testing Model Class', function()
 
             var Socket = new Primus.createSocket();
 
-            var connection = Socket('http://localhost:9998',
+            var connection = Socket("http://localhost:9998",
             {
                 reconnect:
                 {
@@ -246,9 +239,9 @@ describe('Testing Model Class', function()
             // Register Memory two items into memory
             test_unit0.registerMemory("TEST_UNIT0");
             // Values to be set
-            test_unit0.set("TEST_UNIT0", 'SET_TEST_VALUE0');
+            test_unit0.set("TEST_UNIT0", "SET_TEST_VALUE0");
             // Force timestamp to 0 (otherwise timestamp is not determinate)
-            test_unit0.database['TEST_UNIT0']['timestamp'] = 0;
+            test_unit0.database["TEST_UNIT0"]["timestamp"] = 0;
 
         });
     });

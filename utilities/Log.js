@@ -1,8 +1,8 @@
 "use strict";
 
-var Console = require('console').Console;
-var colors = require('colors/safe');
-var fs = require('fs');
+var Console = require("console").Console;
+var colors = require("colors/safe");
+var fs = require("fs");
 
 class Log
 {
@@ -23,7 +23,7 @@ class Log
 		var console_args = Array.prototype.slice.call(arguments);
 		var journal_args = Array.prototype.slice.call(arguments);
 		var module_timestamp_msg = `[${Date().slice(0,-15)}][${this.module}] ::`;
-		//// Add date, module and color into the console's arguments
+		//// Add date, module and color into the console"s arguments
 		console_args.unshift(this.color(module_timestamp_msg));
 		journal_args.unshift(module_timestamp_msg);
 		//// Output message to journal.
@@ -89,12 +89,12 @@ class Log
 //==================================
 Log.initialize = function()
 {
-	var dir = './logs';
+	var dir = "./logs";
 	if (!fs.existsSync(dir)) { fs.mkdirSync(dir); }
 	// Name of stdout file
-	Log.output_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, '-');
+	Log.output_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, "-");
 	// Name of stderr file
-	Log.error_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, '-');
+	Log.error_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, "-");
 	// Generate the output file along with a write stream to it
 	Log.writeOutput = fs.createWriteStream(Log.output_file);
 	// Generate the error file along with a write stream to it

@@ -26,7 +26,7 @@ class Model
     {
         this.database[key] = {
             timestamp: this.currentTime(),
-            value: undefined
+            value: null
         };
         return true;
     }
@@ -57,7 +57,7 @@ class Model
     {
         if (key in this.database)
         {
-            return this.database[key]['value'];
+            return this.database[key]["value"];
         }
         else
         {
@@ -66,7 +66,7 @@ class Model
     }
     getMemory(timestamp)
     {
-        if (typeof timestamp === 'undefined' || timestamp === 0)
+        if (!timestamp || timestamp === 0)
         {
             return this.database;
         }
@@ -75,7 +75,7 @@ class Model
             var latest_database = {};
             for (var memory in this.database)
             {
-                if (this.database[memory]['timestamp'] >= timestamp)
+                if (this.database[memory]["timestamp"] >= timestamp)
                 {
                     //// copy memory to latest_database
                     latest_database[memory] = this.database[memory];

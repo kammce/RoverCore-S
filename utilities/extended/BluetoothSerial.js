@@ -1,16 +1,16 @@
 "use strict";
 
-var Serial = require('./Serial');
+var Serial = require("./Serial");
 
 class BluetoothSerial extends Serial
 {
 	constructor(params)
 	{
 		params.path = `/dev/rfcomm${params.device}`;
-		params.delimiter = '\r\n';
+		params.delimiter = "\r\n";
 		super(params);
 
-		this.fs = require('fs');
+		this.fs = require("fs");
 
 		this.device = params.device;
 		this.mac_address = params.mac;
@@ -33,7 +33,7 @@ class BluetoothSerial extends Serial
 				if(!this.busy && this.port.isOpen())
 				{
 					this.log.debug3("polling :: ", this.poll_counter++);
-					this.sendCommand('~', this.poll_counter++);
+					this.sendCommand("~", this.poll_counter++);
 				}
 			}
 			catch(e) {}
@@ -115,7 +115,7 @@ class BluetoothSerial extends Serial
 				}
 			});
 		};
-		if(typeof this.port !== 'undefined')
+		if(typeof this.port !== "undefined")
 		{
 			this.log.debug1(`Serial Port connection exists, attempting to close it, and release device.`);
 			this.port.close(release_callback);
@@ -132,7 +132,7 @@ class BluetoothSerial extends Serial
 		this.reference = this.reference || this;
 
 		//this.reference.serial_buffer += data.toString();
-		//var messages = this.reference.serial_buffer.split('\r\n');
+		//var messages = this.reference.serial_buffer.split("\r\n");
 
 		var messages = data.toString();
 
@@ -171,7 +171,7 @@ class BluetoothSerial extends Serial
 	attachListener(key, callback)
 	{
 		this.log.debug3(`Attaching listener to key ${key}`);
-		if(/^[a-zA-Z0-9\*]$/g.test(key) && typeof callback === 'function')
+		if(/^[a-zA-Z0-9\*]$/g.test(key) && typeof callback === "function")
 		{
 			this.callback_map[key] = callback;
 			return true;
@@ -223,7 +223,7 @@ BluetoothSerial.spawnBTAgent = function(agent_ps, code_path)
 			"--pin", code_path
 		]);
 
-		BluetoothSerial.bt_agent_process.on('close', (/*code*/) =>
+		BluetoothSerial.bt_agent_process.on("close", (/*code*/) =>
 		{
 			//// NOTE: Could be potentially dangerous :P
 			//// Recursion mang!
@@ -245,8 +245,8 @@ BluetoothSerial.initialize = function()
 	var fs = require("fs");
 
 	// var execSync = require("child_process").execSync;
-	// var sleep = require('sleep');
-	// var glob = require('glob');
+	// var sleep = require("sleep");
+	// var glob = require("glob");
 
 	//// Release all bluetooth rfcomm connections
 	// try
@@ -255,7 +255,7 @@ BluetoothSerial.initialize = function()
 	// 	var strerr = new Buffer("---");
 	// 	while(strerr.toString() || glob.sync("/dev/rfcomm*").length !== 0)
 	// 	{
-	// 		strerr = execSync('rfcomm release all 2>&1');
+	// 		strerr = execSync("rfcomm release all 2>&1");
 	// 		//console.log(strerr.toString());
 
 	// 		sleep.msleep(250);

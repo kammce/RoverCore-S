@@ -27,3 +27,5 @@ experiments/
 ARCHIVES/
 
 install/
+
+.nyc_output/

@@ -1,11 +1,10 @@
 "use strict";
 
-var Log = require('../../utilities/Log');
+var Log = require("../../utilities/Log");
 
-describe('Testing Log Class', function()
+describe("Testing Log Class", function()
 {
-    var write, log, output = '';
-    var fs = require('fs');
+    var write, log, output = "";
 
     // restore after each test
     beforeEach(function()
@@ -15,7 +14,7 @@ describe('Testing Log Class', function()
         log = console.log;
         output = "";
         // our stub will concatenate any output to a string
-        process.stdout.write = console.log = function(s)
+        process.stdout.write = console.log = function()
         {
             for (var i = 0; i < arguments.length; i++)
             {
@@ -27,7 +26,7 @@ describe('Testing Log Class', function()
                 {
                     output += arguments[i];
                 }
-            };
+            }
         };
     });
 
@@ -42,9 +41,9 @@ describe('Testing Log Class', function()
         Log.deleteLogs();
     });
     /* TODO: Make create test to check if that Log statically creates only one log per require("Log") */
-    describe('#output()', function()
+    describe("#output()", function()
     {
-        it('Expect function to output to stdout when given a string', function()
+        it("Expect function to output to stdout when given a string", function()
         {
             var test_unit = new Log("test_unit0", "cyan");
             //fs.writeFileSync(test_unit.output_file, "");
@@ -56,7 +55,7 @@ describe('Testing Log Class', function()
             // Check that log file contains output value
             //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain("hello world", "Output was not written to file.");
         });
-        it('Expect function to output to stdout when given an structure', function()
+        it("Expect function to output to stdout when given an structure", function()
         {
             var test_unit = new Log("test_unit1", "cyan");
             //fs.writeFileSync(test_unit.output_file, "");
@@ -65,11 +64,11 @@ describe('Testing Log Class', function()
                 "a": 1,
                 "b": 2
             });
-            expect(output).to.contain('{"a":1,"b":2}');
+            expect(output).to.contain("{\"a\":1,\"b\":2}");
             // Check that log file contains output value
-            //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain('{"a":1,"b":2}', "Output was not written to file.");
+            //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain("{"a":1,"b":2}", "Output was not written to file.");
         });
-        it('Expect function to output to stdout when given both a string and structure', function()
+        it("Expect function to output to stdout when given both a string and structure", function()
         {
             var test_unit = new Log("test_unit2", "cyan");
             //fs.writeFileSync(test_unit.output_file, "");
@@ -78,14 +77,14 @@ describe('Testing Log Class', function()
                 "a": 1,
                 "b": 2
             });
-            expect(output).to.contain('{"a":1,"b":2}');
+            expect(output).to.contain("{\"a\":1,\"b\":2}");
             expect(output).to.contain("hello world");
             // Check that log file contains output value
-            //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain('{"a":1,"b":2}', "Output was not written to file.");
+            //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain("{"a":1,"b":2}", "Output was not written to file.");
             // Check that log file contains output value
             //expect(fs.readFileSync(test_unit.output_file, "ascii")).to.contain("hello world", "Output was not written to file.");
         });
-        it('Visually check if output is cyan, yellow and green', function()
+        it("Visually check if output is cyan, yellow and green", function()
         {
             // Restore process.stdout.write and console.log
             process.stdout.write = write;
@@ -98,9 +97,9 @@ describe('Testing Log Class', function()
             test_unit2.output("THIS SHOULD COME OUT THE COLOR GREEN!!");
         });
     });
-    describe('#mute(), #unmute()', function()
+    describe("#mute(), #unmute()", function()
     {
-        it('Mute one log, expect only one log can output. Unmute logs, expect both to output',
+        it("Mute one log, expect only one log can output. Unmute logs, expect both to output",
             function()
             {
                 // Create two Logs
@@ -132,9 +131,9 @@ describe('Testing Log Class', function()
             });
     });
 
-    describe('static #mute(), static #unmute()', function()
+    describe("static #mute(), static #unmute()", function()
     {
-        it('Mute one log, expect only one log can output. Unmute logs, expect both to output', function()
+        it("Mute one log, expect only one log can output. Unmute logs, expect both to output", function()
         {
             // Create two Logs
             var test_unit0 = new Log("test_unit6", "cyan");
@@ -164,14 +163,15 @@ describe('Testing Log Class', function()
             expect(output).to.contain("Test0");
             expect(output).to.contain("Test1");
         });
-        it('Attempting to mute a non-existing module return false', function()
+        it("Attempting to mute a non-existing module return false", function()
         {
             expect(Log.mute("does_not_exist")).to.be.false;
             expect(Log.unmute("does_not_exist")).to.be.false;
         });
-        it('Attempting to mute an existing module should return true', function()
+        it("Attempting to mute an existing module should return true", function()
         {
-            var test_unit = new Log("test_unit_true1", "green");
+
+            var test_unit0 = new Log("test_unit_true1", "green"); // jshint unused: false
             expect(Log.mute("test_unit_true1")).to.be.true;
             expect(Log.unmute("test_unit_true1")).to.be.true;
         });
