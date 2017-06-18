@@ -22,7 +22,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>22/22</span>
+        <span class='fraction'>17/17</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>22/22</span>
+        <span class='fraction'>17/17</span>
       </div>
     </div>
   </div>
@@ -82,42 +82,7 @@
 37
 38
 39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+40</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -130,42 +95,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -193,7 +123,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
 &nbsp;
-var Neuron = require('../Neuron');
+var Neuron = require("../Neuron");
 &nbsp;
 class RandomSineWave extends Neuron
 {
@@ -204,43 +134,8 @@ class RandomSineWave extends Neuron
 		// =====================================
 		//// Calls parent class constructor
 		super(util);
-		////Assigns class's name
-		this.name = util.name;
-		/**
-		 * Feedback mechanism for sending information back to mission control.
-		 * Usage:
-		 *		this.feedback(msg_to_output, ...);
-		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
-		 */
-		this.feedback = util.feedback;
-		/**
-		 * Abstraction library for printing to standard out in color as well
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.log.output(msg_to_output, ...);
-		 *		this.log.output("HELLO WORLD", { foo: "bar" });
-		 */
-		this.log = util.log;
 		this.log.setColor("grey");
-		/**
-		 * This variable specifies the amount of time between react() calls before the
-		 * idle() routine is called and the module state is moved to IDLING
-		 */
 		this.idle_timeout = 2000;
-		/**
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.model.registerMemory("Proto");
-		 *		this.model.set("Proto", {
-		 *		    proto: 555
-		 *		});
-		 *		var proto = this.model.get("Proto");
-		 */
-		this.model = util.model;
-		/**
-		 * Structure containing additional extended utilities
-		 */
-		this.extended = util.extended;
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
@@ -271,7 +166,7 @@ module.exports = RandomSineWave;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Jun 16 2017 13:00:16 GMT-0700 (PDT)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sat Jun 17 2017 16:03:59 GMT-0700 (PDT)
 </div>
 </div>
 <script src="../../../prettify.js"></script>

@@ -10,10 +10,10 @@ class Serial
 		this.path = params.path;
 		this.baud_rate = params.baud;
 		this.delimiter = params.delimiter;
-		this.fs = require('fs');
+		this.fs = require("fs");
 		this.exec = require("child_process").exec;
 		this.SerialPort = require("serialport");
-		this.connection_interval = undefined;
+		this.connection_interval = null;
 		this.initial_setup = false;
 	}
 	setupSerial()
@@ -25,7 +25,7 @@ class Serial
 
 		if(typeof this.delimiter === "string")
 		{
-			options['parser'] = this.SerialPort.parsers.readline(this.delimiter);
+			options["parser"] = this.SerialPort.parsers.readline(this.delimiter);
 		}
 
 		this.port = new this.SerialPort(this.path, options);
@@ -53,10 +53,6 @@ class Serial
 				{
 					this.log.debug1(`Connection failed, attempting to open connection to ${this.path}`);
 					this.port.open();
-				}
-				if(this.port.isOpen())
-				{
-
 				}
 			}
 			catch(e)
@@ -105,7 +101,7 @@ class Serial
 	}
 	attachListener(key, callback)
 	{
-		if(/^[a-zA-Z0-9]$/g.test(key) && typeof callback === 'function')
+		if(/^[a-zA-Z0-9]$/g.test(key) && typeof callback === "function")
 		{
 			this.callback_map[key] = callback;
 			return true;

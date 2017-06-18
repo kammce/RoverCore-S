@@ -1,28 +1,57 @@
 "use strict";
+
+const NO_ACTION = "NO-ACTION";
+const UNDEF = "UNDEF";
+
 class Neuron
 {
 	constructor(util)
 	{
-		if( typeof util.name !== "string" ||
-			typeof util.feedback !== "function" ||
-			typeof util.log !== "function" )
-		{
-			return false;
-		}
+		////Assigns class's name
 		this.name = util.name;
+		/**
+		 * Feedback mechanism for sending information back to mission control.
+		 * Usage:
+		 *		this.feedback(msg_to_output, ...);
+		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
+		 */
 		this.feedback = util.feedback;
+		/**
+		 * Abstraction library for printing to standard out in color as well
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.log.output(msg_to_output, ...);
+		 *		this.log.output("HELLO WORLD", { foo: "bar" });
+		 */
 		this.log = util.log;
+		/**
+		 * as writing debug information to file periodically.
+		 * Usage:
+		 *		this.model.registerMemory("Proto");
+		 *		this.model.set("Proto", {
+		 *		    proto: 555
+		 *		});
+		 *		var proto = this.model.get("Proto");
+		 */
+		this.model = util.model;
+		/**
+		 * A method for making up calls to cortex to control the system
+		 */
+		this.upcall = util.upcall;
+
+		/**
+		 * Structure containing additional extended utilities
+		 */
+		this.extended = util.extended;
+
 		this.controller = "";
 		this.idle_timeout = 1000;
 		this.state = "RUNNING";
 	}
 	_halt()
 	{
-		if(typeof this.halt === "undefined")
-		{
-			return "UNDEF";
-		}
-		else
+		var status = UNDEF;
+		if(this.halt)
 		{
 			// run resume function and store return value
 			var was_halt_successful = this.halt();
@@ -30,16 +59,14 @@ class Neuron
 			{
 				this.state = "HALTED";
 			}
-			return was_halt_successful;
+			status = was_halt_successful;
 		}
+		return status;
 	}
 	_resume()
 	{
-		if(typeof this.resume === "undefined")
-		{
-			return "UNDEF";
-		}
-		else
+		var status = UNDEF;
+		if(this.resume)
 		{
 			// run resume function and store return value
 			var was_resume_successful = this.resume();
@@ -47,54 +74,50 @@ class Neuron
 			{
 				this.state = "RUNNING";
 			}
-			return was_resume_successful;
+			status = was_resume_successful;
 		}
+		return status;
 	}
 	_react(input)
 	{
-		if(typeof this.react === "undefined")
-		{
-			return "UNDEF";
-		}
-		else if(typeof input === "undefined" || input === null)
-		{
-			return "NO-ACTION";
-		}
-		else if(this.state === "HALTED")
+		var status = UNDEF;
+		if(this.state === "HALTED")
 		{
 			this.log.output(`${this.name} is ${this.state}`);
 			this.feedback(`${this.name} is ${this.state}`);
-			return "NO-ACTION";
+			status = NO_ACTION;
 		}
-		else
+		else if(this.react)
 		{
 			this.state = "RUNNING";
-			return this.react(input);
+			status = this.react(input);
 		}
+		return status;
 	}
 	_idle()
 	{
-		if(typeof this.idle === "undefined")
-		{
-			return "UNDEF";
-		}
-		else
+		var status = UNDEF;
+		if(this.idle)
 		{
 			// run resume function and store return value
 			if(this.state !== "IDLING")
 			{
 				var was_idle_successful = this.idle();
 				this.state = "IDLING";
-				return was_idle_successful;
+				status = was_idle_successful;
 			}
-			return false;
+			else
+			{
+				status = false;
+			}
 		}
+		return status;
 	}
 }
 
-Neuron.prototype.halt = undefined;
-Neuron.prototype.resume = undefined;
-Neuron.prototype.react = undefined;
-Neuron.prototype.idle = undefined;
+Neuron.prototype.halt = null;
+Neuron.prototype.resume = null;
+Neuron.prototype.react = null;
+Neuron.prototype.idle = null;
 
 module.exports = Neuron;

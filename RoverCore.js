@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 // Check if the -h help
-if(process.argv.indexOf("-h") != -1) {
+if(process.argv.indexOf("-h") !== -1) {
 	console.log(`NAME
 	RoverCore - Start RoverCore
 
@@ -52,49 +52,48 @@ console.log("Loading Libaries COMPLETE");
 // =====================================
 console.log("Checking Arguments");
 var config = {
-	"target": 'http://localhost:9000',
-	"connection": undefined,
+	"target": "http://localhost:9000",
 	"simulate": false,
 	"isolation": false,
 	"debug_level": 0,
 	"no_color": false,
 	"under_test": false
 };
-if(process.argv.indexOf("-s") != -1)
+if(process.argv.indexOf("-s") !== -1)
 {
 	config.simulate = true;
 }
-if(process.argv.indexOf("-t") != -1)
+if(process.argv.indexOf("-t") !== -1)
 {
 	config.target = process.argv[process.argv.indexOf("-t")+1];
 	console.log(`Target Proxy = ${config.target}`);
 	// NOTE: Add Proxy connection here!
 }
-if(process.argv.indexOf("-i") != -1)
+if(process.argv.indexOf("-i") !== -1)
 {
 	config.isolation = process.argv[process.argv.indexOf("-i")+1];
 	console.log(`Attempting to isolate ${config.isolation}`);
 }
 
-if(process.argv.indexOf("-v") != -1)
+if(process.argv.indexOf("-v") !== -1)
 {
 	config.debug_level = 1;
 	console.log(`Debug Level set to ${config.debug_level}`);
 }
 
-if(process.argv.indexOf("-vv") != -1)
+if(process.argv.indexOf("-vv") !== -1)
 {
 	config.debug_level = 2;
 	console.log(`Debug Level set to ${config.debug_level}`);
 }
 
-if(process.argv.indexOf("-vvv") != -1)
+if(process.argv.indexOf("-vvv") !== -1)
 {
 	config.debug_level = 3;
 	console.log(`Debug Level set to ${config.debug_level}`);
 }
 
-if(process.argv.indexOf("--no-color") != -1)
+if(process.argv.indexOf("--no-color") !== -1)
 {
 	config.no_color = true;
 	console.log(`Disablimg log coloring in RoverCore-S.`);
@@ -105,4 +104,5 @@ console.log("Checking Arguments COMPLETE");
 // Launching Cortex
 // =====================================
 console.log(`Launching Cortex!`);
-new Cortex(config);
+
+var cortex = new Cortex(config); // jshint unused: false

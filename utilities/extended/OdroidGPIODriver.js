@@ -1,6 +1,6 @@
 "use strict";
 /*
- *	var OdroidGPIODriver = require('./OdroidGPIODriver.js');
+ *	var OdroidGPIODriver = require("./OdroidGPIODriver.js");
  *	var OdroidGPIODriver = new OdroidGPIODriver();
  *
  *	OdroidGPIODriver.expose(18, "OUTPUT");
@@ -11,7 +11,7 @@
  *
  */
 
-var fs = require('fs');
+var fs = require("fs");
 
 class OdroidGPIODriver
 {
@@ -36,16 +36,16 @@ class OdroidGPIODriver
 		// =====================================
 		// Generate OdroidGPIODriver Structure
 		// =====================================
-		for(var i in this.pinIndex)
+		for(var pin in this.pinIndex)
 		{
-		    this.pins[this.pinIndex[i].key] = this.pinIndex[i];
+		    this.pins[this.pinIndex[pin].key] = this.pinIndex[pin];
 		}
 		// =====================================
 		// RoverCore Blink Led Indicator
 		// =====================================
-		var os = require('os');
+		var os = require("os");
 		console.log(`System Hostname is on ${os.hostname()}`);
-		if(os.hostname() === 'odroid')
+		if(os.hostname() === "odroid")
 		{
 			console.log("RoverCore Blink Led Indicator.");
 			this.expose(13, "OUTPUT");

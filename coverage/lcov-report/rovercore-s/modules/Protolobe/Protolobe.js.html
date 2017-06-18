@@ -22,7 +22,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>24/24</span>
+        <span class='fraction'>18/18</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>24/24</span>
+        <span class='fraction'>18/18</span>
       </div>
     </div>
   </div>
@@ -118,39 +118,7 @@
 73
 74
 75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+76</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -164,38 +132,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -259,7 +195,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
 &nbsp;
-var Neuron = require('../Neuron');
+var Neuron = require("../Neuron");
 &nbsp;
 class ProtoLobe extends Neuron
 {
@@ -270,56 +206,24 @@ class ProtoLobe extends Neuron
 		// =====================================
 		//// Calls parent class constructor
 		super(util);
-		////Assigns class's name
-		this.name = util.name;
-		/**
-		 * Feedback mechanism for sending information back to mission control.
-		 * Usage:
-		 *		this.feedback(msg_to_output, ...);
-		 * 		this.feedback("HELLO WORLD", { foo: "bar" });
-		 */
-		this.feedback = util.feedback;
-		/**
-		 * Abstraction library for printing to standard out in color as well
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.log.output(msg_to_output, ...);
-		 *		this.log.output("HELLO WORLD", { foo: "bar" });
-		 */
-		this.log = util.log;
-		this.log.setColor("grey");
 		/**
 		 * This variable specifies the amount of time between react() calls before the
 		 * idle() routine is called and the module state is moved to IDLING
 		 */
 		this.idle_timeout = 2000;
 		/**
-		 * as writing debug information to file periodically.
-		 * Usage:
-		 *		this.model.registerMemory("Proto");
-		 *		this.model.set("Proto", {
-		 *		    proto: 555
-		 *		});
-		 *		var proto = this.model.get("Proto");
+		 * Set output color
 		 */
-		this.model = util.model;
-		/**
-		 * A method for making up calls to cortex to control the system
-		 */
-		this.upcall = util.upcall;
-		/**
-		 * Structure containing additional extended utilities
-		 */
-		this.extended = util.extended;
+		this.log.setColor("grey");
 		// =====================================
 		// Construct Class After This Points
 		// =====================================
 	}
 	/**
-     * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
-     * @param {mixed} input - command from mission control.
-     * @returns {boolean} returns true if react was successful, returns false if react failed.
-     */
+	 * React method is called by Cortex when mission control sends a command to RoverCore and is targeting this lobe
+	 * @param {mixed} input - command from mission control.
+	 * @returns {boolean} returns true if react was successful, returns false if react failed.
+	 */
 	react(input)
 	{
 		this.log.output(`REACTING ${this.name}: `, input);
@@ -327,12 +231,12 @@ class ProtoLobe extends Neuron
 		return true;
 	}
 	/**
-     * Cortex will attempt to halt this lobe in the following situations:
+	 * Cortex will attempt to halt this lobe in the following situations:
 	 *		1. If the Mission Control controller of a lobe disconnects from the rover server or server proxy.
 	 *		2. If the Mission Control controller sends a manual halt signal to Cortex to halt the lobe.
 	 *		3. If another lobe uses an UPCALL to trigger the halt of a specific lobe or all lobes.
-     * @returns {boolean} returns true if successful, returns false if halt failed.
-     */
+	 * @returns {boolean} returns true if successful, returns false if halt failed.
+	 */
 	halt()
 	{
 		this.log.output(`HALTING ${this.name}`);
@@ -340,11 +244,11 @@ class ProtoLobe extends Neuron
 		return true;
 	}
 	/**
-     * Cortex will attempt to resume this lobe in the following situations:
+	 * Cortex will attempt to resume this lobe in the following situations:
 	 *		1. If the Mission Control controller sends a manual resume signal to Cortex to resume a halted lobe.
 	 *		2. If another lobe uses an UPCALL to trigger resume of a specific lobe or all lobes.
-     * @returns {boolean} returns true if successful, returns false if resume failed.
-     */
+	 * @returns {boolean} returns true if successful, returns false if resume failed.
+	 */
 	resume()
 	{
 		this.log.output(`RESUMING ${this.name}`);
@@ -353,9 +257,9 @@ class ProtoLobe extends Neuron
 		return true;
 	}
 	/**
-     * Cortex will attempt to IDLE your lobes if this lobe does not receive a command from mission control in the specified amount defined in the this.idle_timeout. file. This is useful for lobes that need period commands from mission control. Lobes are put into IDLING state ~100ms after they are constructed.
-     * @returns {boolean} returns true if successful, returns false if idle failed.
-     */
+	 * Cortex will attempt to IDLE your lobes if this lobe does not receive a command from mission control in the specified amount defined in the this.idle_timeout. file. This is useful for lobes that need period commands from mission control. Lobes are put into IDLING state ~100ms after they are constructed.
+	 * @returns {boolean} returns true if successful, returns false if idle failed.
+	 */
 	idle()
 	{
 		this.log.output(`IDLING ${this.name}`);
@@ -370,7 +274,7 @@ module.exports = ProtoLobe;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Jun 16 2017 13:00:16 GMT-0700 (PDT)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sat Jun 17 2017 16:03:59 GMT-0700 (PDT)
 </div>
 </div>
 <script src="../../../prettify.js"></script>
