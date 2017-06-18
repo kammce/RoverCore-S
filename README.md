@@ -38,7 +38,7 @@ RoverCore was built to run on Ubuntu and on Embedded Linux Platforms. Your best 
 
     cd RoverCore-S
 
-**Step 3:** Install  RoverCore-S using `install.sh` script. The script will install the latest `node.js@6.x.x`, `npm`,   node dependencies according to *package.json*. DO NOT INSTALL THE SCRIPT USING **SUDO**. The script will ask you for **sudo** permissions once it runs.
+**Step 3:** Install RoverCore-S using install.sh script. The script will install the latest node.js@6.x.x, npm, node dependencies and development tools according to package.json.
 
     ./install.sh
 
@@ -101,6 +101,6 @@ To get more information about the command line arguments run:
 The code is copyright under *Khalil A. Estell* under the Apache 2.0 license. See LICENSE file in repository.
 
 ## Acknowledgments
-*Matthew Boyd* - Control Systems lead since 2014
-*Mitch Waldman* - Control Systems member in the 2014-2015 competition and gave feedback on how to improve RoverCore.
-*Henry Tran* - Mission Control lead for 2015-2016 competition and gave feedback on how to improve RoverCore.
+* *Matthew Boyd* - Control Systems lead since 2014
+* *Mitch Waldman* - Control Systems member in the 2014-2015 competition and gave feedback on how to improve RoverCore.
+* *Henry Tran* - Mission Control lead for 2015-2016 competition and gave feedback on how to improve RoverCore.
