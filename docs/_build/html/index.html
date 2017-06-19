@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to RoverCore-S’s documentation! &mdash; RoverCore-S 3.0.1 documentation</title>
+  <title>Welcome to RoverCore-S’s documentation! &mdash; RoverCore-S 0.0.1 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="RoverCore-S 3.0.1 documentation" href="#"/>
-        <link rel="next" title="Get Started" href="get-started/start.html"/> 
+    <link rel="top" title="RoverCore-S 0.0.1 documentation" href="#"/>
+        <link rel="next" title="Getting Started" href="rst/getting-started.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                3.0
+                0.0
               </div>
             
           
@@ -89,13 +89,15 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="get-started/start.html">    Get Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/references.html">    API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/guides.html">    API Guides</a></li>
-<li class="toctree-l1"><a class="reference internal" href="info/resources.html">    Resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="info/copyrights.html">    Copyrights</a></li>
-<li class="toctree-l1"><a class="reference internal" href="info/about.html">    About</a></li>
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/creating-and-working-with-lobes.html">Creating and Working with Lobes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/api.html">Lobe API and System Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/unit-testing-and-coverage.html">Unit Testing and Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/copyrights.html">Copyrights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/references.html">API References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/about.html">About</a></li>
 </ul>
 
             
@@ -161,41 +163,64 @@
             
   <div class="section" id="welcome-to-rovercore-s-s-documentation">
 <h1>Welcome to RoverCore-S’s documentation!<a class="headerlink" href="#welcome-to-rovercore-s-s-documentation" title="Permalink to this headline">¶</a></h1>
-<table border="1" class="docutils">
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference external" href="get-started/start.html"><img alt="Get Started" src="_images/get-started.gif" /></a></td>
-<td><a class="reference external" href="api/references.html"><img alt="API Reference" src="_images/api-reference.gif" /></a></td>
-<td><a class="reference external" href="hw-reference/index.html"><img alt="H/W Reference" src="_images/hw-reference.gif" /></a></td>
-</tr>
-<tr class="row-even"><td><a class="reference external" href="get-started/start.html">Get Started</a></td>
-<td><a class="reference external" href="api/references.html">API Reference</a></td>
-<td><a class="reference external" href="hw-reference/index.html">H/W Reference</a></td>
-</tr>
-<tr class="row-odd"><td><a class="reference external" href="api/guides.html"><img alt="Api Guides" src="_images/api-guides.gif" /></a></td>
-<td><a class="reference external" href="contribute/index.html"><img alt="Contribute" src="_images/contribute.gif" /></a></td>
-<td><a class="reference external" href="resources.html"><img alt="Resources" src="_images/resources.gif" /></a></td>
-</tr>
-<tr class="row-even"><td><a class="reference external" href="api/guides.html">API Guides</a></td>
-<td><a class="reference external" href="contribute/index.html">Contribute</a></td>
-<td><a class="reference external" href="resources.html">Resources</a></td>
-</tr>
-</tbody>
-</table>
-<div class="toctree-wrapper compound">
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<div class="toctree-wrapper compound" id="mastertoc2">
+<p class="caption"><span class="caption-text">Table of Contents</span><a class="headerlink" href="#mastertoc2" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/getting-started.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rst/getting-started.html#running-rovercore-s">Running RoverCore-S</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/getting-started.html#connecting-to-rovercore-s-using-rovercore-mc">Connecting to RoverCore-S using RoverCore-MC</a></li>
 </ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/creating-and-working-with-lobes.html">Creating and Working with Lobes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#lobes-in-rovercore-s-and-what-they-do">Lobes in RoverCore-S and What They Do</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#how-lobes-works">How Lobes Works</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#lobe-states">Lobe States</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#react-method">#react() method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#halt-method-halted-state">#halt() method &amp; HALTED state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#resume-method-running-state">#resume() method &amp; RUNNING state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#idle-method-idling-state">#idle() method &amp; IDLING state</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#creating-a-new-lobe">Creating a new Lobe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/creating-and-working-with-lobes.html#util-constructor-parameter-properties"><em>util</em> constructor parameter properties</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/api.html">Lobe API and System Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/api.html#utility-classes">Utility Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rst/api.html#log">Log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/api.html#feedback">feedback()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/api.html#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/api.html#upcall">upcall()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/unit-testing-and-coverage.html">Unit Testing and Code Coverage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/unit-testing-and-coverage.html#unit-testing-tools">Unit Testing Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rst/unit-testing-and-coverage.html#testing-commands">Testing Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst/unit-testing-and-coverage.html#creating-a-unit-test">Creating a Unit Test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/copyrights.html">Copyrights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/references.html">API References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/references.html#reference-1">Reference 1</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/about.html">About</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/about.html#project-goals-and-objectives">Project Goals and Objectives</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="press-next-to-get-started">
+<h2>Press Next To Get Started<a class="headerlink" href="#press-next-to-get-started" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -208,7 +233,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="get-started/start.html" class="btn btn-neutral float-right" title="Get Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="rst/getting-started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -240,7 +265,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.0.1',
+            VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
