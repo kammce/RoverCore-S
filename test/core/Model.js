@@ -1,6 +1,6 @@
 "use strict";
 
-var Model = require("../../utilities/Model");
+var Model = require("Model");
 
 describe("Testing Model Class", function()
 {

@@ -1,20 +1,13 @@
 "use strict";
 
-var Neuron = require("../../modules/Neuron");
+var Neuron = require("Neuron");
 
 describe("Testing Neuron Class", function()
 {
 	var color_log = function() {};
 	color_log.output = function() {};
 
-	var util = {
-		"name": "unit_test",
-		"log": color_log,
-		feedback() {},
-		model() {},
-		upcall() {},
-		extended() {}
-	};
+	var util = require("test_lobe_utilities");
 
 	var test_unit = new Neuron(util);
 

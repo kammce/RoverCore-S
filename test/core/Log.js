@@ -1,6 +1,6 @@
 "use strict";
 
-var Log = require("../../utilities/Log");
+var Log = require("Log");
 
 describe("Testing Log Class", function()
 {

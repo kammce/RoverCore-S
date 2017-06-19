@@ -1,5 +1,23 @@
 "use strict";
 
+/**
+    @class
+    @classdesc Cortex is the brain of RoverCore and handles the following:
+    * Creates a bidirectional websockets server for mission control to connect to the Rover with.
+	* Can also act as a proxy server for which another instance of RoverCore-S and Mission control can communicate through. Mission control and the rover will connect to the IP address of the known proxy. Useful when the IP address of the rover is not known or directly accessible by mission control.
+	* Dynamically loads the modules (Called Lobes).
+	* Handles activating Lobe HALT, RESUME or IDLE states. (see Lobes States)
+	* Handles incoming messages from Mission Control and either acts upon them (if directed at Cortex) or sends commands to the appropriate Lobes through their REACT function.
+	* Creates a utility structure which is given to each Lobe in their constructor to allow lobes to:
+	* Store and Retrieve information from other lobes (see Model.js)
+	* Communicate with mission control (see feedback function in Cortex.js)
+	* Log information to STDOUT and to a log file (see Log.js)
+	* Make UPCALLS to cortex to do global actions that effect the whole system or other lobes. (see upcall function in Cortex.js)
+
+    @param {string} name - Tutorial name.
+    @param {string} content - Text content.
+    @param {number} type - Source formating.
+ */
 class Cortex
 {
 	constructor(config)
@@ -97,17 +115,13 @@ class Cortex
 		// =====================================
 		// Setting up Logs and Model
 		// =====================================
-		this.LOG = require("../utilities/Log");
+		this.LOG = require("Log");
 		this.LOG.disable_colors = config.no_color;
-		this.MODEL = require("../utilities/Model");
+		this.MODEL = require("Model");
 
 		this.log = new this.LOG(this.name, "white", this.debug_level);
 		this.Model = new this.MODEL(this.feedback_generator("model"));
 
-		if(!config.under_test)
-		{
-			this.extended_utilities = require("../utilities/Extended.js");
-		}
 		// =====================================
 		// Loading modules
 		// =====================================
@@ -316,7 +330,7 @@ class Cortex
 		try
 		{
 			//// Adding source code path to config object
-			var source_path = `./${directory}/${directory}`;
+			var source_path = `${directory}/${directory}`;
 			//// Generate Logger
 			var log = new this.LOG(directory, "white", this.debug_level);
 			//// Require protolobe if simulate is TRUE, otherwise require lobe from path.
@@ -326,7 +340,6 @@ class Cortex
 			var lobe_utitilites = {
 				"name": directory,
 				"model": this.Model,
-				"extended": this.extended_utilities,
 				"feedback": this.feedback_generator(directory),
 				upcall,
 				log

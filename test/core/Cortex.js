@@ -9,7 +9,7 @@ describe("Testing Cortex Class", function()
 	// =====================================
 	var Primus = require("primus");
 	var http = require("http");
-	var Cortex = require("../../modules/Cortex");
+	var Cortex = require("Cortex");
 	var server = http.createServer();
 	// =====================================
 	// Construct and define Primus client

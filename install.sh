@@ -51,7 +51,9 @@ sudo npm install -g istanbul
 echo -e "\NYC istanbul command line interface"
 sudo npm install -g nyc
 echo -e "\Node Code Coverage Reporting Tool"
-npm install -g codecov
+sudo npm install -g codecov
+echo -e "\Node Code Coverage Reporting Tool"
+sudo npm install -g jsdoc
 
 #echo -e "\nInstalling Lib udev development library"
 #sudo apt-get install -y libudev-dev

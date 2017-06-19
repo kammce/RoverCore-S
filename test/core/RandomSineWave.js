@@ -3,8 +3,8 @@
 describe("Testing RandomSineWave Class", function()
 {
 	// Loading Libraries
-	var RandomSineWave = require("../../modules/RandomSineWave/RandomSineWave");
-	var Model = require("../../utilities/Model");
+	var RandomSineWave = require("RandomSineWave/RandomSineWave");
+	var Model = require("Model");
 
 	describe("Testing RandomSineWave Updating model", function()
 	{

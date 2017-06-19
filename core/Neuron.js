@@ -39,11 +39,6 @@ class Neuron
 		 */
 		this.upcall = util.upcall;
 
-		/**
-		 * Structure containing additional extended utilities
-		 */
-		this.extended = util.extended;
-
 		this.controller = "";
 		this.idle_timeout = 1000;
 		this.state = "RUNNING";

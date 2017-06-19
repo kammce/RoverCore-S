@@ -19,6 +19,7 @@ Welcome to RoverCore-S's documentation!
 .. toctree::
 	:caption: Table of Contents
 	:name: mastertoc2
+	:maxdepth: 2
 
 	rst/getting-started
 	rst/creating-and-working-with-lobes

@@ -35,7 +35,8 @@ module.exports = function(grunt) {
 					"before": true,
 					"after": true,
 					"beforeEach": true,
-					"afterEach": true
+					"afterEach": true,
+					"sinon": true
 				}
 			},
 		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js', 'test/core/*.js', 'test/modules/*.js', 'test/libraries/*.js']
@@ -49,7 +50,7 @@ module.exports = function(grunt) {
 					reporter: 'spec',
 					require:
 					[
-						'test/config_chai.js',
+						'.config_tests.js',
 						'sinon'
 					]
 				},
