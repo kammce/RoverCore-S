@@ -48,11 +48,7 @@ module.exports = function(grunt) {
 				options:
 				{
 					reporter: 'spec',
-					require:
-					[
-						'.config_tests.js',
-						'sinon'
-					]
+					require: [ '.config_tests.js' ]
 				},
 				//// Removed libraries because those tests are system specific
 				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'test/modules/**/*.js']

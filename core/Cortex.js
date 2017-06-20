@@ -118,8 +118,11 @@ class Cortex
 		this.LOG = require("Log");
 		this.LOG.disable_colors = config.no_color;
 		this.MODEL = require("Model");
-
+		//// Initialize Log write streams and console outputs
+		this.LOG.initialize();
+		//// Creating Cortex's log instance.
 		this.log = new this.LOG(this.name, "white", this.debug_level);
+		//// Creating global Model object
 		this.Model = new this.MODEL(this.feedback_generator("model"));
 
 		// =====================================
@@ -147,6 +150,7 @@ class Cortex
 	{
 		this.log.debug2(data);
 		var target = data["target"];
+		var status = true;
 		if(this.lobe_map.hasOwnProperty(target))
 		{
 			setImmediate(() =>
@@ -167,7 +171,9 @@ class Cortex
 		else
 		{
 			this.log.output(`Target ${target} does not exist in lobe_map.`);
+			status = false;
 		}
+		return status;
 	}
 	sendLobeStatus()
 	{
@@ -197,13 +203,18 @@ class Cortex
 			});
 		}
 	}
-	//// TODO: Create a unit test for this method
 	sendInterfaceStatus()
 	{
 		this.feedback({
 			type: "mission_controllers",
 			data: this.mission_controllers
 		});
+	}
+	//// TODO: Create a unit test for this method
+	addInterface(controller, spark)
+	{
+		this.feedback(`${controller}: Interface Connected!`);
+		this.mission_controllers[controller] = spark.id;
 	}
 	//// TODO: Create a unit test for this method
 	removeInterface(spark)
@@ -217,12 +228,6 @@ class Cortex
 				break;
 			}
 		}
-	}
-	//// TODO: Create a unit test for this method
-	addInterface(controller, spark)
-	{
-		this.feedback(`${controller}: Interface Connected!`);
-		this.mission_controllers[controller] = spark.id;
 	}
 	//// TODO: Create a unit test for this method
 	//// ADD: The ability to invoke lobe state changes through this method

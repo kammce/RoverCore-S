@@ -55,7 +55,7 @@ describe("Testing Cortex Class", function()
 		});
 		it("#loadLobes should load modules found in modules folder", function(done)
 		{
-			this.timeout(4000);
+			this.timeout(1000);
 			//// Check if protolobe is in the lobe_map
 			setTimeout(function()
 			{
@@ -63,58 +63,61 @@ describe("Testing Cortex Class", function()
 				//// Check if protolobe is in the lobe_map
 				expect(cortex.lobe_map["Protolobe"].idle_timeout).to.exist;
 				done();
-			}, 2500);
+			}, 750);
+		});
+		it("Running #loadLobes with an isolation of '' should make it attempt to end the RoverCore process", function()
+		{
+			var process_exit_stub = sinon.stub(process, "exit");
+			cortex.loadLobes("");
+			expect(process_exit_stub.called).to.be.true;
+			process_exit_stub.restore();
 		});
 	});
 
-	// describe("Testing #handleMissionControl() Assignment", function ()
-	// {
-	// 	it("Should send assign current connection as Protolobe controller", function (done)
-	// 	{
-	// 		//// This will send a signal to Cortex to assign this user as the controller of Protolobe.
-	// 		connection.write({
-	// 			target: "Cortex",
-	// 			command: "Protolobe"
-	// 		});
-	// 		setTimeout(() =>
-	// 		{
-	// 			expect(cortex.lobe_map["Protolobe"]["controller"]).to.exist;
-	// 			done();
-	// 		}, 1000);
-	// 	});
-	// });
-
 	describe("Testing #handleIncomingData()", function()
 	{
-		var react, halt, resume, idle;
-		beforeEach(function()
+		var spy, stub;
+		before(function()
 		{
-			//// Save methods
-			react = cortex.lobe_map["Protolobe"]._react;
-			halt = cortex.lobe_map["Protolobe"]._halt;
-			resume = cortex.lobe_map["Protolobe"]._resume;
-			idle = cortex.lobe_map["Protolobe"]._idle;
+			spy = sinon.spy(cortex, "handleIncomingData");
+			stub = sinon.stub(cortex.lobe_map["Protolobe"], "_react");
 		});
 		it("Lobe should receive target data from server", function(done)
 		{
-			cortex.lobe_map["Protolobe"]._react = function(data)
+			stub.callsFake(function(data)
 			{
 				expect(data).to.equal("coldfustion");
+				expect(spy.returnValues[0]).to.be.true;
 				done();
-			};
+			});
 			connection.write(
 			{
 				"target": "Protolobe",
 				"command": "coldfustion"
 			});
 		});
+		it("Should return false with invalid lobe given", function(done)
+		{
+			connection.write(
+			{
+				"target": "LOBE_NAME_THAT_DOES_NOT_EXIST",
+				"command": "coldfustion"
+			});
+
+			setTimeout(function()
+			{
+				expect(spy.returnValues[0]).to.be.false;
+				done();
+			}, 200);
+		});
 		afterEach(function()
 		{
-			//// Restore methods
-			cortex.lobe_map["Protolobe"]._react = react;
-			cortex.lobe_map["Protolobe"]._halt = halt;
-			cortex.lobe_map["Protolobe"]._resume = resume;
-			cortex.lobe_map["Protolobe"]._idle = idle;
+			spy.reset();
+		});
+		after(function()
+		{
+			spy.restore();
+			stub.restore();
 		});
 	});
 	describe("Testing #handleIdleStatus()", function()
@@ -222,62 +225,92 @@ describe("Testing Cortex Class", function()
 		});
 	});
 
-	// describe("Testing #handleMissionControl() Controls", function ()
-	// {
-	// 	it("Protolobe state should be HALTED after halt signal sent", function (done)
-	// 	{
-	// 		//// Reset the timer
-	// 		cortex.time_since_last_command["Protolobe"] = Date.now();
-	// 		//// Set lobe as idle
-	// 		cortex.lobe_map["Protolobe"]._idle();
-	// 		connection.write({
-	// 			target: "Cortex",
-	// 			command:
-	// 			{
-	// 				lobe: "Protolobe",
-	// 				action: "halt"
-	// 			}
-	// 		});
-	// 		setTimeout(() =>
-	// 		{
-	// 			expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("HALTED");
-	// 			done();
-	// 		}, 1000);
-	// 	});
-	// 	it("Protolobe state should be RUNNING after resume signal sent", function (done)
-	// 	{
-	// 		//// Reset the timer
-	// 		cortex.time_since_last_command["Protolobe"] = Date.now();
-	// 		//// Set lobe as idle
-	// 		cortex.lobe_map["Protolobe"]._idle();
-	// 		connection.write({
-	// 			target: "Cortex",
-	// 			command:
-	// 			{
-	// 				lobe: "Protolobe",
-	// 				action: "resume"
-	// 			}
-	// 		});
-	// 		setTimeout(() =>
-	// 		{
-	// 			expect(cortex.lobe_map["Protolobe"]["state"]).to.equal("RUNNING");
-	// 			done();
-	// 		}, 1000);
-	// 	});
-	// 	// it("Protolobe controller should be an empty string when controller disconnects.", function (done)
-	// 	// {
-	// 	// 	expect(cortex.lobe_map["Protolobe"]["controller"]).to.not.be.empty;
-	// 	// 	connection.end();
-	// 	// 	setTimeout(() =>
-	// 	// 	{
-	// 	// 		expect(cortex.lobe_map["Protolobe"]["controller"]).to.be.empty;
-	// 	// 		done();
-	// 	// 	}, 1000);
-	// 	// });
-	// });
+	describe("Testing #sendInterfaceStatus()", function()
+	{
+		var spy;
+		before(function()
+		{
+			spy = sinon.spy(cortex, "feedback");
+		});
+		it("Should use feedback to send mission controllers when called", function()
+		{
+			cortex.sendInterfaceStatus();
+			expect(spy.calledWith({
+				type: "mission_controllers",
+				data: cortex.mission_controllers
+			})).to.be.true;
+		});
+		after(function()
+		{
+			spy.restore();
+		});
+	});
+
+	describe("Testing #addInterface()", function()
+	{
+		before(function()
+		{
+			delete cortex.mission_controllers.Protolobe;
+		});
+		it("Should insert id 'XXX' into property 'Protolobe' after call ", function()
+		{
+			cortex.addInterface("Protolobe", {id: "XXX"});
+			expect(cortex.mission_controllers["Protolobe"]).to.equal("XXX");
+		});
+		after(function()
+		{
+			delete cortex.mission_controllers.Protolobe;
+		});
+	});
+
+	describe("Testing #removeInterface()", function()
+	{
+		before(function()
+		{
+			cortex.mission_controllers.Protolobe = "XXX";
+		});
+		it("Should insert id 'XXX' into property 'Protolobe' after call ", function()
+		{
+			expect(cortex.mission_controllers["Protolobe"]).to.equal("XXX");
+			cortex.removeInterface({id: "XXX"});
+			expect(cortex.mission_controllers["Protolobe"]).to.be.empty;
+		});
+		after(function()
+		{
+			delete cortex.mission_controllers.Protolobe;
+		});
+	});
+
+	describe("Testing #handleMissionControl()", function()
+	{
+		before(function()
+		{
+			delete cortex.mission_controllers.Protolobe;
+		});
+		it("Should add interface to mission_controllers when given parameters { controller: 'Protolobe' }, and spark { id: 'XXX' }", function()
+		{
+			cortex.handleMissionControl({ controller: 'Protolobe' }, { id: "XXX" });
+			expect(cortex.mission_controllers["Protolobe"]).to.equal("XXX");
+		});
+		it("Should remove interface when given parameters 'disconnect', and a spark", function()
+		{
+			cortex.handleMissionControl("disconnect", { id: "XXX" });
+			expect(cortex.mission_controllers["Protolobe"]).to.be.empty;
+		});
+		after(function()
+		{
+			delete cortex.mission_controllers.Protolobe;
+		});
+	});
 
 	describe("Testing direct #upcall('*ALL') state control", function()
 	{
+		var exec_stub, process_exit_stub;
+		before(function()
+		{
+			exec_stub = sinon.stub(cortex, "exec");
+			process_exit_stub = sinon.stub(process, "exit");
+		});
 		it("#upcall('HALTALL') should halt all modules", function()
 		{
 			cortex.upcall("HALTALL");
@@ -301,6 +334,26 @@ describe("Testing Cortex Class", function()
 			{
 				expect(cortex.lobe_map[lobes].state).to.equal("RUNNING");
 			}
+		});
+		it("#upcall('SYSTEM-SHUTDOWN') should run exec with 'shutdown -h now'", function()
+		{
+			cortex.upcall('SYSTEM-SHUTDOWN');
+			expect(exec_stub.calledWith("shutdown -h now")).to.be.true;
+		});
+		it("#upcall('SYSTEM-RESTART') should run exec with 'reboot'", function()
+		{
+			cortex.upcall('SYSTEM-RESTART');
+			expect(exec_stub.calledWith("reboot")).to.be.true;
+		});
+		it("#upcall('RESTART-CORTEX') run process.exit(0)", function()
+		{
+			cortex.upcall('RESTART-CORTEX');
+			expect(process_exit_stub.calledWith(0)).to.be.true;
+		});
+		after(function()
+		{
+			exec_stub.restore();
+			process_exit_stub.restore();
 		});
 	});
 
@@ -337,6 +390,79 @@ describe("Testing Cortex Class", function()
 		after(function()
 		{
 			spy.restore();
+		});
+	});
+
+	describe("Testing Primus 'connection' event callback", function()
+	{
+		var stub_handle_mission_control, stub_handle_incoming_data;
+		beforeEach(function()
+		{
+			stub_handle_mission_control = sinon.stub(cortex, "handleMissionControl");
+			stub_handle_incoming_data = sinon.stub(cortex, "handleIncomingData");
+		});
+		it("Should call #handleMissionControl() when target is 'Cortex'", function(done)
+		{
+			connection.write(
+			{
+				"target": "Cortex",
+				"command": "EMPTY_COMMAND"
+			});
+			setTimeout(function()
+			{
+				expect(stub_handle_mission_control.called).to.be.true;
+				expect(stub_handle_incoming_data.called).to.be.false;
+				done();
+			}, 200);
+		});
+		it("Should call #handleIncomingData() when target is not 'Cortex'", function(done)
+		{
+			connection.write(
+			{
+				"target": "Protolobe",
+				"command": "EMPTY_COMMAND"
+			});
+			setTimeout(function()
+			{
+				expect(stub_handle_mission_control.called).to.be.false;
+				expect(stub_handle_incoming_data.called).to.be.true;
+				done();
+			}, 200);
+		});
+		it("Should call neither #handleIncomingData() #handleMissionControl with invalid structure", function(done)
+		{
+			connection.write({});
+			setTimeout(function()
+			{
+				expect(stub_handle_mission_control.called).to.be.false;
+				expect(stub_handle_incoming_data.called).to.be.false;
+				done();
+			}, 200);
+		});
+		it("Should call #handleIncomingData() when target is not 'Cortex'", function(done)
+		{
+			stub_handle_incoming_data.callsFake(function()
+			{
+				throw new Error("CATCH THIS!!!");
+			});
+
+			connection.write(
+			{
+				"target": "Protolobe",
+				"command": "EMPTY_COMMAND"
+			});
+
+			setTimeout(function()
+			{
+				expect(stub_handle_mission_control.called).to.be.false;
+				expect(stub_handle_incoming_data.called).to.be.true;
+				done();
+			}, 200);
+		});
+		afterEach(function()
+		{
+			stub_handle_mission_control.restore();
+			stub_handle_incoming_data.restore();
 		});
 	});
 });

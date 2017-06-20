@@ -64,13 +64,19 @@ class Log
 	}
 	setColor(output_color)
 	{
+		var status = true;
 		//// check to see if the color exists and it is a function
 		//// use that function to color the output
 		if(typeof colors[output_color] === "function" &&
-			this.constructor.disable_colors !== true)
+			!this.constructor.disable_colors)
 		{
 			this.color = colors[output_color];
 		}
+		else
+		{
+			status = false;
+		}
+		return status;
 	}
 	//// Mute this module
 	mute()
@@ -97,10 +103,8 @@ Log.initialize = function()
 	Log.error_file = `./logs/stdout-${Date().slice(0,-15)}.log`.replace(/[ :]/g, "-");
 	// Generate the output file along with a write stream to it
 	Log.writeOutput = fs.createWriteStream(Log.output_file);
-	// Generate the error file along with a write stream to it
-	Log.writeError = fs.createWriteStream(Log.error_file);
 	// Create a custom console with file write streams as destinations for information
-	Log.journal = new Console(Log.writeOutput, Log.writeError);
+	Log.journal = new Console(Log.writeOutput);
 };
 
 Log.deleteLogs = function()
@@ -109,16 +113,9 @@ Log.deleteLogs = function()
 	{
 		fs.unlinkSync(Log.output_file);
 	}
-	if(fs.existsSync(Log.error_file))
-	{
-		fs.unlinkSync(Log.error_file);
-	}
 };
 
 Log.disable_colors = false;
-
-// Initialize Log write streams and console outputs
-Log.initialize();
 // Map of modules that can be muted
 Log._mutes = {};
 // Static method to mute a log

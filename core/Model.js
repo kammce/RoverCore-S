@@ -61,7 +61,7 @@ class Model
 		}
 		else
 		{
-			return false;
+			return null;
 		}
 	}
 	getMemory(timestamp)
