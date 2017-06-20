@@ -108,5 +108,5 @@ To generate a code coverage report, run this in the root of the project
 
 .. code-block:: bash
 
-	bash < (curl -s https://codecov.io/bash)
+	bash <(curl -s https://codecov.io/bash)
 
