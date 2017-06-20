@@ -4,7 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/rovercore-s/badge/?version=latest)](http://rovercore-s.readthedocs.io/en/latest/?badge=latest)
 [![Dependency Status](https://david-dm.org/kammce/RoverCore-S.svg)](https://david-dm.org/kammce/RoverCore-S)
 [![Development Tools Dependency Status](https://david-dm.org/kammce/RoverCore-S/dev-status.svg)](https://david-dm.org/kammce/RoverCore-S?type=dev)
-[![Build Status](https://travis-ci.org/kammce/RoverCore-S.svg?branch=docs)](https://travis-ci.org/kammce/RoverCore-S)
+[![Build Status](https://travis-ci.org/kammce/RoverCore-S.svg?branch=master)](https://travis-ci.org/kammce/RoverCore-S)
 [![Code Coverage by codecov](https://codecov.io/gh/kammce/RoverCore-S/branch/docs/graph/badge.svg)](https://codecov.io/gh/kammce/RoverCore-S)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b96745c6fe2f4a638bf67d22a4cdf72e)](https://www.codacy.com/app/kammce/RoverCore-S?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kammce/RoverCore-S&amp;utm_campaign=Badge_Grade)
 
