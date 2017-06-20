@@ -1,6 +1,6 @@
 "use strict";
 
-var Model = require("../../utilities/Model");
+var Model = require("Model");
 
 describe("Testing Model Class", function()
 {
@@ -39,6 +39,11 @@ describe("Testing Model Class", function()
 			expect(test_unit.database["TEST_UNIT"]["value"]).to.equal("SET_TEST_VALUE");
 			expect(test_unit.database["TEST_UNIT"]["timestamp"]).to.be.above(test_unit.epoch);
 		});
+
+		it("#set() returns false when attempting to store value into unregistered memory", function()
+		{
+			expect(test_unit.set("UNREGISTERED_MEMORY", "SET_TEST_VALUE")).to.be.false;
+		});
 		it("#get() returns expected value from database", function()
 		{
 			test_unit.set("TEST_UNIT", "GET_TEST_VALUE");
@@ -51,6 +56,10 @@ describe("Testing Model Class", function()
 			expect(result).to.equal("GET_TEST_VALUE");
 			// Timestamp should not be altered by get operation
 			expect(time_after_get).to.equal(time_before_get);
+		});
+		it("#get() returns null with unknown memory", function()
+		{
+			expect(test_unit.get("UNREGISTERED_MEMORY")).to.be.null;
 		});
 		it("#getMemory() returns the full database", function()
 		{

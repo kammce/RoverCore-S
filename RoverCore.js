@@ -41,11 +41,21 @@ OPTIONS
 `);
 	process.exit();
 }
+
+// =====================================
+// Adding Folders to Node JS Paths
+// =====================================
+var module_path = require('app-module-path');
+
+module_path.addPath(__dirname + '/core');
+module_path.addPath(__dirname + '/modules');
+module_path.addPath(__dirname + '/utilities');
+
 // =====================================
 // Loading Libraries
 // =====================================
 console.log("Loading Libaries");
-var Cortex = require("./modules/Cortex");
+var Cortex = require("Cortex");
 console.log("Loading Libaries COMPLETE");
 // =====================================
 // Check Arguments

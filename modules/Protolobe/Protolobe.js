@@ -1,6 +1,6 @@
 "use strict";
 
-var Neuron = require("../Neuron");
+var Neuron = require("Neuron");
 
 class ProtoLobe extends Neuron
 {

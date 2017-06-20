@@ -35,7 +35,8 @@ module.exports = function(grunt) {
 					"before": true,
 					"after": true,
 					"beforeEach": true,
-					"afterEach": true
+					"afterEach": true,
+					"sinon": true
 				}
 			},
 		    target: ['Gruntfile.js', 'modules/**/*.js', 'utilities/**/*.js', 'test/core/*.js', 'test/modules/*.js', 'test/libraries/*.js']
@@ -47,11 +48,7 @@ module.exports = function(grunt) {
 				options:
 				{
 					reporter: 'spec',
-					require:
-					[
-						'test/config_chai.js',
-						'sinon'
-					]
+					require: [ '.config_tests.js' ]
 				},
 				//// Removed libraries because those tests are system specific
 				src: ['test/core/*.js', /*'tests/librarie/*.js',*/ 'test/modules/**/*.js']

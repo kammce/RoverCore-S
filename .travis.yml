@@ -3,9 +3,10 @@ node_js:
   - "6"
 sudo: true
 dist: trusty
+group: edge
 install:
   - ./install.sh
 script:
   - npm test
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - bash < (curl -s https://codecov.io/bash)

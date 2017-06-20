@@ -14,9 +14,9 @@
     "sinon": ">=1.17.7"
   },
   "dependencies": {
+    "app-module-path": "^2.2.0",
     "colors": "",
     "forever-monitor": "",
-    "i2c-bus": "",
     "mjpeg-camera": "^1.7.2",
     "primus": ">=4.0.1",
     "serialport": "^4.0.7",
